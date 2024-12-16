@@ -14,8 +14,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::paginate(10);
-        return Inertia::render("Admin/users/index", compact("users"));
+        $usersPaginate = User::paginate(3);
+        return Inertia::render("Admin/users/index", compact("usersPaginate"));
     }
 
     /**
@@ -23,7 +23,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        return Inertia::render("admin.users.create");
+        return Inertia::render("Admin/users/Create");
     }
 
     /**
@@ -61,7 +61,7 @@ class UserController extends Controller
         $user->password = bcrypt($request->password);
         $user->save();
 
-        return redirect()->route("admin.users.index")->with("success", value: "บันทึกข้อมูลเรียบร้อย");
+        return redirect()->route("admin.users.index")->withSuccess("บันทึกข้อมูลเรียบร้อย");
     }
 
     /**
@@ -78,7 +78,7 @@ class UserController extends Controller
     public function edit(string $id)
     {
         $user = User::find($id);
-        return Inertia::render("admin.users.edit", compact("user"));
+        return Inertia::render("Admin/users/Edit", compact("user"));
     }
 
     /**
