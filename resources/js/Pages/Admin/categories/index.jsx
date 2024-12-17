@@ -73,8 +73,8 @@ export default function index({ categoriesPaginate }) {
                     <Table hoverable>
                         <Table.Head>
                             <Table.HeadCell>ลําดับ</Table.HeadCell>
-                            <Table.HeadCell>ชื่อหมวดหมู่</Table.HeadCell>
                             <Table.HeadCell>รูปภาพ</Table.HeadCell>
+                            <Table.HeadCell>ชื่อหมวดหมู่</Table.HeadCell>
                             <Table.HeadCell>คำอธิบาย</Table.HeadCell>
                             <Table.HeadCell>
                                 <span className="sr-only">Edit</span>
@@ -92,14 +92,18 @@ export default function index({ categoriesPaginate }) {
                                             categories.indexOf(category) +
                                             1}
                                     </Table.Cell>
-                                    <Table.Cell>{category.name}</Table.Cell>
                                     <Table.Cell>
-                                        <img src={isAbsoluteUrl(category.image)
-                                            ? category.image
-                                            : `/images/categories/${category.image}`}
+                                        <img
+                                            src={
+                                                isAbsoluteUrl(category.image)
+                                                    ? category.image
+                                                    : `/images/categories/${category.image}`
+                                            }
                                             className="w-20 h-20 rounded"
-                                            />
+                                        />
                                     </Table.Cell>
+                                    <Table.Cell>{category.name}</Table.Cell>
+
                                     <Table.Cell>
                                         {category.description}
                                     </Table.Cell>

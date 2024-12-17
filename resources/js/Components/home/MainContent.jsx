@@ -1,14 +1,13 @@
 import { useState } from "react";
 import CategorySection from "./CategorySection";
-import ProductListing from "./ProductListing";
 import SaleModal from "./SaleModal";
 
-export default function MainContent({ categories }) {
+export default function MainContent({ categories, products }) {
     const [showSaleModal, setShowSaleModal] = useState(false);
     return (
         <div>
-            <CategorySection categories={categories} />
-            <ProductListing />
+            <CategorySection products={products} categories={categories} />
+
             <SaleModal
                 show={showSaleModal}
                 onClose={() => setShowSaleModal(false)}

@@ -6,7 +6,7 @@ export default function ProductsForm({
     isEditing = false,
     product = null,
 }) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, put , processing, errors } = useForm({
         name: isEditing ? product.name : "",
         image: null,
         description: isEditing ? product.description : "",
@@ -25,16 +25,15 @@ export default function ProductsForm({
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(data);
-        post(
-            isEditing
-                ? route("admin.products.update", product.id)
-                : route("admin.products.store"),
-            data,
-            {
+        if (isEditing) {
+            put(route("admin.products.update", product.id), data, {
                 forceFormData: true,
-            }
-        );
+            });
+        } else {
+            post(route("admin.products.store"), data, {
+                forceFormData: true,
+            });
+        }
     };
     return (
         <div className="container px-4 py-8 mx-auto mt-5 bg-white rounded-md sm:px-8">

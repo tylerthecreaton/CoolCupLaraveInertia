@@ -1,9 +1,9 @@
+import { isAbsoluteUrl } from "@/helpers";
 import { useForm } from "@inertiajs/react";
 import { Button, FileInput, Label, TextInput } from "flowbite-react";
 
-export default function CategoriesForm({ category }) {
-    const isEditing = !!category;
-    const { data, setData, post, processing, errors } = useForm({
+export default function CategoriesForm({ category, isEditing = false }) {
+    const { data, setData, post, put, processing, errors } = useForm({
         name: isEditing ? category.name : "",
         image: null,
         description: isEditing ? category.description : "",
@@ -15,15 +15,15 @@ export default function CategoriesForm({ category }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(
-            isEditing
-                ? route("admin.categories.update", category.id)
-                : route("admin.categories.store"),
-            data,
-            {
+        if (isEditing) {
+            put(route("admin.categories.update", category.id), data, {
                 forceFormData: true,
-            }
-        );
+            });
+        } else {
+            post(route("admin.categories.store"), data, {
+                forceFormData: true,
+            });
+        }
     };
     return (
         <div className="container px-4 py-8 mx-auto mt-5 bg-white rounded-md sm:px-8">
@@ -44,6 +44,15 @@ export default function CategoriesForm({ category }) {
                         onChange={(e) => setData("name", e.target.value)}
                     />
                 </div>
+                <img
+                    src={
+                        isAbsoluteUrl(category.image)
+                            ? category.image
+                            : `/images/categories/${category.image}`
+                    }
+                    alt=""
+                    className="w-full mx-auto"
+                />
                 <div>
                     <div>
                         <Label htmlFor="image" value="อัพโหลดรูปภาพ" />
