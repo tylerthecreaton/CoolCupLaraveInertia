@@ -1,21 +1,24 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import { Breadcrumb, Pagination, Table } from "flowbite-react";
-import { useEffect, useState } from "react";
 import { HiHome } from "react-icons/hi";
 import Swal from "sweetalert2";
-export default function index({ usersPaginate }) {
-    const { current_page, next_page_url, prev_page_url } = usersPaginate;
-    const [users, setUsers] = useState([]);
+import { useEffect } from "react";
+import { useState } from "react";
+import { router } from "@inertiajs/react";
+// import Pagination from "@/Components/Pagination";
+export default function index({ categoriesPaginate }) {
+    const { current_page, next_page_url, prev_page_url } = categoriesPaginate;
+    const [categories, setCategories] = useState([]);
     const onPageChange = (page) => {
         page > current_page
             ? router.get(next_page_url)
             : router.get(prev_page_url);
     };
-
     useEffect(() => {
-        setUsers(usersPaginate.data);
-    }, [usersPaginate]);
+        setCategories(categoriesPaginate.data);
+    }, [categoriesPaginate]);
+
     const handleDelete = (id) => {
         Swal.fire({
             title: "Are you sure?",
@@ -27,7 +30,7 @@ export default function index({ usersPaginate }) {
             confirmButtonText: "Yes, delete it!",
         }).then((result) => {
             if (result.isConfirmed) {
-                router.delete(route("admin.users.destroy", id), {
+                router.delete(route("admin.categories.destroy", id), {
                     onSuccess: () => {
                         Swal.fire(
                             "Deleted!",
@@ -43,56 +46,56 @@ export default function index({ usersPaginate }) {
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    จัดการผู้ใช้
+                    จัดการหมวดหมู่
                 </h2>
             }
         >
-            <Head title="จัดการผู้ใช้" />
+            <Head title="จัดการหมวดหมู่" />
             <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
                         Home
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item>ผู้ใช้งานทั้งหมด</Breadcrumb.Item>
+                    <Breadcrumb.Item>หมวดหมู่ทั้งหมด</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
             <main className="container p-8 mx-auto mt-5 bg-white">
                 <div className="flex justify-end">
                     <Link
-                        href={route("admin.users.create")}
+                        href={route("admin.categories.create")}
                         className="px-4 py-2 text-white bg-cyan-600 rounded-md hover:bg-cyan-800"
                     >
-                        เพิ่มผู้ใช้
+                        เพิ่มหมวดหมู่
                     </Link>
                 </div>
                 <div className="overflow-x-auto">
                     <Table hoverable>
                         <Table.Head>
                             <Table.HeadCell>ลําดับ</Table.HeadCell>
-                            <Table.HeadCell>ชื่อผู้ใช้</Table.HeadCell>
-                            <Table.HeadCell>อีเมล</Table.HeadCell>
-                            <Table.HeadCell>บทบาท</Table.HeadCell>
+                            <Table.HeadCell>ชื่อหมวดหมู่</Table.HeadCell>
+                            <Table.HeadCell>รูปภาพ</Table.HeadCell>
+                            <Table.HeadCell>คำอธิบาย</Table.HeadCell>
                             <Table.HeadCell>
                                 <span className="sr-only">Edit</span>
                             </Table.HeadCell>
                         </Table.Head>
                         <Table.Body className="divide-y">
-                            {users.map((user) => (
+                            {categories.map((category) => (
                                 <Table.Row
                                     className="bg-white dark:border-gray-700 dark:bg-gray-800"
-                                    key={user.id}
+                                    key={category.id}
                                 >
                                     <Table.Cell className="font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {user.id}
+                                        {category.id}
                                     </Table.Cell>
-                                    <Table.Cell>{user.username}</Table.Cell>
-                                    <Table.Cell>{user.email}</Table.Cell>
-                                    <Table.Cell>{user.role}</Table.Cell>
+                                    <Table.Cell>{category.name}</Table.Cell>
+                                    <Table.Cell>{category.image}</Table.Cell>
+                                    <Table.Cell>{category.description}</Table.Cell>
                                     <Table.Cell>
                                         <a
                                             href={route(
-                                                "admin.users.edit",
-                                                user.id
+                                                "admin.categories.edit",
+                                                category.id
                                             )}
                                             className="mr-2 font-medium text-cyan-600 hover:underline dark:text-cyan-500"
                                         >
@@ -100,7 +103,7 @@ export default function index({ usersPaginate }) {
                                         </a>
                                         <button
                                             onClick={async () => {
-                                                await handleDelete(user.id);
+                                                await handleDelete(category.id);
                                             }}
                                             className="font-medium text-red-600 hover:underline dark:text-red-500"
                                         >
@@ -117,19 +120,19 @@ export default function index({ usersPaginate }) {
                                 Showing
                             </p>
                             <span className="font-semibold text-gray-900 dark:text-white">
-                                {usersPaginate.from}
+                                {categoriesPaginate.from}
                             </span>
                             <p className="text-sm text-gray-700 dark:text-gray-400">
                                 to
                             </p>
                             <span className="font-semibold text-gray-900 dark:text-white">
-                                {usersPaginate.to}
+                                {categoriesPaginate.to}
                             </span>
                             <p className="text-sm text-gray-700 dark:text-gray-400">
                                 of
                             </p>
                             <span className="font-semibold text-gray-900 dark:text-white">
-                                {usersPaginate.total}
+                                {categoriesPaginate.total}
                             </span>
                             <p className="text-sm text-gray-700 dark:text-gray-400">
                                 Entries
@@ -137,7 +140,7 @@ export default function index({ usersPaginate }) {
                         </div>
                         <Pagination
                             currentPage={current_page}
-                            totalPages={usersPaginate.last_page}
+                            totalPages={categoriesPaginate.last_page}
                             onPageChange={onPageChange}
                             showIcons
                         />

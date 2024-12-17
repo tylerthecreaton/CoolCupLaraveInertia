@@ -5,19 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class CategoriesController extends Controller
 {
 
     public function index()
     {
-        $categories = Category::paginate(10);
-        return view('admin.categories.index', compact('categories'));
+        $categoriesPaginate = Category::paginate(10);
+        return Inertia::render('Admin/categories/index', compact('categoriesPaginate'));
     }
 
     public function create()
     {
-        return view('admin.categories.create');
+        return Inertia::render('Admin/categories/Create');
     }
 
     public function store(Request $request)
@@ -67,7 +68,7 @@ class CategoriesController extends Controller
     public function edit(string $id)
     {
         $category = Category::find($id);
-        return view('admin.categories.edit', compact('category'));
+        return Inertia::render('admin.categories.edit', compact('category'));
     }
 
     public function update(Request $request, string $id)
