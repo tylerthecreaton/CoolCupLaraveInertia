@@ -72,7 +72,7 @@ export default function index({ customersPaginate }) {
                             <Table.HeadCell>ชื่อ</Table.HeadCell>
                             <Table.HeadCell>เบอร์โทร</Table.HeadCell>
                             <Table.HeadCell>วันเกิด</Table.HeadCell>
-                            <Table.HeadCell>เป็นสมาชิกวันที่</Table.HeadCell>
+                            <Table.HeadCell>วันที่เป็นสมาชิก</Table.HeadCell>
                             <Table.HeadCell>
                                 <span className="sr-only">Edit</span>
                             </Table.HeadCell>
