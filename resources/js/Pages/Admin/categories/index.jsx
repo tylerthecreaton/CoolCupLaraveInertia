@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { useEffect } from "react";
 import { useState } from "react";
 import { router } from "@inertiajs/react";
+import { isAbsoluteUrl } from "@/helpers";
 // import Pagination from "@/Components/Pagination";
 export default function index({ categoriesPaginate }) {
     const { current_page, next_page_url, prev_page_url } = categoriesPaginate;
@@ -86,11 +87,22 @@ export default function index({ categoriesPaginate }) {
                                     key={category.id}
                                 >
                                     <Table.Cell className="font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {(current_page - 1) * categoriesPaginate.per_page + categories.indexOf(category) + 1}
+                                        {(current_page - 1) *
+                                            categoriesPaginate.per_page +
+                                            categories.indexOf(category) +
+                                            1}
                                     </Table.Cell>
                                     <Table.Cell>{category.name}</Table.Cell>
-                                    <Table.Cell>{category.image}</Table.Cell>
-                                    <Table.Cell>{category.description}</Table.Cell>
+                                    <Table.Cell>
+                                        <img src={isAbsoluteUrl(category.image)
+                                            ? category.image
+                                            : `/images/categories/${category.image}`}
+                                            className="w-20 h-20 rounded"
+                                            />
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {category.description}
+                                    </Table.Cell>
                                     <Table.Cell>
                                         <a
                                             href={route(

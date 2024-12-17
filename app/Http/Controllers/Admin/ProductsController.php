@@ -12,31 +12,35 @@ class ProductsController extends Controller
 {
     public function index()
     {
-        $productsPaginate = Product::paginate(10);
+        $productsPaginate = Product::with('category')->paginate(10);
         return Inertia::render('Admin/products/index', compact('productsPaginate'));
     }
 
     public function create()
     {
-        return Inertia::render('Admin/products/Create');
+        $categories = Category::all();
+        return Inertia::render('Admin/products/Create', compact('categories'));
     }
 
     public function store(Request $request)
     {
         $rules = [
-            'name' => 'required',
+            'name' => 'required|min:3',
             'image' => 'required',
             'category_id' => 'required',
             'description' => 'required',
             'cost_price' => 'required|numeric',
-            'sale_price' => 'required',
+            'sale_price' => 'required|numeric',
         ];
         $message = [
             'name.required' => 'กรุณากรอกชื่อสินค้า',
+            'name.min' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :min ตัวอักษร',
             'category_id.required' => 'กรุณาเลือกหมวดหมู่สินค้า',
             'description.required' => 'กรุณากรอกรายละเอียดสินค้า',
             'cost_price.required' => 'กรุณากรอกราคาต้นทุนสินค้า',
+            'cost_price.numeric' => 'กรุณากรอกราคาต้นทุนสินค้าเป็นตัวเลข',
             'sale_price.required' => 'กรุณากรอกราคาขายสินค้า',
+            'sale_price.numeric' => 'กรุณากรอกราคาขายสินค้าเป็นตัวเลข',
             'image.required' => 'กรุณาอัปโหลดรูปภาพสินค้า',
         ];
 
@@ -78,7 +82,6 @@ class ProductsController extends Controller
         $product = Product::find($id);
         $categories = Category::all();
         return Inertia::render('Admin/products/Edit', compact('product', 'categories'));
-
     }
 
     public function update(Request $request, string $id)
@@ -116,11 +119,11 @@ class ProductsController extends Controller
         }
         $product = new Product([
             'name' => $request->name,
-            'category_id'=> $request->category,
+            'category_id' => $request->category,
             'image' => $imageName == '' ? '' : $imageName,
-            'description'=> $request->description,
-            'cost_price'=> $request->cost_price,
-            'sale_price'=> $request->sale_price,
+            'description' => $request->description,
+            'cost_price' => $request->cost_price,
+            'sale_price' => $request->sale_price,
 
         ]);
         $product = Product::find($id);

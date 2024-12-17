@@ -1,15 +1,23 @@
+import { useEffect } from "react";
 import { useForm } from "@inertiajs/react";
-import { Button, FileInput, Label, TextInput } from "flowbite-react";
-export default function ProductsForm({ product, categories }) {
-    const isEditing = !!product;
+import { Button, FileInput, Label, Select, TextInput } from "flowbite-react";
+export default function ProductsForm({
+    categories,
+    isEditing = false,
+    product = null,
+}) {
     const { data, setData, post, processing, errors } = useForm({
         name: isEditing ? product.name : "",
         image: null,
         description: isEditing ? product.description : "",
         cost_price: isEditing ? product.cost_price : "",
         sale_price: isEditing ? product.sale_price : "",
-        category: isEditing ? product.category : "",
+        category_id: isEditing ? product.category_id : "",
     });
+
+    useEffect(() => {
+        console.log(errors);
+    }, [errors]);
 
     const handleFileChange = (e) => {
         setData("image", e.target.files[0]);
@@ -17,6 +25,7 @@ export default function ProductsForm({ product, categories }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        console.log(data);
         post(
             isEditing
                 ? route("admin.products.update", product.id)
@@ -42,7 +51,13 @@ export default function ProductsForm({ product, categories }) {
                         type="text"
                         placeholder="กรุณากรอกชื่อสินค้า"
                         required
+                        color={errors.name ? "failure" : undefined}
                         value={data.name}
+                        helperText={
+                            <span>
+                                {errors.name && <span>{errors.name}</span>}
+                            </span>
+                        }
                         onChange={(e) => setData("name", e.target.value)}
                     />
                 </div>
@@ -50,20 +65,19 @@ export default function ProductsForm({ product, categories }) {
                     <div className="block mb-2">
                         <Label htmlFor="category" value="หมวดหมู่" />
                     </div>
-                    <select
+                    <Select
                         id="category"
-                        className="block px-4 py-2 w-full text-gray-700 bg-white rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                         required
-                        value={data.category}
-                        onChange={(e) => setData("category", e.target.value)}
+                        value={data.category_id}
+                        name="category_id"
+                        onChange={(e) => setData("category_id", e.target.value)}
                     >
-                        <option value="" disabled hidden>
-                            กรุณาเลือกหมวดหมู่
-                        </option>
-                        <option value="tea">ชา</option>
-                        <option value="cofee">กาแฟ</option>
-                        <option value="topping">ท็อปปิ้ง</option>
-                    </select>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </Select>
                 </div>
                 <div>
                     <div>
@@ -82,7 +96,7 @@ export default function ProductsForm({ product, categories }) {
                     </div>
                     <TextInput
                         id="cost_price"
-                        type="text"
+                        type="number"
                         placeholder="กรุณากรอกราคาต้นทุน"
                         required
                         value={data.cost_price}
@@ -93,7 +107,7 @@ export default function ProductsForm({ product, categories }) {
                     </div>
                     <TextInput
                         id="sale_price"
-                        type="text"
+                        type="number"
                         placeholder="กรุณากรอกราคาขาย"
                         required
                         value={data.sale_price}

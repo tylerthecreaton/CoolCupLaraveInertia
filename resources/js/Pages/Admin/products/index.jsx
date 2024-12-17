@@ -1,10 +1,11 @@
+import { isAbsoluteUrl } from "@/helpers";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router } from "@inertiajs/react";
 import { Breadcrumb, Pagination, Table } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { HiHome } from "react-icons/hi";
 import Swal from "sweetalert2";
-export default function Index( { productsPaginate }) {
+export default function Index({ productsPaginate }) {
     const { current_page, next_page_url, prev_page_url } = productsPaginate;
     const [products, setProducts] = useState([]);
     const onPageChange = (page) => {
@@ -69,9 +70,9 @@ export default function Index( { productsPaginate }) {
                     <Table hoverable>
                         <Table.Head>
                             <Table.HeadCell>ลําดับ</Table.HeadCell>
+                            <Table.HeadCell>รูปภาพ</Table.HeadCell>
                             <Table.HeadCell>ชื่อสินค้า</Table.HeadCell>
                             <Table.HeadCell>หมวดหมู่สินค้า</Table.HeadCell>
-                            <Table.HeadCell>รูปภาพ</Table.HeadCell>
                             <Table.HeadCell>คำอธิบาย</Table.HeadCell>
                             <Table.HeadCell>
                                 <span className="sr-only">Edit</span>
@@ -89,9 +90,20 @@ export default function Index( { productsPaginate }) {
                                             products.indexOf(product) +
                                             1}
                                     </Table.Cell>
+                                    <Table.Cell>
+                                        <img
+                                            src={
+                                                isAbsoluteUrl(product.image)
+                                                    ? product.image
+                                                    : `/images/products/${product.image}`
+                                            }
+                                            className="w-20 h-20 rounded"
+                                        />
+                                    </Table.Cell>
                                     <Table.Cell>{product.name}</Table.Cell>
-                                    <Table.Cell>{product.category}</Table.Cell>
-                                    <Table.Cell>{product.image}</Table.Cell>
+                                    <Table.Cell>
+                                        {product.category.name}
+                                    </Table.Cell>
                                     <Table.Cell>
                                         {product.description}
                                     </Table.Cell>
