@@ -9,7 +9,7 @@ export default function ProductListing({ products, setShowSaleModal }) {
                     key={product.id}
                     type="button"
                     color="primary"
-                    onClick={() => setShowSaleModal(true)}
+                    onClick={() => setShowSaleModal && setShowSaleModal(true)}
                 >
                     <div className="flex flex-col justify-between items-center py-5 w-52 h-72 border hover:bg-gray-100">
                         <img

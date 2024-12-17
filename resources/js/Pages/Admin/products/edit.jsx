@@ -5,7 +5,7 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function EditProduct({ product }) {
+export default function EditProduct({ product, categories }) {
     return (
         <AuthenticatedLayout
             header={
@@ -24,7 +24,7 @@ export default function EditProduct({ product }) {
                     <Breadcrumb.Item>แก้ไขสินค้า</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
-            <ProductsForm product={product} isEditing={true} />
+            <ProductsForm product={product} isEditing={true} categories={categories}/>
         </AuthenticatedLayout>
     );
 }

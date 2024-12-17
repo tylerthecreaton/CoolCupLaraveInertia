@@ -13,8 +13,8 @@ export default function CategorySection({ products, categories }) {
 
     return (
         <>
-            <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
-                <div className="relative">
+            <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 ">
+                <div className="relative w-full">
                     <Tabs aria-label="Default tabs" variant="default">
                         <Tabs.Item
                             active={currentTab === 0}

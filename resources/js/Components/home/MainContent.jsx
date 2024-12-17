@@ -10,6 +10,7 @@ export default function MainContent({ categories, products }) {
 
             <SaleModal
                 show={showSaleModal}
+                setShowSaleModal={setShowSaleModal}
                 onClose={() => setShowSaleModal(false)}
             />
         </div>

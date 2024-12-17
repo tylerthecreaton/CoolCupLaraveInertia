@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useForm } from "@inertiajs/react";
 import { Button, FileInput, Label, Select, TextInput } from "flowbite-react";
 export default function ProductsForm({
+
     categories,
     isEditing = false,
     product = null,
