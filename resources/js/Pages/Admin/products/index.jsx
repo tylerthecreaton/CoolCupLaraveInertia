@@ -70,6 +70,7 @@ export default function Index( { productsPaginate }) {
                         <Table.Head>
                             <Table.HeadCell>ลําดับ</Table.HeadCell>
                             <Table.HeadCell>ชื่อสินค้า</Table.HeadCell>
+                            <Table.HeadCell>หมวดหมู่สินค้า</Table.HeadCell>
                             <Table.HeadCell>รูปภาพ</Table.HeadCell>
                             <Table.HeadCell>คำอธิบาย</Table.HeadCell>
                             <Table.HeadCell>
@@ -89,6 +90,7 @@ export default function Index( { productsPaginate }) {
                                             1}
                                     </Table.Cell>
                                     <Table.Cell>{product.name}</Table.Cell>
+                                    <Table.Cell>{product.category}</Table.Cell>
                                     <Table.Cell>{product.image}</Table.Cell>
                                     <Table.Cell>
                                         {product.description}

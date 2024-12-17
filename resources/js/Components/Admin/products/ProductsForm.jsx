@@ -29,7 +29,10 @@ export default function ProductsForm({ product, categories }) {
     };
     return (
         <div className="container px-4 py-8 mx-auto mt-5 bg-white rounded-md sm:px-8">
-            <form className="flex flex-col gap-4 mx-auto max-w-md">
+            <form
+                className="flex flex-col gap-4 mx-auto max-w-md"
+                onSubmit={handleSubmit}
+            >
                 <div>
                     <div className="block mb-2">
                         <Label htmlFor="name" value="ชื่อสินค้า" />
@@ -57,11 +60,9 @@ export default function ProductsForm({ product, categories }) {
                         <option value="" disabled hidden>
                             กรุณาเลือกหมวดหมู่
                         </option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
+                        <option value="tea">ชา</option>
+                        <option value="cofee">กาแฟ</option>
+                        <option value="topping">ท็อปปิ้ง</option>
                     </select>
                 </div>
                 <div>

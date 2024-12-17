@@ -18,14 +18,14 @@ class ProductsController extends Controller
 
     public function create()
     {
-        $categories = Category::all();
-        return Inertia::render('Admin/products/Create', compact('categories'));
+        return Inertia::render('Admin/products/Create');
     }
 
     public function store(Request $request)
     {
         $rules = [
             'name' => 'required',
+            'image' => 'required',
             'category_id' => 'required',
             'description' => 'required',
             'cost_price' => 'required|numeric',

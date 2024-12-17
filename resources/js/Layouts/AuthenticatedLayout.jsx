@@ -30,7 +30,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     หน้าหลัก
                                 </NavLink>
-                                <Dropdown label="จัดการ" inline>
+                                <Dropdown label="จัดการทั่วไป" inline>
                                     <Dropdown.Item>
                                         <Link href="/admin/users">
                                             ผู้ใช้งาน
