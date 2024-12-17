@@ -1,78 +1,42 @@
+import React from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link } from "@inertiajs/react";
-import { Breadcrumb, Pagination, Table } from "flowbite-react";
+import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
-import Swal from "sweetalert2";
-import { useEffect } from "react";
-import { useState } from "react";
-import { router } from "@inertiajs/react";
-// import Pagination from "@/Components/Pagination";
-export default function index({ categoriesPaginate }) {
-    const { current_page, next_page_url, prev_page_url } = categoriesPaginate;
-    const [categories, setCategories] = useState([]);
-    const onPageChange = (page) => {
-        page > current_page
-            ? router.get(next_page_url)
-            : router.get(prev_page_url);
-    };
-    useEffect(() => {
-        setCategories(categoriesPaginate.data);
-    }, [categoriesPaginate]);
-
-    const handleDelete = (id) => {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.delete(route("admin.categories.destroy", id), {
-                    onSuccess: () => {
-                        Swal.fire(
-                            "Deleted!",
-                            "Your file has been deleted.",
-                            "success"
-                        );
-                    },
-                });
-            }
-        });
-    };
+import { Pagination } from "flowbite-react";
+import { Table } from "flowbite-react";
+export default function Index() {
     return (
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    จัดการหมวดหมู่
+                    จัดการสินค้า
                 </h2>
             }
         >
-            <Head title="จัดการหมวดหมู่" />
+            <Head title="จัดการสินค้า" />
             <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
                         Home
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item>หมวดหมู่ทั้งหมด</Breadcrumb.Item>
+                    <Breadcrumb.Item>สินค้าทั้งหมด</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
             <main className="container p-8 mx-auto mt-5 bg-white">
                 <div className="flex justify-end pb-5">
                     <Link
-                        href={route("admin.categories.create")}
+                        href={route("admin.products.create")}
                         className="px-4 py-2 text-white bg-cyan-600 rounded-md hover:bg-cyan-800"
                     >
-                        เพิ่มหมวดหมู่
+                        เพิ่มสินค้า
                     </Link>
                 </div>
                 <div className="overflow-x-auto">
                     <Table hoverable>
                         <Table.Head>
                             <Table.HeadCell>ลําดับ</Table.HeadCell>
-                            <Table.HeadCell>ชื่อหมวดหมู่</Table.HeadCell>
+                            <Table.HeadCell>ชื่อสินค้า</Table.HeadCell>
                             <Table.HeadCell>รูปภาพ</Table.HeadCell>
                             <Table.HeadCell>คำอธิบาย</Table.HeadCell>
                             <Table.HeadCell>
@@ -80,22 +44,24 @@ export default function index({ categoriesPaginate }) {
                             </Table.HeadCell>
                         </Table.Head>
                         <Table.Body className="divide-y">
-                            {categories.map((category) => (
+                            {products.map((product) => (
                                 <Table.Row
                                     className="bg-white dark:border-gray-700 dark:bg-gray-800"
-                                    key={category.id}
+                                    key={product.id}
                                 >
                                     <Table.Cell className="font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {(current_page - 1) * categoriesPaginate.per_page + categories.indexOf(category) + 1}
+                                        {product.id}
                                     </Table.Cell>
-                                    <Table.Cell>{category.name}</Table.Cell>
-                                    <Table.Cell>{category.image}</Table.Cell>
-                                    <Table.Cell>{category.description}</Table.Cell>
+                                    <Table.Cell>{product.name}</Table.Cell>
+                                    <Table.Cell>{product.image}</Table.Cell>
+                                    <Table.Cell>
+                                        {product.description}
+                                    </Table.Cell>
                                     <Table.Cell>
                                         <a
                                             href={route(
-                                                "admin.categories.edit",
-                                                category.id
+                                                "admin.products.edit",
+                                                product.id
                                             )}
                                             className="mr-2 font-medium text-cyan-600 hover:underline dark:text-cyan-500"
                                         >
@@ -103,7 +69,7 @@ export default function index({ categoriesPaginate }) {
                                         </a>
                                         <button
                                             onClick={async () => {
-                                                await handleDelete(category.id);
+                                                await handleDelete(product.id);
                                             }}
                                             className="font-medium text-red-600 hover:underline dark:text-red-500"
                                         >
@@ -120,19 +86,19 @@ export default function index({ categoriesPaginate }) {
                                 Showing
                             </p>
                             <span className="font-semibold text-gray-900 dark:text-white">
-                                {categoriesPaginate.from}
+                                {productsPaginate.from}
                             </span>
                             <p className="text-sm text-gray-700 dark:text-gray-400">
                                 to
                             </p>
                             <span className="font-semibold text-gray-900 dark:text-white">
-                                {categoriesPaginate.to}
+                                {productsPaginate.to}
                             </span>
                             <p className="text-sm text-gray-700 dark:text-gray-400">
                                 of
                             </p>
                             <span className="font-semibold text-gray-900 dark:text-white">
-                                {categoriesPaginate.total}
+                                {productsPaginate.total}
                             </span>
                             <p className="text-sm text-gray-700 dark:text-gray-400">
                                 Entries
@@ -140,7 +106,7 @@ export default function index({ categoriesPaginate }) {
                         </div>
                         <Pagination
                             currentPage={current_page}
-                            totalPages={categoriesPaginate.last_page}
+                            totalPages={productsPaginate.last_page}
                             onPageChange={onPageChange}
                             showIcons
                         />

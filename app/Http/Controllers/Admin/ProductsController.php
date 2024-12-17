@@ -6,36 +6,37 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ProductsController extends Controller
 {
     public function index()
     {
-        $products = Product::paginate(10);
-        return view('admin.products.index', compact('products'));
+        $productsPaginate = Product::paginate(10);
+        return Inertia::render('Admin/products/index', compact('productsPaginate'));
     }
 
     public function create()
     {
         $categories = Category::all();
-        return view('admin.products.create', compact('categories'));
+        return Inertia::render('Admin/products/Create', compact('categories'));
     }
 
     public function store(Request $request)
     {
         $rules = [
             'name' => 'required',
-            // 'category_id' => 'required',
+            'category_id' => 'required',
             'description' => 'required',
             'cost_price' => 'required|numeric',
-            // 'sale_price' => 'required',
+            'sale_price' => 'required',
         ];
         $message = [
             'name.required' => 'กรุณากรอกชื่อสินค้า',
-            // 'category_id.required' => 'กรุณาเลือกหมวดหมู่สินค้า',
+            'category_id.required' => 'กรุณาเลือกหมวดหมู่สินค้า',
             'description.required' => 'กรุณากรอกรายละเอียดสินค้า',
-            // 'cost_price.required' => 'กรุณากรอกราคาต้นทุนสินค้า',
-            // 'sale_price.required' => 'กรุณากรอกราคาขายสินค้า',
+            'cost_price.required' => 'กรุณากรอกราคาต้นทุนสินค้า',
+            'sale_price.required' => 'กรุณากรอกราคาขายสินค้า',
             'image.required' => 'กรุณาอัปโหลดรูปภาพสินค้า',
         ];
 
@@ -76,7 +77,7 @@ class ProductsController extends Controller
     {
         $product = Product::find($id);
         $categories = Category::all();
-        return view('admin.products.edit', compact('product', 'categories'));
+        return Inertia::render('Admin/products/Edit', compact('product', 'categories'));
 
     }
 

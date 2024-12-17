@@ -17,8 +17,8 @@ export default function EditCategory({ category }) {
             <Head title="เพิ่มผู้ใช้งาน" />
             <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
                 <Breadcrumb aria-label="Default breadcrumb example">
-                    <Breadcrumb.Item href="#" icon={HiHome}>
-                        หน้าหลัก
+                    <Breadcrumb.Item href="/dashboard" icon={HiHome}>
+                        Home
                     </Breadcrumb.Item>
                     <Breadcrumb.Item href="/admin/categories">หมวดหมู่</Breadcrumb.Item>
                     <Breadcrumb.Item>แก้ไขหมวดหมู่</Breadcrumb.Item>

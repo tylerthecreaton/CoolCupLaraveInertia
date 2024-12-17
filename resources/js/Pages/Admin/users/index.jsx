@@ -57,7 +57,7 @@ export default function index({ usersPaginate }) {
                 </Breadcrumb>
             </div>
             <main className="container p-8 mx-auto mt-5 bg-white">
-                <div className="flex justify-end">
+                <div className="flex justify-end pb-5">
                     <Link
                         href={route("admin.users.create")}
                         className="px-4 py-2 text-white bg-cyan-600 rounded-md hover:bg-cyan-800"
@@ -69,6 +69,7 @@ export default function index({ usersPaginate }) {
                     <Table hoverable>
                         <Table.Head>
                             <Table.HeadCell>ลําดับ</Table.HeadCell>
+                            <Table.HeadCell>ชื่อ</Table.HeadCell>
                             <Table.HeadCell>ชื่อผู้ใช้</Table.HeadCell>
                             <Table.HeadCell>อีเมล</Table.HeadCell>
                             <Table.HeadCell>บทบาท</Table.HeadCell>
@@ -83,8 +84,9 @@ export default function index({ usersPaginate }) {
                                     key={user.id}
                                 >
                                     <Table.Cell className="font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {user.id}
+                                        {(current_page - 1) * usersPaginate.per_page + users.indexOf(user) + 1}
                                     </Table.Cell>
+                                    <Table.Cell>{user.name}</Table.Cell>
                                     <Table.Cell>{user.username}</Table.Cell>
                                     <Table.Cell>{user.email}</Table.Cell>
                                     <Table.Cell>{user.role}</Table.Cell>

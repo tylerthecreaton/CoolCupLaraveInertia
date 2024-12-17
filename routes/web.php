@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoriesController;
+use App\Http\Controllers\Admin\ProductsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
@@ -33,6 +34,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/categories/{id}/edit', [CategoriesController::class, 'edit'])->name('admin.categories.edit');
         Route::put('/categories/{id}', [CategoriesController::class, 'update'])->name('admin.categories.update');
         Route::delete('/categories/{id}', [CategoriesController::class, 'destroy'])->name('admin.categories.destroy');
+
+        // ---------------------------Products---------------------------
+        Route::get('/products', [ProductsController::class, 'index'])->name('admin.products.index');
+        Route::get('/products/create', [ProductsController::class, 'create'])->name('admin.products.create');
+        Route::post('/products', [ProductsController::class, 'store'])->name('admin.products.store');
+        Route::get('/products/{id}', [ProductsController::class, 'show'])->name('admin.products.show');
+        Route::get('/products/{id}/edit', [ProductsController::class, 'edit'])->name('admin.products.edit');
+        Route::put('/products/{id}', [ProductsController::class, 'update'])->name('admin.products.update');
+        Route::delete('/products/{id}', [ProductsController::class, 'destroy'])->name('admin.products.destroy');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

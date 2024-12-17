@@ -42,13 +42,14 @@ export default function AuthenticatedLayout({ header, children }) {
                                         </Link>
                                     </Dropdown.Item>
                                     <Dropdown.Item>
-                                        <Link href="/admin/earnings">
-                                            Earnings
+                                        <Link href="/admin/products">
+                                            สินค้า
                                         </Link>
                                     </Dropdown.Item>
-                                    <Dropdown.Divider />
                                     <Dropdown.Item>
-                                        Separated link
+                                        <Link href="/admin/customers">
+                                            สมาชิก
+                                        </Link>
                                     </Dropdown.Item>
                                 </Dropdown>
                             </div>
