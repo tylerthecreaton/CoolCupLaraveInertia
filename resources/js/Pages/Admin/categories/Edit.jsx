@@ -20,7 +20,7 @@ export default function EditCategory({ category }) {
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
                         Home
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item href="/admin/categories">หมวดหมู่</Breadcrumb.Item>
+                    <Breadcrumb.Item href="/admin/categories">หมวดหมู่ทั้งหมด</Breadcrumb.Item>
                     <Breadcrumb.Item>แก้ไขหมวดหมู่</Breadcrumb.Item>
                 </Breadcrumb>
             </div>

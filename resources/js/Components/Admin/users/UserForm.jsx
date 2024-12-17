@@ -111,7 +111,7 @@ export default function UserForm({ isEditing = false, user = null }) {
                         id="password1"
                         type="password"
                         placeholder="กรุณากรอกรหัสผ่าน"
-                        required
+                        required={isEditing ? false : true}
                         value={data.password}
                         onChange={(e) => setData("password", e.target.value)}
                     />
@@ -127,7 +127,7 @@ export default function UserForm({ isEditing = false, user = null }) {
                         id="password_confirmation"
                         type="password"
                         placeholder="กรุณายืนยันรหัสผ่าน"
-                        required
+                        required={isEditing ? false : true}
                         value={data.password_confirmation}
                         onChange={(e) =>
                             setData("password_confirmation", e.target.value)

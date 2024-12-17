@@ -4,8 +4,8 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 import CategoriesForm from "@/Components/Admin/categories/CategoriesForm";
-
-export default function Create() {
+import { Link } from "@inertiajs/react";
+export default function CreateCategory() {
     return (
         <AuthenticatedLayout
             header={
@@ -20,7 +20,9 @@ export default function Create() {
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
                         Home
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item href="/admin/categories">หมวดหมู่ทั้งหมด</Breadcrumb.Item>
+                    <Breadcrumb.Item href="/admin/categories">
+                        หมวดหมู่ทั้งหมด
+                    </Breadcrumb.Item>
                     <Breadcrumb.Item>เพิ่มหมวดหมู่</Breadcrumb.Item>
                 </Breadcrumb>
             </div>

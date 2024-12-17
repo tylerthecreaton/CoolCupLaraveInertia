@@ -10,7 +10,7 @@ export default function Tabbar() {
                 </h2>
             }
         >
-            <Head title="จัดการsหมวดหมู่" />
+            <Head title="จัดการหมวดหมู่" />
 
         </AuthenticatedLayout>
     );

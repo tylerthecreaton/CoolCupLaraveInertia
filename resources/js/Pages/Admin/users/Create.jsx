@@ -10,7 +10,7 @@ export default function CreateUser() {
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    จัดการผู้ใช้
+                    เพิ่มผู้ใช้งาน
                 </h2>
             }
         >
@@ -20,7 +20,7 @@ export default function CreateUser() {
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
                         Home
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item href="/admin/users">Users</Breadcrumb.Item>
+                    <Breadcrumb.Item href="/admin/users">ผู้ใช้งานทั้งหมด</Breadcrumb.Item>
                     <Breadcrumb.Item>เพิ่มผู้ใช้งาน</Breadcrumb.Item>
                 </Breadcrumb>
             </div>

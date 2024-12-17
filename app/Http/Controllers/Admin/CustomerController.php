@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Inertia\Inertia;
+
 class CustomerController extends Controller
 {
     /**
@@ -13,8 +15,8 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = User::where("role", "customer")->paginate(10);
-        return view("admin.customers.index", compact("customers"));
+        $customersPaginate = User::where("role", "customer")->paginate(10);
+        return Inertia::render("Admin/customers/index", compact("customersPaginate"));
     }
 
     /**
@@ -23,7 +25,7 @@ class CustomerController extends Controller
     public function create()
     {
         $customers = User::where("role", "customer")->paginate(10);
-        return view("admin.customers.create", compact("customers"));
+        return Inertia::render("Admin/customers/Create", compact("customers"));
     }
 
     /**
@@ -69,7 +71,8 @@ class CustomerController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $customer = Customer::find($id);
+        return Inertia::render("Admin/customers/Edit", compact("customer"));
     }
 
     /**
@@ -77,7 +80,29 @@ class CustomerController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $rules = [
+            "name" => "required|min:3|max:255",
+            "phone_number" => "required|min:10",
+            "birthdate" => "required",
+        ];
+        $message = [
+            "name.required" => "กรุณากรอกชื่อ",
+            "name.min" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
+            "name.max"=> "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
+            "phone_number.required"=> "กรุณากรอกเบอร์โทร",
+            "phone_number"=> "เบอร์โทรต้องมี 10 หลัก",
+            "birthdate.required"=> "กรุณาเลือกวันเกิด",
+            "birthdate"=> "กรุณาเลือกวันเกิด",
+        ];
+        $request->validate($rules, $message);
+
+        $customer = Customer::find($id);
+        $customer->name = $request->name;
+        $customer->phone_number = $request->phone_number;
+        $customer->birthdate = $request->birthdate;
+        $customer->save();
+
+        return redirect()->route("admin.customers.index")->with("success", "บันทึกข้อมูลเรียบร้อย");
     }
 
     /**
@@ -85,6 +110,8 @@ class CustomerController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $customer = Customer::find($id);
+        $customer->delete();
+        return redirect()->route("admin.customers.index")->with("success", "ลบข้อมูลเรียบร้อย");
     }
 }

@@ -1,11 +1,44 @@
-import React from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, Link } from "@inertiajs/react";
-import { Breadcrumb } from "flowbite-react";
+import { Head, Link, router } from "@inertiajs/react";
+import { Breadcrumb, Pagination, Table } from "flowbite-react";
+import { useEffect, useState } from "react";
 import { HiHome } from "react-icons/hi";
-import { Pagination } from "flowbite-react";
-import { Table } from "flowbite-react";
-export default function Index() {
+import Swal from "sweetalert2";
+export default function Index( { productsPaginate }) {
+    const { current_page, next_page_url, prev_page_url } = productsPaginate;
+    const [products, setProducts] = useState([]);
+    const onPageChange = (page) => {
+        page > current_page
+            ? router.get(next_page_url)
+            : router.get(prev_page_url);
+    };
+    useEffect(() => {
+        setProducts(productsPaginate.data);
+    }, [productsPaginate]);
+
+    const handleDelete = (id) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("admin.categories.destroy", id), {
+                    onSuccess: () => {
+                        Swal.fire(
+                            "Deleted!",
+                            "Your file has been deleted.",
+                            "success"
+                        );
+                    },
+                });
+            }
+        });
+    };
     return (
         <AuthenticatedLayout
             header={
@@ -50,7 +83,10 @@ export default function Index() {
                                     key={product.id}
                                 >
                                     <Table.Cell className="font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {product.id}
+                                        {(current_page - 1) *
+                                            productsPaginate.per_page +
+                                            products.indexOf(product) +
+                                            1}
                                     </Table.Cell>
                                     <Table.Cell>{product.name}</Table.Cell>
                                     <Table.Cell>{product.image}</Table.Cell>

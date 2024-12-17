@@ -20,7 +20,7 @@ export default function EditUser({ user }) {
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
                         Home
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item href="/admin/users">Users</Breadcrumb.Item>
+                    <Breadcrumb.Item href="/admin/users">ผู้ใช้งานทั้งหมด</Breadcrumb.Item>
                     <Breadcrumb.Item>แก้ไขผู้ใช้งาน</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
