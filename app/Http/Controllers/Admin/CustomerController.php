@@ -15,7 +15,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customersPaginate = User::where("role", "customer")->paginate(10);
+        $customersPaginate = Customer::paginate(10);
         return Inertia::render("Admin/customers/index", compact("customersPaginate"));
     }
 
@@ -24,8 +24,7 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        $customers = User::where("role", "customer")->paginate(10);
-        return Inertia::render("Admin/customers/Create", compact("customers"));
+        return Inertia::render("Admin/customers/Create");
     }
 
     /**

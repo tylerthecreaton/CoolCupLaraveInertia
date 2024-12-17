@@ -71,6 +71,8 @@ export default function index({ customersPaginate }) {
                             <Table.HeadCell>ลําดับ</Table.HeadCell>
                             <Table.HeadCell>ชื่อ</Table.HeadCell>
                             <Table.HeadCell>เบอร์โทร</Table.HeadCell>
+                            <Table.HeadCell>วันเกิด</Table.HeadCell>
+                            <Table.HeadCell>เป็นสมาชิกวันที่</Table.HeadCell>
                             <Table.HeadCell>
                                 <span className="sr-only">Edit</span>
                             </Table.HeadCell>
@@ -90,6 +92,16 @@ export default function index({ customersPaginate }) {
                                     <Table.Cell>{customer.name}</Table.Cell>
                                     <Table.Cell>
                                         {customer.phone_number}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {customer.birthdate}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {new Date(customer.created_at).toLocaleDateString('th-TH', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                        })}
                                     </Table.Cell>
 
                                     <Table.Cell>

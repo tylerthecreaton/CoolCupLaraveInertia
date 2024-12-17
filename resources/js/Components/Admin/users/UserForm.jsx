@@ -103,6 +103,13 @@ export default function UserForm({ isEditing = false, user = null }) {
                         onChange={(e) => setData("username", e.target.value)}
                     />
                 </div>
+                {isEditing && (
+                    <div>
+                        <div className="block mb-2">
+                            <p className="text-sm text-red-500">* หากไม่ต้องการแก้ไขรหัสผ่านให้เว้นว่างไว้ไม่ต้องกรอก</p>
+                        </div>
+                    </div>
+                )}
                 <div>
                     <div className="block mb-2">
                         <Label htmlFor="password1" value="รหัสผ่าน" />
