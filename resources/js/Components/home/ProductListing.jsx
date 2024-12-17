@@ -25,7 +25,6 @@ export default function ProductListing() {
                         className="object-cover w-full max-h-48"
                         alt=""
                     />
-
                     <p>กาแฟ</p>
                 </div>
             </a>

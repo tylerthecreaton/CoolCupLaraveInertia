@@ -68,7 +68,7 @@ class CategoriesController extends Controller
     public function edit(string $id)
     {
         $category = Category::find($id);
-        return Inertia::render('admin.categories.edit', compact('category'));
+        return Inertia::render('Admin/categories/Edit', compact('category'));
     }
 
     public function update(Request $request, string $id)
