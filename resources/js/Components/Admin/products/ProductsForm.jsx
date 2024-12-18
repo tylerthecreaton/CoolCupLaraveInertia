@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { useForm } from "@inertiajs/react";
 import { Button, FileInput, Label, Select, TextInput } from "flowbite-react";
+import { isAbsoluteUrl } from "@/helpers";
 export default function ProductsForm({
-
     categories,
     isEditing = false,
     product = null,
 }) {
-    const { data, setData, post, put , processing, errors } = useForm({
+    const { data, setData, post, put, processing, errors } = useForm({
         name: isEditing ? product.name : "",
         image: null,
         description: isEditing ? product.description : "",
@@ -72,13 +72,32 @@ export default function ProductsForm({
                         name="category_id"
                         onChange={(e) => setData("category_id", e.target.value)}
                     >
+                        <option value="" disabled>
+                            กรุณาเลือกหมวดหมู่สินค้า
+                        </option>
                         {categories.map((category) => (
                             <option key={category.id} value={category.id}>
                                 {category.name}
                             </option>
                         ))}
                     </Select>
+                    {errors.category_id && (
+                        <p className="mt-1 text-sm text-red-600">
+                            {errors.category_id}
+                        </p>
+                    )}
                 </div>
+                {product?.image && (
+                    <img
+                        src={
+                            isAbsoluteUrl(product.image)
+                                ? product.image
+                                : `/images/products/${product.image}`
+                        }
+                        alt=""
+                        className="mx-auto w-full"
+                    />
+                )}
                 <div>
                     <div>
                         <Label htmlFor="image" value="อัพโหลดรูปภาพ" />

@@ -44,15 +44,17 @@ export default function CategoriesForm({ category, isEditing = false }) {
                         onChange={(e) => setData("name", e.target.value)}
                     />
                 </div>
-                <img
-                    src={
-                        isAbsoluteUrl(category.image)
-                            ? category.image
-                            : `/images/categories/${category.image}`
-                    }
-                    alt=""
-                    className="w-full mx-auto"
-                />
+                {category?.image && (
+                    <img
+                        src={
+                            isAbsoluteUrl(category.image)
+                                ? category.image
+                                : `/images/categories/${category.image}`
+                        }
+                        alt=""
+                        className="mx-auto w-full"
+                    />
+                )}
                 <div>
                     <div>
                         <Label htmlFor="image" value="อัพโหลดรูปภาพ" />
