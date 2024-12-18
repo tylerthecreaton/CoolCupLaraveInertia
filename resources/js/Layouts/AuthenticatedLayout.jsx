@@ -4,12 +4,20 @@ import ResponsiveNavLink from "@/Components/ResponsiveNavLink";
 import { Link, usePage } from "@inertiajs/react";
 import { Dropdown } from "flowbite-react";
 import { useState } from "react";
+import { useEffect } from "react";
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
+
+    const [time, setTime] = useState(new Date().toLocaleTimeString());
+    useEffect(() => {
+        setInterval(() => {
+            setTime(new Date().toLocaleTimeString());
+        }, 1000);
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -52,6 +60,10 @@ export default function AuthenticatedLayout({ header, children }) {
                                         </Link>
                                     </Dropdown.Item>
                                 </Dropdown>
+                                <ul className="flex flex-col items-center mt-2">
+                                    <li>ผู้ใช้ : {user.name}</li>
+                                    <li>เวลา : {time}</li>
+                                </ul>
                             </div>
                         </div>
 
