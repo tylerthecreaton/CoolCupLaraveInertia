@@ -4,6 +4,7 @@ import { Button, Card } from "flowbite-react";
 import { useGlobalState } from "@/Store/state";
 import { cartActions } from "@/Store/state/cartState";
 import { appActions } from "@/Store/state/appState";
+import { isAbsoluteUrl } from "@/helpers";
 
 const ProductModal = ({ show, onClose, product }) => {
     const { state, dispatch } = useGlobalState();
@@ -47,7 +48,9 @@ const ProductModal = ({ show, onClose, product }) => {
         const cartItem = {
             id: product.id,
             name: product.name,
-            image: product.image,
+            image: isAbsoluteUrl(product.image)
+                ? product.image
+                : `/images/products/${product.image}`,
             price: totalPrice,
             quantity: quantity,
             size: size,
