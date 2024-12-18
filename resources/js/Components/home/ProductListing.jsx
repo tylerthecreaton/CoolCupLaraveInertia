@@ -1,7 +1,11 @@
 import React from "react";
 import { Button } from "flowbite-react";
 import { isAbsoluteUrl } from "@/helpers";
-export default function ProductListing({ products, setShowSaleModal }) {
+export default function ProductListing({
+    products,
+    setShowSaleModal,
+    setCurrentProduct,
+}) {
     return (
         <div className="grid grid-cols-5 gap-4 gap-y-5 p-5">
             {products.map((product) => (
@@ -9,7 +13,10 @@ export default function ProductListing({ products, setShowSaleModal }) {
                     key={product.id}
                     type="button"
                     color="primary"
-                    onClick={() => setShowSaleModal && setShowSaleModal(true)}
+                    onClick={() => {
+                        setCurrentProduct(product);
+                        setShowSaleModal(true);
+                    }}
                 >
                     <div className="flex flex-col justify-between items-center py-5 w-52 h-72 border hover:bg-gray-100">
                         <img

@@ -3,7 +3,12 @@ import { useState } from "react";
 import { HiUserCircle } from "react-icons/hi";
 import AddMenuModal from "./AddMenuModal";
 import ProductListing from "./ProductListing";
-export default function CategorySection({ products, categories }) {
+export default function CategorySection({
+    products,
+    categories,
+    setShowSaleModal,
+    setCurrentProduct,
+}) {
     const [showAddMenuModal, setShowAddMenuModal] = useState(false);
     const [currentTab, setCurrentTab] = useState(0);
 
@@ -21,7 +26,11 @@ export default function CategorySection({ products, categories }) {
                             title="สินค้าขายดี"
                             icon={HiUserCircle}
                         >
-                            <ProductListing products={products} />
+                            <ProductListing
+                                products={products}
+                                setShowSaleModal={setShowSaleModal}
+                                setCurrentProduct={setCurrentProduct}
+                            />
                         </Tabs.Item>
                         {categories.map((category) => (
                             <Tabs.Item
@@ -33,7 +42,8 @@ export default function CategorySection({ products, categories }) {
                             >
                                 <ProductListing
                                     products={category.products}
-                                    setShowSaleModal={setShowAddMenuModal}
+                                    setShowSaleModal={setShowSaleModal}
+                                    setCurrentProduct={setCurrentProduct}
                                 />
                             </Tabs.Item>
                         ))}
