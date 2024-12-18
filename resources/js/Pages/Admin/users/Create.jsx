@@ -1,4 +1,5 @@
 import UserForm from "@/Components/Admin/users/UserForm";
+import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 
@@ -15,16 +16,19 @@ export default function CreateUser() {
             }
         >
             <Head title="เพิ่มผู้ใช้งาน" />
-            <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+            <AdminLayout>
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
                         Home
                     </Breadcrumb.Item>
-                    <Breadcrumb.Item href="/admin/users">ผู้ใช้งานทั้งหมด</Breadcrumb.Item>
+                    <Breadcrumb.Item href="/admin/users">
+                        ผู้ใช้งานทั้งหมด
+                    </Breadcrumb.Item>
                     <Breadcrumb.Item>เพิ่มผู้ใช้งาน</Breadcrumb.Item>
                 </Breadcrumb>
-            </div>
-            <UserForm />
+
+                <UserForm />
+            </AdminLayout>
         </AuthenticatedLayout>
     );
 }

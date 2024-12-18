@@ -1,3 +1,4 @@
+import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router } from "@inertiajs/react";
 import { Breadcrumb, Pagination, Table } from "flowbite-react";
@@ -48,15 +49,14 @@ export default function index({ usersPaginate }) {
             }
         >
             <Head title="จัดการผู้ใช้" />
-            <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+
+            <AdminLayout className="container p-8 mx-auto mt-5 bg-white">
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
                         Home
                     </Breadcrumb.Item>
                     <Breadcrumb.Item>ผู้ใช้งานทั้งหมด</Breadcrumb.Item>
                 </Breadcrumb>
-            </div>
-            <main className="container p-8 mx-auto mt-5 bg-white">
                 <div className="flex justify-end pb-5">
                     <Link
                         href={route("admin.users.create")}
@@ -84,7 +84,10 @@ export default function index({ usersPaginate }) {
                                     key={user.id}
                                 >
                                     <Table.Cell className="font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {(current_page - 1) * usersPaginate.per_page + users.indexOf(user) + 1}
+                                        {(current_page - 1) *
+                                            usersPaginate.per_page +
+                                            users.indexOf(user) +
+                                            1}
                                     </Table.Cell>
                                     <Table.Cell>{user.name}</Table.Cell>
                                     <Table.Cell>{user.username}</Table.Cell>
@@ -145,7 +148,7 @@ export default function index({ usersPaginate }) {
                         />
                     </div>
                 </div>
-            </main>
+            </AdminLayout>
         </AuthenticatedLayout>
     );
 }
