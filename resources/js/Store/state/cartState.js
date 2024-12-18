@@ -107,9 +107,9 @@ export const cartReducer = (state = initialCartState, action) => {
 
 // Action Creators
 export const cartActions = {
-    addToCart: (product) => ({
+    addToCart: (cartItem) => ({
         type: "ADD_TO_CART",
-        payload: product,
+        payload: cartItem,
     }),
 
     removeFromCart: (productId) => ({

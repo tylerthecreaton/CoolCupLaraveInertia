@@ -1,7 +1,8 @@
 import { createContext, useReducer, useContext } from "react";
 import { cartReducer, initialCartState } from "./cartState";
+import { appReducer, initialAppState } from "./appState";
 
-const GlobalStateContext = createContext();
+export const GlobalStateContext = createContext();
 
 // Combine multiple reducers into one
 const combineReducers = (reducers) => {
@@ -17,6 +18,7 @@ const combineReducers = (reducers) => {
 // Define all reducers here
 const rootReducer = combineReducers({
     cart: cartReducer,
+    app: appReducer,
     // Add more reducers here as needed
     // example: user: userReducer,
     // example: products: productsReducer,
@@ -24,6 +26,7 @@ const rootReducer = combineReducers({
 
 // Initial state combining all feature states
 const initialState = {
+    app: initialAppState,
     cart: initialCartState,
     // Add more initial states here as needed
     // example: user: initialUserState,
@@ -31,18 +34,23 @@ const initialState = {
 };
 
 // Global state provider component
-const GlobalStateProvider = ({ children }) => {
+export const GlobalStateProvider = ({ children }) => {
     const [state, dispatch] = useReducer(rootReducer, initialState);
 
+    const value = {
+        state,
+        dispatch,
+    };
+
     return (
-        <GlobalStateContext.Provider value={{ state, dispatch }}>
+        <GlobalStateContext.Provider value={value}>
             {children}
         </GlobalStateContext.Provider>
     );
 };
 
 // Custom hook for using the global state
-const useGlobalState = () => {
+export const useGlobalState = () => {
     const context = useContext(GlobalStateContext);
     if (!context) {
         throw new Error(
@@ -51,5 +59,3 @@ const useGlobalState = () => {
     }
     return context;
 };
-
-export { GlobalStateContext, GlobalStateProvider, useGlobalState };

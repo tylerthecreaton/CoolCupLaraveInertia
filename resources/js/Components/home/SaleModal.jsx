@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { X, Minus, Plus } from "lucide-react";
 import { Button, Card } from "flowbite-react";
+import { useGlobalState } from "@/Store/state";
+import { cartActions } from "@/Store/state/cartState";
+import { appActions } from "@/Store/state/appState";
 
 const ProductModal = ({ show, onClose, product }) => {
+    const { state, dispatch } = useGlobalState();
     const [quantity, setQuantity] = useState(1);
     const [size, setSize] = useState("S");
     const [sweetness, setSweetness] = useState("100%");
@@ -39,12 +43,27 @@ const ProductModal = ({ show, onClose, product }) => {
         }
     };
 
+    const handleAddToCart = () => {
+        const cartItem = {
+            id: product.id,
+            name: product.name,
+            image: product.image,
+            price: totalPrice,
+            quantity: quantity,
+            size: size,
+            sweetness: sweetness,
+            topping: topping,
+        };
+        dispatch(cartActions.addToCart(cartItem));
+        dispatch(appActions.setCartOpen(true));
+        onClose();
+    };
+
     if (!show || !product) return null;
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <Card className="w-full max-w-lg bg-white rounded-lg overflow-hidden">
-                {JSON.stringify(product)}
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b">
                     <h2 className="text-xl font-semibold">{product.name}</h2>
@@ -191,13 +210,7 @@ const ProductModal = ({ show, onClose, product }) => {
                         >
                             Cancel
                         </Button>
-                        <Button
-                            className="flex-1"
-                            onClick={() => {
-                                // Handle order confirmation
-                                onClose();
-                            }}
-                        >
+                        <Button className="flex-1" onClick={handleAddToCart}>
                             Add to Order
                         </Button>
                     </div>
