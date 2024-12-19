@@ -30,7 +30,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             <div className="flex items-center shrink-0 transition-transform hover:scale-105">
                                 <Link href="/" className="flex items-center space-x-2">
                                     <ApplicationLogo className="block w-auto h-10 text-primary-600 fill-current" />
-                                    <span className="hidden md:block text-lg font-semibold text-gray-800">
+                                    <span className="hidden md:block text-2xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 via-purple-500 to-primary-600 animate-gradient">
                                         CoolCup
                                     </span>
                                 </Link>
@@ -99,7 +99,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
                         <div className="hidden sm:flex sm:items-center sm:ms-6">
                             <div className="ms-3 relative flex items-center space-x-6">
-                                <Link 
+                                <Link
                                     href="/notifications"
                                     className="relative flex items-center"
                                 >
@@ -222,8 +222,8 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         <div className="mt-3 space-y-1 px-2">
-                            <ResponsiveNavLink 
-                                href="/notifications" 
+                            <ResponsiveNavLink
+                                href="/notifications"
                                 className="flex items-center justify-between space-x-2"
                             >
                                 <div className="flex items-center space-x-2">
