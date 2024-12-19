@@ -10,6 +10,7 @@ export default function HeaderPanel() {
     const { totalItems } = state.cart;
     const [time, setTime] = useState(new Date().toLocaleTimeString());
     const user = usePage().props.auth.user;
+    
     useEffect(() => {
         setInterval(() => {
             setTime(new Date().toLocaleTimeString());
@@ -17,7 +18,7 @@ export default function HeaderPanel() {
     }, []);
 
     return (
-        <div className="flex justify-between bg-blue-300 min-h-24">
+        <div className="flex justify-between bg-blue-300 min-h-24 relative z-50">
             <div className="py-10 text-4xl font-bold text-black ms-8">
                 หน้าขาย
             </div>

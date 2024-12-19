@@ -3,6 +3,7 @@ import { useState } from "react";
 import { HiUserCircle } from "react-icons/hi";
 import AddMenuModal from "./AddMenuModal";
 import ProductListing from "./ProductListing";
+
 export default function CategorySection({
     products,
     categories,
@@ -18,7 +19,7 @@ export default function CategorySection({
 
     return (
         <>
-            <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 ">
+            <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
                 <div className="relative w-full">
                     <Tabs aria-label="Default tabs" variant="default">
                         <Tabs.Item
