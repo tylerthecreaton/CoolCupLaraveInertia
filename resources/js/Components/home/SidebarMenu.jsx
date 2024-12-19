@@ -13,7 +13,7 @@ import {
     MdPointOfSale,
 } from "react-icons/md";
 import Swal from "sweetalert2";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 
 export default function SidebarMenu() {
     const [isOpen, setIsOpen] = useState(() => {
@@ -27,6 +27,49 @@ export default function SidebarMenu() {
     useEffect(() => {
         localStorage.setItem("sidebarOpen", JSON.stringify(isOpen));
     }, [isOpen]);
+
+    const handleLogout = () => {
+        Swal.fire({
+            title: 'ยืนยันการออกจากระบบ',
+            text: 'คุณต้องการออกจากระบบใช่หรือไม่?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#0891b2',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ใช่, ออกจากระบบ',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state
+                Swal.fire({
+                    title: 'กำลังออกจากระบบ',
+                    text: 'กรุณารอสักครู่...',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    allowEnterKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Clear sidebar state and logout
+                localStorage.removeItem("sidebarOpen");
+                router.post(route('logout'), {}, {
+                    onSuccess: () => {
+                        Swal.fire({
+                            title: 'ออกจากระบบสำเร็จ',
+                            text: 'ขอบคุณที่ใช้บริการ',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = route('login');
+                        });
+                    }
+                });
+            }
+        });
+    };
 
     const MenuText = ({ children }) => (
         <span
@@ -142,28 +185,12 @@ export default function SidebarMenu() {
                         <button
                             type="button"
                             className="text-red-500 w-full flex items-center justify-center"
-                            onClick={() => {
-                                Swal.fire({
-                                    title: "ออกจากระบบ?",
-                                    text: "คุณต้องการออกจากระบบใช่หรือไม่?",
-                                    icon: "warning",
-                                    showCancelButton: true,
-                                    confirmButtonColor: "#3085d6",
-                                    cancelButtonColor: "#d33",
-                                    confirmButtonText: "ใช่",
-                                    cancelButtonText: "ไม่",
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        localStorage.removeItem("sidebarOpen");
-                                        window.location.href = "/logout";
-                                    }
-                                });
-                            }}
+                            onClick={handleLogout}
                         >
                             {isOpen ? (
                                 <MenuText>ออกจากระบบ</MenuText>
                             ) : (
-                                <MdExitToApp className="text-2xl" />
+                                <MdExitToApp className="text-2xl hover:scale-110 transition-transform" />
                             )}
                         </button>
                     </li>
