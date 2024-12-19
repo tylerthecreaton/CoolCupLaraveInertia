@@ -26,12 +26,12 @@ export default function SidebarMenu() {
                 <ul className="flex flex-col gap-5 justify-center items-center py-5">
                     <li>
                         <a
-                            href="profilecustomer"
+                            href="member"
                             className="text-blue-500 hover:text-blue-700"
                         >
                             <button
                                 type="button"
-                                className="text-sm font-medium"
+                                className="text-base font-semibold"
                             >
                                 สมาชิก
                             </button>

@@ -3,12 +3,13 @@ import { useGlobalState } from "@/Store/state";
 import { appActions } from "@/Store/state/appState";
 import { Button } from "flowbite-react";
 import { ShoppingCart } from "lucide-react";
+import { usePage } from "@inertiajs/react";
 
 export default function HeaderPanel() {
     const { state, dispatch } = useGlobalState();
     const { totalItems } = state.cart;
     const [time, setTime] = useState(new Date().toLocaleTimeString());
-
+    const user = usePage().props.auth.user;
     useEffect(() => {
         setInterval(() => {
             setTime(new Date().toLocaleTimeString());
@@ -36,7 +37,7 @@ export default function HeaderPanel() {
                 </Button>
                 <div className="text-black">
                     <ul>
-                        <li>ผู้ใช้ : </li>
+                        <li>ผู้ใช้ : {user.name}</li>
                         <li id="current-time">
                             เวลา : <span id="time">{time}</span>
                         </li>

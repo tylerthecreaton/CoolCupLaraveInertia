@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ProductsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterMemberController;
 use Illuminate\Foundation\Application;
@@ -17,7 +18,14 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
+// ---------------------------RegisterMember---------------------------
 Route::get('/registermember', [RegisterMemberController::class, 'index'])->name('registermember');
+
+
+// ---------------------------Member---------------------------
+Route::get('/member', [MemberController::class, 'index'])->name('member');
+
 
 Route::middleware('auth')->group(function () {
     Route::group(['prefix' => '/admin'], function () {
