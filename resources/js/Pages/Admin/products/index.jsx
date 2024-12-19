@@ -1,4 +1,5 @@
 import { isAbsoluteUrl } from "@/helpers";
+import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router } from "@inertiajs/react";
 import { Breadcrumb, Pagination, Table } from "flowbite-react";
@@ -49,6 +50,7 @@ export default function Index({ productsPaginate }) {
             }
         >
             <Head title="จัดการสินค้า" />
+            <AdminLayout className="container p-8 mx-auto mt-5 bg-white">
             <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
@@ -163,6 +165,7 @@ export default function Index({ productsPaginate }) {
                     </div>
                 </div>
             </main>
+            </AdminLayout>
         </AuthenticatedLayout>
     );
 }
