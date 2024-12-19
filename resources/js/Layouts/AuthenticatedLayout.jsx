@@ -4,6 +4,7 @@ import ResponsiveNavLink from "@/Components/ResponsiveNavLink";
 import { Link, usePage, router } from "@inertiajs/react";
 import { Dropdown } from "flowbite-react";
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
@@ -18,7 +19,32 @@ export default function AuthenticatedLayout({ header, children }) {
     }, []);
 
     const handleLogout = () => {
-        router.post(route("logout"));
+        Swal.fire({
+            title: 'ยืนยันการออกจากระบบ',
+            text: "คุณต้องการออกจากระบบใช่หรือไม่?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#0891b2',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ใช่, ออกจากระบบ',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.post(route("logout"), {}, {
+                    onSuccess: () => {
+                        Swal.fire({
+                            title: 'ออกจากระบบสำเร็จ',
+                            text: 'กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...',
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = route('login');
+                        });
+                    }
+                });
+            }
+        });
     };
 
     return (
@@ -64,7 +90,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     <Dropdown.Item className="hover:bg-gray-50 rounded-lg transition-colors duration-150">
                                         <Link href="/admin/users" className="w-full flex items-center space-x-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                             </svg>
                                             <span>ผู้ใช้งาน</span>
                                         </Link>
