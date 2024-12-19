@@ -8,8 +8,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterMemberController;
-use Illuminate\Container\Attributes\Auth;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -18,16 +18,6 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::post('/logout', function () {
-    Auth::logout();
-
-    request()->session()->invalidate();
-
-    request()->session()->regenerateToken();
-
-    return redirect('/');
-})->middleware('auth')->name('logout');
 
 // ---------------------------RegisterMember---------------------------
 Route::get('/registermember', [RegisterMemberController::class, 'index'])->name('registermember');
@@ -74,7 +64,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/customers/{id}/edit', [CustomerController::class, 'edit'])->name('admin.customers.edit');
         Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('admin.customers.update');
         Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy');
-
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

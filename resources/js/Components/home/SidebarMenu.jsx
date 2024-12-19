@@ -1,6 +1,7 @@
 import { Link } from "lucide-react";
 import React from "react";
 import { MdApps } from "react-icons/md";
+import Swal from "sweetalert2";
 
 export default function SidebarMenu() {
     return (
@@ -51,14 +52,30 @@ export default function SidebarMenu() {
                         </a>
                     </li>
                     <li>แมนนวล</li>
-                    <form method="POST" action="/logout">
+                    <li>
                         <button
-                            type="submit"
-                            className="text-red-500 hover:text-red-700"
+                            type="button"
+                            className="text-red-500 w-full"
+                            onClick={() => {
+                                Swal.fire({
+                                    title: "ออกจากระบบ?",
+                                    text: "คุณต้องการออกจากระบบใช่หรือไม่?",
+                                    icon: "warning",
+                                    showCancelButton: true,
+                                    confirmButtonColor: "#3085d6",
+                                    cancelButtonColor: "#d33",
+                                    confirmButtonText: "ใช่",
+                                    cancelButtonText: "ไม่",
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        window.location.href = "/logout";
+                                    }
+                                });
+                            }}
                         >
                             ออกจากระบบ
                         </button>
-                    </form>
+                    </li>
                 </ul>
             </div>
         </div>
