@@ -1,5 +1,5 @@
 import { useForm } from "@inertiajs/react";
-import { Button, Label, TextInput } from "flowbite-react";
+import { Button, Datepicker, Label, TextInput } from "flowbite-react";
 import Swal from "sweetalert2";
 
 export default function CustomersForm({ isEditing = false, customer = null }) {
