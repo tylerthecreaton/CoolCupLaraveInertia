@@ -1,26 +1,47 @@
 import { Link } from "lucide-react";
-import React from "react";
-import { MdApps } from "react-icons/md";
+import React, { useState } from "react";
+import { MdApps, MdDashboard, MdLocalOffer, MdHistory, MdAssessment, MdPerson, MdPersonAdd, MdBook, MdExitToApp, MdMenu, MdPointOfSale } from "react-icons/md";
 import Swal from "sweetalert2";
 
 export default function SidebarMenu() {
+    const [isOpen, setIsOpen] = useState(true);
+
+    const MenuText = ({ children }) => (
+        <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}>
+            {children}
+        </span>
+    );
+
     return (
-        <div className="flex flex-col justify-between w-[150px] h-screen min-h-screen bg-gray-100 border border-gray-300 px-2">
+        <div className={`flex flex-col justify-between ${isOpen ? 'w-[150px]' : 'w-[100px]'} h-screen min-h-screen bg-gray-100 border border-gray-300 px-2 transition-all duration-300 overflow-hidden`}>
             <div>
                 <div className="flex justify-center items-center h-24">
-                    <MdApps className="text-4xl" />
+                    <button
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="p-2 rounded-full hover:bg-gray-200"
+                    >
+                        <MdMenu className={`text-4xl transition-transform duration-300 ${isOpen ? '' : 'rotate-180'}`} />
+                    </button>
                 </div>
                 <a
                     href="/"
                     className="flex justify-center py-2 w-full border border-r-0 border-l-0 border-gray-500 hover:bg-gray-200"
                 >
-                    เมนู
+                    {isOpen ? <MenuText>เมนู</MenuText> : <MdPointOfSale className="text-2xl" />}
                 </a>
                 <ul className="flex flex-col gap-5 justify-center items-center py-5">
-                    <li>Dashboard</li>
-                    <li>โปรโมชั่น</li>
-                    <li>ประวัติใบเสร็จ</li>
-                    <li>รายงาน</li>
+                    <li className="flex items-center">
+                        {isOpen ? <MenuText>Dashboard</MenuText> : <MdDashboard className="text-2xl" />}
+                    </li>
+                    <li className="flex items-center">
+                        {isOpen ? <MenuText>โปรโมชั่น</MenuText> : <MdLocalOffer className="text-2xl" />}
+                    </li>
+                    <li className="flex items-center">
+                        {isOpen ? <MenuText>ประวัติใบเสร็จ</MenuText> : <MdHistory className="text-2xl" />}
+                    </li>
+                    <li className="flex items-center">
+                        {isOpen ? <MenuText>รายงาน</MenuText> : <MdAssessment className="text-2xl" />}
+                    </li>
                 </ul>
             </div>
             <div>
@@ -32,9 +53,9 @@ export default function SidebarMenu() {
                         >
                             <button
                                 type="button"
-                                className="text-base font-semibold"
+                                className="text-base font-semibold flex items-center"
                             >
-                                สมาชิก
+                                {isOpen ? <MenuText>สมาชิก</MenuText> : <MdPerson className="text-2xl" />}
                             </button>
                         </a>
                     </li>
@@ -45,17 +66,19 @@ export default function SidebarMenu() {
                         >
                             <button
                                 type="button"
-                                className="text-base font-semibold"
+                                className="text-base font-semibold flex items-center"
                             >
-                                สมัครสมาชิก
+                                {isOpen ? <MenuText>สมัครสมาชิก</MenuText> : <MdPersonAdd className="text-2xl" />}
                             </button>
                         </a>
                     </li>
-                    <li>แมนนวล</li>
+                    <li className="flex items-center">
+                        {isOpen ? <MenuText>แมนนวล</MenuText> : <MdBook className="text-2xl" />}
+                    </li>
                     <li>
                         <button
                             type="button"
-                            className="text-red-500 w-full"
+                            className="text-red-500 w-full flex items-center justify-center"
                             onClick={() => {
                                 Swal.fire({
                                     title: "ออกจากระบบ?",
@@ -73,7 +96,7 @@ export default function SidebarMenu() {
                                 });
                             }}
                         >
-                            ออกจากระบบ
+                            {isOpen ? <MenuText>ออกจากระบบ</MenuText> : <MdExitToApp className="text-2xl" />}
                         </button>
                     </li>
                 </ul>
