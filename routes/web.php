@@ -16,7 +16,31 @@ use Inertia\Inertia;
 Route::get('/', [HomeController::class, 'index']);
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $customers = \App\Models\Customer::count();
+    $products = \App\Models\Product::count();
+    $popularProducts = \App\Models\Product::with('category')
+        ->select('products.*')
+        ->limit(5)
+        ->get()
+        ->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'category' => $product->category->name,
+                'total_sales' => rand(50, 100), // Mock sales data
+                'image_url' => $product->image_url
+            ];
+        });
+
+    return Inertia::render('Dashboard', [
+        'stats' => [
+            'customers' => $customers,
+            'products' => $products,
+            'orders' => 289, // Mock data
+            'revenue' => 158900, // Mock data
+            'popularProducts' => $popularProducts
+        ]
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // ---------------------------RegisterMember---------------------------
