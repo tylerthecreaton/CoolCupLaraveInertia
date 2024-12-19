@@ -51,7 +51,14 @@ export default function SidebarMenu() {
                         </a>
                     </li>
                     <li>แมนนวล</li>
-                    <li className="text-red-500">ออกจากระบบ</li>
+                    <form method="POST" action="/logout">
+                        <button
+                            type="submit"
+                            className="text-red-500 hover:text-red-700"
+                        >
+                            ออกจากระบบ
+                        </button>
+                    </form>
                 </ul>
             </div>
         </div>

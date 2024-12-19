@@ -18,7 +18,10 @@ export default function HeaderPanel() {
     }, []);
 
     return (
-        <div className="flex justify-between bg-blue-300 min-h-24 relative z-50">
+        <div 
+            className="flex justify-between bg-blue-300 min-h-24 relative z-50 transition-all duration-300 ease-in-out"
+            style={{ marginRight: state.app.isCartOpen ? '384px' : '0' }}
+        >
             <div className="py-10 text-4xl font-bold text-black ms-8">
                 หน้าขาย
             </div>

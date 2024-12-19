@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterMemberController;
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,6 +19,15 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::post('/logout', function () {
+    Auth::logout();
+
+    request()->session()->invalidate();
+
+    request()->session()->regenerateToken();
+
+    return redirect('/');
+})->middleware('auth')->name('logout');
 
 // ---------------------------RegisterMember---------------------------
 Route::get('/registermember', [RegisterMemberController::class, 'index'])->name('registermember');

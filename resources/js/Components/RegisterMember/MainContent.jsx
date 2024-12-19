@@ -7,7 +7,7 @@ export default function MainContent() {
         <main >
             <div className="w-full max-w-[1000px] mx-auto px-4 py-12 ">
                 <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">ลงทะเบียนสมาชิก</h2>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">สมัครสมาชิก</h2>
                     <p className="text-base text-gray-600">กรุณากรอกข้อมูลให้ครบถ้วน</p>
                 </div>
 
@@ -83,19 +83,21 @@ export default function MainContent() {
                                                         <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                                         </svg>
-                                                        <span>เบอร์โทร ${phoneNumber} สามารถใช้งานได้</span>
+                                                        <span>เบอร์มือถือ ${phoneNumber} สามารถใช้งานได้</span>
                                                     </div>`;
                                                     statusSpan.className = "mt-2 block text-sm text-green-600";
-                                                    phoneInput.className = phoneInput.className.replace(/border-red-500/g, '') + ' border-green-500 ring-1 ring-green-500';
+                                                    phoneInput.classList.remove('border-red-500', 'ring-red-500');
+                                                    phoneInput.classList.add('!border-green-500', '!ring-1', '!ring-green-500');
                                                 } else {
                                                     statusSpan.innerHTML = `<div class="flex items-center gap-1">
                                                         <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                                                         </svg>
-                                                        <span>เบอร์โทร ${phoneNumber} ไม่สามารถใช้งานได้</span>
+                                                        <span>เบอร์มือถือ ${phoneNumber} ไม่สามารถใช้งานได้</span>
                                                     </div>`;
                                                     statusSpan.className = "mt-2 block text-sm text-red-600";
-                                                    phoneInput.className = phoneInput.className.replace(/border-green-500/g, '') + ' border-red-500 ring-1 ring-red-500';
+                                                    phoneInput.classList.remove('border-green-500', 'ring-green-500');
+                                                    phoneInput.classList.add('!border-red-500', '!ring-1', '!ring-red-500');
                                                 }
                                             });
                                         }
