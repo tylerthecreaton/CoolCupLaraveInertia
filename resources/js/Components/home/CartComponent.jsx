@@ -4,8 +4,11 @@ import { appActions } from "@/Store/state/appState";
 import { cartActions } from "@/Store/state/cartState";
 import { Button, TextInput } from "flowbite-react";
 import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
+import { usePage } from "@inertiajs/react";
+import Swal from "sweetalert2";
 
 const CartComponent = () => {
+    const user = usePage().props.auth.user;
     const { state, dispatch } = useGlobalState();
     const cartRef = useRef(null);
     const { items, totalItems, total, discount, finalTotal } = state.cart;
@@ -38,10 +41,19 @@ const CartComponent = () => {
 
     const handleApplyDiscount = () => {
         const discountAmount = parseFloat(discountInput);
+        if (total - discountAmount < 0) {
+            Swal.fire({
+                icon: "error",
+                title: "เกิดข้อผิดพลาด",
+                text: "ไม่สามารถใช้ส่วนลดเพิ่มได้",
+            });
+            return;
+        }
+        setDiscountInput("");
         dispatch(
             cartActions.addToCart({
-                id: "discount",
-                name: "Discount",
+                id: new Date().getTime(),
+                name: `Discount / ${user.id} : ${user.name}`,
                 price: -discountAmount,
                 quantity: 1,
             })
@@ -224,7 +236,9 @@ const CartComponent = () => {
                             </div>
                         </div>
 
-                        <Button className="w-full">ชำระเงิน</Button>
+                        <Button type="button" className="w-full">
+                            ชำระเงิน
+                        </Button>
                     </div>
                 )}
             </div>
