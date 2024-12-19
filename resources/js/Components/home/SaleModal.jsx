@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, Minus, Plus } from "lucide-react";
-import { Button, Card } from "flowbite-react";
+import { Button, Card, Checkbox } from "flowbite-react";
 import { useGlobalState } from "@/Store/state";
 import { cartActions } from "@/Store/state/cartState";
 import { appActions } from "@/Store/state/appState";
@@ -11,7 +11,7 @@ const ProductModal = ({ show, onClose, product }) => {
     const [quantity, setQuantity] = useState(1);
     const [size, setSize] = useState("S");
     const [sweetness, setSweetness] = useState("100%");
-    const [topping, setTopping] = useState(null);
+    const [selectedToppings, setSelectedToppings] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
 
     const sizes = [
@@ -25,23 +25,37 @@ const ProductModal = ({ show, onClose, product }) => {
     const toppings = [
         { name: "ไข่มุก", price: 10 },
         { name: "ฟองนม", price: 15 },
+        { name: "วิปครีม", price: 15 },
+        { name: "พุดดิ้ง", price: 10 },
     ];
 
     useEffect(() => {
         if (product) {
             const basePrice = parseFloat(product.sale_price || 0);
             const sizePrice = sizes.find((s) => s.label === size)?.price || 0;
-            const toppingPrice =
-                toppings.find((t) => t.name === topping)?.price || 0;
-            setTotalPrice((basePrice + sizePrice + toppingPrice) * quantity);
+            const toppingsPrice = selectedToppings.reduce((total, topping) => {
+                const toppingPrice = toppings.find(t => t.name === topping)?.price || 0;
+                return total + toppingPrice;
+            }, 0);
+            setTotalPrice((basePrice + sizePrice + toppingsPrice) * quantity);
         }
-    }, [size, topping, quantity, product]);
+    }, [size, selectedToppings, quantity, product]);
 
     const handleQuantityChange = (delta) => {
         const newQuantity = quantity + delta;
         if (newQuantity >= 1 && newQuantity <= 99) {
             setQuantity(newQuantity);
         }
+    };
+
+    const handleToppingToggle = (toppingName) => {
+        setSelectedToppings(prev => {
+            if (prev.includes(toppingName)) {
+                return prev.filter(t => t !== toppingName);
+            } else {
+                return [...prev, toppingName];
+            }
+        });
     };
 
     const handleAddToCart = () => {
@@ -55,7 +69,7 @@ const ProductModal = ({ show, onClose, product }) => {
             quantity: quantity,
             size: size,
             sweetness: sweetness,
-            topping: topping,
+            toppings: selectedToppings,
         };
         dispatch(cartActions.addToCart(cartItem));
         dispatch(appActions.setCartOpen(true));
@@ -70,8 +84,13 @@ const ProductModal = ({ show, onClose, product }) => {
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b">
                     <h2 className="text-xl font-semibold">{product.name}</h2>
-                    <Button variant="ghost" size="icon" onClick={onClose}>
-                        <X className="h-5 w-5" />
+                    <Button
+                        color="gray"
+                        size="sm"
+                        onClick={onClose}
+                        className="!p-2"
+                    >
+                        <X className="w-4 h-4" />
                     </Button>
                 </div>
 
@@ -88,8 +107,8 @@ const ProductModal = ({ show, onClose, product }) => {
                     {/* Quantity Selector */}
                     <div className="flex items-center justify-center space-x-4">
                         <Button
-                            variant="outline"
-                            size="icon"
+                            color="light"
+                            size="sm"
                             onClick={() => handleQuantityChange(-1)}
                             disabled={quantity <= 1}
                         >
@@ -99,8 +118,8 @@ const ProductModal = ({ show, onClose, product }) => {
                             {quantity}
                         </span>
                         <Button
-                            variant="outline"
-                            size="icon"
+                            color="light"
+                            size="sm"
                             onClick={() => handleQuantityChange(1)}
                             disabled={quantity >= 99}
                         >
@@ -111,16 +130,16 @@ const ProductModal = ({ show, onClose, product }) => {
                     {/* Size Selection */}
                     <div className="space-y-2">
                         <label className="block text-sm font-medium">
-                            Size
+                            ขนาด
                         </label>
                         <div className="flex justify-between gap-2">
                             {sizes.map((sizeOption) => (
                                 <Button
                                     key={sizeOption.label}
-                                    variant={
+                                    color={
                                         size === sizeOption.label
-                                            ? "default"
-                                            : "outline"
+                                            ? "blue"
+                                            : "light"
                                     }
                                     className="flex-1"
                                     onClick={() => setSize(sizeOption.label)}
@@ -142,16 +161,16 @@ const ProductModal = ({ show, onClose, product }) => {
                     {/* Sweetness Selection */}
                     <div className="space-y-2">
                         <label className="block text-sm font-medium">
-                            Sweetness Level
+                            ความหวาน
                         </label>
                         <div className="grid grid-cols-5 gap-2">
                             {sweetnessLevels.map((level) => (
                                 <Button
                                     key={level}
-                                    variant={
+                                    color={
                                         sweetness === level
-                                            ? "default"
-                                            : "outline"
+                                            ? "blue"
+                                            : "light"
                                     }
                                     onClick={() => setSweetness(level)}
                                     className="text-sm"
@@ -165,33 +184,21 @@ const ProductModal = ({ show, onClose, product }) => {
                     {/* Toppings Selection */}
                     <div className="space-y-2">
                         <label className="block text-sm font-medium">
-                            Toppings
+                            ท็อปปิ้ง (เลือกได้หลายอย่าง)
                         </label>
-                        <div className="flex gap-2">
+                        <div className="grid grid-cols-2 gap-2">
                             {toppings.map((toppingOption) => (
-                                <Button
+                                <label
                                     key={toppingOption.name}
-                                    variant={
-                                        topping === toppingOption.name
-                                            ? "default"
-                                            : "outline"
-                                    }
-                                    onClick={() =>
-                                        setTopping(
-                                            topping === toppingOption.name
-                                                ? null
-                                                : toppingOption.name
-                                        )
-                                    }
-                                    className="flex-1"
+                                    className="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50 cursor-pointer"
                                 >
-                                    <div className="text-center">
-                                        <div>{toppingOption.name}</div>
-                                        <div className="text-xs">
-                                            +฿{toppingOption.price}
-                                        </div>
-                                    </div>
-                                </Button>
+                                    <Checkbox
+                                        checked={selectedToppings.includes(toppingOption.name)}
+                                        onChange={() => handleToppingToggle(toppingOption.name)}
+                                    />
+                                    <span>{toppingOption.name}</span>
+                                    <span className="text-blue-600">+{toppingOption.price}฿</span>
+                                </label>
                             ))}
                         </div>
                     </div>
@@ -200,16 +207,17 @@ const ProductModal = ({ show, onClose, product }) => {
                 {/* Footer with Total and Actions */}
                 <div className="border-t p-4 space-y-4">
                     <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold">Total</span>
+                        <span className="text-lg font-semibold">ราคารวม</span>
                         <span className="text-2xl font-bold">
                             ฿{totalPrice}
                         </span>
                     </div>
+
                     <div className="flex gap-3">
                         <Button
-                            variant="outline"
-                            className="flex-1"
+                            color="gray"
                             onClick={onClose}
+                            className="flex-1"
                         >
                             Cancel
                         </Button>

@@ -1,3 +1,4 @@
+import { Link } from "lucide-react";
 import React from "react";
 import { MdApps } from "react-icons/md";
 
@@ -9,7 +10,7 @@ export default function SidebarMenu() {
                     <MdApps className="text-4xl" />
                 </div>
                 <a
-                    href="storefront"
+                    href="/"
                     className="flex justify-center py-2 w-full border border-r-0 border-l-0 border-gray-500 hover:bg-gray-200"
                 >
                     เมนู
@@ -38,12 +39,12 @@ export default function SidebarMenu() {
                     </li>
                     <li>
                         <a
-                            href="registercustomer"
+                            href="registermember"
                             className="text-blue-500 hover:text-blue-700"
                         >
                             <button
                                 type="button"
-                                className="text-sm font-medium"
+                                className="text-base font-semibold"
                             >
                                 สมัครสมาชิก
                             </button>

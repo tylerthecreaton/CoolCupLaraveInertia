@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ProductsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RegisterMemberController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -15,6 +16,8 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/registermember', [RegisterMemberController::class, 'index'])->name('registermember');
 
 Route::middleware('auth')->group(function () {
     Route::group(['prefix' => '/admin'], function () {

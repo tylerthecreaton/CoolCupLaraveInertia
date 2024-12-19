@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useGlobalState } from "@/Store/state";
 import { appActions } from "@/Store/state/appState";
 import { cartActions } from "@/Store/state/cartState";
@@ -7,8 +7,25 @@ import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
 
 const CartComponent = () => {
     const { state, dispatch } = useGlobalState();
+    const cartRef = useRef(null);
     const { items, totalItems, total, discount, finalTotal } = state.cart;
     const [discountInput, setDiscountInput] = useState("");
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (cartRef.current && !cartRef.current.contains(event.target)) {
+                dispatch(appActions.setCartOpen(false));
+            }
+        };
+
+        if (state.app.isCartOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [state.app.isCartOpen]);
 
     const handleUpdateQuantity = (id, currentQuantity, change) => {
         const newQuantity = currentQuantity + change;
@@ -48,7 +65,7 @@ const CartComponent = () => {
             </div>
 
             {/* Cart Items */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div ref={cartRef} className="flex-1 overflow-y-auto p-4">
                 {items.length === 0 ? (
                     <div className="text-center text-gray-500 mt-10">
                         ไม่มีสินค้าในตะกร้า
@@ -87,8 +104,8 @@ const CartComponent = () => {
                                     <div className="text-sm text-gray-600 mt-1">
                                         <p>ขนาด: {item.size}</p>
                                         <p>ความหวาน: {item.sweetness}</p>
-                                        {item.topping && (
-                                            <p>ท็อปปิ้ง: {item.topping}</p>
+                                        {item.toppings && item.toppings.length > 0 && (
+                                            <p>ท็อปปิ้ง: {item.toppings.join(", ")}</p>
                                         )}
                                     </div>
                                     <div className="flex items-center justify-between mt-2">
