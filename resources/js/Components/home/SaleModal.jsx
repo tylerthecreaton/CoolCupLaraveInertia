@@ -16,8 +16,8 @@ const ProductModal = ({ show, onClose, product }) => {
 
     const sizes = [
         { label: "S", price: 0, ml: "300ml" },
-        { label: "M", price: 5, ml: "400ml" },
-        { label: "L", price: 10, ml: "500ml" },
+        { label: "M", price: 5, ml: "450ml" },
+        { label: "L", price: 10, ml: "600ml" },
     ];
 
     const sweetnessLevels = ["0%", "25%", "50%", "75%", "100%"];

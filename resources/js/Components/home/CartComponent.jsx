@@ -19,11 +19,11 @@ const CartComponent = () => {
         };
 
         if (state.app.isCartOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener("mousedown", handleClickOutside);
         }
 
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [state.app.isCartOpen]);
 
@@ -38,10 +38,14 @@ const CartComponent = () => {
 
     const handleApplyDiscount = () => {
         const discountAmount = parseFloat(discountInput);
-        if (!isNaN(discountAmount) && discountAmount >= 0) {
-            dispatch(cartActions.applyDiscount(discountAmount));
-            setDiscountInput("");
-        }
+        dispatch(
+            cartActions.addToCart({
+                id: "discount",
+                name: "Discount",
+                price: -discountAmount,
+                quantity: 1,
+            })
+        );
     };
 
     if (!state.app.isCartOpen) return null;
@@ -81,7 +85,10 @@ const CartComponent = () => {
                                     className="flex items-start space-x-4 bg-gray-50 p-3 rounded-lg"
                                 >
                                     <img
-                                        src={item.image}
+                                        src={
+                                            item.image ??
+                                            "https://via.placeholder.com/150"
+                                        }
                                         alt={item.name}
                                         className="w-20 h-20 object-cover rounded"
                                     />
@@ -105,47 +112,62 @@ const CartComponent = () => {
                                             </Button>
                                         </div>
                                         <div className="text-sm text-gray-600 mt-1">
-                                            <p>ขนาด: {item.size}</p>
-                                            <p>ความหวาน: {item.sweetness}</p>
-                                            {item.toppings && item.toppings.length > 0 && (
-                                                <p>ท็อปปิ้ง: {item.toppings.join(", ")}</p>
+                                            {item.size && (
+                                                <p>ขนาด: {item.size}</p>
                                             )}
+                                            {item.sweetness && (
+                                                <p>
+                                                    ความหวาน: {item.sweetness}
+                                                </p>
+                                            )}
+                                            {item.toppings &&
+                                                item.toppings.length > 0 && (
+                                                    <p>
+                                                        ท็อปปิ้ง:{" "}
+                                                        {item.toppings.join(
+                                                            ", "
+                                                        )}
+                                                    </p>
+                                                )}
                                         </div>
+
                                         <div className="flex items-center justify-between mt-2">
                                             <span className="text-blue-600 font-medium">
                                                 ฿{item.price}
                                             </span>
-                                            <div className="flex items-center space-x-2">
-                                                <Button
-                                                    size="xs"
-                                                    color="light"
-                                                    onClick={() =>
-                                                        handleUpdateQuantity(
-                                                            item.id,
-                                                            item.quantity,
-                                                            -1
-                                                        )
-                                                    }
-                                                >
-                                                    <Minus className="w-3 h-3" />
-                                                </Button>
-                                                <span className="w-8 text-center">
-                                                    {item.quantity}
-                                                </span>
-                                                <Button
-                                                    size="xs"
-                                                    color="light"
-                                                    onClick={() =>
-                                                        handleUpdateQuantity(
-                                                            item.id,
-                                                            item.quantity,
-                                                            1
-                                                        )
-                                                    }
-                                                >
-                                                    <Plus className="w-3 h-3" />
-                                                </Button>
-                                            </div>
+                                            {item.price >= 0 && (
+                                                <div className="flex items-center space-x-2">
+                                                    <Button
+                                                        size="xs"
+                                                        color="light"
+                                                        onClick={() =>
+                                                            handleUpdateQuantity(
+                                                                item.id,
+                                                                item.quantity,
+                                                                -1
+                                                            )
+                                                        }
+                                                    >
+                                                        <Minus className="w-3 h-3" />
+                                                    </Button>
+                                                    <span className="w-8 text-center">
+                                                        {item.quantity}
+                                                    </span>
+                                                    <Button
+                                                        size="xs"
+                                                        color="light"
+                                                        onClick={() =>
+                                                            handleUpdateQuantity(
+                                                                item.id,
+                                                                item.quantity,
+                                                                1
+                                                            )
+                                                        }
+                                                    >
+                                                        <Plus className="w-3 h-3" />
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="text-right text-sm text-gray-600 mt-1">
                                             รวม: ฿{item.price * item.quantity}
@@ -166,7 +188,9 @@ const CartComponent = () => {
                                 type="number"
                                 placeholder="ใส่ส่วนลด"
                                 value={discountInput}
-                                onChange={(e) => setDiscountInput(e.target.value)}
+                                onChange={(e) =>
+                                    setDiscountInput(e.target.value)
+                                }
                                 className="flex-1"
                             />
                             <Button

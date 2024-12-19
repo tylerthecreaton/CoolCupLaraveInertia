@@ -1,4 +1,5 @@
-export const initialCartState = {
+export const cartState = {
+    key: 0, // unique key
     items: [],
     total: 0,
     totalItems: 0,
@@ -6,7 +7,41 @@ export const initialCartState = {
     finalTotal: 0,
 };
 
-export const cartReducer = (state = initialCartState, action) => {
+const getCartStateFromLocalStorage = () => {
+    const cartStateString = localStorage.getItem("cartState");
+    return cartStateString ? JSON.parse(cartStateString) : cartState;
+};
+
+const saveCartStateToLocalStorage = (cartState) => {
+    localStorage.setItem("cartState", JSON.stringify(cartState));
+};
+
+const removeCartStateFromLocalStorageByKey = (key) => {
+    const cartStateString = localStorage.getItem("cartState");
+    if (cartStateString) {
+        const cartState = JSON.parse(cartStateString);
+        if (cartState.key === key) {
+            localStorage.removeItem("cartState");
+        }
+    }
+};
+
+const updateCartStateFromLocalStorageByKey = (key, cartState) => {
+    localStorage.setItem("cartState", JSON.stringify({ ...cartState, key }));
+};
+
+const clearCartStateFromLocalStorage = () => {
+    localStorage.removeItem("cartState");
+};
+
+const getLasterKey = () => {
+    const cartStateString = localStorage.getItem("cartState");
+    return cartStateString ? JSON.parse(cartStateString).key : 0;
+};
+
+export const initialCartState = getCartStateFromLocalStorage();
+
+export const cartReducer = (state = cartState, action) => {
     switch (action.type) {
         case "ADD_TO_CART": {
             const existingItemIndex = state.items.findIndex(
@@ -25,20 +60,36 @@ export const cartReducer = (state = initialCartState, action) => {
             }
 
             const total = newItems.reduce(
-                (sum, item) => sum + item.price * item.quantity,
+                (sum, item) => sum + (item.price > 0 ? item.price * item.quantity : 0),
+                0
+            );
+            const discountFromItems = newItems.reduce(
+                (sum, item) => sum + (item.price < 0 ? Math.abs(item.price * item.quantity) : 0),
                 0
             );
             const totalItems = newItems.reduce(
-                (sum, item) => sum + item.quantity,
+                (sum, item) => sum + (item.price > 0 ? item.quantity : 0),
                 0
             );
 
-            return {
+            saveCartStateToLocalStorage({
                 ...state,
+                key: getLasterKey() + 1,
                 items: newItems,
                 total,
                 totalItems,
-                finalTotal: total - state.discount,
+                discount: discountFromItems,
+                finalTotal: total - discountFromItems,
+            });
+
+            return {
+                ...state,
+                key: getLasterKey() + 1,
+                items: newItems,
+                total,
+                totalItems,
+                discount: discountFromItems,
+                finalTotal: total - discountFromItems,
             };
         }
 
@@ -47,20 +98,37 @@ export const cartReducer = (state = initialCartState, action) => {
                 (item) => item.id !== action.payload
             );
             const total = newItems.reduce(
-                (sum, item) => sum + item.price * item.quantity,
+                (sum, item) => sum + (item.price > 0 ? item.price * item.quantity : 0),
+                0
+            );
+            const discountFromItems = newItems.reduce(
+                (sum, item) => sum + (item.price < 0 ? Math.abs(item.price * item.quantity) : 0),
                 0
             );
             const totalItems = newItems.reduce(
-                (sum, item) => sum + item.quantity,
+                (sum, item) => sum + (item.price > 0 ? item.quantity : 0),
                 0
             );
 
-            return {
+            removeCartStateFromLocalStorageByKey(state.key);
+            updateCartStateFromLocalStorageByKey(getLasterKey() + 1, {
                 ...state,
+                key: getLasterKey() + 1,
                 items: newItems,
                 total,
                 totalItems,
-                finalTotal: total - state.discount,
+                discount: discountFromItems,
+                finalTotal: total - discountFromItems,
+            });
+
+            return {
+                ...state,
+                key: getLasterKey() + 1,
+                items: newItems,
+                total,
+                totalItems,
+                discount: discountFromItems,
+                finalTotal: total - discountFromItems,
             };
         }
 
@@ -71,20 +139,37 @@ export const cartReducer = (state = initialCartState, action) => {
             );
 
             const total = newItems.reduce(
-                (sum, item) => sum + item.price * item.quantity,
+                (sum, item) => sum + (item.price > 0 ? item.price * item.quantity : 0),
+                0
+            );
+            const discountFromItems = newItems.reduce(
+                (sum, item) => sum + (item.price < 0 ? Math.abs(item.price * item.quantity) : 0),
                 0
             );
             const totalItems = newItems.reduce(
-                (sum, item) => sum + item.quantity,
+                (sum, item) => sum + (item.price > 0 ? item.quantity : 0),
                 0
             );
 
-            return {
+            removeCartStateFromLocalStorageByKey(state.key);
+            updateCartStateFromLocalStorageByKey(getLasterKey() + 1, {
                 ...state,
+                key: getLasterKey() + 1,
                 items: newItems,
                 total,
                 totalItems,
-                finalTotal: total - state.discount,
+                discount: discountFromItems,
+                finalTotal: total - discountFromItems,
+            });
+
+            return {
+                ...state,
+                key: getLasterKey() + 1,
+                items: newItems,
+                total,
+                totalItems,
+                discount: discountFromItems,
+                finalTotal: total - discountFromItems,
             };
         }
 
@@ -98,6 +183,7 @@ export const cartReducer = (state = initialCartState, action) => {
         }
 
         case "CLEAR_CART":
+            clearCartStateFromLocalStorage();
             return initialCartState;
 
         default:
