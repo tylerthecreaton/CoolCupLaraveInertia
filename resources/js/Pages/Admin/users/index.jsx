@@ -25,7 +25,7 @@ export default function index({ usersPaginate }) {
 
     useEffect(() => {
         const results = users.filter(user =>
-            Object.values(user).some(value => 
+            Object.values(user).some(value =>
                 value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
             )
         );
@@ -123,8 +123,8 @@ export default function index({ usersPaginate }) {
                                         <Table.Cell className="px-6 py-4">{user.email}</Table.Cell>
                                         <Table.Cell className="px-6 py-4">
                                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                                user.role === 'admin' 
-                                                    ? 'bg-purple-100 text-purple-700' 
+                                                user.role === 'admin'
+                                                    ? 'bg-purple-100 text-purple-700'
                                                     : 'bg-blue-100 text-blue-700'
                                             }`}>
                                                 {user.role}

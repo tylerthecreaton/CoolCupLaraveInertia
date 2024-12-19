@@ -1,11 +1,11 @@
-import UserForm from "@/Components/Admin/users/UserForm";
+import CustomersForm from "@/Components/Admin/customers/CustomersForm";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function EditUser({ customer }) {
+export default function EditCustomer({ customer }) {
     return (
         <AuthenticatedLayout
             header={
@@ -14,7 +14,7 @@ export default function EditUser({ customer }) {
                 </h2>
             }
         >
-            <Head title="เพิ่มสมาชิก" />
+            <Head title="แก้ไขสมาชิก" />
             <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
@@ -24,7 +24,7 @@ export default function EditUser({ customer }) {
                     <Breadcrumb.Item>แก้ไขสมาชิก</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
-            <UserForm customer={customer} isEditing={true} />
+            <CustomersForm customer={customer} isEditing={true} />
         </AuthenticatedLayout>
     );
 }

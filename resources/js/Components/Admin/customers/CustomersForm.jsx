@@ -2,11 +2,11 @@ import { useForm } from "@inertiajs/react";
 import { Button, Label, TextInput } from "flowbite-react";
 import Swal from "sweetalert2";
 
-export default function CustomersForm({ isEditing = false, user = null }) {
+export default function CustomersForm({ isEditing = false, customer = null }) {
     const { data, setData, post, processing, errors } = useForm({
-        name: isEditing ? user.name : "",
-        phone_number: isEditing ? user.phone_number : "",
-        birthdate: isEditing ? user.birthdate : "",
+        name: isEditing ? customer.name : "",
+        phone_number: isEditing ? customer.phone_number : "",
+        birthdate: isEditing ? customer.birthdate : "",
     });
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -35,6 +35,7 @@ export default function CustomersForm({ isEditing = false, user = null }) {
                         type="text"
                         placeholder="กรุณากรอกชื่อ-นามสกุล"
                         required
+                        name="name"
                         value={data.name}
                         onChange={(e) => setData("name", e.target.value)}
                     />
@@ -73,6 +74,7 @@ export default function CustomersForm({ isEditing = false, user = null }) {
                         type="text"
                         placeholder="กรุณากรอกเบอร์โทร"
                         required
+                        name="phone_number"
                         value={data.phone_number}
                         onChange={(e) => setData("phone_number", e.target.value)}
                         disabled={data.is_phone_number_checked}
@@ -87,6 +89,7 @@ export default function CustomersForm({ isEditing = false, user = null }) {
                         type="date"
                         placeholder="กรุณากรอกวัน/เดือน/ปีเกิด"
                         required
+                        name="birthdate"
                         value={data.birthdate}
                         onChange={(e) => setData("birthdate", e.target.value)}
                     />
