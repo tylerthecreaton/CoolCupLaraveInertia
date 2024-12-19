@@ -144,7 +144,7 @@ export default function MainContent() {
                                 size="lg"
                                 className="w-full text-base font-medium hover:scale-[1.02] transform transition-transform duration-200 hover:shadow-lg"
                             >
-                                ลงทะเบียน
+                                สมัครสมาชิก
                             </Button>
                         </div>
                     </div>
