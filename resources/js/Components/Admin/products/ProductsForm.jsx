@@ -48,6 +48,7 @@ export default function ProductsForm({
                     </div>
                     <TextInput
                         id="name"
+                        name="name"
                         type="text"
                         placeholder="กรุณากรอกชื่อสินค้า"
                         required
@@ -104,6 +105,7 @@ export default function ProductsForm({
                     </div>
                     <FileInput
                         id="image"
+                        name="image"
                         helperText="SVG, PNG, JPG or GIF (MAX. 800x400px)."
                         accept="image/*"
                         onChange={handleFileChange}
@@ -115,6 +117,7 @@ export default function ProductsForm({
                     </div>
                     <TextInput
                         id="cost_price"
+                        name="cost_price"
                         type="number"
                         placeholder="กรุณากรอกราคาต้นทุน"
                         required
@@ -126,6 +129,7 @@ export default function ProductsForm({
                     </div>
                     <TextInput
                         id="sale_price"
+                        name="sale_price"
                         type="number"
                         placeholder="กรุณากรอกราคาขาย"
                         required
@@ -142,6 +146,7 @@ export default function ProductsForm({
                     </div>
                     <TextInput
                         id="description"
+                        name="description"
                         type="text"
                         placeholder="กรุณากรอกคำอธิบายหมวดหมู่"
                         required

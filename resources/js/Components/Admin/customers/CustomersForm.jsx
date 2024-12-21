@@ -3,22 +3,22 @@ import { Button, Datepicker, Label, TextInput } from "flowbite-react";
 import Swal from "sweetalert2";
 
 export default function CustomersForm({ isEditing = false, customer = null }) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, put, processing, errors } = useForm({
         name: isEditing ? customer.name : "",
         phone_number: isEditing ? customer.phone_number : "",
         birthdate: isEditing ? customer.birthdate : "",
     });
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(
-            isEditing
-                ? route("admin.customers.update", customer.id)
-                : route("admin.customers.store"),
-            data,
-            {
+        if (isEditing) {
+            put(route("admin.customers.update", customer.id), data, {
                 forceFormData: true,
-            }
-        );
+            });
+        } else {
+            post(route("admin.customers.store"), data, {
+                forceFormData: true,
+            });
+        }
     };
     return (
         <div className="container px-4 py-8 mx-auto mt-5 bg-white rounded-md sm:px-8">
@@ -58,7 +58,10 @@ export default function CustomersForm({ isEditing = false, customer = null }) {
                                         cancelButtonText: "ไม่",
                                     }).then((result) => {
                                         if (result.isConfirmed) {
-                                            setData("is_phone_number_checked", true);
+                                            setData(
+                                                "is_phone_number_checked",
+                                                true
+                                            );
                                         }
                                     });
                                 }
@@ -76,7 +79,9 @@ export default function CustomersForm({ isEditing = false, customer = null }) {
                         required
                         name="phone_number"
                         value={data.phone_number}
-                        onChange={(e) => setData("phone_number", e.target.value)}
+                        onChange={(e) =>
+                            setData("phone_number", e.target.value)
+                        }
                         disabled={data.is_phone_number_checked}
                     />
                 </div>

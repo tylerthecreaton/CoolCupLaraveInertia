@@ -2,7 +2,7 @@ import { useForm } from "@inertiajs/react";
 import { Button, FileInput, Label, TextInput } from "flowbite-react";
 
 export default function UserForm({ isEditing = false, user = null }) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, put, processing, errors } = useForm({
         name: isEditing ? user.name : "",
         email: isEditing ? user.email : "",
         username: isEditing ? user.username : "",
@@ -18,15 +18,15 @@ export default function UserForm({ isEditing = false, user = null }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(
-            isEditing
-                ? route("admin.users.update", user.id)
-                : route("admin.users.store"),
-            data,
-            {
+        if (isEditing) {
+            put(route("admin.users.update", user.id), data, {
                 forceFormData: true,
-            }
-        );
+            });
+        } else {
+            post(route("admin.users.store"), data, {
+                forceFormData: true,
+            });
+        }
     };
     return (
         <div className="container px-4 py-8 mx-auto mt-5 bg-white rounded-md sm:px-8">

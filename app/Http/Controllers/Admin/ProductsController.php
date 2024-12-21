@@ -87,54 +87,60 @@ class ProductsController extends Controller
     public function update(Request $request, string $id)
     {
         $rules = [
-            'name' => 'required',
-            'category_id' => 'required',
+            'name' => 'required|min:3|max:255|unique:products,name,' . $id,
+            'category_id'=> 'required',
             'description' => 'required',
-            'cost_price' => 'required',
-            'sale_price' => 'required',
+            'cost_price' => 'required|numeric',
+            'sale_price' => 'required|numeric',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
         ];
+
         $message = [
             'name.required' => 'กรุณากรอกชื่อสินค้า',
-            'category_id.required' => 'กรุณาเลือกหมวดหมู่สินค้า',
-            'description.required' => 'กรุณากรอกรายละเอียดสินค้า',
-            'cost_price.required' => 'กรุณากรอกราคาต้นทุนสินค้า',
-            'sale_price.required' => 'กรุณากรอกราคาขายสินค้า',
-
+            'name.unique' => 'ชื่อสินค้านี้ถูกใช้ไปแล้ว',
+            'description.required' => 'กรุณากรอกรายละเอียด',
+            'category_id'=> 'กรุณาเลือกหมวดหมู่',
+            'cost_price'=> 'กรุณากรอกราคาต้นทุน',
+            'sale_price'=> 'กรุณากรอกราคาขาย',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
+
         if ($request->hasFile('image')) {
             $rules['image'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:2048';
-            $message['image.image'] = 'กรุณาอัปโหลดรูปภาพสินค้าให้ถูกต้อง';
-            $message['image.mimes'] = 'กรุณาอัปโหลดรูปภาพสินค้าให้ถูกต้อง';
-            $message['image.max'] = 'กรุณาอัปโหลดรูปภาพสินค้าให้ถูกต้อง';
+            $message['image.image'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
+            $message['image.mimes'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
+            $message['image.max'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
         }
-        $request->validate($rules, $message);
-        $imageName = "";
 
+        $request->validate($rules, $message);
+
+
+
+        $product = Product::find($id);
+
+        $imageName = $product->image;
         if ($request->hasFile('image')) {
+            try {
+                unlink(filename: public_path('/images/products/' . $imageName));
+            } catch (\Throwable $th) {
+            }
             $image = $request->file('image');
             $name = time() . '.' . $image->getClientOriginalExtension();
             $destinationPath = public_path('/images/products/');
             $image->move($destinationPath, $name);
             $imageName = $name;
         }
-        $product = new Product([
-            'name' => $request->name,
-            'category_id' => $request->category,
-            'image' => $imageName == '' ? '' : $imageName,
-            'description' => $request->description,
-            'cost_price' => $request->cost_price,
-            'sale_price' => $request->sale_price,
 
-        ]);
-        $product = Product::find($id);
         $product->name = $request->name;
         $product->category_id = $request->category_id;
         $product->description = $request->description;
         $product->cost_price = $request->cost_price;
         $product->sale_price = $request->sale_price;
         $product->image = $imageName;
+
         $product->save();
-        return redirect()->route('admin.products.index')->with('success', 'แก้ไขสินค้าเรียบร้อย');
+        return redirect()->route('admin.products.index')->with('success', 'บันทึกข้อมูลเรียบร้อย');
     }
 
     public function destroy($id)

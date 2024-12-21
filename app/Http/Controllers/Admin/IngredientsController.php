@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ingredient;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,14 +17,15 @@ class IngredientsController extends Controller
     }
     public function create()
     {
-        return Inertia::render("Admin/ingredients/Create");
+        $units = Unit::all();
+        return Inertia::render("Admin/ingredients/Create", compact('units'));
     }
     public function store(Request $request)
     {
         $rules = [
             "name" => "required|min:3|max:255|unique:ingredients",
             "quantity" => "required|numeric",
-            "unit" => "required|min:3|max:255",
+            "unit" => "required|exists:units,id",
             "expiration_date" => "required",
             "image" => "image|mimes:jpeg,png,jpg,gif,svg|max:2048",
         ];
@@ -34,7 +36,8 @@ class IngredientsController extends Controller
             "name.unique" => "ชื่อนี้ถูกใช้ไปแล้ว",
             "quantity.required" => "กรุณากรอกจํานวน",
             "quantity.numeric"=> "กรุณากรอกจํานวนให้ถูกต้อง",
-            "unit.required" => "กรุณากรอกหน่วย",
+            "unit.required" => "กรุณาเลือกหน่วยวัด",
+            "unit.exists" => "หน่วยวัดที่เลือกไม่ถูกต้อง",
             "expiration_date.required" => "กรุณากรอกวันหมดอายุ",
             "expiration_date" => "กรุณากรอกวันหมดอายุ",
             "image.image" => "กรุณาอัปโหลดรูปภาพให้ถูกต้อง",
@@ -62,7 +65,7 @@ class IngredientsController extends Controller
         $ingredient = new Ingredient([
             'name' => $request->name,
             'quantity' => $request->quantity,
-            'unit' => $request->unit,
+            'unit_id' => $request->unit,
             'expiration_date' => $request->expiration_date,
             'image' => $imageName == '' ? '' : $imageName,
         ]);
@@ -77,15 +80,16 @@ class IngredientsController extends Controller
     }
     public function edit($id)
     {
-        $ingredient = Ingredient::find($id);
-        return Inertia::render('Admin/ingredients/Edit', compact('ingredient'));
+        $ingredient = Ingredient::with('unit')->find($id);
+        $units = Unit::all();
+        return Inertia::render('Admin/ingredients/Edit', compact('ingredient', 'units'));
     }
     public function update(Request $request, $id)
     {
         $rules = [
             'name' => 'required|min:3|max:255|unique:ingredients,name,' . $id,
             'quantity' => 'required|numeric',
-            'unit' => 'required',
+            'unit' => 'required|exists:units,id',
             'expiration_date' => 'required',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
@@ -97,7 +101,8 @@ class IngredientsController extends Controller
             'name.max' => 'ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร',
             'quantity.required' => 'กรุณากรอกจํานวน',
             'quantity.numeric' => 'กรุณากรอกจํานวนให้ถูกต้อง',
-            'unit.required' => 'กรุณากรอกหน่วย',
+            'unit.required' => 'กรุณาเลือกหน่วยวัด',
+            'unit.exists' => 'หน่วยวัดที่เลือกไม่ถูกต้อง',
             'expiration_date.required' => 'กรุณากรอกวันหมดอายุ',
             'required'=> 'กรุณากรอกข้อมูล',
             'image.image' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
@@ -121,12 +126,12 @@ class IngredientsController extends Controller
         $imageName = $ingredient->image;
         if ($request->hasFile('image')) {
             try {
-                unlink(filename: public_path('/images/categories/' . $imageName));
+                unlink(filename: public_path('/images/ingredients/' . $imageName));
             } catch (\Throwable $th) {
             }
             $image = $request->file('image');
             $name = time() . '.' . $image->getClientOriginalExtension();
-            $destinationPath = public_path('/images/categories/');
+            $destinationPath = public_path('/images/ingredients/');
             $image->move($destinationPath, $name);
             $imageName = $name;
         }
@@ -134,7 +139,7 @@ class IngredientsController extends Controller
         $ingredient->name = $request->name;
         $ingredient->image = $imageName;
         $ingredient->quantity = $request->quantity;
-        $ingredient->unit = $request->unit;
+        $ingredient->unit_id = $request->unit;
         $ingredient->expiration_date = $request->expiration_date;
         $ingredient->save();
         return redirect()->route('Admin.ingredients.index')->with('success', '');

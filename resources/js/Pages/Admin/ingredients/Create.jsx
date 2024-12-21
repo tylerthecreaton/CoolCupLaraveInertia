@@ -1,11 +1,11 @@
 import React from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
-import { Breadcrumb } from "flowbite-react";
-import { HiHome } from "react-icons/hi";
+import AdminLayout from "@/Layouts/AdminLayout";
 import IngredientsForm from "@/Components/Admin/ingredients/IngredientsForm";
 import { Link } from "@inertiajs/react";
-export default function CreateIngredients() {
+
+export default function CreateIngredients({ units }) {
     return (
         <AuthenticatedLayout
             header={
@@ -16,17 +16,10 @@ export default function CreateIngredients() {
         >
             <Head title="เพิ่มวัตถุดิบ" />
             <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
-                <Breadcrumb aria-label="Default breadcrumb example">
-                    <Breadcrumb.Item href="/dashboard" icon={HiHome}>
-                        Home
-                    </Breadcrumb.Item>
-                    <Breadcrumb.Item href="/admin/ingredients">
-                        วัตถุดิบทั้งหมด
-                    </Breadcrumb.Item>
-                    <Breadcrumb.Item>เพิ่มวัตถุดิบ</Breadcrumb.Item>
-                </Breadcrumb>
+                <AdminLayout>
+                    <IngredientsForm units={units} />
+                </AdminLayout>
             </div>
-            <IngredientsForm />
         </AuthenticatedLayout>
     );
 }

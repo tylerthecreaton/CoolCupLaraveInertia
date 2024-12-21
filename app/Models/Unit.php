@@ -10,4 +10,9 @@ class Unit extends Model
         'name',
         'abbreviation',
     ];
+
+    public function ingredients()
+    {
+        return $this->hasMany(Ingredient::class);
+    }
 }
