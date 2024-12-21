@@ -1,0 +1,116 @@
+import React, { useState } from "react";
+import { Modal, Button } from "flowbite-react";
+import { ShoppingBag, Receipt } from "lucide-react";
+import PaymethodModal from "./PaymethodModal";
+
+const ConfirmOrderModal = ({ show, onClose, items, totalItems, total, discount, finalTotal }) => {
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+    const handlePaymentConfirm = (paymentMethod) => {
+        // Handle payment confirmation here
+        console.log("Payment confirmed with method:", paymentMethod);
+        setShowPaymentModal(false);
+        onClose();
+    };
+
+    return (
+        <>
+            <Modal show={show} onClose={onClose} size="xl" className="dark:bg-gray-800">
+                <Modal.Header className="border-b bg-gray-50 dark:bg-gray-700">
+                    <div className="flex items-center space-x-2">
+                        <ShoppingBag className="w-6 h-6 text-blue-600" />
+                        <span className="text-xl font-semibold">ยืนยันการสั่งซื้อ</span>
+                    </div>
+                </Modal.Header>
+                <Modal.Body className="p-6">
+                    <div className="space-y-6">
+                        <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                            <Receipt className="w-5 h-5 text-blue-600" />
+                            <p className="text-base text-blue-700">
+                                กรุณาตรวจสอบรายการสั่งซื้อของคุณให้ถูกต้อง
+                            </p>
+                        </div>
+
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-semibold flex items-center space-x-2">
+                                <span>รายการสินค้า</span>
+                                <span className="text-sm text-gray-500">({totalItems} รายการ)</span>
+                            </h3>
+                            <div className="bg-white rounded-lg border divide-y">
+                                {items.map((item) => (
+                                    <div key={item.id} className="flex justify-between items-center p-4 hover:bg-gray-50">
+                                        <div className="flex items-center space-x-4">
+                                            <div className="relative">
+                                                <img
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    className="w-16 h-16 object-cover rounded-lg shadow-sm"
+                                                />
+                                                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                    {item.quantity}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-gray-800">{item.name}</p>
+                                                <p className="text-sm text-gray-500">฿{item.price} ต่อแก้ว</p>
+                                            </div>
+                                        </div>
+                                        <p className="font-semibold text-lg">฿{item.price * item.quantity}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                            <h3 className="font-semibold text-lg mb-3">สรุปคำสั่งซื้อ</h3>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">จำนวนสินค้า:</span>
+                                <span className="font-medium">{totalItems} แก้ว</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">ราคารวม:</span>
+                                <span className="font-medium">฿{total}</span>
+                            </div>
+                            {discount > 0 && (
+                                <div className="flex justify-between text-sm text-green-600">
+                                    <span>ส่วนลด:</span>
+                                    <span className="font-medium">-฿{discount}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between text-lg pt-3 border-t">
+                                <span className="font-bold">ราคาสุทธิ:</span>
+                                <span className="font-bold text-blue-600">฿{finalTotal}</span>
+                            </div>
+                        </div>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer className="border-t bg-gray-50">
+                    <div className="flex justify-center space-x-3 w-full">
+                        <Button
+                            onClick={onClose}
+                            color="gray"
+                            className="px-6"
+                        >
+                            ยกเลิก
+                        </Button>
+                        <Button
+                            onClick={() => setShowPaymentModal(true)}
+                            className="px-6 bg-blue-600 hover:bg-blue-700"
+                        >
+                            ชำระเงิน
+                        </Button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
+
+            <PaymethodModal
+                show={showPaymentModal}
+                onClose={() => setShowPaymentModal(false)}
+                onConfirm={handlePaymentConfirm}
+                total={finalTotal}
+            />
+        </>
+    );
+};
+
+export default ConfirmOrderModal;

@@ -39,24 +39,33 @@ const getLasterKey = () => {
     return cartStateString ? JSON.parse(cartStateString).key : 0;
 };
 
+// Create a utility function to generate item key
+const getItemKey = (item) => {
+    if (!item.toppings && !item.sweetness) return item.id;
+    return `${item.drinkId}_${item.toppings?.sort().join('_')}_${item.sweetness}`;
+};
+
 export const initialCartState = getCartStateFromLocalStorage();
 
 export const cartReducer = (state = cartState, action) => {
     switch (action.type) {
         case "ADD_TO_CART": {
-            const existingItemIndex = state.items.findIndex(
-                (item) => item.id === action.payload.id
+            const newItemKey = getItemKey(action.payload);
+            
+            // Find existing item with same combination
+            const existingItemIndex = state.items.findIndex(item => 
+                getItemKey(item) === newItemKey
             );
 
             let newItems;
             if (existingItemIndex >= 0) {
                 newItems = state.items.map((item, index) =>
                     index === existingItemIndex
-                        ? { ...item, quantity: item.quantity + 1 }
+                        ? { ...item, quantity: item.quantity + (action.payload.quantity || 1) }
                         : item
                 );
             } else {
-                newItems = [...state.items, { ...action.payload, quantity: 1 }];
+                newItems = [...state.items, { ...action.payload, quantity: action.payload.quantity || 1 }];
             }
 
             const total = newItems.reduce(
@@ -94,9 +103,13 @@ export const cartReducer = (state = cartState, action) => {
         }
 
         case "REMOVE_FROM_CART": {
-            const newItems = state.items.filter(
-                (item) => item.id !== action.payload
+            const itemToRemove = state.items.find(item => item.id === action.payload);
+            const itemKey = getItemKey(itemToRemove);
+            
+            const newItems = state.items.filter(item => 
+                getItemKey(item) !== itemKey || item.id !== action.payload
             );
+
             const total = newItems.reduce(
                 (sum, item) => sum + (item.price > 0 ? item.price * item.quantity : 0),
                 0
@@ -134,6 +147,8 @@ export const cartReducer = (state = cartState, action) => {
 
         case "UPDATE_QUANTITY": {
             const { id, quantity } = action.payload;
+            const itemToUpdate = state.items.find(item => item.id === id);
+            
             const newItems = state.items.map((item) =>
                 item.id === id ? { ...item, quantity } : item
             );

@@ -29,6 +29,16 @@ const ProductModal = ({ show, onClose, product }) => {
         { name: "พุดดิ้ง", price: 10 },
     ];
 
+    
+    useEffect(() => {
+        if (show) {
+            setQuantity(1);
+            setSize("S");
+            setSweetness("100%");
+            setSelectedToppings([]);
+        }
+    }, [show]);
+
     useEffect(() => {
         if (product) {
             const basePrice = parseFloat(product.sale_price || 0);
@@ -58,9 +68,19 @@ const ProductModal = ({ show, onClose, product }) => {
         });
     };
 
+    const handleClose = () => {
+        // Reset selections before closing
+        setQuantity(1);
+        setSize("S");
+        setSweetness("100%");
+        setSelectedToppings([]);
+        onClose();
+    };
+
     const handleAddToCart = () => {
         const cartItem = {
-            id: product.id,
+            id: new Date().getTime(), // Use timestamp for unique ID
+            drinkId: product.id,
             name: product.name,
             image: isAbsoluteUrl(product.image)
                 ? product.image
@@ -73,7 +93,7 @@ const ProductModal = ({ show, onClose, product }) => {
         };
         dispatch(cartActions.addToCart(cartItem));
         dispatch(appActions.setCartOpen(true));
-        onClose();
+        handleClose();
     };
 
     if (!show || !product) return null;
@@ -81,13 +101,13 @@ const ProductModal = ({ show, onClose, product }) => {
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <Card className="w-full max-w-lg bg-white rounded-lg overflow-hidden">
-                {/* Header */}
+
                 <div className="flex items-center justify-between p-4 border-b">
                     <h2 className="text-xl font-semibold">{product.name}</h2>
                     <Button
                         color="gray"
                         size="sm"
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="!p-2"
                     >
                         <X className="w-4 h-4" />
@@ -95,7 +115,7 @@ const ProductModal = ({ show, onClose, product }) => {
                 </div>
 
                 <div className="p-6 space-y-6">
-                    {/* Product Image */}
+
                     <div className="flex justify-center">
                         <img
                             src={`/images/products/${product.image}`}
@@ -104,7 +124,7 @@ const ProductModal = ({ show, onClose, product }) => {
                         />
                     </div>
 
-                    {/* Quantity Selector */}
+
                     <div className="flex items-center justify-center space-x-4">
                         <Button
                             color="light"
@@ -127,7 +147,7 @@ const ProductModal = ({ show, onClose, product }) => {
                         </Button>
                     </div>
 
-                    {/* Size Selection */}
+
                     <div className="space-y-2">
                         <label className="block text-sm font-medium">
                             ขนาด
@@ -158,7 +178,7 @@ const ProductModal = ({ show, onClose, product }) => {
                         </div>
                     </div>
 
-                    {/* Sweetness Selection */}
+
                     <div className="space-y-2">
                         <label className="block text-sm font-medium">
                             ความหวาน
@@ -181,7 +201,7 @@ const ProductModal = ({ show, onClose, product }) => {
                         </div>
                     </div>
 
-                    {/* Toppings Selection */}
+
                     <div className="space-y-2">
                         <label className="block text-sm font-medium">
                             ท็อปปิ้ง (เลือกได้หลายอย่าง)
@@ -204,7 +224,7 @@ const ProductModal = ({ show, onClose, product }) => {
                     </div>
                 </div>
 
-                {/* Footer with Total and Actions */}
+
                 <div className="border-t p-4 space-y-4">
                     <div className="flex justify-between items-center">
                         <span className="text-lg font-semibold">ราคารวม</span>
@@ -216,7 +236,7 @@ const ProductModal = ({ show, onClose, product }) => {
                     <div className="flex gap-3">
                         <Button
                             color="gray"
-                            onClick={onClose}
+                            onClick={handleClose}
                             className="flex-1"
                         >
                             Cancel

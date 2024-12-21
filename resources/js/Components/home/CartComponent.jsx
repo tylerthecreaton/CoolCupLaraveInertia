@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { useGlobalState } from "@/Store/state";
 import { appActions } from "@/Store/state/appState";
 import { cartActions } from "@/Store/state/cartState";
-import { Button, TextInput } from "flowbite-react";
+import { Button, TextInput, Select } from "flowbite-react";
 import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
 import { usePage } from "@inertiajs/react";
 import Swal from "sweetalert2";
+import ConfirmOrderModal from "./ConfirmOrderModal";
 
 const CartComponent = () => {
     const user = usePage().props.auth.user;
@@ -13,30 +14,109 @@ const CartComponent = () => {
     const cartRef = useRef(null);
     const { items, totalItems, total, discount, finalTotal } = state.cart;
     const [discountInput, setDiscountInput] = useState("");
+    const [showOrderModal, setShowOrderModal] = useState(false);
+    const [selectedPromotion, setSelectedPromotion] = useState("");
+    const [customDiscount, setCustomDiscount] = useState("");
+
+    const promotions = [
+        { code: "NEWUSER", discount: 10, description: "ส่วนลดลูกค้าใหม่ 10%" },
+        { code: "HOLIDAY", discount: 15, description: "ส่วนลดเทศกาล 15%" },
+        { code: "MEMBER", discount: 20, description: "ส่วนลดสมาชิก 20%" },
+    ];
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (cartRef.current && !cartRef.current.contains(event.target)) {
+            const cart = document.getElementById("shopping-cart");
+            const modals = document.querySelectorAll('[role="dialog"]');
+            
+            // Check if click is inside any modal
+            const isModalClick = Array.from(modals).some(modal => 
+                modal.contains(event.target)
+            );
+
+            // If click is outside cart and not in any modal, close cart
+            if (cart && 
+                !cart.contains(event.target) && 
+                !isModalClick && 
+                !event.target.closest('.modal')) {
                 dispatch(appActions.setCartOpen(false));
             }
         };
 
-        if (state.app.isCartOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        }
-
+        document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [state.app.isCartOpen]);
+    }, [dispatch]);
+
+    const handleAddToCart = (drink, toppings, sweetness) => {
+        const cartItem = {
+            id: new Date().getTime(),
+            drinkId: drink.id,
+            name: drink.name,
+            price: drink.price,
+            image: drink.image,
+            toppings: toppings,
+            sweetness: sweetness,
+            quantity: 1
+        };
+
+        dispatch(cartActions.addToCart(cartItem));
+    };
 
     const handleUpdateQuantity = (id, currentQuantity, change) => {
         const newQuantity = currentQuantity + change;
         if (newQuantity > 0) {
             dispatch(cartActions.updateQuantity(id, newQuantity));
         } else {
-            dispatch(cartActions.removeFromCart(id));
+            handleRemoveItem(id);
         }
+    };
+
+    const handleRemoveItem = (id) => {
+        Swal.fire({
+            title: 'ยืนยันการลบ',
+            text: 'คุณต้องการลบรายการนี้ใช่หรือไม่?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ลบ',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#ef4444',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                dispatch(cartActions.removeFromCart(id));
+            }
+        });
+    };
+
+    const calculateTotal = () => {
+        const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+        let discount = 0;
+
+        if (selectedPromotion) {
+            const promotion = promotions.find(p => p.code === selectedPromotion);
+            if (promotion) {
+                discount = (subtotal * promotion.discount) / 100;
+            }
+        } else if (customDiscount) {
+            discount = parseFloat(customDiscount) || 0;
+        }
+
+        return {
+            subtotal,
+            discount,
+            total: Math.max(0, subtotal - discount)
+        };
+    };
+
+    const handlePromotionChange = (value) => {
+        setSelectedPromotion(value);
+        setCustomDiscount("");  // ปิดช่องส่วนลดเมือเลือกโปรโมชั่น
+    };
+
+    const handleCustomDiscountChange = (value) => {
+        setCustomDiscount(value);
+        setSelectedPromotion("");  // ปิดการเลือกใช้โปรโมชั่นถ้าหากเลือกใช้ช่องส่วนลด
     };
 
     const handleApplyDiscount = () => {
@@ -64,7 +144,7 @@ const CartComponent = () => {
 
     return (
         <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-lg z-[60] transition-transform duration-300 ease-in-out transform">
-            <div ref={cartRef} className="h-full flex flex-col">
+            <div ref={cartRef} id="shopping-cart" className="h-full flex flex-col">
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b bg-blue-50">
                     <div className="flex items-center space-x-2">
@@ -106,83 +186,58 @@ const CartComponent = () => {
                                     />
                                     <div className="flex-1">
                                         <div className="flex justify-between">
-                                            <h3 className="font-medium">
-                                                {item.name}
-                                            </h3>
+                                            <h3 className="font-medium">{item.name}</h3>
+                                            <p className="font-medium">
+                                                ฿{item.price * item.quantity}
+                                            </p>
+                                        </div>
+                                        {(item.toppings || item.sweetness) && (
+                                            <div className="text-sm text-gray-500 mt-1">
+                                                {item.toppings?.length > 0 && (
+                                                    <p>เพิ่มเติม: {item.toppings.join(", ")}</p>
+                                                )}
+                                                {item.sweetness && (
+                                                    <p>ความหวาน: {item.sweetness}</p>
+                                                )}
+                                            </div>
+                                        )}
+                                        <div className="flex items-center space-x-2 mt-2">
                                             <Button
                                                 size="xs"
-                                                color="failure"
+                                                color="light"
                                                 onClick={() =>
-                                                    dispatch(
-                                                        cartActions.removeFromCart(
-                                                            item.id
-                                                        )
+                                                    handleUpdateQuantity(
+                                                        item.id,
+                                                        item.quantity,
+                                                        -1
                                                     )
                                                 }
                                             >
+                                                <Minus className="w-3 h-3" />
+                                            </Button>
+                                            <span className="w-8 text-center">
+                                                {item.quantity}
+                                            </span>
+                                            <Button
+                                                size="xs"
+                                                color="light"
+                                                onClick={() =>
+                                                    handleUpdateQuantity(
+                                                        item.id,
+                                                        item.quantity,
+                                                        1
+                                                    )
+                                                }
+                                            >
+                                                <Plus className="w-3 h-3" />
+                                            </Button>
+                                            <Button
+                                                size="xs"
+                                                color="failure"
+                                                onClick={() => handleRemoveItem(item.id)}
+                                            >
                                                 <Trash2 className="w-3 h-3" />
                                             </Button>
-                                        </div>
-                                        <div className="text-sm text-gray-600 mt-1">
-                                            {item.size && (
-                                                <p>ขนาด: {item.size}</p>
-                                            )}
-                                            {item.sweetness && (
-                                                <p>
-                                                    ความหวาน: {item.sweetness}
-                                                </p>
-                                            )}
-                                            {item.toppings &&
-                                                item.toppings.length > 0 && (
-                                                    <p>
-                                                        ท็อปปิ้ง:{" "}
-                                                        {item.toppings.join(
-                                                            ", "
-                                                        )}
-                                                    </p>
-                                                )}
-                                        </div>
-
-                                        <div className="flex items-center justify-between mt-2">
-                                            <span className="text-blue-600 font-medium">
-                                                ฿{item.price}
-                                            </span>
-                                            {item.price >= 0 && (
-                                                <div className="flex items-center space-x-2">
-                                                    <Button
-                                                        size="xs"
-                                                        color="light"
-                                                        onClick={() =>
-                                                            handleUpdateQuantity(
-                                                                item.id,
-                                                                item.quantity,
-                                                                -1
-                                                            )
-                                                        }
-                                                    >
-                                                        <Minus className="w-3 h-3" />
-                                                    </Button>
-                                                    <span className="w-8 text-center">
-                                                        {item.quantity}
-                                                    </span>
-                                                    <Button
-                                                        size="xs"
-                                                        color="light"
-                                                        onClick={() =>
-                                                            handleUpdateQuantity(
-                                                                item.id,
-                                                                item.quantity,
-                                                                1
-                                                            )
-                                                        }
-                                                    >
-                                                        <Plus className="w-3 h-3" />
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="text-right text-sm text-gray-600 mt-1">
-                                            รวม: ฿{item.price * item.quantity}
                                         </div>
                                     </div>
                                 </div>
@@ -191,30 +246,43 @@ const CartComponent = () => {
                     )}
                 </div>
 
-                {/* Footer */}
                 {items.length > 0 && (
                     <div className="border-t p-4 bg-gray-50">
-                        {/* Discount Input */}
-                        <div className="flex space-x-2 mb-4">
-                            <TextInput
-                                type="number"
-                                placeholder="ใส่ส่วนลด"
-                                value={discountInput}
-                                onChange={(e) =>
-                                    setDiscountInput(e.target.value)
-                                }
-                                className="flex-1"
-                            />
-                            <Button
-                                size="sm"
-                                color="light"
-                                onClick={handleApplyDiscount}
+                        <div className="flex flex-col space-y-4 mb-4">
+                            <Select
+                                value={selectedPromotion}
+                                onChange={(e) => handlePromotionChange(e.target.value)}
+                                className="w-full"
                             >
-                                ใช้ส่วนลด
-                            </Button>
+                                <option value="">เลือกโปรโมชั่น</option>
+                                {promotions.map((promo) => (
+                                    <option key={promo.code} value={promo.code}>
+                                        {promo.description}
+                                    </option>
+                                ))}
+                            </Select>
+
+                            <div className="flex space-x-2">
+                                <TextInput
+                                    type="number"
+                                    placeholder="ส่วนลดอื่นๆ"
+                                    value={customDiscount}
+                                    onChange={(e) => handleCustomDiscountChange(e.target.value)}
+                                    disabled={!!selectedPromotion}
+                                    className="flex-1"
+                                />
+                                <Button
+                                    color="light"
+                                    onClick={() => {
+                                        setCustomDiscount("");
+                                        setSelectedPromotion("");
+                                    }}
+                                >
+                                    ล้าง
+                                </Button>
+                            </div>
                         </div>
 
-                        {/* Summary */}
                         <div className="space-y-2 mb-4">
                             <div className="flex justify-between text-sm">
                                 <span>จำนวนสินค้า:</span>
@@ -222,26 +290,39 @@ const CartComponent = () => {
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span>ราคารวม:</span>
-                                <span>฿{total}</span>
+                                <span>฿{calculateTotal().subtotal}</span>
                             </div>
-                            {discount > 0 && (
+                            {calculateTotal().discount > 0 && (
                                 <div className="flex justify-between text-sm text-green-600">
                                     <span>ส่วนลด:</span>
-                                    <span>-฿{discount}</span>
+                                    <span>-฿{calculateTotal().discount}</span>
                                 </div>
                             )}
                             <div className="flex justify-between font-semibold text-lg pt-2 border-t">
                                 <span>ราคาสุทธิ:</span>
-                                <span>฿{finalTotal}</span>
+                                <span>฿{calculateTotal().total}</span>
                             </div>
                         </div>
 
-                        <Button type="button" className="w-full">
-                            ชำระเงิน
+                        <Button
+                            type="button"
+                            className="w-full"
+                            onClick={() => setShowOrderModal(true)}
+                        >
+                            สั่งออเดอร์
                         </Button>
                     </div>
                 )}
             </div>
+            <ConfirmOrderModal
+                show={showOrderModal}
+                onClose={() => setShowOrderModal(false)}
+                items={items}
+                totalItems={totalItems}
+                total={calculateTotal().subtotal}
+                discount={calculateTotal().discount}
+                finalTotal={calculateTotal().total}
+            />
         </div>
     );
 };
