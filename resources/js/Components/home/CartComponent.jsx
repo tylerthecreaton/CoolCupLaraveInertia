@@ -10,13 +10,12 @@ import ConfirmOrderModal from "./ConfirmOrderModal";
 
 const CartComponent = () => {
     const user = usePage().props.auth.user;
+    const cartRef = useRef();
     const { state, dispatch } = useGlobalState();
-    const cartRef = useRef(null);
-    const { items, totalItems, total, discount, finalTotal } = state.cart;
+    const { items } = state.cart;
+    const [selectedPromotion, setSelectedPromotion] = useState("");
     const [discountInput, setDiscountInput] = useState("");
     const [showOrderModal, setShowOrderModal] = useState(false);
-    const [selectedPromotion, setSelectedPromotion] = useState("");
-    const [customDiscount, setCustomDiscount] = useState("");
 
     const promotions = [
         { code: "NEWUSER", discount: 10, description: "ส่วนลดลูกค้าใหม่ 10%" },
@@ -28,17 +27,20 @@ const CartComponent = () => {
         const handleClickOutside = (event) => {
             const cart = document.getElementById("shopping-cart");
             const modals = document.querySelectorAll('[role="dialog"]');
-            
-            // Check if click is inside any modal
-            const isModalClick = Array.from(modals).some(modal => 
-                modal.contains(event.target)
-            );
 
-            // If click is outside cart and not in any modal, close cart
-            if (cart && 
-                !cart.contains(event.target) && 
-                !isModalClick && 
-                !event.target.closest('.modal')) {
+            let isInsideModal = false;
+            modals.forEach((modal) => {
+                if (modal.contains(event.target)) {
+                    isInsideModal = true;
+                }
+            });
+
+            if (
+                cart &&
+                !cart.contains(event.target) &&
+                !isInsideModal &&
+                state.app.isCartOpen
+            ) {
                 dispatch(appActions.setCartOpen(false));
             }
         };
@@ -47,198 +49,305 @@ const CartComponent = () => {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [dispatch]);
+    }, [state.app.isCartOpen]);
 
-    const handleAddToCart = (drink, toppings, sweetness) => {
+    useEffect(() => {
+        if (!state.cart.currentOrderNumber) {
+            dispatch(cartActions.incrementOrderNumber());
+        }
+    }, []);
+
+    const handleAddToCart = (drink, toppings, sweetness, size) => {
         const cartItem = {
-            id: new Date().getTime(),
-            drinkId: drink.id,
+            id: drink.id,
             name: drink.name,
-            price: drink.price,
             image: drink.image,
+            price: drink.sale_price,
             toppings: toppings,
             sweetness: sweetness,
-            quantity: 1
+            size: size,
+            quantity: 1,
         };
 
         dispatch(cartActions.addToCart(cartItem));
     };
 
-    const handleUpdateQuantity = (id, currentQuantity, change) => {
-        const newQuantity = currentQuantity + change;
-        if (newQuantity > 0) {
-            dispatch(cartActions.updateQuantity(id, newQuantity));
-        } else {
-            handleRemoveItem(id);
+    const handleRemoveItem = async (itemId) => {
+        const result = await Swal.fire({
+            title: "ยืนยันการลบ",
+            text: "คุณต้องการลบรายการนี้ใช่หรือไม่?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "ใช่, ลบเลย",
+            cancelButtonText: "ยกเลิก",
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+        });
+
+        if (result.isConfirmed) {
+            dispatch(cartActions.removeFromCart(itemId));
         }
     };
 
-    const handleRemoveItem = (id) => {
-        Swal.fire({
-            title: 'ยืนยันการลบ',
-            text: 'คุณต้องการลบรายการนี้ใช่หรือไม่?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'ลบ',
-            cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: '#ef4444',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                dispatch(cartActions.removeFromCart(id));
-            }
-        });
+    const handleUpdateQuantity = (itemId, delta) => {
+        const item = items.find((item) => item.id === itemId);
+        if (!item) return;
+
+        const newQuantity = item.quantity + delta;
+
+        if (newQuantity <= 0) {
+            dispatch(cartActions.removeFromCart(itemId));
+        } else {
+            dispatch(cartActions.updateQuantity({ itemId, delta }));
+        }
     };
 
     const calculateTotal = () => {
-        const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+        const subtotal = items.reduce((total, item) => {
+            if (!item.isDiscount) {
+                return total + item.price * item.quantity;
+            }
+            return total;
+        }, 0);
+
         let discount = 0;
 
-        if (selectedPromotion) {
-            const promotion = promotions.find(p => p.code === selectedPromotion);
-            if (promotion) {
-                discount = (subtotal * promotion.discount) / 100;
+        items.forEach((item) => {
+            if (item.isDiscount) {
+                discount += Math.abs(item.price * item.quantity);
             }
-        } else if (customDiscount) {
-            discount = parseFloat(customDiscount) || 0;
+        });
+
+        if (selectedPromotion) {
+            const promotion = promotions.find(
+                (p) => p.code === selectedPromotion
+            );
+            if (promotion) {
+                discount += (subtotal * promotion.discount) / 100;
+            }
         }
+
+        const total = Math.max(0, subtotal - discount);
 
         return {
             subtotal,
             discount,
-            total: Math.max(0, subtotal - discount)
+            total,
         };
     };
 
     const handlePromotionChange = (value) => {
+        const hasManualDiscount = items.some((item) => item.isDiscount);
+        if (value && hasManualDiscount) {
+            Swal.fire({
+                title: "ไม่สามารถใช้โปรโมชั่นได้",
+                text: "กรุณาลบส่วนลดที่มีอยู่ก่อนใช้โปรโมชั่น",
+                icon: "warning",
+            });
+            return;
+        }
         setSelectedPromotion(value);
-        setCustomDiscount("");  // ปิดช่องส่วนลดเมือเลือกโปรโมชั่น
-    };
-
-    const handleCustomDiscountChange = (value) => {
-        setCustomDiscount(value);
-        setSelectedPromotion("");  // ปิดการเลือกใช้โปรโมชั่นถ้าหากเลือกใช้ช่องส่วนลด
     };
 
     const handleApplyDiscount = () => {
         const discountAmount = parseFloat(discountInput);
-        if (total - discountAmount < 0) {
+        if (!discountAmount || discountAmount <= 0) {
             Swal.fire({
+                title: "ไม่สามารถใช้ส่วนลดได้",
+                text: "กรุณากรอกส่วนลดให้ถูกต้อง",
                 icon: "error",
-                title: "เกิดข้อผิดพลาด",
-                text: "ไม่สามารถใช้ส่วนลดเพิ่มได้",
             });
             return;
         }
+
+        if (selectedPromotion) {
+            Swal.fire({
+                title: "ไม่สามารถใช้ส่วนลดได้",
+                text: "กรุณายกเลิกโปรโมชั่นก่อนใช้ส่วนลด",
+                icon: "warning",
+            });
+            return;
+        }
+
+        if (calculateTotal().subtotal - discountAmount < 0) {
+            Swal.fire({
+                title: "ไม่สามารถใช้ส่วนลดได้",
+                text: "ส่วนลดมากกว่าราคารวม",
+                icon: "error",
+            });
+            return;
+        }
+
+        const discountItem = {
+            id: `discount-${new Date().getTime()}`,
+            image: "https://via.placeholder.com/150",
+            name: `Discount (${
+                user ? `${user.name} # ID: ${user.id}` : "Guest"
+            })`,
+            price: -discountAmount,
+            quantity: 1,
+            isDiscount: true,
+            isManualDiscount: true,
+        };
+
+        dispatch(cartActions.addToCart(discountItem));
         setDiscountInput("");
-        dispatch(
-            cartActions.addToCart({
-                id: new Date().getTime(),
-                name: `Discount / ${user.id} : ${user.name}`,
-                price: -discountAmount,
-                quantity: 1,
-            })
-        );
     };
 
-    if (!state.app.isCartOpen) return null;
+    const totalItems = items.reduce(
+        (sum, item) => (!item.isDiscount ? sum + item.quantity : sum),
+        0
+    );
+
+    if (!state.app.isCartOpen) {
+        return null;
+    }
 
     return (
         <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-lg z-[60] transition-transform duration-300 ease-in-out transform">
-            <div ref={cartRef} id="shopping-cart" className="h-full flex flex-col">
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b bg-blue-50">
-                    <div className="flex items-center space-x-2">
-                        <ShoppingCart className="w-6 h-6" />
-                        <h2 className="text-lg font-semibold">ตะกร้าสินค้า</h2>
-                        <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-sm">
-                            {totalItems}
-                        </span>
+            <div
+                ref={cartRef}
+                id="shopping-cart"
+                className="h-full flex flex-col"
+            >
+                <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-500 to-blue-600">
+                    <div className="flex items-center space-x-3">
+                        <div className="bg-white p-2 rounded-lg">
+                            <ShoppingCart className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div className="flex flex-col text-white">
+                            <span className="text-2xl font-bold">
+                                ออเดอร์ #{state.cart.currentOrderNumber}
+                            </span>
+                            <div className="flex items-center space-x-2">
+                                <span className="text-sm text-blue-100">
+                                    ตะกร้าสินค้า
+                                </span>
+                                {totalItems > 0 && (
+                                    <span className="bg-white text-blue-600 text-xs px-1.5 py-0.5 rounded-full font-medium">
+                                        {totalItems} รายการ
+                                    </span>
+                                )}
+                            </div>
+                        </div>
                     </div>
                     <Button
+                        color="white"
                         size="sm"
-                        color="gray"
                         onClick={() => dispatch(appActions.setCartOpen(false))}
+                        className="flex items-center justify-center w-8 h-8 bg-white  hover:bg-blue-50 transition duration-150"
                     >
-                        <X className="w-4 h-4" />
+                        <X className="w-4 h-4 text-blue-600" />
                     </Button>
                 </div>
 
-                {/* Cart Items */}
                 <div className="flex-1 overflow-y-auto p-4">
                     {items.length === 0 ? (
-                        <div className="text-center text-gray-500 mt-10">
-                            ไม่มีสินค้าในตะกร้า
+                        <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                            <ShoppingCart className="w-16 h-16 mb-4" />
+                            <p className="text-lg">ตะกร้าว่างเปล่า</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
                             {items.map((item) => (
                                 <div
                                     key={item.id}
-                                    className="flex items-start space-x-4 bg-gray-50 p-3 rounded-lg"
+                                    className="flex items-center justify-between bg-white p-4 rounded-lg border"
                                 >
-                                    <img
-                                        src={
-                                            item.image ??
-                                            "https://via.placeholder.com/150"
-                                        }
-                                        alt={item.name}
-                                        className="w-20 h-20 object-cover rounded"
-                                    />
-                                    <div className="flex-1">
-                                        <div className="flex justify-between">
-                                            <h3 className="font-medium">{item.name}</h3>
-                                            <p className="font-medium">
-                                                ฿{item.price * item.quantity}
-                                            </p>
-                                        </div>
-                                        {(item.toppings || item.sweetness) && (
-                                            <div className="text-sm text-gray-500 mt-1">
-                                                {item.toppings?.length > 0 && (
-                                                    <p>เพิ่มเติม: {item.toppings.join(", ")}</p>
-                                                )}
-                                                {item.sweetness && (
-                                                    <p>ความหวาน: {item.sweetness}</p>
-                                                )}
+                                    <div className="flex items-center space-x-4">
+                                        {!item.isDiscount ? (
+                                            <>
+                                                <img
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    className="w-16 h-16 object-cover rounded-lg"
+                                                />
+                                                <div>
+                                                    <h3 className="font-medium">
+                                                        {item.name}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-500">
+                                                        ฿{item.price} ต่อแก้ว
+                                                    </p>
+                                                    {item.size && (
+                                                        <p className="text-sm text-gray-500">
+                                                            ขนาด: {item.size}
+                                                        </p>
+                                                    )}
+                                                    {item.toppings?.length >
+                                                        0 && (
+                                                        <p className="text-sm text-gray-500">
+                                                            ท็อปปิ้ง:{" "}
+                                                            {item.toppings.join(
+                                                                ", "
+                                                            )}
+                                                        </p>
+                                                    )}
+                                                    {item.sweetness && (
+                                                        <p className="text-sm text-gray-500">
+                                                            ความหวาน:{" "}
+                                                            {item.sweetness}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex items-center text-green-600">
+                                                <div>
+                                                    <h3 className="font-medium">
+                                                        {item.name}
+                                                    </h3>
+                                                    <p className="text-sm">
+                                                        -฿{Math.abs(item.price)}
+                                                    </p>
+                                                </div>
                                             </div>
                                         )}
-                                        <div className="flex items-center space-x-2 mt-2">
-                                            <Button
-                                                size="xs"
-                                                color="light"
-                                                onClick={() =>
-                                                    handleUpdateQuantity(
-                                                        item.id,
-                                                        item.quantity,
-                                                        -1
-                                                    )
-                                                }
-                                            >
-                                                <Minus className="w-3 h-3" />
-                                            </Button>
-                                            <span className="w-8 text-center">
-                                                {item.quantity}
-                                            </span>
-                                            <Button
-                                                size="xs"
-                                                color="light"
-                                                onClick={() =>
-                                                    handleUpdateQuantity(
-                                                        item.id,
-                                                        item.quantity,
-                                                        1
-                                                    )
-                                                }
-                                            >
-                                                <Plus className="w-3 h-3" />
-                                            </Button>
-                                            <Button
-                                                size="xs"
-                                                color="failure"
-                                                onClick={() => handleRemoveItem(item.id)}
-                                            >
-                                                <Trash2 className="w-3 h-3" />
-                                            </Button>
-                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-end space-y-2">
+                                        {!item.isDiscount && (
+                                            <div className="flex items-center space-x-1">
+                                                <Button
+                                                    size="xs"
+                                                    color="light"
+                                                    onClick={() =>
+                                                        handleUpdateQuantity(
+                                                            item.id,
+                                                            -1
+                                                        )
+                                                    }
+                                                    className="!p-1"
+                                                >
+                                                    <Minus className="w-3 h-3" />
+                                                </Button>
+                                                <span className="w-6 text-center text-sm">
+                                                    {item.quantity}
+                                                </span>
+                                                <Button
+                                                    size="xs"
+                                                    color="light"
+                                                    onClick={() =>
+                                                        handleUpdateQuantity(
+                                                            item.id,
+                                                            1
+                                                        )
+                                                    }
+                                                    className="!p-1"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                </Button>
+                                            </div>
+                                        )}
+                                        <Button
+                                            size="xs"
+                                            color="failure"
+                                            onClick={() =>
+                                                handleRemoveItem(item.id)
+                                            }
+                                            className="!p-1"
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                        </Button>
                                     </div>
                                 </div>
                             ))}
@@ -248,11 +357,14 @@ const CartComponent = () => {
 
                 {items.length > 0 && (
                     <div className="border-t p-4 bg-gray-50">
-                        <div className="flex flex-col space-y-4 mb-4">
+                        <div className="space-y-4 mb-4">
                             <Select
                                 value={selectedPromotion}
-                                onChange={(e) => handlePromotionChange(e.target.value)}
+                                onChange={(e) =>
+                                    handlePromotionChange(e.target.value)
+                                }
                                 className="w-full"
+                                disabled={items.some((item) => item.isDiscount)}
                             >
                                 <option value="">เลือกโปรโมชั่น</option>
                                 {promotions.map((promo) => (
@@ -265,20 +377,21 @@ const CartComponent = () => {
                             <div className="flex space-x-2">
                                 <TextInput
                                     type="number"
-                                    placeholder="ส่วนลดอื่นๆ"
-                                    value={customDiscount}
-                                    onChange={(e) => handleCustomDiscountChange(e.target.value)}
-                                    disabled={!!selectedPromotion}
+                                    placeholder="ใส่ส่วนลด"
+                                    value={discountInput}
+                                    onChange={(e) =>
+                                        setDiscountInput(e.target.value)
+                                    }
                                     className="flex-1"
+                                    disabled={selectedPromotion !== ""}
                                 />
                                 <Button
+                                    size="sm"
                                     color="light"
-                                    onClick={() => {
-                                        setCustomDiscount("");
-                                        setSelectedPromotion("");
-                                    }}
+                                    onClick={handleApplyDiscount}
+                                    disabled={selectedPromotion !== ""}
                                 >
-                                    ล้าง
+                                    ใช้ส่วนลด
                                 </Button>
                             </div>
                         </div>
@@ -286,7 +399,7 @@ const CartComponent = () => {
                         <div className="space-y-2 mb-4">
                             <div className="flex justify-between text-sm">
                                 <span>จำนวนสินค้า:</span>
-                                <span>{totalItems} ชิ้น</span>
+                                <span>{totalItems} แก้ว</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span>ราคารวม:</span>
@@ -309,11 +422,12 @@ const CartComponent = () => {
                             className="w-full"
                             onClick={() => setShowOrderModal(true)}
                         >
-                            สั่งออเดอร์
+                            ยืนยันคำสั่งซื้อ
                         </Button>
                     </div>
                 )}
             </div>
+
             <ConfirmOrderModal
                 show={showOrderModal}
                 onClose={() => setShowOrderModal(false)}
@@ -322,6 +436,8 @@ const CartComponent = () => {
                 total={calculateTotal().subtotal}
                 discount={calculateTotal().discount}
                 finalTotal={calculateTotal().total}
+                selectedPromotion={selectedPromotion}
+                promotions={promotions}
             />
         </div>
     );

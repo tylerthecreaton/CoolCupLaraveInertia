@@ -29,7 +29,6 @@ const ProductModal = ({ show, onClose, product }) => {
         { name: "พุดดิ้ง", price: 10 },
     ];
 
-    
     useEffect(() => {
         if (show) {
             setQuantity(1);
@@ -44,7 +43,8 @@ const ProductModal = ({ show, onClose, product }) => {
             const basePrice = parseFloat(product.sale_price || 0);
             const sizePrice = sizes.find((s) => s.label === size)?.price || 0;
             const toppingsPrice = selectedToppings.reduce((total, topping) => {
-                const toppingPrice = toppings.find(t => t.name === topping)?.price || 0;
+                const toppingPrice =
+                    toppings.find((t) => t.name === topping)?.price || 0;
                 return total + toppingPrice;
             }, 0);
             setTotalPrice((basePrice + sizePrice + toppingsPrice) * quantity);
@@ -59,9 +59,9 @@ const ProductModal = ({ show, onClose, product }) => {
     };
 
     const handleToppingToggle = (toppingName) => {
-        setSelectedToppings(prev => {
+        setSelectedToppings((prev) => {
             if (prev.includes(toppingName)) {
-                return prev.filter(t => t !== toppingName);
+                return prev.filter((t) => t !== toppingName);
             } else {
                 return [...prev, toppingName];
             }
@@ -101,7 +101,6 @@ const ProductModal = ({ show, onClose, product }) => {
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <Card className="w-full max-w-lg bg-white rounded-lg overflow-hidden">
-
                 <div className="flex items-center justify-between p-4 border-b">
                     <h2 className="text-xl font-semibold">{product.name}</h2>
                     <Button
@@ -115,7 +114,6 @@ const ProductModal = ({ show, onClose, product }) => {
                 </div>
 
                 <div className="p-6 space-y-6">
-
                     <div className="flex justify-center">
                         <img
                             src={`/images/products/${product.image}`}
@@ -123,7 +121,6 @@ const ProductModal = ({ show, onClose, product }) => {
                             className="w-40 h-40 object-cover rounded-lg"
                         />
                     </div>
-
 
                     <div className="flex items-center justify-center space-x-4">
                         <Button
@@ -146,7 +143,6 @@ const ProductModal = ({ show, onClose, product }) => {
                             <Plus className="h-4 w-4" />
                         </Button>
                     </div>
-
 
                     <div className="space-y-2">
                         <label className="block text-sm font-medium">
@@ -178,7 +174,6 @@ const ProductModal = ({ show, onClose, product }) => {
                         </div>
                     </div>
 
-
                     <div className="space-y-2">
                         <label className="block text-sm font-medium">
                             ความหวาน
@@ -188,9 +183,7 @@ const ProductModal = ({ show, onClose, product }) => {
                                 <Button
                                     key={level}
                                     color={
-                                        sweetness === level
-                                            ? "blue"
-                                            : "light"
+                                        sweetness === level ? "blue" : "light"
                                     }
                                     onClick={() => setSweetness(level)}
                                     className="text-sm"
@@ -200,7 +193,6 @@ const ProductModal = ({ show, onClose, product }) => {
                             ))}
                         </div>
                     </div>
-
 
                     <div className="space-y-2">
                         <label className="block text-sm font-medium">
@@ -213,17 +205,24 @@ const ProductModal = ({ show, onClose, product }) => {
                                     className="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50 cursor-pointer"
                                 >
                                     <Checkbox
-                                        checked={selectedToppings.includes(toppingOption.name)}
-                                        onChange={() => handleToppingToggle(toppingOption.name)}
+                                        checked={selectedToppings.includes(
+                                            toppingOption.name
+                                        )}
+                                        onChange={() =>
+                                            handleToppingToggle(
+                                                toppingOption.name
+                                            )
+                                        }
                                     />
                                     <span>{toppingOption.name}</span>
-                                    <span className="text-blue-600">+{toppingOption.price}฿</span>
+                                    <span className="text-blue-600">
+                                        +{toppingOption.price}฿
+                                    </span>
                                 </label>
                             ))}
                         </div>
                     </div>
                 </div>
-
 
                 <div className="border-t p-4 space-y-4">
                     <div className="flex justify-between items-center">
