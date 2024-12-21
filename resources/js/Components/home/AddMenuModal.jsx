@@ -1,142 +1,145 @@
-import React from "react";
-import { Button, Modal } from "flowbite-react";
+import { useForm } from "@inertiajs/react";
+import { Button, Modal, Label, TextInput, Select, FileInput } from "flowbite-react";
+
 export default function AddMenuModal({ categories, show, onClose }) {
-    const [state, setState] = React.useState({
+    const { data, setData, post, processing, errors } = useForm({
         name: "",
-        category: "",
-        image: "",
-        cost_price: 0,
-        sale_price: 0,
+        category_id: "",
         image: null,
+        description: "",
+        cost_price: "",
+        sale_price: "",
     });
 
-    const handleChange = (e) => {
-        setState({
-            ...state,
-            [e.target.name]: e.target.value,
-        });
-    };
-
     const handleFileChange = (e) => {
-        setState({
-            ...state,
-            image: e.target.files[0],
-        });
+        setData("image", e.target.files[0]);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(state);
+        post(route("products.store"), {
+            forceFormData: true,
+            onSuccess: () => {
+                onClose();
+            },
+        });
     };
 
     return (
-        <Modal id="crud-modal" show={show} onClose={onClose}>
+        <Modal show={show} onClose={onClose}>
             <Modal.Header>เพิ่มเมนูใหม่</Modal.Header>
             <Modal.Body>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="col-span-2">
-                            <label
-                                htmlFor="name"
-                                className="block mb-2 text-sm font-medium text-gray-900"
-                            >
-                                ชื่อสินค้า
-                            </label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={state.name}
-                                onChange={handleChange}
-                                className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-600 focus:border-blue-600"
-                                placeholder="กรอกชื่อสินค้า"
-                                required
-                            />
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <div>
+                        <div className="block mb-2">
+                            <Label htmlFor="name" value="ชื่อสินค้า" />
                         </div>
-                        {/* Category */}
-                        <div className="col-span-2">
-                            <label
-                                htmlFor="category"
-                                className="block mb-2 text-sm font-medium text-gray-900"
-                            >
-                                หมวดหมู่
-                            </label>
-                            <select
-                                value={state.category}
-                                onChange={handleChange}
-                                name="category"
-                                className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-600 focus:border-blue-600"
-                            >
-                                <option selected>เลือกหมวดหมู่</option>
-                                {categories.map((category) => (
-                                    <option
-                                        key={category.id}
-                                        value={category.id}
-                                    >
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        {/* Image Upload */}
-                        <div className="col-span-2">
-                            <label
-                                htmlFor="image"
-                                className="block mb-2 text-sm font-medium text-gray-900"
-                            >
-                                รูปภาพ
-                            </label>
-                            <input
-                                type="file"
-                                onChange={handleFileChange}
-                                name="image"
-                                className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer focus:outline-none"
-                            />
-                        </div>
-                        <div className="col-span-2 sm:col-span-1">
-                            <label
-                                htmlFor="price"
-                                className="block mb-2 text-sm font-medium text-gray-900"
-                            >
-                                ราคาต้นทุน
-                            </label>
-                            <input
-                                type="number"
-                                name="price"
-                                value={state.cost_price}
-                                onChange={handleChange}
-                                className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-600 focus:border-blue-600"
-                                placeholder="กรอกราคาต้นทุน"
-                                required
-                            />
-                        </div>
-                        <div className="col-span-2 sm:col-span-1">
-                            <label
-                                htmlFor="price"
-                                className="block mb-2 text-sm font-medium text-gray-900"
-                            >
-                                ราคาขาย
-                            </label>
-                            <input
-                                type="number"
-                                name="price"
-                                value={state.sale_price}
-                                onChange={handleChange}
-                                className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-600 focus:border-blue-600"
-                                placeholder="กรอกราคาขาย"
-                                required
-                            />
-                        </div>
+                        <TextInput
+                            id="name"
+                            type="text"
+                            placeholder="กรุณากรอกชื่อสินค้า"
+                            required
+                            color={errors.name ? "failure" : undefined}
+                            value={data.name}
+                            helperText={errors.name && <span>{errors.name}</span>}
+                            onChange={(e) => setData("name", e.target.value)}
+                        />
                     </div>
+
+                    <div>
+                        <div className="block mb-2">
+                            <Label htmlFor="category" value="หมวดหมู่" />
+                        </div>
+                        <Select
+                            id="category"
+                            required
+                            value={data.category_id}
+                            onChange={(e) => setData("category_id", e.target.value)}
+                        >
+                            <option value="" disabled>กรุณาเลือกหมวดหมู่สินค้า</option>
+                            {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </Select>
+                        {errors.category_id && (
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.category_id}
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <div className="block mb-2">
+                            <Label htmlFor="image" value="อัพโหลดรูปภาพ" />
+                        </div>
+                        <FileInput
+                            id="image"
+                            helperText="SVG, PNG, JPG or GIF (MAX. 800x400px)."
+                            accept="image/*"
+                            onChange={handleFileChange}
+                        />
+                        {errors.image && (
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.image}
+                            </p>
+                        )}
+                    </div>
+
+                    <div>
+                        <div className="block mb-2">
+                            <Label htmlFor="cost_price" value="ราคาต้นทุน" />
+                        </div>
+                        <TextInput
+                            id="cost_price"
+                            type="number"
+                            placeholder="กรุณากรอกราคาต้นทุน"
+                            required
+                            value={data.cost_price}
+                            color={errors.cost_price ? "failure" : undefined}
+                            helperText={errors.cost_price && <span>{errors.cost_price}</span>}
+                            onChange={(e) => setData("cost_price", e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <div className="block mb-2">
+                            <Label htmlFor="sale_price" value="ราคาขาย" />
+                        </div>
+                        <TextInput
+                            id="sale_price"
+                            type="number"
+                            placeholder="กรุณากรอกราคาขาย"
+                            required
+                            value={data.sale_price}
+                            color={errors.sale_price ? "failure" : undefined}
+                            helperText={errors.sale_price && <span>{errors.sale_price}</span>}
+                            onChange={(e) => setData("sale_price", e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <div className="block mb-2">
+                            <Label htmlFor="description" value="คําอธิบายสินค้า" />
+                        </div>
+                        <TextInput
+                            id="description"
+                            type="text"
+                            placeholder="กรุณากรอกคำอธิบายสินค้า"
+                            required
+                            value={data.description}
+                            color={errors.description ? "failure" : undefined}
+                            helperText={errors.description && <span>{errors.description}</span>}
+                            onChange={(e) => setData("description", e.target.value)}
+                        />
+                    </div>
+
+                    <Button type="submit" disabled={processing}>
+                        {processing ? "กำลังบันทึก..." : "บันทึก"}
+                    </Button>
                 </form>
             </Modal.Body>
-            <Modal.Footer>
-                <Button color="failure" onClick={() => console.log("close")}>
-                    ปิด
-                </Button>
-                <Button type="submit" color="success">
-                    บันทึก
-                </Button>
-            </Modal.Footer>
         </Modal>
     );
 }
