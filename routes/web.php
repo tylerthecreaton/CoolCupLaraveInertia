@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ProductsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterMemberController;
 use Illuminate\Foundation\Application;
@@ -50,7 +51,6 @@ Route::get('/registermember', [RegisterMemberController::class, 'index'])->name(
 // ---------------------------Member---------------------------
 Route::get('/member', [MemberController::class, 'index'])->name('member');
 
-
 Route::middleware('auth')->group(function () {
     Route::group(['prefix' => '/admin'], function () {
         // ---------------------------Users---------------------------
@@ -88,6 +88,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/customers/{id}/edit', [CustomerController::class, 'edit'])->name('admin.customers.edit');
         Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('admin.customers.update');
         Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy');
+
+        // ---------------------------Orders---------------------------
+        Route::get('/orders', [OrderController::class,'index'])->name('admin.orders.index');
+        Route::get('/orders/create', [OrderController::class,'create'])->name('admin.orders.create');
+        Route::post('/orders', [OrderController::class,'store'])->name('admin.orders.store');
+        Route::get('/orders/{id}', [OrderController::class,'show'])->name('admin.orders.show');
+        Route::get('/orders/{id}/edit', [OrderController::class,'edit'])->name('admin.orders.edit');
+        Route::put('/orders/{id}', [OrderController::class,'update'])->name('admin.orders.update');
+        Route::delete('/orders/{id}', [OrderController::class,'destroy'])->name('admin.orders.destroy');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

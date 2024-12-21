@@ -7,22 +7,24 @@ import {
     Label,
     FileInput,
 } from "flowbite-react";
+import { useForm } from "@inertiajs/react";
+
 import { Banknote, QrCode, Receipt, CreditCard } from "lucide-react";
 import Swal from "sweetalert2";
 
-const PaymethodModal = ({
-    show,
-    onClose,
-    onConfirm,
-    total,
-    dispatch,
-    cartActions,
-}) => {
-    const [selectedMethod, setSelectedMethod] = useState("");
-    const [cashReceived, setCashReceived] = useState("");
-    const [showQR, setShowQR] = useState(false);
-    const [paymentFile, setPaymentFile] = useState(null);
-    const [paymentNote, setPaymentNote] = useState("");
+import generatePayload from "promptpay-qr";
+import ReactQrCode from "react-qr-code";
+import { useGlobalState } from "@/Store/state";
+const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
+    const { state } = useGlobalState();
+    const { data, post, setData, errors } = useForm({
+        selectedMethod: "cash",
+        cashReceived: 0.0,
+        showQR: false,
+        paymentFile: null,
+        paymentNote: "",
+        cart: state.cart,
+    });
 
     const paymentMethods = [
         {
@@ -40,25 +42,26 @@ const PaymethodModal = ({
     ];
 
     const handleMethodSelect = (methodId) => {
-        setSelectedMethod(methodId);
+        setData("selectedMethod", methodId);
         if (methodId === "promptpay") {
-            setShowQR(true);
+            setData("showQR", true);
         } else {
-            setShowQR(false);
+            setData("showQR", false);
         }
-        setCashReceived("");
-        setPaymentFile(null);
-        setPaymentNote("");
+        setData("cashReceived", "");
+        setData("paymentFile", null);
+        setData("paymentNote", "");
     };
 
     const calculateChange = () => {
-        const received = parseFloat(cashReceived);
+        const received = parseFloat(data.cashReceived);
         if (!received || received < total) return null;
         return (received - total).toFixed(2);
     };
 
-    const handleConfirm = () => {
-        if (!selectedMethod) {
+    const handleConfirm = (e) => {
+        e.preventDefault();
+        if (!data.selectedMethod) {
             Swal.fire({
                 title: "กรุณาเลือกวิธีการชำระเงิน",
                 icon: "warning",
@@ -66,8 +69,8 @@ const PaymethodModal = ({
             return;
         }
 
-        if (selectedMethod === "cash") {
-            const received = parseFloat(cashReceived);
+        if (data.selectedMethod === "cash") {
+            const received = parseFloat(data.cashReceived);
             if (!received) {
                 Swal.fire({
                     title: "กรุณากรอกจำนวนเงินที่รับมา",
@@ -85,24 +88,36 @@ const PaymethodModal = ({
             }
         }
 
-        if (selectedMethod === "promptpay" && !paymentFile) {
-            Swal.fire({
-                title: "กรุณาแนบหลักฐานการโอนเงิน",
-                icon: "warning",
-            });
-            return;
-        }
+        // if (selectedMethod === "promptpay" && !paymentFile) {
+        //     Swal.fire({
+        //         title: "กรุณาแนบหลักฐานการโอนเงิน",
+        //         icon: "warning",
+        //     });
+        //     return;
+        // }
 
-        onConfirm({
-            method: selectedMethod,
-            cashReceived:
-                selectedMethod === "cash" ? parseFloat(cashReceived) : null,
-            change: selectedMethod === "cash" ? calculateChange() : null,
-            paymentFile: selectedMethod === "promptpay" ? paymentFile : null,
-            paymentNote: selectedMethod === "promptpay" ? paymentNote : null,
-        });
-
-        dispatch(cartActions.incrementOrderNumber());
+        post(
+            route("admin.orders.store"),
+            {
+                payment_method: data,
+                cart: state.cart,
+            },
+            {
+                forceFormData: true,
+                onSuccess: () => {
+                    onClose();
+                    dispatch(cartActions.incrementOrderNumber());
+                },
+                onError: (errors) => {
+                    console.log(errors);
+                    Swal.fire({
+                        title: "เกิดข้อผิดพลาด",
+                        text: "กรุณาตรวจสอบข้อมูลอีกครั้ง",
+                        icon: "error",
+                    });
+                },
+            }
+        );
     };
 
     return (
@@ -132,7 +147,7 @@ const PaymethodModal = ({
                             <div
                                 key={method.id}
                                 className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-                                    selectedMethod === method.id
+                                    data.selectedMethod === method.id
                                         ? "border-blue-500 bg-blue-50"
                                         : "hover:bg-gray-50"
                                 }`}
@@ -154,7 +169,7 @@ const PaymethodModal = ({
                                     </div>
                                 </div>
                                 <Radio
-                                    checked={selectedMethod === method.id}
+                                    checked={data.selectedMethod === method.id}
                                     onChange={() =>
                                         handleMethodSelect(method.id)
                                     }
@@ -163,7 +178,7 @@ const PaymethodModal = ({
                         ))}
                     </div>
 
-                    {selectedMethod === "cash" && (
+                    {data.selectedMethod === "cash" && (
                         <div className="space-y-4 p-4 border rounded-lg">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -172,9 +187,12 @@ const PaymethodModal = ({
                                 <div className="flex items-center space-x-2">
                                     <TextInput
                                         type="number"
-                                        value={cashReceived}
+                                        value={data.cashReceived}
                                         onChange={(e) =>
-                                            setCashReceived(e.target.value)
+                                            setData(
+                                                "cashReceived",
+                                                e.target.value
+                                            )
                                         }
                                         placeholder="กรอกจำนวนเงิน"
                                         className="flex-1"
@@ -195,13 +213,19 @@ const PaymethodModal = ({
                         </div>
                     )}
 
-                    {selectedMethod === "promptpay" && (
+                    {data.selectedMethod === "promptpay" && (
                         <div className="space-y-4 mt-4">
                             <div className="flex flex-col items-center space-y-4 p-4 bg-blue-50 rounded-lg">
-                                <img
+                                {/* <img
                                     src="https://promptpay.io/0899999999.png"
                                     alt="QR Code"
                                     className="w-64 h-64"
+                                /> */}
+                                <ReactQrCode
+                                    value={generatePayload("0942017100", {
+                                        amount: total,
+                                    })}
+                                    size={256}
                                 />
                                 <div className="text-center">
                                     <p className="text-sm text-gray-600">
@@ -213,6 +237,26 @@ const PaymethodModal = ({
                                 </div>
                             </div>
                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    จำนวนเงินที่ได้รับ
+                                </label>
+                                <div className="flex items-center space-x-2">
+                                    <TextInput
+                                        type="number"
+                                        value={data.cashReceived}
+                                        onChange={(e) =>
+                                            setData(
+                                                "cashReceived",
+                                                e.target.value
+                                            )
+                                        }
+                                        placeholder="กรอกจำนวนเงิน"
+                                        className="flex-1"
+                                    />
+                                    <span className="text-gray-500">บาท</span>
+                                </div>
+                            </div>
+                            <div>
                                 <Label
                                     htmlFor="payment-file"
                                     value="แนบหลักฐานการโอน"
@@ -221,7 +265,10 @@ const PaymethodModal = ({
                                     id="payment-file"
                                     accept="image/*"
                                     onChange={(e) =>
-                                        setPaymentFile(e.target.files[0])
+                                        setData(
+                                            "paymentFile",
+                                            e.target.files[0]
+                                        )
                                     }
                                     className="mt-1"
                                 />
@@ -235,9 +282,9 @@ const PaymethodModal = ({
                                     id="payment-note"
                                     type="text"
                                     placeholder="กรอกหมายเหตุเพิ่มเติม"
-                                    value={paymentNote}
+                                    value={data.paymentNote}
                                     onChange={(e) =>
-                                        setPaymentNote(e.target.value)
+                                        setData("paymentNote", e.target.value)
                                     }
                                     className="mt-1"
                                 />

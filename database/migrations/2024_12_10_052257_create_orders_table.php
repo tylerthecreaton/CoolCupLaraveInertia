@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('customer_id');
+            $table->unsignedBigInteger(column: 'customer_id');
             $table->foreign('customer_id')->references('id')->on('customers');
             $table->unsignedBigInteger('promotions_id')->nullable();
             $table->foreign('promotions_id')->references('id')->on('promotions');
-            $table->unsignedBigInteger('total_amount');
-            $table->unsignedBigInteger('discount_amount')->default(0);
-            $table->unsignedBigInteger('final_amount');
+            $table->unsignedBigInteger('total_amount')->comment('ราคาที่ยังไม่รวมส่วนลด');
+            $table->unsignedBigInteger('discount_amount')->default(0)->comment('ส่วนลด');
+            $table->unsignedBigInteger('final_amount')->comment('ราคาที่ต้องชําระ');
             $table->dateTime('order_date');
             $table->timestamps();
         });

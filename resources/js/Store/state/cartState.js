@@ -269,4 +269,5 @@ export const cartActions = {
             type: "INCREMENT_ORDER_NUMBER",
         };
     },
+
 };

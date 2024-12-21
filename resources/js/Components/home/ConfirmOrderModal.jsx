@@ -4,6 +4,7 @@ import { ShoppingBag, Receipt, Tag } from "lucide-react";
 import PaymethodModal from "./PaymethodModal";
 import { useGlobalState } from "@/Store/state";
 import { cartActions } from "@/Store/state/cartState";
+import { useForm } from "@inertiajs/react";
 
 const ConfirmOrderModal = ({
     show,
@@ -18,12 +19,6 @@ const ConfirmOrderModal = ({
 }) => {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const { state, dispatch } = useGlobalState();
-
-    const handlePaymentConfirm = (paymentMethod) => {
-        console.log("Payment confirmed with method:", paymentMethod);
-        setShowPaymentModal(false);
-        onClose();
-    };
 
     const selectedPromotionDetails = selectedPromotion
         ? promotions.find((p) => p.code === selectedPromotion)
@@ -204,7 +199,6 @@ const ConfirmOrderModal = ({
             <PaymethodModal
                 show={showPaymentModal}
                 onClose={() => setShowPaymentModal(false)}
-                onConfirm={handlePaymentConfirm}
                 total={finalTotal}
                 dispatch={dispatch}
                 cartActions={cartActions}
