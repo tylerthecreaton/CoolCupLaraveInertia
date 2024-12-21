@@ -4,13 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Ingredient extends Model
+class Unit extends Model
 {
     protected $fillable = [
         'name',
-        'unit',
-        'quantity',
-        'expiration_date',
-        'image',
+        'abbreviation',
     ];
 }

@@ -1,0 +1,148 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Ingredient;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class IngredientsController extends Controller
+{
+    public function index()
+    {
+        $ingredientsPaginate = Ingredient::paginate(10);
+        return Inertia::render("Admin/ingredients/index", compact("ingredientsPaginate"));
+    }
+    public function create()
+    {
+        return Inertia::render("Admin/ingredients/Create");
+    }
+    public function store(Request $request)
+    {
+        $rules = [
+            "name" => "required|min:3|max:255|unique:ingredients",
+            "quantity" => "required|numeric",
+            "unit" => "required|min:3|max:255",
+            "expiration_date" => "required",
+            "image" => "image|mimes:jpeg,png,jpg,gif,svg|max:2048",
+        ];
+        $message = [
+            "name.required" => "กรุณากรอกชื่อ",
+            "name.min" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
+            "name.max" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
+            "name.unique" => "ชื่อนี้ถูกใช้ไปแล้ว",
+            "quantity.required" => "กรุณากรอกจํานวน",
+            "quantity.numeric"=> "กรุณากรอกจํานวนให้ถูกต้อง",
+            "unit.required" => "กรุณากรอกหน่วย",
+            "expiration_date.required" => "กรุณากรอกวันหมดอายุ",
+            "expiration_date" => "กรุณากรอกวันหมดอายุ",
+            "image.image" => "กรุณาอัปโหลดรูปภาพให้ถูกต้อง",
+            "image.mimes" => "กรุณาอัปโหลดรูปภาพให้ถูกต้อง",
+            "image.max" => "กรุณาอัปโหลดรูปภาพให้ถูกต้อง",
+        ];
+
+        if ($request->hasFile('image')) {
+            $rules['image'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:2048';
+            $message['image.image'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
+            $message['image.mimes'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
+            $message['image.max'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
+        }
+
+        $request->validate($rules, $message);
+        $imageName = "";
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name = time() . '.' . $image->getClientOriginalExtension();
+            $destinationPath = public_path('/images/ingredients/');
+            $image->move($destinationPath, $name);
+            $imageName = $name;
+        }
+        $ingredient = new Ingredient([
+            'name' => $request->name,
+            'quantity' => $request->quantity,
+            'unit' => $request->unit,
+            'expiration_date' => $request->expiration_date,
+            'image' => $imageName == '' ? '' : $imageName,
+        ]);
+
+        $ingredient->save();
+
+
+        return redirect()->route('admin.ingredients.index')->with('success', '');
+    }
+    public function show($id) {
+        //
+    }
+    public function edit($id)
+    {
+        $ingredient = Ingredient::find($id);
+        return Inertia::render('Admin/ingredients/Edit', compact('ingredient'));
+    }
+    public function update(Request $request, $id)
+    {
+        $rules = [
+            'name' => 'required|min:3|max:255|unique:ingredients,name,' . $id,
+            'quantity' => 'required|numeric',
+            'unit' => 'required',
+            'expiration_date' => 'required',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ];
+
+        $message = [
+            'name.required' => 'กรุณากรอกชื่อ',
+            'name.unique' => 'ชื่อนี้ถูกใช้ไปแล้ว',
+            'name.min' => 'ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร',
+            'name.max' => 'ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร',
+            'quantity.required' => 'กรุณากรอกจํานวน',
+            'quantity.numeric' => 'กรุณากรอกจํานวนให้ถูกต้อง',
+            'unit.required' => 'กรุณากรอกหน่วย',
+            'expiration_date.required' => 'กรุณากรอกวันหมดอายุ',
+            'required'=> 'กรุณากรอกข้อมูล',
+            'image.image' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
+            'image.mimes' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
+            'image.max' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
+        ];
+
+        if ($request->hasFile('image')) {
+            $rules['image'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:2048';
+            $message['image.image'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
+            $message['image.mimes'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
+            $message['image.max'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
+        }
+
+        $request->validate($rules, $message);
+
+
+
+        $ingredient = Ingredient::find($id);
+
+        $imageName = $ingredient->image;
+        if ($request->hasFile('image')) {
+            try {
+                unlink(filename: public_path('/images/categories/' . $imageName));
+            } catch (\Throwable $th) {
+            }
+            $image = $request->file('image');
+            $name = time() . '.' . $image->getClientOriginalExtension();
+            $destinationPath = public_path('/images/categories/');
+            $image->move($destinationPath, $name);
+            $imageName = $name;
+        }
+
+        $ingredient->name = $request->name;
+        $ingredient->image = $imageName;
+        $ingredient->quantity = $request->quantity;
+        $ingredient->unit = $request->unit;
+        $ingredient->expiration_date = $request->expiration_date;
+        $ingredient->save();
+        return redirect()->route('Admin.ingredients.index')->with('success', '');
+    }
+    public function destroy($id)
+    {
+        $ingredient = Ingredient::find($id);
+        $ingredient->delete();
+        return redirect()->route('Admin.ingredients.index')->with('success', '');
+    }
+}
