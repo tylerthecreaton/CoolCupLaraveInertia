@@ -57,12 +57,12 @@ const CartComponent = () => {
         }
     }, []);
 
-    const handleAddToCart = (drink, toppings, sweetness, size) => {
+    const handleAddToCart = (product, toppings, sweetness, size) => {
         const cartItem = {
-            id: drink.id,
-            name: drink.name,
-            image: drink.image,
-            price: drink.sale_price,
+            id: product.id,
+            name: product.name,
+            image: product.image,
+            price: product.sale_price,
             toppings: toppings,
             sweetness: sweetness,
             size: size,

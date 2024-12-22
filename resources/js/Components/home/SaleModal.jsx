@@ -80,7 +80,7 @@ const ProductModal = ({ show, onClose, product }) => {
     const handleAddToCart = () => {
         const cartItem = {
             id: new Date().getTime(), // Use timestamp for unique ID
-            drinkId: product.id,
+            productId: product.id,
             name: product.name,
             image: isAbsoluteUrl(product.image)
                 ? product.image

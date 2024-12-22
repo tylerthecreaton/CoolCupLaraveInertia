@@ -22,7 +22,7 @@ export const cartState = {
 
 const getItemKey = (item) => {
     if (!item.toppings && !item.sweetness) return item.id;
-    return `${item.drinkId}_${item.toppings?.sort().join("_")}_${
+    return `${item.productId}_${item.toppings?.sort().join("_")}_${
         item.sweetness
     }`;
 };
@@ -269,5 +269,4 @@ export const cartActions = {
             type: "INCREMENT_ORDER_NUMBER",
         };
     },
-
 };
