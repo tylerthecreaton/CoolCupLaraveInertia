@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('customer_id');
-            $table->foreign('customer_id')->references('id')->on('customers');
+            $table->unsignedBigInteger('customer_id')->nullable();
             $table->unsignedBigInteger('promotions_id')->nullable();
             $table->foreign('promotions_id')->references('id')->on('promotions');
             $table->unsignedBigInteger('total_amount')->comment('ราคาที่ยังไม่รวมส่วนลด');
