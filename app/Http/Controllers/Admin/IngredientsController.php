@@ -25,7 +25,7 @@ class IngredientsController extends Controller
         $rules = [
             "name" => "required|min:3|max:255|unique:ingredients",
             "quantity" => "required|numeric",
-            "unit" => "required|exists:units,id",
+            "unit_id" => "required|exists:units,id",
             "expiration_date" => "required",
             "image" => "image|mimes:jpeg,png,jpg,gif,svg|max:2048",
         ];
@@ -36,8 +36,8 @@ class IngredientsController extends Controller
             "name.unique" => "ชื่อนี้ถูกใช้ไปแล้ว",
             "quantity.required" => "กรุณากรอกจํานวน",
             "quantity.numeric"=> "กรุณากรอกจํานวนให้ถูกต้อง",
-            "unit.required" => "กรุณาเลือกหน่วยวัด",
-            "unit.exists" => "หน่วยวัดที่เลือกไม่ถูกต้อง",
+            "unit_id.required" => "กรุณาเลือกหน่วยวัด",
+            "unit_id.exists" => "หน่วยวัดที่เลือกไม่ถูกต้อง",
             "expiration_date.required" => "กรุณากรอกวันหมดอายุ",
             "expiration_date" => "กรุณากรอกวันหมดอายุ",
             "image.image" => "กรุณาอัปโหลดรูปภาพให้ถูกต้อง",
@@ -65,7 +65,7 @@ class IngredientsController extends Controller
         $ingredient = new Ingredient([
             'name' => $request->name,
             'quantity' => $request->quantity,
-            'unit_id' => $request->unit,
+            'unit_id' => $request->unit_id,
             'expiration_date' => $request->expiration_date,
             'image' => $imageName == '' ? '' : $imageName,
         ]);
@@ -89,7 +89,7 @@ class IngredientsController extends Controller
         $rules = [
             'name' => 'required|min:3|max:255|unique:ingredients,name,' . $id,
             'quantity' => 'required|numeric',
-            'unit' => 'required|exists:units,id',
+            'unit_id' => 'required|exists:units,id',
             'expiration_date' => 'required',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
@@ -101,8 +101,8 @@ class IngredientsController extends Controller
             'name.max' => 'ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร',
             'quantity.required' => 'กรุณากรอกจํานวน',
             'quantity.numeric' => 'กรุณากรอกจํานวนให้ถูกต้อง',
-            'unit.required' => 'กรุณาเลือกหน่วยวัด',
-            'unit.exists' => 'หน่วยวัดที่เลือกไม่ถูกต้อง',
+            'unit_id.required' => 'กรุณาเลือกหน่วยวัด',
+            'unit_id.exists' => 'หน่วยวัดที่เลือกไม่ถูกต้อง',
             'expiration_date.required' => 'กรุณากรอกวันหมดอายุ',
             'required'=> 'กรุณากรอกข้อมูล',
             'image.image' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
@@ -139,7 +139,7 @@ class IngredientsController extends Controller
         $ingredient->name = $request->name;
         $ingredient->image = $imageName;
         $ingredient->quantity = $request->quantity;
-        $ingredient->unit_id = $request->unit;
+        $ingredient->unit_id = $request->unit_id;
         $ingredient->expiration_date = $request->expiration_date;
         $ingredient->save();
         return redirect()->route('Admin.ingredients.index')->with('success', '');

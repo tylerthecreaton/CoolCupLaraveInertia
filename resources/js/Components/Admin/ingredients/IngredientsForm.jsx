@@ -11,7 +11,7 @@ import { HiOutlinePhotograph, HiCalendar, HiScale, HiCube, HiTag } from "react-i
 export default function IngredientsForm({ ingredient, units = [], isEditing = false }) {
     const { data, setData, post, put, processing, errors } = useForm({
         name: isEditing ? ingredient.name : "",
-        unit: isEditing ? ingredient.unit_id : "",
+        unit_id: isEditing ? ingredient.unit_id : "",
         quantity: isEditing ? ingredient.quantity : "",
         expiration_date: isEditing ? ingredient.expiration_date : "",
         image: null,
@@ -35,10 +35,10 @@ export default function IngredientsForm({ ingredient, units = [], isEditing = fa
     };
 
     return (
-        <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="mx-auto max-w-2xl">
+            <div className="overflow-hidden bg-white rounded-lg shadow-md">
                 <div className="p-6 sm:p-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                    <h2 className="mb-6 text-2xl font-bold text-gray-900">
                         {isEditing ? "แก้ไขวัตถุดิบ" : "เพิ่มวัตถุดิบใหม่"}
                     </h2>
 
@@ -46,7 +46,7 @@ export default function IngredientsForm({ ingredient, units = [], isEditing = fa
                         {/* Name Field */}
                         <div>
                             <Label htmlFor="name" value="ชื่อวัตถุดิบ" className="inline-flex items-center mb-2">
-                                <HiTag className="w-5 h-5 mr-2 text-gray-500" />
+                                <HiTag className="mr-2 w-5 h-5 text-gray-500" />
                                 <span>ชื่อวัตถุดิบ</span>
                             </Label>
                             <TextInput
@@ -63,10 +63,10 @@ export default function IngredientsForm({ ingredient, units = [], isEditing = fa
                         </div>
 
                         {/* Quantity and Unit Fields */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <div>
                                 <Label htmlFor="quantity" value="จำนวน" className="inline-flex items-center mb-2">
-                                    <HiCube className="w-5 h-5 mr-2 text-gray-500" />
+                                    <HiCube className="mr-2 w-5 h-5 text-gray-500" />
                                     <span>จำนวน</span>
                                 </Label>
                                 <TextInput
@@ -86,17 +86,17 @@ export default function IngredientsForm({ ingredient, units = [], isEditing = fa
 
                             <div>
                                 <Label htmlFor="unit" value="หน่วยวัด" className="inline-flex items-center mb-2">
-                                    <HiScale className="w-5 h-5 mr-2 text-gray-500" />
+                                    <HiScale className="mr-2 w-5 h-5 text-gray-500" />
                                     <span>หน่วยวัด</span>
                                 </Label>
                                 <select
                                     id="unit"
-                                    name="unit"
-                                    value={data.unit}
-                                    onChange={(e) => setData("unit", e.target.value)}
+                                    name="unit_id"
+                                    value={data.unit_id}
+                                    onChange={(e) => setData("unit_id", e.target.value)}
                                     required
                                     className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${
-                                        errors.unit
+                                        errors.unit_id
                                             ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-red-500"
                                             : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                                     } bg-white shadow-sm`}
@@ -108,8 +108,8 @@ export default function IngredientsForm({ ingredient, units = [], isEditing = fa
                                         </option>
                                     ))}
                                 </select>
-                                {errors.unit && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.unit}</p>
+                                {errors.unit_id && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.unit_id}</p>
                                 )}
                             </div>
                         </div>
@@ -117,7 +117,7 @@ export default function IngredientsForm({ ingredient, units = [], isEditing = fa
                         {/* Expiration Date Field */}
                         <div>
                             <Label htmlFor="expiration_date" value="วันหมดอายุ" className="inline-flex items-center mb-2">
-                                <HiCalendar className="w-5 h-5 mr-2 text-gray-500" />
+                                <HiCalendar className="mr-2 w-5 h-5 text-gray-500" />
                                 <span>วันหมดอายุ</span>
                             </Label>
                             <TextInput
@@ -135,16 +135,16 @@ export default function IngredientsForm({ ingredient, units = [], isEditing = fa
                         {/* Image Upload Field */}
                         <div>
                             <Label htmlFor="image" value="รูปภาพวัตถุดิบ" className="inline-flex items-center mb-2">
-                                <HiOutlinePhotograph className="w-5 h-5 mr-2 text-gray-500" />
+                                <HiOutlinePhotograph className="mr-2 w-5 h-5 text-gray-500" />
                                 <span>รูปภาพวัตถุดิบ</span>
                             </Label>
-                            <div className="flex items-center justify-center w-full">
+                            <div className="flex justify-center items-center w-full">
                                 <label
                                     htmlFor="image"
-                                    className="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                                    className="flex flex-col justify-center items-center w-full h-40 bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer hover:bg-gray-100"
                                 >
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                        <HiOutlinePhotograph className="w-8 h-8 mb-3 text-gray-400" />
+                                    <div className="flex flex-col justify-center items-center pt-5 pb-6">
+                                        <HiOutlinePhotograph className="mb-3 w-8 h-8 text-gray-400" />
                                         <p className="mb-2 text-sm text-gray-500">
                                             <span className="font-semibold">คลิกเพื่ออัพโหลดรูปภาพ</span>
                                         </p>
@@ -170,22 +170,22 @@ export default function IngredientsForm({ ingredient, units = [], isEditing = fa
                         </div>
 
                         {/* Form Actions */}
-                        <div className="flex items-center justify-end space-x-4 pt-6 border-t">
+                        <div className="flex justify-end items-center pt-6 space-x-4 border-t">
                             <Link
                                 href={route("admin.ingredients.index")}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
                                 ยกเลิก
                             </Link>
                             <Button
                                 type="submit"
                                 disabled={processing}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg border border-transparent hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             >
                                 {processing ? (
                                     <>
                                         <svg
-                                            className="w-4 h-4 mr-2 animate-spin"
+                                            className="mr-2 w-4 h-4 animate-spin"
                                             fill="none"
                                             viewBox="0 0 24 24"
                                         >
