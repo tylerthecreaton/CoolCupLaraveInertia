@@ -142,12 +142,12 @@ class IngredientsController extends Controller
         $ingredient->unit_id = $request->unit_id;
         $ingredient->expiration_date = $request->expiration_date;
         $ingredient->save();
-        return redirect()->route('Admin.ingredients.index')->with('success', '');
+        return redirect()->route('admin.ingredients.index')->with('success', '');
     }
     public function destroy($id)
     {
         $ingredient = Ingredient::find($id);
         $ingredient->delete();
-        return redirect()->route('Admin.ingredients.index')->with('success', '');
+        return redirect()->route('admin.ingredients.index')->with('success', '');
     }
 }
