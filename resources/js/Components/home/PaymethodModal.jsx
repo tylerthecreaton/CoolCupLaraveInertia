@@ -24,6 +24,7 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
         paymentFile: null,
         paymentNote: "",
         cart: state.cart,
+        memberPhone: "", // Add new field for member phone
     });
 
     const paymentMethods = [
@@ -210,6 +211,22 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                     </span>
                                 </div>
                             )}
+                            <div className="space-y-4 p-4 border rounded-lg">
+                                <Label
+                                    htmlFor="memberPhone"
+                                    value="เบอร์สมาชิกเพื่อสะสมแต้ม"
+                                />
+                                <TextInput
+                                    id="memberPhone"
+                                    type="tel"
+                                    value={data.memberPhone}
+                                    onChange={(e) =>
+                                        setData("memberPhone", e.target.value)
+                                    }
+                                    placeholder="กรอกเบอร์โทรศัพท์สมาชิก"
+                                    className="mt-1"
+                                />
+                            </div>
                         </div>
                     )}
 
@@ -286,6 +303,22 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                     onChange={(e) =>
                                         setData("paymentNote", e.target.value)
                                     }
+                                    className="mt-1"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <Label
+                                    htmlFor="memberPhone"
+                                    value="เบอร์สมาชิกเพื่อสะสมแต้ม"
+                                />
+                                <TextInput
+                                    id="memberPhone"
+                                    type="tel"
+                                    value={data.memberPhone}
+                                    onChange={(e) =>
+                                        setData("memberPhone", e.target.value)
+                                    }
+                                    placeholder="กรอกเบอร์โทรศัพท์สมาชิก"
                                     className="mt-1"
                                 />
                             </div>
