@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\IngredientsController;
 use App\Http\Controllers\Admin\InventoryTransactionsController;
 use App\Http\Controllers\Admin\ProductsController;
+use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\HomeController;
@@ -127,6 +128,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/transactions/{id}/edit', [InventoryTransactionsController::class, 'edit'])->name('admin.transactions.edit');
         Route::put('/transactions/{id}', [InventoryTransactionsController::class, 'update'])->name('admin.transactions.update');
         Route::delete('/transactions/{id}', [InventoryTransactionsController::class, 'destroy'])->name('admin.transactions.destroy');
+
+        // ---------------------------Settings---------------------------
+        Route::get('/settings', [SettingController::class, 'index'])->name('admin.settings.index');
+        Route::post('/settings', [SettingController::class, 'store'])->name('admin.settings.store');
+        Route::put('/settings/{setting}', [SettingController::class, 'update'])->name('admin.settings.update');
+        Route::delete('/settings/{setting}', [SettingController::class, 'destroy'])->name('admin.settings.destroy');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

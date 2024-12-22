@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Ingredient;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -19,7 +20,8 @@ class ProductsController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return Inertia::render('Admin/products/Create', compact('categories'));
+        $ingredients = Ingredient::with('unit')->get();
+        return Inertia::render('Admin/products/Create', compact('categories', 'ingredients'));
     }
 
     public function store(Request $request)
@@ -77,11 +79,15 @@ class ProductsController extends Controller
 
         return redirect()->route('admin.products.index')->with('success', 'เพิ่มสินค้าเรียบร้อย');
     }
+
     public function edit($id)
     {
-        $product = Product::find($id);
+        $product = Product::with(['category', 'getIngredients.unit'])->findOrFail($id);
         $categories = Category::all();
-        return Inertia::render('Admin/products/Edit', compact('product', 'categories'));
+        $ingredients = Ingredient::with('unit')->get();
+        $productIngredients = $product->ingredients;
+        
+        return Inertia::render('Admin/products/Edit', compact('product', 'categories', 'ingredients', 'productIngredients'));
     }
 
     public function update(Request $request, string $id)

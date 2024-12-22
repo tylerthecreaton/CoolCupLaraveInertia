@@ -2,8 +2,12 @@ import { useEffect } from "react";
 import { useForm } from "@inertiajs/react";
 import { Button, FileInput, Label, Select, TextInput } from "flowbite-react";
 import { isAbsoluteUrl } from "@/helpers";
+import ProductIngredientsForm from "./ProductIngredientsForm";
+
 export default function ProductsForm({
     categories,
+    ingredients = [],
+    productIngredients = [],
     isEditing = false,
     product = null,
 }) {
@@ -155,6 +159,11 @@ export default function ProductsForm({
                     />
                 </div>
                 <Button type="submit">Submit</Button>
+                <ProductIngredientsForm
+                    product={product}
+                    ingredients={ingredients}
+                    productIngredients={productIngredients}
+                />
             </form>
         </div>
     );

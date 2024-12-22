@@ -1,11 +1,10 @@
 import ProductsForm from "@/Components/Admin/products/ProductsForm";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
-
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function EditProduct({ product, categories }) {
+export default function EditProduct({ product, categories, ingredients, productIngredients }) {
     return (
         <AuthenticatedLayout
             header={
@@ -24,7 +23,13 @@ export default function EditProduct({ product, categories }) {
                     <Breadcrumb.Item>แก้ไขสินค้า</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
-            <ProductsForm product={product} isEditing={true} categories={categories}/>
+            <ProductsForm 
+                product={product} 
+                isEditing={true} 
+                categories={categories}
+                ingredients={ingredients}
+                productIngredients={productIngredients}
+            />
         </AuthenticatedLayout>
     );
 }

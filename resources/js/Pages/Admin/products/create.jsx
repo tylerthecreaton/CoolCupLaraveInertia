@@ -3,7 +3,8 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 import ProductsForm from "@/Components/Admin/products/ProductsForm";
-export default function CreateProduct({ categories }) {
+
+export default function CreateProduct({ categories, ingredients }) {
     return (
         <AuthenticatedLayout
             header={
@@ -24,7 +25,11 @@ export default function CreateProduct({ categories }) {
                     <Breadcrumb.Item>เพิ่มสินค้า</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
-            <ProductsForm categories={categories} />
+            <ProductsForm 
+                categories={categories} 
+                ingredients={ingredients}
+                productIngredients={[]}
+            />
         </AuthenticatedLayout>
     );
 }

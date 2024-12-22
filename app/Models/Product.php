@@ -21,4 +21,16 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function ingredients()
+    {
+        return $this->hasMany(ProductIngredients::class);
+    }
+
+    public function getIngredients()
+    {
+        return $this->belongsToMany(Ingredient::class, 'product_ingredients')
+            ->withPivot('quantity_used')
+            ->withTimestamps();
+    }
 }
