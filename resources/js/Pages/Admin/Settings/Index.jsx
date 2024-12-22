@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
-import { Button, Table, Modal, Label, TextInput, Select, Textarea } from 'flowbite-react';
-import { HiOutlinePencilAlt, HiOutlineTrash, HiPlus } from 'react-icons/hi';
+import { Button, Table, Modal, Label, TextInput, Select, Textarea, Breadcrumb } from 'flowbite-react';
+import { HiOutlinePencilAlt, HiOutlineTrash, HiPlus, HiHome } from 'react-icons/hi';
 
 const Index = ({ settings, types }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -60,6 +60,13 @@ const Index = ({ settings, types }) => {
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6">
+                            <Breadcrumb className="mb-6">
+                                <Breadcrumb.Item href={route('dashboard')} icon={HiHome}>
+                                    หน้าหลัก
+                                </Breadcrumb.Item>
+                                <Breadcrumb.Item>จัดการการตั้งค่า</Breadcrumb.Item>
+                            </Breadcrumb>
+
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-2xl font-semibold text-gray-800">จัดการการตั้งค่า</h2>
                                 <Button onClick={() => showModal()} color="blue">
