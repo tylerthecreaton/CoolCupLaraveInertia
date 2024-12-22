@@ -85,8 +85,8 @@ class ProductsController extends Controller
         $product = Product::with(['category', 'getIngredients.unit'])->findOrFail($id);
         $categories = Category::all();
         $ingredients = Ingredient::with('unit')->get();
-        $productIngredients = $product->ingredients;
-        
+        $productIngredients = $product->ingredients()->with('ingredient')->get();
+
         return Inertia::render('Admin/products/Edit', compact('product', 'categories', 'ingredients', 'productIngredients'));
     }
 

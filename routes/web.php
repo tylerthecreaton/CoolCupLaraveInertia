@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CategoriesController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\IngredientsController;
 use App\Http\Controllers\Admin\InventoryTransactionsController;
+use App\Http\Controllers\Admin\ProductIngredientsController;
 use App\Http\Controllers\Admin\ProductsController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UnitController;
@@ -83,6 +84,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/products/{id}/edit', [ProductsController::class, 'edit'])->name('admin.products.edit');
         Route::put('/products/{id}', [ProductsController::class, 'update'])->name('admin.products.update');
         Route::delete('/products/{id}', [ProductsController::class, 'destroy'])->name('admin.products.destroy');
+
+        // ---------------------------Product Ingredients---------------------------
+        Route::post('/product-ingredients/batch-update', [ProductIngredientsController::class, 'batchUpdate'])
+            ->name('admin.product-ingredients.batch-update');
 
         // ---------------------------Customers---------------------------
         Route::get('/customers', [CustomerController::class, 'index'])->name('admin.customers.index');

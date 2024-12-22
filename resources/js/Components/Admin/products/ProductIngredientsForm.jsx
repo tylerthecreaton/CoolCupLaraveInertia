@@ -2,43 +2,109 @@ import { useEffect, useState } from "react";
 import { useForm } from "@inertiajs/react";
 import { Button, Label, Select, TextInput, Table, Card } from "flowbite-react";
 import { HiPlus, HiTrash, HiPencil, HiCheck, HiX } from "react-icons/hi";
+import { router } from "@inertiajs/react";
 
 export default function ProductIngredientsForm({
     product,
     ingredients,
     productIngredients = [],
 }) {
+    const [localIngredients, setLocalIngredients] = useState(productIngredients);
     const [editingId, setEditingId] = useState(null);
     const [editQuantity, setEditQuantity] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData } = useForm({
         product_id: product?.id,
         ingredient_id: "",
         quantity_used: "",
     });
 
-    const handleSubmit = (e) => {
+    const handleAddIngredient = (e) => {
         e.preventDefault();
-        post(route("admin.product-ingredients.store"), {
-            onSuccess: () => {
-                reset("ingredient_id", "quantity_used");
-            },
+        
+        const selectedIngredient = ingredients.find(ing => ing.id === parseInt(data.ingredient_id));
+        if (!selectedIngredient) {
+            alert("กรุณาเลือกวัตถุดิบ");
+            return;
+        }
+
+        if (!data.quantity_used || parseFloat(data.quantity_used) <= 0) {
+            alert("กรุณาระบุปริมาณที่ถูกต้อง");
+            return;
+        }
+
+        if (localIngredients.some(item => item.ingredient_id === parseInt(data.ingredient_id))) {
+            alert("วัตถุดิบนี้ถูกเพิ่มในสูตรแล้ว");
+            return;
+        }
+
+        const newIngredient = {
+            id: `temp_${Date.now()}`,
+            ingredient_id: parseInt(data.ingredient_id),
+            quantity_used: parseFloat(data.quantity_used),
+            ingredient: selectedIngredient,
+            isNew: true
+        };
+
+        setLocalIngredients(prev => [...prev, newIngredient]);
+        setData({
+            product_id: product?.id,
+            ingredient_id: "",
+            quantity_used: "",
         });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (isSubmitting) return;
+
+        if (localIngredients.length === 0) {
+            alert("กรุณาเพิ่มวัตถุดิบอย่างน้อย 1 รายการ");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            await router.post(route("admin.product-ingredients.batch-update"), {
+                product_id: product.id,
+                ingredients: localIngredients.map(item => ({
+                    id: item.isNew ? null : item.id,
+                    ingredient_id: item.ingredient_id,
+                    quantity_used: parseFloat(item.quantity_used)
+                }))
+            });
+        } catch (error) {
+            console.error("Error saving ingredients:", error);
+            alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleUpdate = (productIngredient) => {
-        put(route("admin.product-ingredients.update", productIngredient.id), {
-            quantity_used: editQuantity,
-        });
+        if (!editQuantity || parseFloat(editQuantity) <= 0) {
+            alert("กรุณาระบุปริมาณที่ถูกต้อง");
+            return;
+        }
+
+        setLocalIngredients(prev =>
+            prev.map(item =>
+                item.id === productIngredient.id
+                    ? { ...item, quantity_used: parseFloat(editQuantity) }
+                    : item
+            )
+        );
         setEditingId(null);
+        setEditQuantity("");
     };
 
     const handleDelete = (productIngredient) => {
-        if (confirm("คุณต้องการลบวัตถุดิบนี้ออกจากสูตรใช่หรือไม่?")) {
-            router.delete(
-                route("admin.product-ingredients.destroy", productIngredient.id)
-            );
-        }
+        if (!confirm("คุณต้องการลบวัตถุดิบนี้ออกจากสูตรใช่หรือไม่?")) return;
+
+        setLocalIngredients(prev =>
+            prev.filter(item => item.id !== productIngredient.id)
+        );
     };
 
     const startEditing = (item) => {
@@ -62,7 +128,7 @@ export default function ProductIngredientsForm({
                     <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
                         เพิ่มวัตถุดิบใหม่
                     </h3>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="col-span-2">
                                 <div className="block mb-2">
@@ -76,7 +142,7 @@ export default function ProductIngredientsForm({
                                     id="ingredient_id"
                                     name="ingredient_id"
                                     value={data.ingredient_id}
-                                    onChange={(e) => setData("ingredient_id", e.target.value)}
+                                    onChange={(e) => setData('ingredient_id', e.target.value)}
                                     required
                                     className="w-full"
                                 >
@@ -85,19 +151,14 @@ export default function ProductIngredientsForm({
                                         <option
                                             key={ingredient.id}
                                             value={ingredient.id}
-                                            disabled={productIngredients.some(
+                                            disabled={localIngredients.some(
                                                 (item) => item.ingredient_id === ingredient.id
                                             )}
                                         >
-                                            {ingredient.name} ({ingredient.unit?.name || "หน่วย"})
+                                            {ingredient.name} {ingredient.unit ? `(${ingredient.unit.name})` : ''}
                                         </option>
                                     ))}
                                 </Select>
-                                {errors.ingredient_id && (
-                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        {errors.ingredient_id}
-                                    </p>
-                                )}
                             </div>
                             <div>
                                 <div className="block mb-2">
@@ -107,24 +168,26 @@ export default function ProductIngredientsForm({
                                         className="text-gray-700 dark:text-gray-300"
                                     />
                                 </div>
-                                <TextInput
-                                    id="quantity_used"
-                                    name="quantity_used"
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    value={data.quantity_used}
-                                    onChange={(e) => setData("quantity_used", e.target.value)}
-                                    required
-                                />
-                                {errors.quantity_used && (
-                                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                                        {errors.quantity_used}
-                                    </p>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    <TextInput
+                                        id="quantity_used"
+                                        name="quantity_used"
+                                        type="number"
+                                        min="0.01"
+                                        step="0.01"
+                                        value={data.quantity_used}
+                                        onChange={(e) => setData('quantity_used', e.target.value)}
+                                        required
+                                    />
+                                </div>
                             </div>
                         </div>
-                        <Button type="submit" disabled={processing} className="w-full md:w-auto">
+                        <Button
+                            onClick={handleAddIngredient}
+                            disabled={!data.ingredient_id || !data.quantity_used}
+                            color="primary"
+                            type="button"
+                        >
                             <HiPlus className="h-4 w-4 mr-2" />
                             เพิ่มวัตถุดิบ
                         </Button>
@@ -132,9 +195,22 @@ export default function ProductIngredientsForm({
                 </div>
 
                 <div className="space-y-4">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                        วัตถุดิบที่ใช้ในสูตร
-                    </h3>
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                            วัตถุดิบที่ใช้ในสูตร
+                        </h3>
+                        {localIngredients.length > 0 && (
+                            <Button
+                                onClick={handleSubmit}
+                                color="success"
+                                className="px-4"
+                                disabled={isSubmitting}
+                            >
+                                <HiCheck className="h-4 w-4 mr-2" />
+                                บันทึกสูตร
+                            </Button>
+                        )}
+                    </div>
                     <div className="overflow-x-auto">
                         <Table hoverable>
                             <Table.Head>
@@ -144,7 +220,7 @@ export default function ProductIngredientsForm({
                                 <Table.HeadCell className="bg-gray-50">จัดการ</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y">
-                                {productIngredients.map((item) => (
+                                {localIngredients.map((item) => (
                                     <Table.Row
                                         key={item.id}
                                         className="bg-white dark:border-gray-700 dark:bg-gray-800"
@@ -154,14 +230,19 @@ export default function ProductIngredientsForm({
                                         </Table.Cell>
                                         <Table.Cell>
                                             {editingId === item.id ? (
-                                                <TextInput
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.01"
-                                                    value={editQuantity}
-                                                    onChange={(e) => setEditQuantity(e.target.value)}
-                                                    className="w-24"
-                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <TextInput
+                                                        type="number"
+                                                        min="0.01"
+                                                        step="0.01"
+                                                        value={editQuantity}
+                                                        onChange={(e) => setEditQuantity(e.target.value)}
+                                                        className="w-24"
+                                                    />
+                                                    <span className="text-gray-600">
+                                                        {item.ingredient.unit?.name || ''}
+                                                    </span>
+                                                </div>
                                             ) : (
                                                 <span className="font-medium">
                                                     {item.quantity_used}
@@ -169,7 +250,7 @@ export default function ProductIngredientsForm({
                                             )}
                                         </Table.Cell>
                                         <Table.Cell>
-                                            {item.ingredient.unit?.name || "หน่วย"}
+                                            {item.ingredient.unit?.name || '-'}
                                         </Table.Cell>
                                         <Table.Cell>
                                             <div className="flex gap-2">
@@ -216,7 +297,7 @@ export default function ProductIngredientsForm({
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}
-                                {productIngredients.length === 0 && (
+                                {localIngredients.length === 0 && (
                                     <Table.Row>
                                         <Table.Cell colSpan={4} className="text-center py-4 text-gray-500">
                                             ยังไม่มีวัตถุดิบในสูตรนี้
