@@ -19,6 +19,7 @@ class CustomerController extends Controller
         return Inertia::render("Admin/customers/index", compact("customersPaginate"));
     }
 
+
     /**
      * Show the form for creating a new resource.
      */
@@ -40,11 +41,11 @@ class CustomerController extends Controller
         $message = [
             "name.required" => "กรุณากรอกชื่อ",
             "name.min" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
-            "name.max"=> "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
-            "phone_number.required"=> "กรุณากรอกเบอร์โทร",
-            "phone_number"=> "เบอร์โทรต้องมี 10 หลัก",
-            "birthdate.required"=> "กรุณาเลือกวันเกิด",
-            "birthdate"=> "กรุณาเลือกวันเกิด",
+            "name.max" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
+            "phone_number.required" => "กรุณากรอกเบอร์โทร",
+            "phone_number" => "เบอร์โทรต้องมี 10 หลัก",
+            "birthdate.required" => "กรุณาเลือกวันเกิด",
+            "birthdate" => "กรุณาเลือกวันเกิด",
         ];
         $request->validate($rules, $message);
 
@@ -63,6 +64,13 @@ class CustomerController extends Controller
     public function show(string $id)
     {
         //
+    }
+
+
+    public function memberWherePhoneNumber(String $phone_number)
+    {
+        $customer = Customer::where('phone_number', $phone_number)->first();
+        return $customer;
     }
 
     /**
@@ -87,11 +95,11 @@ class CustomerController extends Controller
         $message = [
             "name.required" => "กรุณากรอกชื่อ",
             "name.min" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
-            "name.max"=> "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
-            "phone_number.required"=> "กรุณากรอกเบอร์โทร",
-            "phone_number"=> "เบอร์โทรต้องมี 10 หลัก",
-            "birthdate.required"=> "กรุณาเลือกวันเกิด",
-            "birthdate"=> "กรุณาเลือกวันเกิด",
+            "name.max" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
+            "phone_number.required" => "กรุณากรอกเบอร์โทร",
+            "phone_number" => "เบอร์โทรต้องมี 10 หลัก",
+            "birthdate.required" => "กรุณาเลือกวันเกิด",
+            "birthdate" => "กรุณาเลือกวันเกิด",
         ];
         $request->validate($rules, $message);
 

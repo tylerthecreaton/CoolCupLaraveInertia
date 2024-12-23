@@ -16,21 +16,24 @@ import generatePayload from "promptpay-qr";
 import ReactQrCode from "react-qr-code";
 import { useGlobalState } from "@/Store/state";
 import ReceiptModal from "./ReceiptModal";
+import LoadingIndicator from "../LoadingIndicator";
 
 const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
     const { state } = useGlobalState();
-    const { data, post, setData, errors } = useForm({
+    const { data, post, setData, errors, processing } = useForm({
         selectedMethod: "cash",
         cashReceived: 0.0,
         showQR: false,
         paymentFile: null,
         paymentNote: "",
         cart: state.cart,
-        memberPhone: "", // Add new field for member phone
+        memberPhone: "",
     });
 
     const [showReceipt, setShowReceipt] = useState(false);
-    const [orderData, setOrderData] = useState(null);
+    const [member, setMember] = useState(null);
+
+    const [receipt, setReceipt] = useState(null);
 
     const paymentMethods = [
         {
@@ -46,6 +49,15 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
             description: "สแกน QR Code เพื่อชำระเงิน",
         },
     ];
+
+    const handleSearchMember = async () => {
+        const response = await axios.get(
+            route("api.admin.member.memberWherePhoneNumber", {
+                phoneNumber: data.memberPhone,
+            })
+        );
+        setMember(response.data);
+    };
 
     const handleMethodSelect = (methodId) => {
         setData("selectedMethod", methodId);
@@ -63,6 +75,26 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
         const received = parseFloat(data.cashReceived);
         if (!received || received < total) return null;
         return (received - total).toFixed(2);
+    };
+
+    const confirmOrder = async () => {
+        const response = await axios.post(route("order.store"), {
+            ...data,
+            cart: state.cart,
+        });
+        if (response.status === 200) {
+            Swal.fire({
+                title: "สำเร็จ!",
+                text: "ชำระเงินเรียบร้อยแล้ว",
+                icon: "success",
+                timer: 1500,
+                showConfirmButton: false,
+            });
+            dispatch(cartActions.clearCart());
+            onClose();
+            setReceipt(response.data);
+            setShowReceipt(true);
+        }
     };
 
     const handleConfirm = (e) => {
@@ -94,76 +126,60 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
             }
         }
 
-        // Prepare order data before submitting
         const newOrderData = {
             orderNumber: `ORD${new Date().getTime()}`,
             items: state.cart,
             total: total,
             paymentMethod: data.selectedMethod,
             cashReceived: data.cashReceived,
-            memberPhone: data.memberPhone
+            memberPhone: data.memberPhone,
         };
 
-        // Show confirmation dialog first
         Swal.fire({
-            title: 'ยืนยันการชำระเงิน',
+            title: "ยืนยันการชำระเงิน",
             text: `ยอดชำระ: ฿${total}`,
-            icon: 'question',
+            icon: "question",
             showCancelButton: true,
-            confirmButtonText: 'ยืนยัน',
-            cancelButtonText: 'ยกเลิก',
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33'
+            confirmButtonText: "ยืนยัน",
+            cancelButtonText: "ยกเลิก",
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
         }).then((result) => {
             if (result.isConfirmed) {
-                // Show processing payment alert
-                Swal.fire({
-                    title: 'กำลังดำเนินการ',
-                    html: 'กำลังยืนยันการชำระเงิน...',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    timer: 1500,
-                    allowEnterKey: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                post(
-                    route("admin.orders.store"),
-                    {
-                        payment_method: data,
-                        cart: state.cart,
-                    },
-                    {
-                        forceFormData: true,
-                        onSuccess: () => {
-                            // Close processing alert and show success
-                            Swal.fire({
-                                title: 'สำเร็จ!',
-                                text: 'ชำระเงินเรียบร้อยแล้ว',
-                                icon: 'success',
-                                timer: 1500,
-                                showConfirmButton: false
-                            }).then(() => {
-                                setOrderData(newOrderData);
-                                setShowReceipt(true);
-                                dispatch(cartActions.incrementOrderNumber());
-                                dispatch(cartActions.clearCart());
-                                onClose();
-                            });
-                        },
-                        onError: (errors) => {
-                            console.log(errors);
-                            // Close processing alert and show error
-                            Swal.fire({
-                                title: "ไม่สำเร็จ",
-                                text: "เกิดข้อผิดพลาดในการชำระเงิน กรุณาลองใหม่อีกครั้ง",
-                                icon: "error",
-                            });
-                        },
-                    }
-                );
+                confirmOrder();
+                // post(
+                //     route("order.store"),
+                //     {
+                //         payment_method: data,
+                //         cart: state.cart,
+                //     },
+                //     {
+                //         forceFormData: true,
+                //         onSuccess: () => {
+                //             Swal.fire({
+                //                 title: "สำเร็จ!",
+                //                 text: "ชำระเงินเรียบร้อยแล้ว",
+                //                 icon: "success",
+                //                 timer: 1500,
+                //                 showConfirmButton: false,
+                //             }).then(() => {
+                //                 setOrderData(newOrderData);
+                //                 setShowReceipt(true);
+                //                 dispatch(cartActions.incrementOrderNumber());
+                //                 dispatch(cartActions.clearCart());
+                //                 onClose();
+                //             });
+                //         },
+                //         onError: (errors) => {
+                //             console.log(errors);
+                //             Swal.fire({
+                //                 title: "ไม่สำเร็จ",
+                //                 text: "เกิดข้อผิดพลาดในการชำระเงิน กรุณาลองใหม่อีกครั้ง",
+                //                 icon: "error",
+                //             });
+                //         },
+                //     }
+                // );
             }
         });
     };
@@ -185,6 +201,7 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                     </div>
                 </Modal.Header>
                 <Modal.Body className="p-6">
+                    <LoadingIndicator loading={processing} />
                     <div className="space-y-6">
                         <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
                             <div className="flex items-center space-x-2">
@@ -205,7 +222,9 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                             ? "border-blue-500 bg-blue-50"
                                             : "hover:bg-gray-50"
                                     }`}
-                                    onClick={() => handleMethodSelect(method.id)}
+                                    onClick={() =>
+                                        handleMethodSelect(method.id)
+                                    }
                                 >
                                     <div className="flex flex-1 items-center space-x-4">
                                         {method.icon === "banknotes" ? (
@@ -223,7 +242,9 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                         </div>
                                     </div>
                                     <Radio
-                                        checked={data.selectedMethod === method.id}
+                                        checked={
+                                            data.selectedMethod === method.id
+                                        }
                                         onChange={() =>
                                             handleMethodSelect(method.id)
                                         }
@@ -251,7 +272,9 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                             placeholder="กรอกจำนวนเงิน"
                                             className="flex-1"
                                         />
-                                        <span className="text-gray-500">บาท</span>
+                                        <span className="text-gray-500">
+                                            บาท
+                                        </span>
                                     </div>
                                 </div>
                                 {calculateChange() !== null && (
@@ -274,11 +297,60 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                         type="tel"
                                         value={data.memberPhone}
                                         onChange={(e) =>
-                                            setData("memberPhone", e.target.value)
+                                            setData(
+                                                "memberPhone",
+                                                e.target.value
+                                            )
                                         }
                                         placeholder="กรอกเบอร์โทรศัพท์สมาชิก"
                                         className="mt-1"
                                     />
+
+                                    {member && (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="font-medium text-gray-700">
+                                                    ชื่อสมาชิก:
+                                                </span>
+                                                <span className="text-lg font-bold">
+                                                    {member?.name}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="font-medium text-gray-700">
+                                                    เบอร์โทรศัพท์:
+                                                </span>
+                                                <span className="text-lg font-bold">
+                                                    {member?.phone_number}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="font-medium text-gray-700">
+                                                    วันเกิด:
+                                                </span>
+                                                <span className="text-lg font-bold">
+                                                    {new Date(
+                                                        member?.birthdate
+                                                    ).toLocaleDateString(
+                                                        "th-TH",
+                                                        {
+                                                            year: "numeric",
+                                                            month: "long",
+                                                            day: "numeric",
+                                                        }
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="font-medium text-gray-700">
+                                                    แต้มสะสม:
+                                                </span>
+                                                <span className="text-lg font-bold">
+                                                    {member?.loyalty_points}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex justify-end">
                                     <Button
@@ -291,25 +363,8 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                                     icon: "error",
                                                 });
                                             }
-                                            axios
-                                                .get(
-                                                    `/api/customer/loyalty-point?phone_number=${data.memberPhone}`
-                                                )
-                                                .then((response) => {
-                                                    Swal.fire({
-                                                        title: "แต้มสะสม",
-                                                        text: `คุณมีแต้มสะสม ${response.data} แต้ม`,
-                                                        icon: "success",
-                                                    });
-                                                })
-                                                .catch((error) => {
-                                                    console.log(error);
-                                                    Swal.fire({
-                                                        title: "ไม่สำเร็จ",
-                                                        text: "ไม่พบข้อมูลสมาชิก",
-                                                        icon: "error",
-                                                    });
-                                                });
+
+                                            handleSearchMember();
                                         }}
                                     >
                                         ค้นหา
@@ -358,7 +413,9 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                             placeholder="กรอกจำนวนเงิน"
                                             className="flex-1"
                                         />
-                                        <span className="text-gray-500">บาท</span>
+                                        <span className="text-gray-500">
+                                            บาท
+                                        </span>
                                     </div>
                                 </div>
                                 <div>
@@ -389,7 +446,10 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                         placeholder="กรอกหมายเหตุเพิ่มเติม"
                                         value={data.paymentNote}
                                         onChange={(e) =>
-                                            setData("paymentNote", e.target.value)
+                                            setData(
+                                                "paymentNote",
+                                                e.target.value
+                                            )
                                         }
                                         className="mt-1"
                                     />
@@ -404,7 +464,10 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                         type="tel"
                                         value={data.memberPhone}
                                         onChange={(e) =>
-                                            setData("memberPhone", e.target.value)
+                                            setData(
+                                                "memberPhone",
+                                                e.target.value
+                                            )
                                         }
                                         placeholder="กรอกเบอร์โทรศัพท์สมาชิก"
                                         className="mt-1"
@@ -431,7 +494,7 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
             <ReceiptModal
                 show={showReceipt}
                 onClose={handleReceiptClose}
-                orderData={orderData}
+                orderData={receipt}
             />
         </>
     );

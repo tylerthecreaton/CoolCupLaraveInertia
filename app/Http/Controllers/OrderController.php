@@ -10,43 +10,12 @@ use App\Models\ProductIngredients;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class OrderController extends Controller
 {
     public function store(Request $request)
     {
-
-        //         array:7 [▼ // app\Http\Controllers\OrderController.php:11
-        //   "selectedMethod" => "cash"
-        //   "cashReceived" => "100"
-        //   "showQR" => false
-        //   "paymentFile" => null
-        //   "paymentNote" => null
-        //   "cart" => array:7 [▼
-        //     "key" => 52
-        //     "items" => array:2 [▼
-        //       0 => array:9 [▼
-        //         "id" => 1734874136638
-        //         "productId" => 4
-        //         "name" => "เอสเปรสโซ่"
-        //         "image" => "/images/products/1734445766.jpg"
-        //         "price" => 50
-        //         "quantity" => 1
-        //         "size" => "S"
-        //         "sweetness" => "100%"
-        //         "toppings" => []
-        //       ]
-        //       1 => array:9 []
-        //     ]
-        //     "total" => 100
-        //     "totalItems" => 2
-        //     "discount" => 0
-        //     "finalTotal" => 100
-        //     "currentOrderNumber" => 28
-        //   ]
-        //   "memberPhone" => null
-        // ]
-
         $lastOrder = Order::latest()->first();
 
         $order = new Order();
@@ -72,6 +41,23 @@ class OrderController extends Controller
         //TODO: หาเบอร์ลูกค้าก่อนบันทึก
 
         $this->saveOrderDetails($cart['items'], $order->id);
+
+        return Order::with([
+            'orderDetails',
+            'user',
+            'customer',
+        ])->find($order->id);
+    }
+
+    public function receiptHistory()
+    {
+        $orders = Order::with(['orderDetails', 'customer'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return Inertia::render('ReceiptHistory', [
+            'orders' => $orders
+        ]);
     }
 
     private function findCustomerIdFromPhoneNumber(string $phoneNumber): ?string

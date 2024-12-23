@@ -21,6 +21,7 @@
         "vite": "^6.0"
     },
     "dependencies": {
+        "date-fns": "^4.1.0",
         "flowbite-react": "^0.10.2",
         "lucide-react": "^0.468.0",
         "promptpay-js": "^1.0.7",

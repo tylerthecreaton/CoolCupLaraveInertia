@@ -57,6 +57,17 @@ Route::get('/registermember', [RegisterMemberController::class, 'index'])->name(
 Route::get('/member', [MemberController::class, 'index'])->name('member');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/receipt-history', [OrderController::class, 'receiptHistory'])->name('receipt.history');
+
+    // ---------------------------Orders---------------------------
+    Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
+    Route::get('/orders/create', [OrderController::class, 'create'])->name('order.create');
+    Route::post('/orders', [OrderController::class, 'store'])->name('order.store');
+    Route::get('/orders/{id}', [OrderController::class, 'show'])->name('order.show');
+    Route::get('/orders/{id}/edit', [OrderController::class, 'edit'])->name('order.edit');
+    Route::put('/orders/{id}', [OrderController::class, 'update'])->name('order.update');
+    Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('order.destroy');
+
     Route::group(['prefix' => '/admin'], function () {
         // ---------------------------Users---------------------------
         Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
@@ -97,15 +108,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/customers/{id}/edit', [CustomerController::class, 'edit'])->name('admin.customers.edit');
         Route::put('/customers/{id}', [CustomerController::class, 'update'])->name('admin.customers.update');
         Route::delete('/customers/{id}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy');
-
-        // ---------------------------Orders---------------------------
-        Route::get('/orders', [OrderController::class, 'index'])->name('admin.orders.index');
-        Route::get('/orders/create', [OrderController::class, 'create'])->name('admin.orders.create');
-        Route::post('/orders', [OrderController::class, 'store'])->name('admin.orders.store');
-        Route::get('/orders/{id}', [OrderController::class, 'show'])->name('admin.orders.show');
-        Route::get('/orders/{id}/edit', [OrderController::class, 'edit'])->name('admin.orders.edit');
-        Route::put('/orders/{id}', [OrderController::class, 'update'])->name('admin.orders.update');
-        Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('admin.orders.destroy');
 
         // ---------------------------Ingredients---------------------------
         Route::get('/ingredients', [IngredientsController::class, 'index'])->name('admin.ingredients.index');

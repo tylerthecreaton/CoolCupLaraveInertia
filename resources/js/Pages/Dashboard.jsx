@@ -195,7 +195,7 @@ export default function Dashboard({ stats }) {
                                             </div>
                                         </li>
                                     ))}
-                                    {(!stats?.recentOrders || stats.recentOrders.length === 0) && (
+                                    {(!stats?.recentOrders || stats.recentorder.length === 0) && (
                                         <li className="py-8 text-center">
                                             <HiClipboardList className="mx-auto w-12 h-12 text-gray-400" />
                                             <p className="mt-2 text-gray-500">ไม่มีข้อมูลออเดอร์</p>

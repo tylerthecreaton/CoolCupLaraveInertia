@@ -129,11 +129,16 @@ export default function SidebarMenu() {
                         )}
                     </li>
                     <li className="flex items-center">
-                        {isOpen ? (
-                            <MenuText>ประวัติใบเสร็จ</MenuText>
-                        ) : (
-                            <MdHistory className="text-2xl" />
-                        )}
+                        <Link
+                            href="/receipt-history"
+                            className="text-blue-500 hover:text-blue-700"
+                        >
+                            {isOpen ? (
+                                <MenuText>ประวัติใบเสร็จ</MenuText>
+                            ) : (
+                                <MdHistory className="text-2xl" />
+                            )}
+                        </Link>
                     </li>
                     <li className="flex items-center">
                         {isOpen ? (
