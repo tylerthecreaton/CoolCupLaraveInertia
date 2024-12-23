@@ -84,7 +84,7 @@ class IngredientsController extends Controller
         $units = Unit::all();
         return Inertia::render('Admin/ingredients/Edit', compact('ingredient', 'units'));
     }
-    public function update(Request $request, $id)
+    public function update(Request $request,String $id)
     {
         $rules = [
             'name' => 'required|min:3|max:255|unique:ingredients,name,' . $id,
