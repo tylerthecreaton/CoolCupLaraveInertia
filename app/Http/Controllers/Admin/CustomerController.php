@@ -113,4 +113,16 @@ class CustomerController extends Controller
         $customer->delete();
         return redirect()->route("admin.customers.index")->with("success", "ลบข้อมูลเรียบร้อย");
     }
+
+    public function getLoyaltyPoint(Request $request)
+    {
+        dd($request->phone_number);
+        $customer = Customer::where('phone_number', $request->phone_number)->first();
+
+        if (!$customer) {
+            return response()->json(null, 404);
+        }
+
+        return response()->json($customer->loyalty_point);
+    }
 }
