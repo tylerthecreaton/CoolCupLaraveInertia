@@ -104,53 +104,68 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
             memberPhone: data.memberPhone
         };
 
-        // Show processing payment alert
+        // Show confirmation dialog first
         Swal.fire({
-            title: 'กำลังดำเนินการ',
-            html: 'กำลังยืนยันการชำระเงิน...',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            allowEnterKey: false,
-            didOpen: () => {
-                Swal.showLoading();
+            title: 'ยืนยันการชำระเงิน',
+            text: `ยอดชำระ: ฿${total}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'ยกเลิก',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show processing payment alert
+                Swal.fire({
+                    title: 'กำลังดำเนินการ',
+                    html: 'กำลังยืนยันการชำระเงิน...',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    timer: 1500,
+                    allowEnterKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                post(
+                    route("admin.orders.store"),
+                    {
+                        payment_method: data,
+                        cart: state.cart,
+                    },
+                    {
+                        forceFormData: true,
+                        onSuccess: () => {
+                            // Close processing alert and show success
+                            Swal.fire({
+                                title: 'สำเร็จ!',
+                                text: 'ชำระเงินเรียบร้อยแล้ว',
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                setOrderData(newOrderData);
+                                setShowReceipt(true);
+                                dispatch(cartActions.incrementOrderNumber());
+                                dispatch(cartActions.clearCart());
+                                onClose();
+                            });
+                        },
+                        onError: (errors) => {
+                            console.log(errors);
+                            // Close processing alert and show error
+                            Swal.fire({
+                                title: "ไม่สำเร็จ",
+                                text: "เกิดข้อผิดพลาดในการชำระเงิน กรุณาลองใหม่อีกครั้ง",
+                                icon: "error",
+                            });
+                        },
+                    }
+                );
             }
         });
-
-        post(
-            route("admin.orders.store"),
-            {
-                payment_method: data,
-                cart: state.cart,
-            },
-            {
-                forceFormData: true,
-                onSuccess: () => {
-                    // Close processing alert and show success
-                    Swal.fire({
-                        title: 'สำเร็จ!',
-                        text: 'ชำระเงินเรียบร้อยแล้ว',
-                        icon: 'success',
-                        timer: 1500,
-                        showConfirmButton: false
-                    }).then(() => {
-                        setOrderData(newOrderData);
-                        setShowReceipt(true);
-                        dispatch(cartActions.incrementOrderNumber());
-                        dispatch(cartActions.clearCart());
-                        onClose();
-                    });
-                },
-                onError: (errors) => {
-                    console.log(errors);
-                    // Close processing alert and show error
-                    Swal.fire({
-                        title: "ไม่สำเร็จ",
-                        text: "เกิดข้อผิดพลาดในการชำระเงิน กรุณาลองใหม่อีกครั้ง",
-                        icon: "error",
-                    });
-                },
-            }
-        );
     };
 
     const handleReceiptClose = () => {

@@ -18,7 +18,7 @@ export default function Dashboard({ stats }) {
                             ยินดีต้อนรับสู่ระบบจัดการร้าน CoolCupPOS
                         </p>
                     </div>
-                    <Button gradientDuoTone="purpleToBlue" className="hidden sm:flex items-center gap-2">
+                    <Button gradientDuoTone="purpleToBlue" className="hidden gap-2 items-center sm:flex">
                         <HiChartPie className="w-4 h-4" />
                         รายงานประจำวัน
                     </Button>
@@ -32,7 +32,7 @@ export default function Dashboard({ stats }) {
                     {/* Stats Cards */}
                     <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
                         {/* Total Customers */}
-                        <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+                        <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
                             <div className="relative">
                                 <div className="flex items-center">
                                     <div className="p-3 mr-4 text-orange-500 bg-gradient-to-br from-orange-100 to-orange-200 rounded-xl shadow-sm">
@@ -42,11 +42,11 @@ export default function Dashboard({ stats }) {
                                         <p className="mb-2 text-sm font-medium text-gray-600">
                                             ลูกค้าทั้งหมด
                                         </p>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex gap-2 items-center">
                                             <p className="text-2xl font-bold text-gray-700">
                                                 {stats?.customers?.toLocaleString() || 0}
                                             </p>
-                                            <Badge color="success" className="flex items-center gap-1">
+                                            <Badge color="success" className="flex gap-1 items-center">
                                                 <HiArrowSmUp className="w-3 h-3" />
                                                 12%
                                             </Badge>
@@ -60,7 +60,7 @@ export default function Dashboard({ stats }) {
                         </Card>
 
                         {/* Total Products */}
-                        <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+                        <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
                             <div className="relative">
                                 <div className="flex items-center">
                                     <div className="p-3 mr-4 text-blue-500 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl shadow-sm">
@@ -70,11 +70,11 @@ export default function Dashboard({ stats }) {
                                         <p className="mb-2 text-sm font-medium text-gray-600">
                                             สินค้าทั้งหมด
                                         </p>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex gap-2 items-center">
                                             <p className="text-2xl font-bold text-gray-700">
                                                 {stats?.products?.toLocaleString() || 0}
                                             </p>
-                                            <Badge color="success" className="flex items-center gap-1">
+                                            <Badge color="success" className="flex gap-1 items-center">
                                                 <HiArrowSmUp className="w-3 h-3" />
                                                 8%
                                             </Badge>
@@ -88,7 +88,7 @@ export default function Dashboard({ stats }) {
                         </Card>
 
                         {/* Total Orders */}
-                        <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+                        <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
                             <div className="relative">
                                 <div className="flex items-center">
                                     <div className="p-3 mr-4 text-green-500 bg-gradient-to-br from-green-100 to-green-200 rounded-xl shadow-sm">
@@ -98,11 +98,11 @@ export default function Dashboard({ stats }) {
                                         <p className="mb-2 text-sm font-medium text-gray-600">
                                             ออเดอร์ทั้งหมด
                                         </p>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex gap-2 items-center">
                                             <p className="text-2xl font-bold text-gray-700">
                                                 {stats?.orders?.toLocaleString() || 0}
                                             </p>
-                                            <Badge color="success" className="flex items-center gap-1">
+                                            <Badge color="success" className="flex gap-1 items-center">
                                                 <HiArrowSmUp className="w-3 h-3" />
                                                 15%
                                             </Badge>
@@ -116,7 +116,7 @@ export default function Dashboard({ stats }) {
                         </Card>
 
                         {/* Total Revenue */}
-                        <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+                        <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg">
                             <div className="relative">
                                 <div className="flex items-center">
                                     <div className="p-3 mr-4 text-purple-500 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl shadow-sm">
@@ -126,11 +126,11 @@ export default function Dashboard({ stats }) {
                                         <p className="mb-2 text-sm font-medium text-gray-600">
                                             รายได้ทั้งหมด
                                         </p>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex gap-2 items-center">
                                             <p className="text-2xl font-bold text-gray-700">
                                                 ฿{stats?.revenue?.toLocaleString() || '0'}
                                             </p>
-                                            <Badge color="success" className="flex items-center gap-1">
+                                            <Badge color="success" className="flex gap-1 items-center">
                                                 <HiArrowSmUp className="w-3 h-3" />
                                                 20%
                                             </Badge>
@@ -148,7 +148,7 @@ export default function Dashboard({ stats }) {
                     <div className="grid gap-6 mb-8 md:grid-cols-2">
                         {/* Recent Orders */}
                         <Card>
-                            <div className="flex items-center justify-between mb-4">
+                            <div className="flex justify-between items-center mb-4">
                                 <div>
                                     <h5 className="text-xl font-bold text-gray-900">
                                         ออเดอร์ล่าสุด
@@ -157,7 +157,7 @@ export default function Dashboard({ stats }) {
                                         รายการสั่งซื้อล่าสุด 5 รายการ
                                     </p>
                                 </div>
-                                <Button color="gray" size="sm" className="flex items-center gap-2">
+                                <Button color="gray" size="sm" className="flex gap-2 items-center">
                                     <HiEye className="w-4 h-4" />
                                     ดูทั้งหมด
                                 </Button>
@@ -165,10 +165,10 @@ export default function Dashboard({ stats }) {
                             <div className="flow-root">
                                 <ul className="divide-y divide-gray-200">
                                     {stats?.recentOrders?.map((order) => (
-                                        <li key={order.id} className="py-4 hover:bg-gray-50 transition-colors">
+                                        <li key={order.id} className="py-4 transition-colors hover:bg-gray-50">
                                             <div className="flex items-center space-x-4">
                                                 <div className="flex-shrink-0">
-                                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <div className="flex justify-center items-center w-10 h-10 bg-blue-100 rounded-full">
                                                         <HiClipboardList className="w-5 h-5 text-blue-600" />
                                                     </div>
                                                 </div>
@@ -176,7 +176,7 @@ export default function Dashboard({ stats }) {
                                                     <p className="text-sm font-semibold text-gray-900 truncate">
                                                         {order.customer_name}
                                                     </p>
-                                                    <div className="flex items-center gap-2 mt-1">
+                                                    <div className="flex gap-2 items-center mt-1">
                                                         <HiClock className="w-4 h-4 text-gray-400" />
                                                         <p className="text-sm text-gray-500">
                                                             {new Date(order.created_at).toLocaleDateString('th-TH', {
@@ -207,7 +207,7 @@ export default function Dashboard({ stats }) {
 
                         {/* Popular Products */}
                         <Card>
-                            <div className="flex items-center justify-between mb-4">
+                            <div className="flex justify-between items-center mb-4">
                                 <div>
                                     <h5 className="text-xl font-bold text-gray-900">
                                         สินค้าขายดี
@@ -216,7 +216,7 @@ export default function Dashboard({ stats }) {
                                         สินค้าที่มียอดขายสูงสุด 5 อันดับ
                                     </p>
                                 </div>
-                                <Button color="gray" size="sm" className="flex items-center gap-2">
+                                <Button color="gray" size="sm" className="flex gap-2 items-center">
                                     <HiTrendingUp className="w-4 h-4" />
                                     ดูเพิ่มเติม
                                 </Button>
@@ -224,23 +224,23 @@ export default function Dashboard({ stats }) {
                             <div className="flow-root">
                                 <ul className="divide-y divide-gray-200">
                                     {stats?.popularProducts?.map((product, index) => (
-                                        <li key={product.id} className="py-4 hover:bg-gray-50 transition-colors">
+                                        <li key={product.id} className="py-4 transition-colors hover:bg-gray-50">
                                             <div className="flex items-center space-x-4">
                                                 <div className="flex-shrink-0">
                                                     {product.image_url ? (
                                                         <img
-                                                            className="w-16 h-16 rounded-xl object-cover ring-2 ring-gray-200"
+                                                            className="object-cover w-16 h-16 rounded-xl ring-2 ring-gray-200"
                                                             src={product.image_url}
                                                             alt={product.name}
                                                         />
                                                     ) : (
-                                                        <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center ring-2 ring-gray-200">
+                                                        <div className="flex justify-center items-center w-16 h-16 bg-gray-100 rounded-xl ring-2 ring-gray-200">
                                                             <HiShoppingBag className="w-8 h-8 text-gray-400" />
                                                         </div>
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex gap-2 items-center">
                                                         <p className="text-sm font-semibold text-gray-900">
                                                             {product.name}
                                                         </p>
@@ -248,7 +248,7 @@ export default function Dashboard({ stats }) {
                                                             #{index + 1}
                                                         </Badge>
                                                     </div>
-                                                    <div className="flex items-center gap-2 mt-1">
+                                                    <div className="flex gap-2 items-center mt-1">
                                                         <Badge color="info" className="font-medium">
                                                             {product.category}
                                                         </Badge>
