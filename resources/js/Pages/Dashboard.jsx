@@ -190,12 +190,17 @@ export default function Dashboard({ stats }) {
                                                     </div>
                                                 </div>
                                                 <div className="inline-flex items-center text-base font-bold text-gray-900">
-                                                    ฿{order.total.toLocaleString()}
+                                                    <span className="text-sm font-semibold text-green-600">
+                                                        {order.status === 'pending' ? 'รอการจัดส่ง' : order.status === 'shipping' ? 'กำลังส่ง' : 'เสร็จสิ้น'}
+                                                    </span>
+                                                    <span className="hidden sm:inline-block sm:mx-2 sm:px-2 sm:py-1 sm:rounded-full sm:bg-gray-200">
+                                                        {order.payment_method}
+                                                    </span>
                                                 </div>
                                             </div>
                                         </li>
                                     ))}
-                                    {(!stats?.recentOrders || stats.recentorder.length === 0) && (
+                                    {(!stats?.recentOrders || stats.recentOrders.length === 0) && (
                                         <li className="py-8 text-center">
                                             <HiClipboardList className="mx-auto w-12 h-12 text-gray-400" />
                                             <p className="mt-2 text-gray-500">ไม่มีข้อมูลออเดอร์</p>
