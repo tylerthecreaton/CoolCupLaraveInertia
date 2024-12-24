@@ -225,7 +225,7 @@ export const cartReducer = (state = initialCartState, action) => {
             }
             return {
                 ...cartState,
-                currentOrderNumber: state.currentOrderNumber,
+                currentOrderNumber: state.currentOrderNumber +1,
             };
         }
 

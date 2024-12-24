@@ -115,7 +115,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                             <span>+{Number(orderData?.received_points || 0).toFixed(2)}</span>
                         </div>
                         {orderData?.customer && (
-                            <div className="mt-4 text-sm text-gray-600">
+                            <div className="mt-4 text-base text-gray-600">
                                 <p>ลูกค้า: {orderData.customer.name || '-'}</p>
                                 <p>เบอร์โทร: {orderData.customer.phone_number || '-'}</p>
                                 <p>แต้มสะสมทั้งหมด: {Number(orderData.customer.loyalty_points || 0).toFixed(2)}</p>

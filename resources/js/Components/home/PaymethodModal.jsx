@@ -17,6 +17,8 @@ import ReactQrCode from "react-qr-code";
 import { useGlobalState } from "@/Store/state";
 import ReceiptModal from "./ReceiptModal";
 import LoadingIndicator from "../LoadingIndicator";
+import { MdOutlineSystemSecurityUpdateWarning } from "react-icons/md";
+import UsePointModal from "./UsePointModal";
 
 const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
     const { state } = useGlobalState();
@@ -32,7 +34,6 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
 
     const [showReceipt, setShowReceipt] = useState(false);
     const [member, setMember] = useState(null);
-
     const [receipt, setReceipt] = useState(null);
 
     const paymentMethods = [
@@ -309,26 +310,26 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                     {member && (
                                         <div className="space-y-2">
                                             <div className="flex items-center space-x-2">
-                                                <span className="font-medium text-gray-700">
+                                                <span className="font-bold text-gray-700">
                                                     ชื่อสมาชิก:
                                                 </span>
-                                                <span className="text-lg font-bold">
+                                                <span className="text-base font-normal">
                                                     {member?.name}
                                                 </span>
                                             </div>
                                             <div className="flex items-center space-x-2">
-                                                <span className="font-medium text-gray-700">
+                                                <span className="font-bold text-gray-700">
                                                     เบอร์โทรศัพท์:
                                                 </span>
-                                                <span className="text-lg font-bold">
+                                                <span className="text-base font-normal">
                                                     {member?.phone_number}
                                                 </span>
                                             </div>
                                             <div className="flex items-center space-x-2">
-                                                <span className="font-medium text-gray-700">
+                                                <span className="font-bold text-gray-700">
                                                     วันเกิด:
                                                 </span>
-                                                <span className="text-lg font-bold">
+                                                <span className="text-base font-normal">
                                                     {new Date(
                                                         member?.birthdate
                                                     ).toLocaleDateString(
@@ -342,10 +343,10 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                                 </span>
                                             </div>
                                             <div className="flex items-center space-x-2">
-                                                <span className="font-medium text-gray-700">
+                                                <span className="font-bold text-gray-700">
                                                     แต้มสะสม:
                                                 </span>
-                                                <span className="text-lg font-bold">
+                                                <span className="text-base font-normal">
                                                     {member?.loyalty_points}
                                                 </span>
                                             </div>
@@ -454,7 +455,7 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                         className="mt-1"
                                     />
                                 </div>
-                                <div className="mb-4">
+                                <div className="p-4 space-y-4 rounded-lg border">
                                     <Label
                                         htmlFor="memberPhone"
                                         value="เบอร์สมาชิกเพื่อสะสมแต้ม"
@@ -472,6 +473,72 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                                         placeholder="กรอกเบอร์โทรศัพท์สมาชิก"
                                         className="mt-1"
                                     />
+                                    {member && (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="font-bold text-gray-700">
+                                                    ชื่อสมาชิก:
+                                                </span>
+                                                <span className="text-base font-normal">
+                                                    {member?.name}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="font-bold text-gray-700">
+                                                    เบอร์โทรศัพท์:
+                                                </span>
+                                                <span className="text-base font-normal">
+                                                    {member?.phone_number}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="font-bold text-gray-700">
+                                                    วันเกิด:
+                                                </span>
+                                                <span className="text-base font-normal">
+                                                    {new Date(
+                                                        member?.birthdate
+                                                    ).toLocaleDateString(
+                                                        "th-TH",
+                                                        {
+                                                            year: "numeric",
+                                                            month: "long",
+                                                            day: "numeric",
+                                                        }
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center space-x-2">
+                                                <span className="font-bold text-gray-700">
+                                                    แต้มสะสม:
+                                                </span>
+                                                <span className="text-base font-normal">
+                                                    {member?.loyalty_points}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex gap-2 justify-between">
+                                    <Button type="button" onClick={() => {}}>
+                                        ใช้แต้ม
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        onClick={() => {
+                                            if (!data.memberPhone) {
+                                                return Swal.fire({
+                                                    title: "ไม่สำเร็จ",
+                                                    text: "กรุณากรอกเบอร์โทรศัพท์สมาชิก",
+                                                    icon: "error",
+                                                });
+                                            }
+
+                                            handleSearchMember();
+                                        }}
+                                    >
+                                        ค้นหา
+                                    </Button>
                                 </div>
                             </div>
                         )}
