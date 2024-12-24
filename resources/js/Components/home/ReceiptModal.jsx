@@ -58,7 +58,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                     </h3>
                 </div>
             </Modal.Header>
-            <Modal.Body ref={receiptRef}>
+            <div className="p-6" ref={receiptRef}>
                 {error && (
                     <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
                         {error}
@@ -180,7 +180,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                         <p>Cool Cup</p>
                     </div>
                 </div>
-            </Modal.Body>
+            </div>
             <Modal.Footer className="bg-gray-50 border-t">
                 <div className="flex justify-center space-x-3 w-full">
                     <Button
