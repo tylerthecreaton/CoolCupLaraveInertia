@@ -1,8 +1,43 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Modal, Button } from "flowbite-react";
 import { Receipt } from "lucide-react";
+import html2canvas from 'html2canvas';
+import axios from 'axios';
 
 const ReceiptModal = ({ show, onClose, orderData }) => {
+    const receiptRef = useRef(null);
+    const [receiptUrl, setReceiptUrl] = React.useState(null);
+    const [error, setError] = React.useState(null);
+
+    useEffect(() => {
+        if (show && receiptRef.current) {
+            setTimeout(() => {
+                captureAndSaveReceipt();
+            }, 500);
+        }
+    }, [show]);
+
+    const captureAndSaveReceipt = async () => {
+        try {
+            setError(null);
+            const canvas = await html2canvas(receiptRef.current);
+            const imageData = canvas.toDataURL('image/png');
+
+            const response = await axios.post('/receipt/store', {
+                svgData: imageData
+            });
+
+            if (response.data.success) {
+                setReceiptUrl(response.data.url);
+            } else {
+                setError(response.data.message || 'Failed to save receipt');
+            }
+        } catch (error) {
+            console.error('Failed to save receipt:', error);
+            setError(error.response?.data?.message || 'Failed to save receipt: Network error');
+        }
+    };
+
     const formatDate = (date) => {
         return new Date(date).toLocaleString("th-TH", {
             year: "numeric",
@@ -23,7 +58,17 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                     </h3>
                 </div>
             </Modal.Header>
-            <Modal.Body>
+            <Modal.Body ref={receiptRef}>
+                {error && (
+                    <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
+                        {error}
+                    </div>
+                )}
+                {receiptUrl && !error && (
+                    <div className="p-4 mb-4 text-green-700 bg-green-100 rounded-lg">
+                        Receipt saved successfully!
+                    </div>
+                )}
                 <div className="space-y-6">
                     <div className="text-center">
                         <h2 className="text-2xl font-bold">Cool Cup</h2>
