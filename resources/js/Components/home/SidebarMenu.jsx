@@ -30,43 +30,47 @@ export default function SidebarMenu() {
 
     const handleLogout = () => {
         Swal.fire({
-            title: 'ยืนยันการออกจากระบบ',
-            text: 'คุณต้องการออกจากระบบใช่หรือไม่?',
-            icon: 'question',
+            title: "ยืนยันการออกจากระบบ",
+            text: "คุณต้องการออกจากระบบใช่หรือไม่?",
+            icon: "question",
             showCancelButton: true,
-            confirmButtonColor: '#0891b2',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'ใช่, ออกจากระบบ',
-            cancelButtonText: 'ยกเลิก'
+            confirmButtonColor: "#0891b2",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ใช่, ออกจากระบบ",
+            cancelButtonText: "ยกเลิก",
         }).then((result) => {
             if (result.isConfirmed) {
                 // Show loading state
                 Swal.fire({
-                    title: 'กำลังออกจากระบบ',
-                    text: 'กรุณารอสักครู่...',
+                    title: "กำลังออกจากระบบ",
+                    text: "กรุณารอสักครู่...",
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     allowEnterKey: false,
                     didOpen: () => {
                         Swal.showLoading();
-                    }
+                    },
                 });
 
                 // Clear sidebar state and logout
                 localStorage.removeItem("sidebarOpen");
-                router.post(route('logout'), {}, {
-                    onSuccess: () => {
-                        Swal.fire({
-                            title: 'ออกจากระบบสำเร็จ',
-                            text: 'ขอบคุณที่ใช้บริการ',
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.href = route('login');
-                        });
+                router.post(
+                    route("logout"),
+                    {},
+                    {
+                        onSuccess: () => {
+                            Swal.fire({
+                                title: "ออกจากระบบสำเร็จ",
+                                text: "ขอบคุณที่ใช้บริการ",
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false,
+                            }).then(() => {
+                                window.location.href = route("login");
+                            });
+                        },
                     }
-                });
+                );
             }
         });
     };
@@ -97,8 +101,7 @@ export default function SidebarMenu() {
                     >
                         <MdMenu
                             className={`text-4xl transition-transform duration-300 ${
-                                isOpen ? "" : "rotate-180"
-                            }`}
+                                isOpen ? "":"rotate-180"}`}
                         />
                     </button>
                 </div>
@@ -122,11 +125,18 @@ export default function SidebarMenu() {
                         )}
                     </li>
                     <li className="flex items-center">
-                        {isOpen ? (
-                            <MenuText>โปรโมชั่น</MenuText>
-                        ) : (
-                            <MdLocalOffer className="text-2xl" />
-                        )}
+                        <Link
+                            href="/promotions"
+                            className="text-blue-500 hover:text-blue-700"
+                        >
+                            <span className="flex items-center text-base font-semibold">
+                                {isOpen ? (
+                                    <MenuText>โปรโมชั่น</MenuText>
+                                ) : (
+                                    <MdLocalOffer className="text-2xl" />
+                                )}
+                            </span>
+                        </Link>
                     </li>
                     <li className="flex items-center">
                         {isOpen ? (
@@ -151,7 +161,7 @@ export default function SidebarMenu() {
                             href="/member"
                             className="text-blue-500 hover:text-blue-700"
                         >
-                            <span className="text-base font-semibold flex items-center">
+                            <span className="flex items-center text-base font-semibold">
                                 {isOpen ? (
                                     <MenuText>สมาชิก</MenuText>
                                 ) : (
@@ -165,7 +175,7 @@ export default function SidebarMenu() {
                             href="/registermember"
                             className="text-blue-500 hover:text-blue-700"
                         >
-                            <span className="text-base font-semibold flex items-center">
+                            <span className="flex items-center text-base font-semibold">
                                 {isOpen ? (
                                     <MenuText>สมัครสมาชิก</MenuText>
                                 ) : (
@@ -184,13 +194,13 @@ export default function SidebarMenu() {
                     <li>
                         <button
                             type="button"
-                            className="text-red-500 w-full flex items-center justify-center"
+                            className="flex justify-center items-center w-full text-red-500"
                             onClick={handleLogout}
                         >
                             {isOpen ? (
                                 <MenuText>ออกจากระบบ</MenuText>
                             ) : (
-                                <MdExitToApp className="text-2xl hover:scale-110 transition-transform" />
+                                <MdExitToApp className="text-2xl transition-transform hover:scale-110" />
                             )}
                         </button>
                     </li>
