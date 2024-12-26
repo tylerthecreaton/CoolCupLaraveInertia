@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
 import { useGlobalState } from "@/Store/state";
 import { usePage } from "@inertiajs/react";
+import { useEffect, useState } from "react";
 
 export default function HeaderPanel() {
     const { state, dispatch } = useGlobalState();
@@ -16,7 +16,7 @@ export default function HeaderPanel() {
     return (
         <div className="flex justify-between bg-blue-300 min-h-24">
             <div className="py-10 text-4xl font-bold text-black ms-8">
-                สมาชิก
+                โปรโมชั่น
             </div>
             <div className="flex items-center space-x-6 py-10 mr-8">
                 <div className="text-black">
