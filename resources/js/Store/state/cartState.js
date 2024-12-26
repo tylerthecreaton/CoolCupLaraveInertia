@@ -17,7 +17,7 @@ export const cartState = {
     totalItems: 0,
     discount: 0,
     finalTotal: 0,
-    currentOrderNumber: 1,
+    currentOrderNumber: null,
 };
 
 const getItemKey = (item) => {
@@ -219,13 +219,22 @@ export const cartReducer = (state = initialCartState, action) => {
             return newState;
         }
 
+        case "SET_ORDER_NUMBER": {
+            const newState = {
+                ...state,
+                currentOrderNumber: action.payload,
+            };
+            saveCartStateToLocalStorage(newState);
+            return newState;
+        }
+
         case "CLEAR_CART": {
             if (isLocalStorageAvailable()) {
                 localStorage.removeItem("cartState");
             }
             return {
                 ...cartState,
-                currentOrderNumber: state.currentOrderNumber +1,
+                currentOrderNumber: state.currentOrderNumber,
             };
         }
 
@@ -267,6 +276,12 @@ export const cartActions = {
     incrementOrderNumber() {
         return {
             type: "INCREMENT_ORDER_NUMBER",
+        };
+    },
+    setOrderNumber(number) {
+        return {
+            type: "SET_ORDER_NUMBER",
+            payload: number,
         };
     },
 };

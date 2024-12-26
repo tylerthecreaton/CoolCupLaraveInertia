@@ -15,6 +15,7 @@ import Swal from "sweetalert2";
 import generatePayload from "promptpay-qr";
 import ReactQrCode from "react-qr-code";
 import { useGlobalState } from "@/Store/state";
+import { appActions } from "@/Store/state/appState";
 import ReceiptModal from "./ReceiptModal";
 import LoadingIndicator from "../LoadingIndicator";
 import { MdOutlineSystemSecurityUpdateWarning } from "react-icons/md";
@@ -33,8 +34,8 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
     });
 
     const [showReceipt, setShowReceipt] = useState(false);
-    const [member, setMember] = useState(null);
     const [receipt, setReceipt] = useState(null);
+    const [member, setMember] = useState(null);
 
     const paymentMethods = [
         {
@@ -148,39 +149,6 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
         }).then((result) => {
             if (result.isConfirmed) {
                 confirmOrder();
-                // post(
-                //     route("order.store"),
-                //     {
-                //         payment_method: data,
-                //         cart: state.cart,
-                //     },
-                //     {
-                //         forceFormData: true,
-                //         onSuccess: () => {
-                //             Swal.fire({
-                //                 title: "สำเร็จ!",
-                //                 text: "ชำระเงินเรียบร้อยแล้ว",
-                //                 icon: "success",
-                //                 timer: 1500,
-                //                 showConfirmButton: false,
-                //             }).then(() => {
-                //                 setOrderData(newOrderData);
-                //                 setShowReceipt(true);
-                //                 dispatch(cartActions.incrementOrderNumber());
-                //                 dispatch(cartActions.clearCart());
-                //                 onClose();
-                //             });
-                //         },
-                //         onError: (errors) => {
-                //             console.log(errors);
-                //             Swal.fire({
-                //                 title: "ไม่สำเร็จ",
-                //                 text: "เกิดข้อผิดพลาดในการชำระเงิน กรุณาลองใหม่อีกครั้ง",
-                //                 icon: "error",
-                //             });
-                //         },
-                //     }
-                // );
             }
         });
     };
@@ -192,7 +160,12 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
 
     return (
         <>
-            <Modal show={show && !showReceipt} onClose={onClose} size="lg">
+            <Modal
+                show={show}
+                onClose={onClose}
+                size="lg"
+                className="dark:bg-gray-800"
+            >
                 <Modal.Header className="bg-gray-50 border-b">
                     <div className="flex items-center space-x-2">
                         <CreditCard className="w-6 h-6 text-blue-600" />
@@ -558,9 +531,10 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                     </div>
                 </Modal.Footer>
             </Modal>
+
             <ReceiptModal
                 show={showReceipt}
-                onClose={handleReceiptClose}
+                onClose={() => setShowReceipt(false)}
                 orderData={receipt}
             />
         </>

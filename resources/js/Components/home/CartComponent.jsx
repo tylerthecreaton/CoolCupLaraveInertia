@@ -6,6 +6,7 @@ import { Button, TextInput, Select } from "flowbite-react";
 import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
 import { usePage } from "@inertiajs/react";
 import Swal from "sweetalert2";
+import axios from 'axios';
 import ConfirmOrderModal from "./ConfirmOrderModal";
 
 const CartComponent = () => {
@@ -52,9 +53,15 @@ const CartComponent = () => {
     }, [state.app.isCartOpen]);
 
     useEffect(() => {
-        if (!state.cart.currentOrderNumber) {
-            dispatch(cartActions.incrementOrderNumber());
-        }
+        // Fetch the last order number from backend
+        axios.get('/get-last-order-number')
+            .then(response => {
+                dispatch(cartActions.setOrderNumber(response.data.nextOrderNumber));
+            })
+            .catch(error => {
+                console.error('Error fetching order number:', error);
+                dispatch(cartActions.setOrderNumber(1));
+            });
     }, []);
 
     const handleAddToCart = (product, toppings, sweetness, size) => {

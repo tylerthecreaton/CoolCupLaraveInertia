@@ -16,15 +16,13 @@ class OrderController extends Controller
 {
     public function store(Request $request)
     {
-        $lastOrder = Order::latest()->first();
-
         $order = new Order();
         $order->user_id = Auth::user()->id;
         if ($request->get("memberPhone")) {
             $order->customer_id = $this->findCustomerIdFromPhoneNumber($request->get("memberPhone"));
         }
         $cart = $request->get("cart");
-        $order->order_number = $cart['currentOrderNumber'] ?? $lastOrder->order_number + 1;
+        $order->order_number = Order::generateOrderNumber();
         $order->total_amount = $cart['total'];
         $order->discount_amount = $cart['discount'];
         $order->final_amount = $cart['finalTotal'];
@@ -47,6 +45,14 @@ class OrderController extends Controller
             'user',
             'customer',
         ])->find($order->id);
+    }
+
+    public function getLastOrderNumber()
+    {
+        $lastOrder = Order::orderBy('order_number', 'desc')->first();
+        return response()->json([
+            'nextOrderNumber' => $lastOrder ? $lastOrder->order_number + 1 : 1
+        ]);
     }
 
     public function receiptHistory()

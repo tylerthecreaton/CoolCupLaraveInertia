@@ -14,8 +14,15 @@ class Order extends Model
         'discount',
         'grand_total',
         'status',
+        'order_number'
     ];
 
+
+    public static function generateOrderNumber()
+    {
+        $lastOrder = self::orderBy('order_number', 'desc')->first();
+        return $lastOrder ? $lastOrder->order_number + 1 : 1;
+    }
 
     public function orderDetails()
     {
