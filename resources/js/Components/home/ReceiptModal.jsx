@@ -41,23 +41,33 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
     }, []);
 
     useEffect(() => {
-        if (show && receiptRef.current) {
+        if (show && receiptRef.current && orderData?.id) {
             setTimeout(() => {
                 captureAndSaveReceipt();
             }, 500);
         }
-    }, [show]);
+    }, [show, orderData]);
 
     const captureAndSaveReceipt = async () => {
         try {
             setError(null);
+            console.log('Capturing receipt for order:', orderData);
+            
+            if (!orderData?.id) {
+                console.error('No order ID available');
+                return;
+            }
+
             const canvas = await html2canvas(receiptRef.current);
             const imageData = canvas.toDataURL('image/png');
 
+            console.log('Sending request with order ID:', orderData.id);
             const response = await axios.post('/receipt/store', {
-                svgData: imageData
+                svgData: imageData,
+                orderId: orderData.id
             });
 
+            console.log('Receipt save response:', response.data);
             if (response.data.success) {
                 setReceiptUrl(response.data.url);
             } else {
@@ -75,13 +85,22 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
         setIsSaving(true);
         try {
             setError(null);
+            console.log('Manually saving receipt for order:', orderData);
+            
+            if (!orderData?.id) {
+                throw new Error('No order ID available');
+            }
+
             const canvas = await html2canvas(receiptRef.current);
             const imageData = canvas.toDataURL('image/png');
 
+            console.log('Sending request with order ID:', orderData.id);
             const response = await axios.post('/receipt/store', {
-                svgData: imageData
+                svgData: imageData,
+                orderId: orderData.id
             });
 
+            console.log('Receipt save response:', response.data);
             if (response.data.success) {
                 setReceiptUrl(response.data.url);
                 Swal.fire({
