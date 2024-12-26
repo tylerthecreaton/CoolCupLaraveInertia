@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
+use Illuminate\Support\Str;
 
 class ReceiptController extends Controller
 {
-    function store(Request $request)
+    public function store(Request $request)
     {
         try {
             if (!$request->has('svgData')) {
@@ -30,7 +31,7 @@ class ReceiptController extends Controller
                 ], 400);
             }
 
-            $filename = 'receipt-' . time() . '.png';
+            $filename = 'receipt_' . date('Ymd_His') . '_' . Str::random(8) . '.png';
 
             if (!is_dir(public_path('images/receipt'))) {
                 mkdir(public_path('images/receipt'), 0777, true);

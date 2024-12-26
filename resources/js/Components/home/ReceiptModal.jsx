@@ -3,11 +3,42 @@ import { Modal, Button } from "flowbite-react";
 import { Receipt } from "lucide-react";
 import html2canvas from 'html2canvas';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const ReceiptModal = ({ show, onClose, orderData }) => {
     const receiptRef = useRef(null);
     const [receiptUrl, setReceiptUrl] = React.useState(null);
     const [error, setError] = React.useState(null);
+    const [isSaving, setIsSaving] = React.useState(false);
+    
+    // แสดงใบเสร็จตอนกด Button พิมพ์ใบเสร็จ
+    useEffect(() => {
+        const style = document.createElement('style');
+        style.textContent = `
+            @media print {
+                body * {
+                    visibility: hidden;
+                }
+                .receipt-content {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                }
+                .receipt-content, .receipt-content * {
+                    visibility: visible;
+                }
+                .modal-footer {
+                    display: none !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        return () => {
+            document.head.removeChild(style);
+        };
+    }, []);
 
     useEffect(() => {
         if (show && receiptRef.current) {
@@ -38,6 +69,43 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
         }
     };
 
+    const handleSaveReceipt = async () => {
+        if (!receiptRef.current) return;
+
+        setIsSaving(true);
+        try {
+            setError(null);
+            const canvas = await html2canvas(receiptRef.current);
+            const imageData = canvas.toDataURL('image/png');
+
+            const response = await axios.post('/receipt/store', {
+                svgData: imageData
+            });
+
+            if (response.data.success) {
+                setReceiptUrl(response.data.url);
+                Swal.fire({
+                    title: 'บันทึกสำเร็จ',
+                    text: 'บันทึกใบเสร็จเรียบร้อยแล้ว',
+                    icon: 'success',
+                    confirmButtonText: 'ตกลง'
+                });
+            } else {
+                throw new Error(response.data.message || 'Failed to save receipt');
+            }
+        } catch (error) {
+            console.error('Failed to save receipt:', error);
+            Swal.fire({
+                title: 'เกิดข้อผิดพลาด',
+                text: error.response?.data?.message || 'ไม่สามารถบันทึกใบเสร็จได้',
+                icon: 'error',
+                confirmButtonText: 'ตกลง'
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const formatDate = (date) => {
         return new Date(date).toLocaleString("th-TH", {
             year: "numeric",
@@ -49,7 +117,11 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
     };
 
     return (
-        <Modal show={show} onClose={onClose} size="lg">
+        <Modal
+            show={show}
+            onClose={onClose}
+            size="xl"
+        >
             <Modal.Header className="bg-gray-50 border-b">
                 <div className="flex items-center space-x-2">
                     <Receipt className="w-6 h-6 text-green-600" />
@@ -58,7 +130,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                     </h3>
                 </div>
             </Modal.Header>
-            <div className="p-6" ref={receiptRef}>
+            <div ref={receiptRef} className="receipt-content bg-white p-8">
                 {error && (
                     <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
                         {error}
@@ -181,20 +253,39 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                     </div>
                 </div>
             </div>
-            <Modal.Footer className="bg-gray-50 border-t">
-                <div className="flex justify-center space-x-3 w-full">
-                    <Button
-                        onClick={onClose}
-                        className="bg-green-600 hover:bg-green-700"
-                    >
+            <Modal.Footer className="bg-gray-50 border-t modal-footer">
+                <div className="flex justify-between w-full">
+                    <Button color="gray" onClick={onClose}>
                         ปิด
                     </Button>
-                    <Button
-                        onClick={() => window.print()}
-                        className="bg-gray-600 hover:bg-gray-700"
-                    >
-                        พิมพ์ใบเสร็จ
-                    </Button>
+                    <div className="flex space-x-2">
+                        <Button
+                            color="gray"
+                            onClick={() => window.print()}
+                        >
+                            พิมพ์ใบเสร็จ
+                        </Button>
+                        <Button
+                            color="blue"
+                            onClick={handleSaveReceipt}
+                            disabled={isSaving}
+                        >
+                            {isSaving ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    กำลังบันทึก...
+                                </>
+                            ) : (
+                                <>
+                                    <Receipt className="w-4 h-4 mr-2" />
+                                    บันทึกใบเสร็จ
+                                </>
+                            )}
+                        </Button>
+                    </div>
                 </div>
             </Modal.Footer>
         </Modal>

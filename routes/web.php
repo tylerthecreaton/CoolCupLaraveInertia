@@ -14,6 +14,7 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterMemberController;
+use App\Http\Controllers\ReceiptController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/orders/{id}', [OrderController::class, 'update'])->name('order.update');
     Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('order.destroy');
     Route::get('/get-last-order-number', [OrderController::class, 'getLastOrderNumber'])->name('order.lastNumber');
+    Route::post('/receipt/store', [ReceiptController::class, 'store'])->name('receipt.store');
 
     Route::group(['prefix' => '/admin'], function () {
         // ---------------------------Users---------------------------
