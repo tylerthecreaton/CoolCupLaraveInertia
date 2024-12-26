@@ -30,43 +30,47 @@ export default function SidebarMenu() {
 
     const handleLogout = () => {
         Swal.fire({
-            title: 'ยืนยันการออกจากระบบ',
-            text: 'คุณต้องการออกจากระบบใช่หรือไม่?',
-            icon: 'question',
+            title: "ยืนยันการออกจากระบบ",
+            text: "คุณต้องการออกจากระบบใช่หรือไม่?",
+            icon: "question",
             showCancelButton: true,
-            confirmButtonColor: '#0891b2',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'ใช่, ออกจากระบบ',
-            cancelButtonText: 'ยกเลิก'
+            confirmButtonColor: "#0891b2",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ใช่, ออกจากระบบ",
+            cancelButtonText: "ยกเลิก",
         }).then((result) => {
             if (result.isConfirmed) {
                 // Show loading state
                 Swal.fire({
-                    title: 'กำลังออกจากระบบ',
-                    text: 'กรุณารอสักครู่...',
+                    title: "กำลังออกจากระบบ",
+                    text: "กรุณารอสักครู่...",
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     allowEnterKey: false,
                     didOpen: () => {
                         Swal.showLoading();
-                    }
+                    },
                 });
 
                 // Clear sidebar state and logout
                 localStorage.removeItem("sidebarOpen");
-                router.post(route('logout'), {}, {
-                    onSuccess: () => {
-                        Swal.fire({
-                            title: 'ออกจากระบบสำเร็จ',
-                            text: 'ขอบคุณที่ใช้บริการ',
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false
-                        }).then(() => {
-                            window.location.href = route('login');
-                        });
+                router.post(
+                    route("logout"),
+                    {},
+                    {
+                        onSuccess: () => {
+                            Swal.fire({
+                                title: "ออกจากระบบสำเร็จ",
+                                text: "ขอบคุณที่ใช้บริการ",
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false,
+                            }).then(() => {
+                                window.location.href = route("login");
+                            });
+                        },
                     }
-                });
+                );
             }
         });
     };
@@ -122,11 +126,16 @@ export default function SidebarMenu() {
                         )}
                     </li>
                     <li className="flex items-center">
-                        {isOpen ? (
-                            <MenuText>โปรโมชั่น</MenuText>
-                        ) : (
-                            <MdLocalOffer className="text-2xl" />
-                        )}
+                        <Link
+                            href={route("promotion.index")}
+                            className="text-blue-500 hover:text-blue-700"
+                        >
+                            {isOpen ? (
+                                <MenuText>โปรโมชั่น</MenuText>
+                            ) : (
+                                <MdLocalOffer className="text-2xl" />
+                            )}
+                        </Link>
                     </li>
                     <li className="flex items-center">
                         <Link
