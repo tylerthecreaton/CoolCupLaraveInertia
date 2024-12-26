@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\IngredientsController;
 use App\Http\Controllers\Admin\InventoryTransactionsController;
 use App\Http\Controllers\Admin\ProductIngredientsController;
 use App\Http\Controllers\Admin\ProductsController;
+use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UnitController;
 use App\Http\Controllers\Admin\UserController;
@@ -144,6 +145,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/settings', [SettingController::class, 'store'])->name('admin.settings.store');
         Route::put('/settings/{setting}', [SettingController::class, 'update'])->name('admin.settings.update');
         Route::delete('/settings/{setting}', [SettingController::class, 'destroy'])->name('admin.settings.destroy');
+
+        // ---------------------------Promotions---------------------------
+        Route::get('/promotions', [PromotionController::class, 'index'])->name('admin.promotions.index');
+        Route::get('/promotions/create', [PromotionController::class, 'create'])->name('admin.promotions.create');
+        Route::post('/promotions', [PromotionController::class, 'store'])->name('admin.promotions.store');
+        Route::get('/promotions/{id}', [PromotionController::class, 'show'])->name('admin.promotions.show');
+        Route::get('/promotions/{id}/edit', [PromotionController::class, 'edit'])->name('admin.promotions.edit');
+        Route::put('/promotions/{id}', [PromotionController::class, 'update'])->name('admin.promotions.update');
+        Route::delete('/promotions/{id}', [PromotionController::class, 'destroy'])->name('admin.promotions.destroy');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

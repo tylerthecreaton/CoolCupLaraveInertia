@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('description');
             $table->enum('type', ['percentage', 'fixed'])->default('percentage');
-            $table->decimal('discount_value',10,2)->default(0);
+            $table->decimal('discount_value', 10, 2)->default(0);
             $table->date('start_date');
             $table->date('end_date');
             $table->timestamps();
