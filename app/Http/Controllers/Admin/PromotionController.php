@@ -10,6 +10,12 @@ use Inertia\Inertia;
 
 class PromotionController extends Controller
 {
+
+    public function promotions()
+    {
+        $promotions = Promotion::OrderBy('id', 'desc')->get();
+        return $promotions;
+    }
     public function index()
     {
         $promotions = Promotion::OrderBy('id', 'desc')->get();

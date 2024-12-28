@@ -6,7 +6,7 @@ import { Button, TextInput, Select } from "flowbite-react";
 import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
 import { usePage } from "@inertiajs/react";
 import Swal from "sweetalert2";
-import axios from 'axios';
+import axios from "axios";
 import ConfirmOrderModal from "./ConfirmOrderModal";
 
 const CartComponent = () => {
@@ -17,12 +17,20 @@ const CartComponent = () => {
     const [selectedPromotion, setSelectedPromotion] = useState("");
     const [discountInput, setDiscountInput] = useState("");
     const [showOrderModal, setShowOrderModal] = useState(false);
+    const [promotions, setPromotions] = useState([]);
 
-    const promotions = [
-        { code: "NEWUSER", discount: 10, description: "ส่วนลดลูกค้าใหม่ 10%" },
-        { code: "HOLIDAY", discount: 15, description: "ส่วนลดเทศกาล 15%" },
-        { code: "MEMBER", discount: 20, description: "ส่วนลดสมาชิก 20%" },
-    ];
+    const fetchPromotions = async () => {
+        try {
+            const response = await axios.get("api/promotions");
+            setPromotions(response.data);
+        } catch (error) {
+            console.error("Error fetching promotions:", error);
+            return [];
+        }
+    };
+    useEffect(() => {
+        fetchPromotions();
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -54,12 +62,15 @@ const CartComponent = () => {
 
     useEffect(() => {
         // Fetch the last order number from backend
-        axios.get('/get-last-order-number')
-            .then(response => {
-                dispatch(cartActions.setOrderNumber(response.data.nextOrderNumber));
+        axios
+            .get("/get-last-order-number")
+            .then((response) => {
+                dispatch(
+                    cartActions.setOrderNumber(response.data.nextOrderNumber)
+                );
             })
-            .catch(error => {
-                console.error('Error fetching order number:', error);
+            .catch((error) => {
+                console.error("Error fetching order number:", error);
                 dispatch(cartActions.setOrderNumber(1));
             });
     }, []);
