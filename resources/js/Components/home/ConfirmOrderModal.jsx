@@ -6,16 +6,14 @@ import { useGlobalState } from "@/Store/state";
 import { cartActions } from "@/Store/state/cartState";
 import { useForm } from "@inertiajs/react";
 
-const ConfirmOrderModal = ({
-    show,
-    onClose,
-    summary
-}) => {
+const ConfirmOrderModal = ({ show, onClose }) => {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const { state, dispatch } = useGlobalState();
 
+    const summary = state.cart;
+
     // Format order number with leading zeros
-    const formattedOrderNumber = String(summary.orderNumber).padStart(4, '0');
+    const formattedOrderNumber = String(summary.orderNumber).padStart(4, "0");
 
     return (
         <>
@@ -55,8 +53,9 @@ const ConfirmOrderModal = ({
                                 </span>
                             </h3>
                             <div className="bg-white rounded-lg border divide-y">
-                                {summary.items.map(
-                                    (item) => (
+                                {summary.items
+                                    .filter((i) => i.price > -1)
+                                    .map((item) => (
                                         <div
                                             key={item.id}
                                             className="flex justify-between items-center p-4 hover:bg-gray-50"
@@ -77,13 +76,11 @@ const ConfirmOrderModal = ({
                                                         {item.name}
                                                     </p>
                                                     <p className="text-sm text-gray-500">
-                                                        ฿{item.price}{" "}
-                                                        ต่อแก้ว
+                                                        ฿{item.price} ต่อแก้ว
                                                     </p>
                                                     {item.size && (
                                                         <p className="text-sm text-gray-500">
-                                                            ขนาด:{" "}
-                                                            {item.size}
+                                                            ขนาด: {item.size}
                                                         </p>
                                                     )}
                                                     {item.toppings?.length >
@@ -105,11 +102,12 @@ const ConfirmOrderModal = ({
                                             </div>
                                             <p className="text-lg font-semibold">
                                                 ฿
-                                                {(item.price * item.quantity).toFixed(2)}
+                                                {(
+                                                    item.price * item.quantity
+                                                ).toFixed(2)}
                                             </p>
                                         </div>
-                                    )
-                                )}
+                                    ))}
                             </div>
                         </div>
 
@@ -127,26 +125,33 @@ const ConfirmOrderModal = ({
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-600">ราคารวม:</span>
-                                <span className="font-medium">฿{summary.subtotal.toFixed(2)}</span>
+                                <span className="font-medium">
+                                    ฿{summary.subtotal.toFixed(2)}
+                                </span>
                             </div>
-                            {summary.discountType === 'promotion' && summary.appliedPromotion && (
-                                <div className="flex justify-between text-sm text-green-600">
-                                    <span className="flex gap-1 items-center">
-                                        <Tag className="w-4 h-4" />
-                                        <span>
-                                            โปรโมชั่น: {summary.appliedPromotion.name}
+                            {summary.discountType === "promotion" &&
+                                summary.appliedPromotion && (
+                                    <div className="flex justify-between text-sm text-green-600">
+                                        <span className="flex gap-1 items-center">
+                                            <Tag className="w-4 h-4" />
+                                            <span>
+                                                โปรโมชั่น:{" "}
+                                                {summary.appliedPromotion.name}
+                                            </span>
                                         </span>
-                                    </span>
-                                    <span className="font-medium">
-                                        -฿{summary.discount.toFixed(2)}
-                                    </span>
-                                </div>
-                            )}
-                            {summary.discountType === 'manual' && (
+                                        <span className="font-medium">
+                                            -฿{summary.discount.toFixed(2)}
+                                        </span>
+                                    </div>
+                                )}
+                            {summary.discountType === "manual" && (
                                 <div className="flex justify-between text-sm text-green-600">
                                     <span>ส่วนลด</span>
                                     <span className="font-medium">
-                                        -฿{summary.manualDiscountAmount.toFixed(2)}
+                                        -฿
+                                        {summary.manualDiscountAmount.toFixed(
+                                            2
+                                        )}
                                     </span>
                                 </div>
                             )}
@@ -179,9 +184,7 @@ const ConfirmOrderModal = ({
                 show={showPaymentModal}
                 onClose={() => setShowPaymentModal(false)}
                 total={summary.total}
-                dispatch={dispatch}
                 cartActions={cartActions}
-                summary={summary}
             />
         </>
     );

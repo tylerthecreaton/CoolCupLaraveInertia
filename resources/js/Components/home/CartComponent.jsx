@@ -19,19 +19,15 @@ const CartComponent = () => {
     const [discountInput, setDiscountInput] = useState("");
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [promotions, setPromotions] = useState([]);
-    const [appliedDiscount, setAppliedDiscount] = useState({
-        type: null, // 'promotion' or 'manual'
-        amount: 0,
-        promotion: null,
-    });
     const [summary, setSummary] = useState({
-        orderNumber: 0,
+        orderNumber: state.cart.orderNumber,
+        key: 0,
         items: [],
         subtotal: 0,
         discount: 0,
         total: 0,
+        discountType: "", // 'promotion' | 'manual' | ''
         totalItems: 0,
-        discountType: null, // 'promotion' or 'manual'
         appliedPromotion: null,
         manualDiscountAmount: 0,
         userId: user?.id || null,
@@ -97,7 +93,10 @@ const CartComponent = () => {
                 const response = await axios.get("/api/get-last-order-number");
                 const nextOrderNumber = response.data.nextOrderNumber;
                 dispatch(cartActions.setOrderNumber(nextOrderNumber));
-                setSummary((prev) => ({ ...prev, orderNumber: nextOrderNumber }));
+                setSummary((prev) => ({
+                    ...prev,
+                    orderNumber: nextOrderNumber,
+                }));
             } catch (error) {
                 console.error("Error fetching order number:", error);
                 dispatch(cartActions.setOrderNumber(1));
@@ -109,64 +108,67 @@ const CartComponent = () => {
 
     // Update summary whenever relevant values change
     useEffect(() => {
-        const { subtotal, discount, total } = calculateTotals();
-        const regularItems = items.filter((item) => !item.isDiscount);
-        const currentTotalItems = calculateTotalItems();
+        const { subtotal, discount, total, totalItems } = calculateTotals();
+        const regularItems = items.filter((item) => item.price > 0);
 
         setSummary((prev) => ({
             ...prev,
-            orderNumber: state.cart.currentOrderNumber,
+            orderNumber: state.cart.orderNumber,
+            key: state.cart.key,
             items: regularItems,
             subtotal,
             discount,
             total,
-            totalItems: currentTotalItems,
-            discountType: appliedDiscount.type,
-            appliedPromotion: appliedDiscount.promotion,
-            manualDiscountAmount:
-                appliedDiscount.type === "manual" ? appliedDiscount.amount : 0,
+            totalItems,
+            discountType: state.cart.discountType,
+            appliedPromotion: state.cart.appliedPromotion,
+            manualDiscountAmount: state.cart.manualDiscountAmount,
             userId: user?.id || null,
             userName: user?.name || "ผู้ใช้ทั่วไป",
             timestamp: new Date().toISOString(),
         }));
-    }, [items, state.cart.currentOrderNumber, appliedDiscount, user]);
+    }, [items, state.cart, user]);
 
     // Calculate cart totals
     const calculateTotals = () => {
-        const regularItems = items.filter((item) => !item.isDiscount);
+        const regularItems = items.filter((item) => item.price > 0);
+        const discountItems = items.filter((item) => item.price < 0);
+
         const subtotal = regularItems.reduce(
             (sum, item) => sum + item.price * item.quantity,
             0
         );
 
-        let discount = 0;
-        if (appliedDiscount.type === "promotion" && appliedDiscount.promotion) {
-            discount = calculateTotalDiscount(
-                regularItems,
-                [appliedDiscount.promotion],
-                new Date()
-            );
-        } else if (appliedDiscount.type === "manual") {
-            discount = appliedDiscount.amount;
-        }
+        const discountFromItems = discountItems.reduce(
+            (sum, item) => sum + Math.abs(item.price) * item.quantity,
+            0
+        );
 
-        const total = Math.max(0, subtotal - discount);
+        const totalItems = regularItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0
+        );
 
-        return { subtotal, discount, total };
+        return {
+            subtotal,
+            discount: discountFromItems,
+            total: Math.max(0, subtotal - discountFromItems),
+            totalItems,
+        };
     };
 
     // Handle promotion selection
     const handlePromotionSelect = async (promotionId) => {
         if (!promotionId) {
             setSelectedPromotion("");
-            setAppliedDiscount({ type: null, amount: 0, promotion: null });
-            setSummary((prev) => ({
-                ...prev,
-                discountType: null,
-                appliedPromotion: null,
-                manualDiscountAmount: 0,
-                timestamp: new Date().toISOString(),
-            }));
+            dispatch(cartActions.applyPromotion(null));
+            // Remove any existing promotion discount items
+            const discountItems = items.filter(
+                (item) => item.isDiscount && item.isPromotionDiscount
+            );
+            discountItems.forEach((item) => {
+                dispatch(cartActions.removeFromCart(item.id));
+            });
             return;
         }
 
@@ -182,6 +184,7 @@ const CartComponent = () => {
                 text: "กรุณาลบส่วนลดที่มีอยู่ก่อนใช้โปรโมชั่น",
                 icon: "warning",
             });
+            setSelectedPromotion("");
             return;
         }
 
@@ -197,19 +200,36 @@ const CartComponent = () => {
             return;
         }
 
-        setSelectedPromotion(promotionId);
-        setAppliedDiscount({
-            type: "promotion",
-            amount: 0,
-            promotion,
-        });
-        setSummary((prev) => ({
-            ...prev,
-            discountType: "promotion",
-            appliedPromotion: promotion,
-            manualDiscountAmount: 0,
-            timestamp: new Date().toISOString(),
-        }));
+        // Calculate promotion discount
+        const discountAmount = calculateTotalDiscount(
+            items.filter((item) => !item.isDiscount),
+            [promotion],
+            new Date()
+        );
+
+        if (discountAmount > 0) {
+            // Remove any existing promotion discount items
+            const discountItems = items.filter(
+                (item) => item.isDiscount && item.isPromotionDiscount
+            );
+            discountItems.forEach((item) => {
+                dispatch(cartActions.removeFromCart(item.id));
+            });
+
+            // Add promotion discount item
+            const discountItem = {
+                id: `promotion-${promotion.id}-${Date.now()}`,
+                name: `ส่วนลด ${promotion.name}`,
+                price: -discountAmount,
+                quantity: 1,
+                isDiscount: true,
+                isPromotionDiscount: true,
+            };
+
+            dispatch(cartActions.addToCart(discountItem));
+            dispatch(cartActions.applyPromotion(promotion));
+            setSelectedPromotion(promotionId);
+        }
     };
 
     // Handle manual discount
@@ -243,8 +263,14 @@ const CartComponent = () => {
             return;
         }
 
+        // Remove any existing discount items
+        const discountItems = items.filter((item) => item.isDiscount);
+        discountItems.forEach((item) => {
+            dispatch(cartActions.removeFromCart(item.id));
+        });
+
         const discountItem = {
-            id: `discount-${Date.now()}`,
+            id: `manual-discount-${Date.now()}`,
             name: `ส่วนลด (${
                 user ? `${user.name} #${user.id}` : "ผู้ใช้ทั่วไป"
             })`,
@@ -255,19 +281,8 @@ const CartComponent = () => {
         };
 
         dispatch(cartActions.addToCart(discountItem));
+        dispatch(cartActions.applyManualDiscount(amount));
         setDiscountInput("");
-        setAppliedDiscount({
-            type: "manual",
-            amount,
-            promotion: null,
-        });
-        setSummary((prev) => ({
-            ...prev,
-            discountType: "manual",
-            appliedPromotion: null,
-            manualDiscountAmount: amount,
-            timestamp: new Date().toISOString(),
-        }));
     };
 
     // Handle quantity updates
@@ -280,12 +295,13 @@ const CartComponent = () => {
             handleRemoveItem(itemId);
         } else {
             dispatch(cartActions.updateQuantity({ itemId, delta }));
-            const { subtotal, discount, total } = calculateTotals();
+            const { subtotal, discount, total, totalItems } = calculateTotals();
             setSummary((prev) => ({
                 ...prev,
                 subtotal,
                 discount,
                 total,
+                totalItems,
                 timestamp: new Date().toISOString(),
             }));
         }
@@ -310,21 +326,22 @@ const CartComponent = () => {
             // Reset promotion if removing a discount item
             const item = items.find((item) => item.id === itemId);
             if (item?.isManualDiscount) {
-                setAppliedDiscount({ type: null, amount: 0, promotion: null });
                 setSummary((prev) => ({
                     ...prev,
-                    discountType: null,
+                    discountType: "",
                     appliedPromotion: null,
                     manualDiscountAmount: 0,
                     timestamp: new Date().toISOString(),
                 }));
             } else {
-                const { subtotal, discount, total } = calculateTotals();
+                const { subtotal, discount, total, totalItems } =
+                    calculateTotals();
                 setSummary((prev) => ({
                     ...prev,
                     subtotal,
                     discount,
                     total,
+                    totalItems,
                     timestamp: new Date().toISOString(),
                 }));
             }
@@ -348,7 +365,7 @@ const CartComponent = () => {
                         </div>
                         <div className="flex flex-col text-white">
                             <span className="text-2xl font-bold">
-                                ออเดอร์ #{state.cart.currentOrderNumber}
+                                ออเดอร์ #{state.cart.orderNumber}
                             </span>
                             <div className="flex items-center space-x-2">
                                 <span className="text-sm text-blue-100">
@@ -530,8 +547,12 @@ const CartComponent = () => {
 
                             {/* Calculate and display totals */}
                             {(() => {
-                                const { subtotal, discount, total } =
-                                    calculateTotals();
+                                const {
+                                    subtotal,
+                                    discount,
+                                    total,
+                                    totalItems,
+                                } = calculateTotals();
                                 return (
                                     <>
                                         <div className="flex justify-between text-sm">
@@ -560,7 +581,6 @@ const CartComponent = () => {
                             type="button"
                             className="w-full"
                             onClick={() => {
-                                console.log("Order Summary:", summary);
                                 setShowOrderModal(true);
                             }}
                         >
@@ -574,12 +594,6 @@ const CartComponent = () => {
             <ConfirmOrderModal
                 show={showOrderModal}
                 onClose={() => setShowOrderModal(false)}
-                // items={items}
-                // totalItems={calculateTotalItems()}
-                // orderSummary={calculateTotals()}
-                // selectedPromotion={selectedPromotion}
-                // promotions={promotions}
-                summary={summary}
             />
         </div>
     );

@@ -1,4 +1,5 @@
-function isLocalStorageAvailable() {
+// Local Storage Utilities
+const isLocalStorageAvailable = () => {
     try {
         const testKey = "__test__";
         localStorage.setItem(testKey, testKey);
@@ -8,66 +9,91 @@ function isLocalStorageAvailable() {
         console.warn("localStorage is not available:", e);
         return false;
     }
-}
+};
 
-export const cartState = {
+// Initial cart state
+export const initialCartState = {
+    orderNumber: 1,
     key: 0,
     items: [],
-    total: 0,
-    totalItems: 0,
+    subtotal: 0,
     discount: 0,
-    finalTotal: 0,
-    currentOrderNumber: 1,
+    total: 0,
+    discountType: "", // 'promotion' | 'manual' | ''
+    totalItems: 0,
+    appliedPromotion: null,
+    manualDiscountAmount: 0,
+    userId: null,
+    userName: null,
+    timestamp: new Date().toISOString(),
 };
 
+// Helper functions
 const getItemKey = (item) => {
     if (!item.toppings && !item.sweetness) return item.id;
-    return `${item.productId}_${item.toppings?.sort().join("_")}_${
-        item.sweetness
-    }`;
+    return `${item.id}_${item.toppings?.sort().join("_")}_${item.sweetness}`;
 };
 
-const getLasterKey = () => {
-    const cartStateString = localStorage.getItem("cartState");
-    return cartStateString ? JSON.parse(cartStateString).key : 0;
+const calculateCartTotals = (items) => {
+    const regularItems = items.filter((item) => item.price > 0);
+    const discountItems = items.filter((item) => item.price < 0);
+
+    const subtotal = regularItems.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+    );
+
+    const discountFromItems = discountItems.reduce(
+        (sum, item) => sum + Math.abs(item.price) * item.quantity,
+        0
+    );
+
+    const totalItems = regularItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+    );
+
+    return {
+        subtotal,
+        discount: discountFromItems,
+        total: Math.max(0, subtotal - discountFromItems),
+        totalItems,
+    };
 };
 
-const getCartStateFromLocalStorage = () => {
-    if (!isLocalStorageAvailable()) {
-        return cartState;
-    }
+// Local storage operations
+const getCartFromStorage = () => {
+    if (!isLocalStorageAvailable()) return initialCartState;
 
     try {
-        const cartStateString = localStorage.getItem("cartState");
-        if (!cartStateString) {
-            return cartState;
-        }
-        const savedState = JSON.parse(cartStateString);
-        
-        // Ensure currentOrderNumber exists and is valid
-        if (!savedState.currentOrderNumber || savedState.currentOrderNumber < 1) {
-            savedState.currentOrderNumber = 1;
-        }
-        
-        return savedState;
+        const storedCart = localStorage.getItem("cartState");
+        if (!storedCart) return initialCartState;
+
+        const parsedCart = JSON.parse(storedCart);
+        return {
+            ...initialCartState,
+            ...parsedCart,
+            timestamp: new Date().toISOString(), // Always use current timestamp
+        };
     } catch (error) {
-        console.error("Error loading cart state:", error);
-        return cartState;
+        console.error("Error loading cart from storage:", error);
+        return initialCartState;
     }
 };
 
-const saveCartStateToLocalStorage = (cartState) => {
+const saveCartToStorage = (cartState) => {
     if (!isLocalStorageAvailable()) return;
     try {
         localStorage.setItem("cartState", JSON.stringify(cartState));
     } catch (error) {
-        console.error("Error saving cart state:", error);
+        console.error("Error saving cart to storage:", error);
     }
 };
 
-export const initialCartState = getCartStateFromLocalStorage();
+// Cart reducer
+export const cartReducer = (state = getCartFromStorage(), action) => {
+    let newState;
 
-export const cartReducer = (state = initialCartState, action) => {
     switch (action.type) {
         case "ADD_TO_CART": {
             const newItemKey = getItemKey(action.payload);
@@ -75,91 +101,48 @@ export const cartReducer = (state = initialCartState, action) => {
                 (item) => getItemKey(item) === newItemKey
             );
 
-            let newItems;
-            if (existingItemIndex >= 0) {
-                newItems = state.items.map((item, index) =>
-                    index === existingItemIndex
-                        ? {
-                              ...item,
-                              quantity:
-                                  item.quantity +
-                                  (action.payload.quantity || 1),
-                          }
-                        : item
-                );
-            } else {
-                newItems = [
-                    ...state.items,
-                    {
-                        ...action.payload,
-                        quantity: action.payload.quantity || 1,
-                    },
-                ];
-            }
+            const newItems =
+                existingItemIndex >= 0
+                    ? state.items.map((item, index) =>
+                          index === existingItemIndex
+                              ? {
+                                    ...item,
+                                    quantity:
+                                        item.quantity +
+                                        (action.payload.quantity || 1),
+                                }
+                              : item
+                      )
+                    : [
+                          ...state.items,
+                          {
+                              ...action.payload,
+                              quantity: action.payload.quantity || 1,
+                          },
+                      ];
 
-            const total = newItems.reduce(
-                (sum, item) =>
-                    sum + (item.price > 0 ? item.price * item.quantity : 0),
-                0
-            );
-            const discountFromItems = newItems.reduce(
-                (sum, item) =>
-                    sum +
-                    (item.price < 0 ? Math.abs(item.price * item.quantity) : 0),
-                0
-            );
-            const totalItems = newItems.reduce(
-                (sum, item) => sum + (item.price > 0 ? item.quantity : 0),
-                0
-            );
-
-            const newState = {
+            const totals = calculateCartTotals(newItems);
+            newState = {
                 ...state,
-                key: getLasterKey() + 1,
+                key: state.key + 1,
                 items: newItems,
-                total,
-                totalItems,
-                discount: discountFromItems,
-                finalTotal: total - discountFromItems,
+                ...totals,
             };
-
-            saveCartStateToLocalStorage(newState);
-            return newState;
+            break;
         }
 
         case "REMOVE_FROM_CART": {
             const newItems = state.items.filter(
                 (item) => item.id !== action.payload
             );
-
-            const total = newItems.reduce(
-                (sum, item) =>
-                    sum + (item.price > 0 ? item.price * item.quantity : 0),
-                0
-            );
-            const discountFromItems = newItems.reduce(
-                (sum, item) =>
-                    sum +
-                    (item.price < 0 ? Math.abs(item.price * item.quantity) : 0),
-                0
-            );
-            const totalItems = newItems.reduce(
-                (sum, item) => sum + (item.price > 0 ? item.quantity : 0),
-                0
-            );
-
-            const newState = {
+            const totals = calculateCartTotals(newItems);
+            newState = {
                 ...state,
-                key: getLasterKey() + 1,
+                key: state.key + 1,
                 items: newItems,
-                total,
-                totalItems,
-                discount: discountFromItems,
-                finalTotal: total - discountFromItems,
+                ...totals,
             };
-
-            saveCartStateToLocalStorage(newState);
-            return newState;
+            break;
         }
 
         case "UPDATE_QUANTITY": {
@@ -167,109 +150,166 @@ export const cartReducer = (state = initialCartState, action) => {
             const newItems = state.items
                 .map((item) =>
                     item.id === itemId
-                        ? { ...item, quantity: item.quantity + delta }
+                        ? {
+                              ...item,
+                              quantity: Math.max(0, item.quantity + delta),
+                          }
                         : item
                 )
                 .filter((item) => item.quantity > 0);
 
-            const total = newItems.reduce(
-                (sum, item) =>
-                    sum + (item.price > 0 ? item.price * item.quantity : 0),
-                0
-            );
-            const discountFromItems = newItems.reduce(
-                (sum, item) =>
-                    sum +
-                    (item.price < 0 ? Math.abs(item.price * item.quantity) : 0),
-                0
-            );
-            const totalItems = newItems.reduce(
-                (sum, item) => sum + (item.price > 0 ? item.quantity : 0),
-                0
-            );
-
-            const newState = {
+            const totals = calculateCartTotals(newItems);
+            newState = {
                 ...state,
-                key: getLasterKey() + 1,
+                key: state.key + 1,
                 items: newItems,
-                total,
-                totalItems,
-                discount: discountFromItems,
-                finalTotal: total - discountFromItems,
+                ...totals,
             };
-
-            saveCartStateToLocalStorage(newState);
-            return newState;
+            break;
         }
 
-        case "APPLY_DISCOUNT": {
-            const discount = action.payload;
-            const newState = {
+        case "APPLY_PROMOTION": {
+            const promotion = action.payload;
+            newState = {
                 ...state,
-                discount,
-                finalTotal: state.total - discount,
+                discountType: promotion ? "promotion" : "",
+                appliedPromotion: promotion,
+                manualDiscountAmount: 0,
             };
-            saveCartStateToLocalStorage(newState);
-            return newState;
+            break;
+        }
+
+        case "APPLY_MANUAL_DISCOUNT": {
+            const amount = Math.max(0, Number(action.payload) || 0);
+            newState = {
+                ...state,
+                discountType: amount > 0 ? "manual" : "",
+                manualDiscountAmount: amount,
+                appliedPromotion: null,
+                discount: amount,
+                total: Math.max(0, state.subtotal - amount),
+            };
+            break;
         }
 
         case "SET_ORDER_NUMBER": {
-            const newState = {
+            const orderNumber = Math.max(1, parseInt(action.payload) || 1);
+            newState = {
                 ...state,
-                currentOrderNumber: parseInt(action.payload) || 1
+                orderNumber,
             };
-            saveCartStateToLocalStorage(newState);
-            return newState;
+            break;
         }
 
         case "INCREMENT_ORDER_NUMBER": {
-            const newState = {
+            newState = {
                 ...state,
-                currentOrderNumber: (state.currentOrderNumber || 0) + 1
+                orderNumber: state.orderNumber + 1,
             };
-            saveCartStateToLocalStorage(newState);
-            return newState;
+            break;
         }
 
         case "CLEAR_CART": {
-            const clearedState = {
-                ...cartState,
-                currentOrderNumber: state.currentOrderNumber // Preserve order number when clearing cart
+            newState = {
+                ...initialCartState,
+                orderNumber: state.orderNumber,
+                key: state.key + 1,
+                timestamp: new Date().toISOString(),
             };
-            saveCartStateToLocalStorage(clearedState);
-            return clearedState;
+            break;
+        }
+
+        case "SET_USER": {
+            newState = {
+                ...state,
+                userId: action.payload?.id || null,
+                userName: action.payload?.name || null,
+            };
+            break;
         }
 
         default:
             return state;
     }
+
+    // Save to localStorage and return new state
+    saveCartToStorage(newState);
+    return newState;
 };
 
+// Action creators
 export const cartActions = {
-    addToCart: (cartItem) => ({
+    addToCart: (item) => ({
         type: "ADD_TO_CART",
-        payload: cartItem,
+        payload: item,
     }),
-    removeFromCart: (productId) => ({
+
+    removeFromCart: (itemId) => ({
         type: "REMOVE_FROM_CART",
-        payload: productId,
+        payload: itemId,
     }),
-    updateQuantity: ({ itemId, delta }) => ({
+
+    updateQuantity: (itemId, delta) => ({
         type: "UPDATE_QUANTITY",
         payload: { itemId, delta },
     }),
-    applyDiscount: (amount) => ({
-        type: "APPLY_DISCOUNT",
+
+    applyPromotion: (promotion) => ({
+        type: "APPLY_PROMOTION",
+        payload: promotion,
+    }),
+
+    applyManualDiscount: (amount) => ({
+        type: "APPLY_MANUAL_DISCOUNT",
         payload: amount,
     }),
-    clearCart: () => ({
-        type: "CLEAR_CART",
-    }),
-    incrementOrderNumber: () => ({
-        type: "INCREMENT_ORDER_NUMBER",
-    }),
+
     setOrderNumber: (number) => ({
         type: "SET_ORDER_NUMBER",
         payload: number,
     }),
+
+    incrementOrderNumber: () => ({
+        type: "INCREMENT_ORDER_NUMBER",
+    }),
+
+    clearCart: () => ({
+        type: "CLEAR_CART",
+    }),
+
+    setUser: (user) => ({
+        type: "SET_USER",
+        payload: user,
+    }),
 };
+
+// Types for TypeScript (optional)
+/**
+ * @typedef {Object} CartItem
+ * @property {string} id
+ * @property {string} name
+ * @property {number} price
+ * @property {number} quantity
+ * @property {string} [image]
+ * @property {string} [size]
+ * @property {string[]} [toppings]
+ * @property {string} [sweetness]
+ * @property {string} [options]
+ */
+
+/**
+ * @typedef {Object} CartState
+ * @property {number} orderNumber
+ * @property {number} key
+ * @property {CartItem[]} items
+ * @property {number} subtotal
+ * @property {number} discount
+ * @property {number} total
+ * @property {string} discountType
+ * @property {number} totalItems
+ * @property {Object|null} appliedPromotion
+ * @property {number} manualDiscountAmount
+ * @property {string|null} userId
+ * @property {string|null} userName
+ * @property {string} timestamp
+ */

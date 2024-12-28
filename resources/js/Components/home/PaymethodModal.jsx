@@ -1,35 +1,25 @@
-import React, { useState } from "react";
+import { useForm } from "@inertiajs/react";
 import {
-    Modal,
     Button,
+    FileInput,
+    Label,
+    Modal,
     Radio,
     TextInput,
-    Label,
-    FileInput,
 } from "flowbite-react";
-import { useForm } from "@inertiajs/react";
+import { useState } from "react";
 
-import { Banknote, QrCode, Receipt, CreditCard } from "lucide-react";
+import { Banknote, CreditCard, QrCode, Receipt } from "lucide-react";
 import Swal from "sweetalert2";
 
+import { useGlobalState } from "@/Store/state";
 import generatePayload from "promptpay-qr";
 import ReactQrCode from "react-qr-code";
-import { useGlobalState } from "@/Store/state";
-import { appActions } from "@/Store/state/appState";
-import ReceiptModal from "./ReceiptModal";
 import LoadingIndicator from "../LoadingIndicator";
-import { MdOutlineSystemSecurityUpdateWarning } from "react-icons/md";
-import UsePointModal from "./UsePointModal";
+import ReceiptModal from "./ReceiptModal";
 
-const PaymethodModal = ({
-    show,
-    onClose,
-    total,
-    dispatch,
-    cartActions,
-    summary,
-}) => {
-    const { state } = useGlobalState();
+const PaymethodModal = ({ show, onClose, total, cartActions }) => {
+    const { state, dispatch } = useGlobalState();
     const { data, post, setData, errors, processing } = useForm({
         selectedMethod: "cash",
         cashReceived: 0.0,
@@ -543,7 +533,6 @@ const PaymethodModal = ({
                 show={showReceipt}
                 onClose={() => setShowReceipt(false)}
                 orderData={receipt}
-                summary={summary}
             />
         </>
     );
