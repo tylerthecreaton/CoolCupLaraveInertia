@@ -17,7 +17,7 @@ export const cartState = {
     totalItems: 0,
     discount: 0,
     finalTotal: 0,
-    currentOrderNumber: null,
+    currentOrderNumber: 1,
 };
 
 const getItemKey = (item) => {
@@ -43,9 +43,12 @@ const getCartStateFromLocalStorage = () => {
             return cartState;
         }
         const savedState = JSON.parse(cartStateString);
-        if (!savedState.currentOrderNumber) {
+        
+        // Ensure currentOrderNumber exists and is valid
+        if (!savedState.currentOrderNumber || savedState.currentOrderNumber < 1) {
             savedState.currentOrderNumber = 1;
         }
+        
         return savedState;
     } catch (error) {
         console.error("Error loading cart state:", error);
@@ -210,32 +213,31 @@ export const cartReducer = (state = initialCartState, action) => {
             return newState;
         }
 
-        case "INCREMENT_ORDER_NUMBER": {
+        case "SET_ORDER_NUMBER": {
             const newState = {
                 ...state,
-                currentOrderNumber: state.currentOrderNumber + 1,
+                currentOrderNumber: parseInt(action.payload) || 1
             };
             saveCartStateToLocalStorage(newState);
             return newState;
         }
 
-        case "SET_ORDER_NUMBER": {
+        case "INCREMENT_ORDER_NUMBER": {
             const newState = {
                 ...state,
-                currentOrderNumber: action.payload,
+                currentOrderNumber: (state.currentOrderNumber || 0) + 1
             };
             saveCartStateToLocalStorage(newState);
             return newState;
         }
 
         case "CLEAR_CART": {
-            if (isLocalStorageAvailable()) {
-                localStorage.removeItem("cartState");
-            }
-            return {
+            const clearedState = {
                 ...cartState,
-                currentOrderNumber: state.currentOrderNumber,
+                currentOrderNumber: state.currentOrderNumber // Preserve order number when clearing cart
             };
+            saveCartStateToLocalStorage(clearedState);
+            return clearedState;
         }
 
         default:
@@ -244,44 +246,30 @@ export const cartReducer = (state = initialCartState, action) => {
 };
 
 export const cartActions = {
-    addToCart(cartItem) {
-        return {
-            type: "ADD_TO_CART",
-            payload: cartItem,
-        };
-    },
-    removeFromCart(productId) {
-        return {
-            type: "REMOVE_FROM_CART",
-            payload: productId,
-        };
-    },
-    updateQuantity({ itemId, delta }) {
-        return {
-            type: "UPDATE_QUANTITY",
-            payload: { itemId, delta },
-        };
-    },
-    applyDiscount(amount) {
-        return {
-            type: "APPLY_DISCOUNT",
-            payload: amount,
-        };
-    },
-    clearCart() {
-        return {
-            type: "CLEAR_CART",
-        };
-    },
-    incrementOrderNumber() {
-        return {
-            type: "INCREMENT_ORDER_NUMBER",
-        };
-    },
-    setOrderNumber(number) {
-        return {
-            type: "SET_ORDER_NUMBER",
-            payload: number,
-        };
-    },
+    addToCart: (cartItem) => ({
+        type: "ADD_TO_CART",
+        payload: cartItem,
+    }),
+    removeFromCart: (productId) => ({
+        type: "REMOVE_FROM_CART",
+        payload: productId,
+    }),
+    updateQuantity: ({ itemId, delta }) => ({
+        type: "UPDATE_QUANTITY",
+        payload: { itemId, delta },
+    }),
+    applyDiscount: (amount) => ({
+        type: "APPLY_DISCOUNT",
+        payload: amount,
+    }),
+    clearCart: () => ({
+        type: "CLEAR_CART",
+    }),
+    incrementOrderNumber: () => ({
+        type: "INCREMENT_ORDER_NUMBER",
+    }),
+    setOrderNumber: (number) => ({
+        type: "SET_ORDER_NUMBER",
+        payload: number,
+    }),
 };

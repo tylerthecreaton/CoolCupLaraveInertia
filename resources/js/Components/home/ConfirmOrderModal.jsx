@@ -9,21 +9,13 @@ import { useForm } from "@inertiajs/react";
 const ConfirmOrderModal = ({
     show,
     onClose,
-    items,
-    totalItems,
-    total,
-    discount,
-    finalTotal,
-    selectedPromotion,
-    promotions,
+    summary
 }) => {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const { state, dispatch } = useGlobalState();
 
-    const selectedPromotionDetails = selectedPromotion
-        ? promotions.find((p) => p.id == selectedPromotion.id)
-        : null;
-    console.log(promotions);
+    // Format order number with leading zeros
+    const formattedOrderNumber = String(summary.orderNumber).padStart(4, '0');
 
     return (
         <>
@@ -41,7 +33,7 @@ const ConfirmOrderModal = ({
                                 ยืนยันการสั่งซื้อ
                             </span>
                             <span className="text-lg font-bold text-blue-600">
-                                ออเดอร์ # {state.cart.currentOrderNumber}
+                                ออเดอร์ #{formattedOrderNumber}
                             </span>
                         </div>
                     </div>
@@ -59,65 +51,64 @@ const ConfirmOrderModal = ({
                             <h3 className="flex items-center space-x-2 text-lg font-semibold">
                                 <span>รายการสินค้า</span>
                                 <span className="text-sm text-gray-500">
-                                    ({totalItems} รายการ)
+                                    ({summary.totalItems} รายการ)
                                 </span>
                             </h3>
                             <div className="bg-white rounded-lg border divide-y">
-                                {items.map(
-                                    (item) =>
-                                        !item.isDiscount && (
-                                            <div
-                                                key={item.id}
-                                                className="flex justify-between items-center p-4 hover:bg-gray-50"
-                                            >
-                                                <div className="flex items-center space-x-4">
-                                                    <div className="relative">
-                                                        <img
-                                                            src={item.image}
-                                                            alt={item.name}
-                                                            className="object-cover w-16 h-16 rounded-lg shadow-sm"
-                                                        />
-                                                        <span className="absolute -top-2 -right-2 px-2 py-1 text-xs font-bold text-white bg-blue-600 rounded-full">
-                                                            {item.quantity}
-                                                        </span>
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-semibold text-gray-800">
-                                                            {item.name}
-                                                        </p>
-                                                        <p className="text-sm text-gray-500">
-                                                            ฿{item.price}{" "}
-                                                            ต่อแก้ว
-                                                        </p>
-                                                        {item.size && (
-                                                            <p className="text-sm text-gray-500">
-                                                                ขนาด:{" "}
-                                                                {item.size}
-                                                            </p>
-                                                        )}
-                                                        {item.toppings?.length >
-                                                            0 && (
-                                                            <p className="text-sm text-gray-500">
-                                                                ท็อปปิ้ง:{" "}
-                                                                {item.toppings.join(
-                                                                    ", "
-                                                                )}
-                                                            </p>
-                                                        )}
-                                                        {item.sweetness && (
-                                                            <p className="text-sm text-gray-500">
-                                                                ความหวาน:{" "}
-                                                                {item.sweetness}
-                                                            </p>
-                                                        )}
-                                                    </div>
+                                {summary.items.map(
+                                    (item) => (
+                                        <div
+                                            key={item.id}
+                                            className="flex justify-between items-center p-4 hover:bg-gray-50"
+                                        >
+                                            <div className="flex items-center space-x-4">
+                                                <div className="relative">
+                                                    <img
+                                                        src={item.image}
+                                                        alt={item.name}
+                                                        className="object-cover w-16 h-16 rounded-lg shadow-sm"
+                                                    />
+                                                    <span className="absolute -top-2 -right-2 px-2 py-1 text-xs font-bold text-white bg-blue-600 rounded-full">
+                                                        {item.quantity}
+                                                    </span>
                                                 </div>
-                                                <p className="text-lg font-semibold">
-                                                    ฿
-                                                    {item.price * item.quantity}
-                                                </p>
+                                                <div>
+                                                    <p className="font-semibold text-gray-800">
+                                                        {item.name}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500">
+                                                        ฿{item.price}{" "}
+                                                        ต่อแก้ว
+                                                    </p>
+                                                    {item.size && (
+                                                        <p className="text-sm text-gray-500">
+                                                            ขนาด:{" "}
+                                                            {item.size}
+                                                        </p>
+                                                    )}
+                                                    {item.toppings?.length >
+                                                        0 && (
+                                                        <p className="text-sm text-gray-500">
+                                                            ท็อปปิ้ง:{" "}
+                                                            {item.toppings.join(
+                                                                ", "
+                                                            )}
+                                                        </p>
+                                                    )}
+                                                    {item.sweetness && (
+                                                        <p className="text-sm text-gray-500">
+                                                            ความหวาน:{" "}
+                                                            {item.sweetness}
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </div>
-                                        )
+                                            <p className="text-lg font-semibold">
+                                                ฿
+                                                {(item.price * item.quantity).toFixed(2)}
+                                            </p>
+                                        </div>
+                                    )
                                 )}
                             </div>
                         </div>
@@ -131,57 +122,44 @@ const ConfirmOrderModal = ({
                                     จำนวนสินค้า:
                                 </span>
                                 <span className="font-medium">
-                                    {totalItems} แก้ว
+                                    {summary.totalItems} แก้ว
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-600">ราคารวม:</span>
-                                <span className="font-medium">฿{total}</span>
+                                <span className="font-medium">฿{summary.subtotal.toFixed(2)}</span>
                             </div>
-                            {selectedPromotionDetails && (
+                            {summary.discountType === 'promotion' && summary.appliedPromotion && (
                                 <div className="flex justify-between text-sm text-green-600">
                                     <span className="flex gap-1 items-center">
                                         <Tag className="w-4 h-4" />
                                         <span>
-                                            โปรโมชั่น:{" "}
-                                            {
-                                                selectedPromotionDetails.description
-                                            }
+                                            โปรโมชั่น: {summary.appliedPromotion.name}
                                         </span>
                                     </span>
                                     <span className="font-medium">
-                                        -฿
-                                        {(
-                                            (total *
-                                                selectedPromotionDetails.discount) /
-                                            100
-                                        ).toFixed(2)}
+                                        -฿{summary.discount.toFixed(2)}
                                     </span>
                                 </div>
                             )}
-                            {items.map(
-                                (item) =>
-                                    item.isDiscount && (
-                                        <div
-                                            key={item.id}
-                                            className="flex justify-between text-sm text-green-600"
-                                        >
-                                            <span>{item.name}</span>
-                                            <span className="font-medium">
-                                                -฿{Math.abs(item.price)}
-                                            </span>
-                                        </div>
-                                    )
+                            {summary.discountType === 'manual' && (
+                                <div className="flex justify-between text-sm text-green-600">
+                                    <span>ส่วนลด</span>
+                                    <span className="font-medium">
+                                        -฿{summary.manualDiscountAmount.toFixed(2)}
+                                    </span>
+                                </div>
                             )}
                             <div className="flex justify-between pt-3 text-lg border-t">
                                 <span className="font-bold">ราคาสุทธิ:</span>
                                 <span className="font-bold text-blue-600">
-                                    ฿{finalTotal}
+                                    ฿{summary.total.toFixed(2)}
                                 </span>
                             </div>
                         </div>
                     </div>
                 </Modal.Body>
+
                 <Modal.Footer className="bg-gray-50 border-t dark:bg-gray-700">
                     <div className="flex justify-center space-x-3 w-full">
                         <Button onClick={onClose} color="gray" className="px-6">
@@ -200,7 +178,7 @@ const ConfirmOrderModal = ({
             <PaymethodModal
                 show={showPaymentModal}
                 onClose={() => setShowPaymentModal(false)}
-                total={finalTotal}
+                total={summary.total}
                 dispatch={dispatch}
                 cartActions={cartActions}
             />

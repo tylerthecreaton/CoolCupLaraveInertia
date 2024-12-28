@@ -92,7 +92,6 @@ export const calculateCategoryDiscount = (
     { categoryId, discountType, discountValue }
 ) => {
     const isCategoryItem = (item) => item.categoryId === Number(categoryId);
-    console.log(items);
     const categoryItems = items.filter(isCategoryItem);
 
     if (categoryItems.length === 0) return 0;

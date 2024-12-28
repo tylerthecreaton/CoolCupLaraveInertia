@@ -24,6 +24,28 @@ const CartComponent = () => {
         amount: 0,
         promotion: null,
     });
+    const [summary, setSummary] = useState({
+        orderNumber: 0,
+        items: [],
+        subtotal: 0,
+        discount: 0,
+        total: 0,
+        totalItems: 0,
+        discountType: null, // 'promotion' or 'manual'
+        appliedPromotion: null,
+        manualDiscountAmount: 0,
+        userId: user?.id || null,
+        userName: user?.name || "ผู้ใช้ทั่วไป",
+        timestamp: new Date().toISOString(),
+    });
+
+    // Calculate total items (excluding discounts)
+    const calculateTotalItems = () => {
+        return items.reduce(
+            (sum, item) => (!item.isDiscount ? sum + item.quantity : sum),
+            0
+        );
+    };
 
     // Fetch promotions on component mount
     useEffect(() => {
@@ -73,16 +95,41 @@ const CartComponent = () => {
         const fetchOrderNumber = async () => {
             try {
                 const response = await axios.get("/api/get-last-order-number");
-                dispatch(
-                    cartActions.setOrderNumber(response.data.nextOrderNumber)
-                );
+                const nextOrderNumber = response.data.nextOrderNumber;
+                dispatch(cartActions.setOrderNumber(nextOrderNumber));
+                setSummary((prev) => ({ ...prev, orderNumber: nextOrderNumber }));
             } catch (error) {
                 console.error("Error fetching order number:", error);
                 dispatch(cartActions.setOrderNumber(1));
+                setSummary((prev) => ({ ...prev, orderNumber: 1 }));
             }
         };
         fetchOrderNumber();
     }, [dispatch]);
+
+    // Update summary whenever relevant values change
+    useEffect(() => {
+        const { subtotal, discount, total } = calculateTotals();
+        const regularItems = items.filter((item) => !item.isDiscount);
+        const currentTotalItems = calculateTotalItems();
+
+        setSummary((prev) => ({
+            ...prev,
+            orderNumber: state.cart.currentOrderNumber,
+            items: regularItems,
+            subtotal,
+            discount,
+            total,
+            totalItems: currentTotalItems,
+            discountType: appliedDiscount.type,
+            appliedPromotion: appliedDiscount.promotion,
+            manualDiscountAmount:
+                appliedDiscount.type === "manual" ? appliedDiscount.amount : 0,
+            userId: user?.id || null,
+            userName: user?.name || "ผู้ใช้ทั่วไป",
+            timestamp: new Date().toISOString(),
+        }));
+    }, [items, state.cart.currentOrderNumber, appliedDiscount, user]);
 
     // Calculate cart totals
     const calculateTotals = () => {
@@ -113,6 +160,13 @@ const CartComponent = () => {
         if (!promotionId) {
             setSelectedPromotion("");
             setAppliedDiscount({ type: null, amount: 0, promotion: null });
+            setSummary((prev) => ({
+                ...prev,
+                discountType: null,
+                appliedPromotion: null,
+                manualDiscountAmount: 0,
+                timestamp: new Date().toISOString(),
+            }));
             return;
         }
 
@@ -146,9 +200,16 @@ const CartComponent = () => {
         setSelectedPromotion(promotionId);
         setAppliedDiscount({
             type: "promotion",
-            amount: 0, // Will be calculated in calculateTotals
+            amount: 0,
             promotion,
         });
+        setSummary((prev) => ({
+            ...prev,
+            discountType: "promotion",
+            appliedPromotion: promotion,
+            manualDiscountAmount: 0,
+            timestamp: new Date().toISOString(),
+        }));
     };
 
     // Handle manual discount
@@ -200,6 +261,13 @@ const CartComponent = () => {
             amount,
             promotion: null,
         });
+        setSummary((prev) => ({
+            ...prev,
+            discountType: "manual",
+            appliedPromotion: null,
+            manualDiscountAmount: amount,
+            timestamp: new Date().toISOString(),
+        }));
     };
 
     // Handle quantity updates
@@ -212,6 +280,14 @@ const CartComponent = () => {
             handleRemoveItem(itemId);
         } else {
             dispatch(cartActions.updateQuantity({ itemId, delta }));
+            const { subtotal, discount, total } = calculateTotals();
+            setSummary((prev) => ({
+                ...prev,
+                subtotal,
+                discount,
+                total,
+                timestamp: new Date().toISOString(),
+            }));
         }
     };
 
@@ -235,15 +311,25 @@ const CartComponent = () => {
             const item = items.find((item) => item.id === itemId);
             if (item?.isManualDiscount) {
                 setAppliedDiscount({ type: null, amount: 0, promotion: null });
+                setSummary((prev) => ({
+                    ...prev,
+                    discountType: null,
+                    appliedPromotion: null,
+                    manualDiscountAmount: 0,
+                    timestamp: new Date().toISOString(),
+                }));
+            } else {
+                const { subtotal, discount, total } = calculateTotals();
+                setSummary((prev) => ({
+                    ...prev,
+                    subtotal,
+                    discount,
+                    total,
+                    timestamp: new Date().toISOString(),
+                }));
             }
         }
     };
-
-    // Calculate total items (excluding discounts)
-    const totalItems = items.reduce(
-        (sum, item) => (!item.isDiscount ? sum + item.quantity : sum),
-        0
-    );
 
     if (!state.app.isCartOpen) return null;
 
@@ -268,9 +354,9 @@ const CartComponent = () => {
                                 <span className="text-sm text-blue-100">
                                     ตะกร้าสินค้า
                                 </span>
-                                {totalItems > 0 && (
+                                {calculateTotalItems() > 0 && (
                                     <span className="bg-white text-blue-600 text-xs px-1.5 py-0.5 rounded-full font-medium">
-                                        {totalItems} รายการ
+                                        {calculateTotalItems()} รายการ
                                     </span>
                                 )}
                             </div>
@@ -439,7 +525,7 @@ const CartComponent = () => {
                         <div className="mb-4 space-y-2">
                             <div className="flex justify-between text-sm">
                                 <span>จำนวนสินค้า:</span>
-                                <span>{totalItems} ชิ้น</span>
+                                <span>{calculateTotalItems()} ชิ้น</span>
                             </div>
 
                             {/* Calculate and display totals */}
@@ -473,7 +559,10 @@ const CartComponent = () => {
                         <Button
                             type="button"
                             className="w-full"
-                            onClick={() => setShowOrderModal(true)}
+                            onClick={() => {
+                                console.log("Order Summary:", summary);
+                                setShowOrderModal(true);
+                            }}
                         >
                             ยืนยันคำสั่งซื้อ
                         </Button>
@@ -485,11 +574,12 @@ const CartComponent = () => {
             <ConfirmOrderModal
                 show={showOrderModal}
                 onClose={() => setShowOrderModal(false)}
-                items={items}
-                totalItems={totalItems}
-                orderSummary={calculateTotals()}
-                selectedPromotion={selectedPromotion}
-                promotions={promotions}
+                // items={items}
+                // totalItems={calculateTotalItems()}
+                // orderSummary={calculateTotals()}
+                // selectedPromotion={selectedPromotion}
+                // promotions={promotions}
+                summary={summary}
             />
         </div>
     );

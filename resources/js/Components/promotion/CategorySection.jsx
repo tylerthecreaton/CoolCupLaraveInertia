@@ -13,9 +13,6 @@ export default function CategorySection({ promotions, types, onTypeChange }) {
     };
 
     const filterPromotionsByType = (typeId) => {
-        console.log(typeId);
-        console.log(promotions);
-
         if (!typeId) return promotions;
         return promotions.filter((promo) => promo.type === typeId);
     };
