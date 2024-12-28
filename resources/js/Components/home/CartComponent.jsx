@@ -99,8 +99,6 @@ const CartComponent = () => {
                 [appliedDiscount.promotion],
                 new Date()
             );
-
-            console.log(`Discount applied: ${discount}`);
         } else if (appliedDiscount.type === "manual") {
             discount = appliedDiscount.amount;
         }

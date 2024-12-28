@@ -48,25 +48,38 @@ export const calculatePercentageDiscount = (items, percentage) => {
  * @returns {number} - Calculated discount
  */
 export const calculateBuyXGetYDiscount = (items, buyQty, freeQty) => {
-    // Group items by product ID with their total quantities
-    const groupedItems = items.reduce(
-        (groups, item) => ({
+    // Group items by product ID with their total quantities and track total sets
+    const groupedItems = items.reduce((groups, item) => {
+        const existingGroup = groups[item.id] || { ...item, quantity: 0 };
+        return {
             ...groups,
             [item.id]: {
-                ...item,
-                quantity: (groups[item.id]?.quantity || 0) + item.quantity,
+                ...existingGroup,
+                quantity: existingGroup.quantity + item.quantity,
             },
-        }),
-        {}
-    );
+        };
+    }, {});
 
-    // Calculate discount for each product group
-    return Object.values(groupedItems).reduce((totalDiscount, item) => {
+    let totalDiscount = 0;
+
+    // Process each product group
+    Object.values(groupedItems).forEach((item) => {
         const setSize = Number(buyQty) + Number(freeQty);
         const numSets = Math.floor(item.quantity / setSize);
-        const freeItems = numSets * Number(freeQty);
-        return totalDiscount + freeItems * item.price;
-    }, 0);
+
+        if (numSets > 0) {
+            // Find the cheapest items in the cart to apply the discount
+            const sortedItems = [...items].sort((a, b) => a.price - b.price);
+            const freeItemsCount = numSets * Number(freeQty);
+
+            // Apply discount based on the cheapest items' prices
+            for (let i = 0; i < freeItemsCount && i < sortedItems.length; i++) {
+                totalDiscount += sortedItems[i].price;
+            }
+        }
+    });
+
+    return totalDiscount;
 };
 
 /**
@@ -79,7 +92,8 @@ export const calculateCategoryDiscount = (
     items,
     { categoryId, discountType, discountValue }
 ) => {
-    const isCategoryItem = (item) => item.category_id === Number(categoryId);
+    const isCategoryItem = (item) => item.categoryId === Number(categoryId);
+    console.log(items);
     const categoryItems = items.filter(isCategoryItem);
 
     if (categoryItems.length === 0) return 0;
@@ -161,9 +175,6 @@ export const calculateTotalDiscount = (items, promotions, currentTime) => {
             const currentDiscount = calculatePromotionDiscount(
                 items,
                 promotion
-            );
-            console.log(
-                `Promotion: ${promotion.name}, Discount: ${currentDiscount}`
             );
             return Math.max(maxDiscount, currentDiscount);
         }, 0);

@@ -10,7 +10,9 @@ class PromotionController extends Controller
 {
     public function promotions()
     {
-        $promotions = Promotion::OrderBy('id', 'desc')->get();
+        $promotions = Promotion::where('start_date', '<=', date('Y-m-d'))
+            ->where('end_date', '>=', date('Y-m-d'))
+            ->where('is_active', 1)->OrderBy('id', 'desc')->get();
         return $promotions;
     }
 

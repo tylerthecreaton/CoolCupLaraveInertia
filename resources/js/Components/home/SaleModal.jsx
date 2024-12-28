@@ -81,6 +81,7 @@ const ProductModal = ({ show, onClose, product }) => {
         const cartItem = {
             id: new Date().getTime(), // Use timestamp for unique ID
             productId: product.id,
+            categoryId: product.category_id,
             name: product.name,
             image: isAbsoluteUrl(product.image)
                 ? product.image
@@ -99,9 +100,9 @@ const ProductModal = ({ show, onClose, product }) => {
     if (!show || !product) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <Card className="w-full max-w-lg bg-white rounded-lg overflow-hidden">
-                <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex fixed inset-0 z-50 justify-center items-center bg-black/50">
+            <Card className="overflow-hidden w-full max-w-lg bg-white rounded-lg">
+                <div className="flex justify-between items-center p-4 border-b">
                     <h2 className="text-xl font-semibold">{product.name}</h2>
                     <Button
                         color="gray"
@@ -118,20 +119,20 @@ const ProductModal = ({ show, onClose, product }) => {
                         <img
                             src={`/images/products/${product.image}`}
                             alt={product.name}
-                            className="w-40 h-40 object-cover rounded-lg"
+                            className="object-cover w-40 h-40 rounded-lg"
                         />
                     </div>
 
-                    <div className="flex items-center justify-center space-x-4">
+                    <div className="flex justify-center items-center space-x-4">
                         <Button
                             color="light"
                             size="sm"
                             onClick={() => handleQuantityChange(-1)}
                             disabled={quantity <= 1}
                         >
-                            <Minus className="h-4 w-4" />
+                            <Minus className="w-4 h-4" />
                         </Button>
-                        <span className="text-xl font-semibold w-12 text-center">
+                        <span className="w-12 text-xl font-semibold text-center">
                             {quantity}
                         </span>
                         <Button
@@ -140,7 +141,7 @@ const ProductModal = ({ show, onClose, product }) => {
                             onClick={() => handleQuantityChange(1)}
                             disabled={quantity >= 99}
                         >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="w-4 h-4" />
                         </Button>
                     </div>
 
@@ -148,7 +149,7 @@ const ProductModal = ({ show, onClose, product }) => {
                         <label className="block text-sm font-medium">
                             ขนาด
                         </label>
-                        <div className="flex justify-between gap-2">
+                        <div className="flex gap-2 justify-between">
                             {sizes.map((sizeOption) => (
                                 <Button
                                     key={sizeOption.label}
@@ -202,7 +203,7 @@ const ProductModal = ({ show, onClose, product }) => {
                             {toppings.map((toppingOption) => (
                                 <label
                                     key={toppingOption.name}
-                                    className="flex items-center space-x-2 p-2 border rounded hover:bg-gray-50 cursor-pointer"
+                                    className="flex items-center p-2 space-x-2 rounded border cursor-pointer hover:bg-gray-50"
                                 >
                                     <Checkbox
                                         checked={selectedToppings.includes(
@@ -224,7 +225,7 @@ const ProductModal = ({ show, onClose, product }) => {
                     </div>
                 </div>
 
-                <div className="border-t p-4 space-y-4">
+                <div className="p-4 space-y-4 border-t">
                     <div className="flex justify-between items-center">
                         <span className="text-lg font-semibold">ราคารวม</span>
                         <span className="text-2xl font-bold">
