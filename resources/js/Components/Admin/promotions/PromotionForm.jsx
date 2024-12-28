@@ -16,6 +16,7 @@ export default function PromotionForm({
 }) {
     const { data, setData, post, put, processing, errors, reset } = useForm({
         name: isEditing ? promotion?.name : "",
+        image: null,
         description: isEditing ? promotion?.description : "",
         type: isEditing ? promotion?.type : "PERCENTAGE",
         percentage: isEditing ? promotion?.discount_value : 0,
@@ -34,6 +35,10 @@ export default function PromotionForm({
         start_date: isEditing ? promotion?.start_date : "",
         end_date: isEditing ? promotion?.end_date : "",
     });
+
+    const handleFileChange = (e) => {
+        setData("image", e.target.files[0]);
+    };
 
     useEffect(() => {
         // Reset discount values when type changes
@@ -137,6 +142,29 @@ export default function PromotionForm({
                     </div>
                 </div>
 
+                {/* Promotion Image Section */}
+                <div className="space-y-4">
+                    <h3 className="text-lg font-medium text-gray-900">
+                        รูปโปรโมชั่น
+                    </h3>
+                    {data.image && (
+                        <img
+                            src={URL.createObjectURL(data.image)}
+                            alt="Promotion"
+                            className="w-48 h-auto rounded-md"
+                        />
+                    )}
+                    <div>
+                        <Label htmlFor="image" value="เลือกรูปโปรโมชั่น" />
+                        <FileInput
+                            id="image"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            color={errors.image ? "failure" : "gray"}
+                            helperText={errors.image}
+                        />
+                    </div>
+                </div>
                 {/* Promotion Type Section */}
                 <div className="space-y-4">
                     <h3 className="text-lg font-medium text-gray-900">
@@ -437,7 +465,7 @@ export default function PromotionForm({
                 </div>
 
                 {/* Submit Button */}
-                <div className="flex justify-end gap-4">
+                <div className="flex gap-4 justify-end">
                     <Button
                         type="button"
                         color="light"

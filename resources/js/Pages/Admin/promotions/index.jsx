@@ -1,3 +1,4 @@
+import { isAbsoluteUrl } from "@/helpers";
 import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link } from "@inertiajs/react";
@@ -43,16 +44,17 @@ export default function Index({ promotions }) {
                     <div className="w-full sm:w-72">{/* todo search */}</div>
                     <Link
                         href={route("admin.promotions.create")}
-                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-cyan-600 rounded-lg hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 hover:scale-105"
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-lg transition-all duration-200 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 hover:scale-105"
                     >
-                        <HiPlus className="w-5 h-5 mr-2" />
+                        <HiPlus className="mr-2 w-5 h-5" />
                         เพิ่มโปรโมชั่น
                     </Link>
                 </div>
-                <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm mt-5">
+                <div className="overflow-hidden mt-5 rounded-lg border border-gray-200 shadow-sm">
                     <Table hoverable>
                         <Table.Head>
                             <Table.HeadCell>ลําดับ</Table.HeadCell>
+                            <Table.HeadCell>รูปโปรโมชั่น</Table.HeadCell>
                             <Table.HeadCell>ชื่อโปรโมชั่น</Table.HeadCell>
                             <Table.HeadCell>รายละเอียด</Table.HeadCell>
                             <Table.HeadCell>ประเภท</Table.HeadCell>
@@ -70,11 +72,39 @@ export default function Index({ promotions }) {
                                     <Table.Cell className="font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                         {index + 1}
                                     </Table.Cell>
+                                    <Table.Cell className="w-25">
+                                        <img
+                                            src={
+                                                promotion.image ??
+                                                "/images/defaults/default-promotion.jpg"
+                                            }
+                                            alt={promotion.name}
+                                            className="w-full h-full rounded"
+                                        />
+                                    </Table.Cell>
                                     <Table.Cell>{promotion.name}</Table.Cell>
-                                    <Table.Cell>{promotion.description}</Table.Cell>
+                                    <Table.Cell>
+                                        {promotion.description}
+                                    </Table.Cell>
                                     <Table.Cell>{promotion.type}</Table.Cell>
-                                    <Table.Cell>{promotion.start_date}</Table.Cell>
-                                    <Table.Cell>{promotion.end_date}</Table.Cell>
+                                    <Table.Cell>
+                                        {new Date(
+                                            promotion.start_date
+                                        ).toLocaleString("th-TH", {
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                        })}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {new Date(
+                                            promotion.end_date
+                                        ).toLocaleString("th-TH", {
+                                            year: "numeric",
+                                            month: "long",
+                                            day: "numeric",
+                                        })}
+                                    </Table.Cell>
                                     <Table.Cell>{promotion.status}</Table.Cell>
                                     <Table.Cell className="flex gap-2">
                                         <Link

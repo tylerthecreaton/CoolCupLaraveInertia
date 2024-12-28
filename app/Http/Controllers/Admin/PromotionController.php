@@ -12,7 +12,7 @@ class PromotionController extends Controller
 {
     public function index()
     {
-        $promotions = Promotion::all();
+        $promotions = Promotion::OrderBy('id', 'desc')->get();
         return Inertia::render('Admin/promotions/index', compact('promotions'));
     }
 
@@ -24,7 +24,7 @@ class PromotionController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'type' => 'required|in:PERCENTAGE,FIXED,BUY_X_GET_Y,CATEGORY_DISCOUNT',
@@ -37,7 +37,22 @@ class PromotionController extends Controller
             'category.discount_value' => 'required_if:type,CATEGORY_DISCOUNT|nullable|numeric|min:0',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            $rules['image'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:2048';
+        }
+
+        $validated = $request->validate($rules);
+        $imageName = "/images/defaults/default-promotion.jpg";
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name = time() . '.' . $image->getClientOriginalExtension();
+            $destinationPath = public_path('/images/promotions/');
+            $image->move($destinationPath, $name);
+            $validated['image'] = $name;
+            $imageName = "/images/promotions/" . $name;
+        }
 
         $promotion = new Promotion();
         $promotion->name = $validated['name'];
@@ -45,6 +60,10 @@ class PromotionController extends Controller
         $promotion->type = $validated['type'];
         $promotion->start_date = $validated['start_date'];
         $promotion->end_date = $validated['end_date'];
+
+        if ($request->hasFile('image')) {
+            $promotion->image = $imageName;
+        }
 
         switch ($validated['type']) {
             case 'PERCENTAGE':
