@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\ProductIngredients;
+use App\Models\PromotionUsage;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,14 +19,17 @@ class OrderController extends Controller
     {
         $order = new Order();
         $order->user_id = Auth::user()->id;
+        $order->username = Auth::user()->username;
         if ($request->get("memberPhone")) {
             $order->customer_id = $this->findCustomerIdFromPhoneNumber($request->get("memberPhone"));
         }
         $cart = $request->get("cart");
         $order->order_number = Order::generateOrderNumber();
-        $order->total_amount = $cart['total'];
+        $order->total_amount = $cart['subtotal'];
         $order->discount_amount = $cart['discount'];
-        $order->final_amount = $cart['finalTotal'];
+        $order->discount_type = $cart['discountType'];
+        $order->manual_discount_amount = $cart['manualDiscountAmount'];
+        $order->final_amount = $cart['total'];
         $order->payment_method = $request->get("selectedMethod");
         $order->cash = $request->get("cashReceived");
         $order->file_name = '';
@@ -36,10 +40,11 @@ class OrderController extends Controller
         if ($request->get("memberPhone")) {
             $this->addPointToCustomer($cart['total'], $request->get("memberPhone"));
         }
-        //TODO: หาเบอร์ลูกค้าก่อนบันทึก
 
         $this->saveOrderDetails($cart['items'], $order->id);
-
+        if ($cart['appliedPromotion']) {
+            $this->savePromotionUsage($cart['appliedPromotion'], $cart['discount'], $order->id);
+        }
         return Order::with([
             'orderDetails',
             'user',
@@ -99,17 +104,11 @@ class OrderController extends Controller
     private function saveOrderDetails(array $items, int $orderId)
     {
 
-        //         "id" => 1734874136638
-        //         "productId" => 4
-        //         "name" => "เอสเปรสโซ่"
-        //         "image" => "/images/products/1734445766.jpg"
-        //         "price" => 50
-        //         "quantity" => 1
-        //         "size" => "S"
-        //         "sweetness" => "100%"
-        //         "toppings" => []
-        //       ]
+
         foreach ($items as $item) {
+            if (isset($item['isDiscount']) && $item['isDiscount']) {
+                continue;
+            }
             $orderDetail = new OrderDetail();
             $orderDetail->order_id = $orderId;
             $orderDetail->product_id = $item['productId'];
@@ -123,6 +122,21 @@ class OrderController extends Controller
             $orderDetail->quantity = $item['quantity'];
             $orderDetail->subtotal = $item['quantity'] * $item['price']; // TODO: Calculate subtotal
             $orderDetail->save();
+        }
+    }
+
+    private function savePromotionUsage($appliedPromotion, $discountAmount, $orderId)
+    {
+        if ($appliedPromotion) {
+            $promotionUsage = new PromotionUsage();
+            $promotionUsage->promotion_id = $appliedPromotion['id'];
+            $promotionUsage->user_id = Auth::user()->id;
+            $promotionUsage->order_id = $orderId;
+            $promotionUsage->discount_amount = $discountAmount;
+            $promotionUsage->promotion_type = $appliedPromotion['type'];
+            $promotionUsage->promotion_value = $discountAmount;
+            $promotionUsage->promotion_details = json_encode($appliedPromotion);
+            $promotionUsage->save();
         }
     }
 
