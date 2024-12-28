@@ -21,7 +21,14 @@ import LoadingIndicator from "../LoadingIndicator";
 import { MdOutlineSystemSecurityUpdateWarning } from "react-icons/md";
 import UsePointModal from "./UsePointModal";
 
-const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
+const PaymethodModal = ({
+    show,
+    onClose,
+    total,
+    dispatch,
+    cartActions,
+    summary,
+}) => {
     const { state } = useGlobalState();
     const { data, post, setData, errors, processing } = useForm({
         selectedMethod: "cash",
@@ -536,6 +543,7 @@ const PaymethodModal = ({ show, onClose, total, dispatch, cartActions }) => {
                 show={showReceipt}
                 onClose={() => setShowReceipt(false)}
                 orderData={receipt}
+                summary={summary}
             />
         </>
     );

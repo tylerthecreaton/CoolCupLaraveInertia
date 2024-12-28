@@ -181,6 +181,7 @@ const ConfirmOrderModal = ({
                 total={summary.total}
                 dispatch={dispatch}
                 cartActions={cartActions}
+                summary={summary}
             />
         </>
     );
