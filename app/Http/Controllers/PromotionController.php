@@ -8,9 +8,17 @@ use Inertia\Inertia;
 
 class PromotionController extends Controller
 {
+    public function promotions()
+    {
+        $promotions = Promotion::OrderBy('id', 'desc')->get();
+        return $promotions;
+    }
+
     public function index()
     {
-        $promotions = Promotion::all();
+        $promotions = Promotion::where('start_date', '<=', date('Y-m-d'))
+            ->where('end_date', '>=', date('Y-m-d'))
+            ->get();
         $promotion_types = [
             ['BUY_X_GET_Y' => 'ซื้อ x รับ y'],
             ['PERCENTAGE' => 'เปอร์เซ็นต์'],

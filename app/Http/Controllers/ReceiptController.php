@@ -26,9 +26,9 @@ class ReceiptController extends Controller
 
             $imageData = $request->input('svgData');
             $orderId = $request->input('orderId');
-            
+
             Log::info('Processing order ID: ' . $orderId);
-            
+
             $imageData = str_replace('data:image/png;base64,', '', $imageData);
             $imageData = str_replace(' ', '+', $imageData);
             $imageData = base64_decode($imageData);
@@ -48,14 +48,14 @@ class ReceiptController extends Controller
             }
 
             file_put_contents(public_path('images/receipt/' . $filename), $imageData);
-            
+
             // อัพเดท receipt_path ในตาราง orders
             $order = Order::findOrFail($orderId);
             Log::info('Found order:', $order->toArray());
-            
+
             $order->receipt_path = $filename;
             $order->save();
-            
+
             Log::info('Receipt saved successfully with filename: ' . $filename);
 
             return response()->json([
@@ -65,15 +65,22 @@ class ReceiptController extends Controller
                 'filename' => $filename,
                 'receipt_path' => $filename
             ]);
-
         } catch (\Exception $e) {
             Log::error('Failed to save receipt: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to save receipt: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getLastOrderNumber()
+    {
+        $lastOrder = Order::orderBy('order_number', 'desc')->first();
+        return response()->json([
+            'nextOrderNumber' => $lastOrder ? $lastOrder->order_number + 1 : 1
+        ]);
     }
 }
