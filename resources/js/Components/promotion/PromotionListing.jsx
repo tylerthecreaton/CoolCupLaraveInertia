@@ -4,7 +4,7 @@ import { isAbsoluteUrl } from "@/helpers";
 
 export default function PromotionListing({ promotions }) {
     return (
-        <div className="container px-4 mx-auto sm:px-6 lg:px-8">
+        <div className="container px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 gap-6 md:gap-8 lg:gap-10 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                 {promotions?.map((promotion) => (
                     <Button

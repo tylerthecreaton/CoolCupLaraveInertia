@@ -1,15 +1,16 @@
+import React, { useState, useEffect } from "react";
 import ApplicationLogo from "@/Components/ApplicationLogo";
 import NavLink from "@/Components/NavLink";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink";
 import { Link, usePage, router } from "@inertiajs/react";
-import { Dropdown } from "flowbite-react";
-import { useState, useEffect } from "react";
+import { Dropdown, Avatar, Badge } from "flowbite-react";
 import Swal from "sweetalert2";
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [time, setTime] = useState(new Date().toLocaleTimeString());
+    const [unreadNotifications] = useState(3); // TODO: Replace with actual notifications count
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -200,6 +201,113 @@ export default function AuthenticatedLayout({ header, children }) {
                             </div>
                         </div>
 
+                        {/* Add Profile and Notifications Section */}
+                        <div className="hidden gap-x-4 space-x-4 sm:flex sm:items-center sm:ms-6">
+                            {/* Notifications Dropdown */}
+                            <Dropdown
+                                label={
+                                    <div className="relative">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-gray-600 transition-colors hover:text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        </svg>
+                                        {unreadNotifications > 0 && (
+                                            <div className="absolute -top-1 -right-1">
+                                                <Badge color="failure" className="px-1.5 !text-xs">
+                                                    {unreadNotifications}
+                                                </Badge>
+                                            </div>
+                                        )}
+                                    </div>
+                                }
+                                arrowIcon={false}
+                                inline
+                                className="w-80 !p-0"
+                            >
+                                <div className="py-2">
+                                    <div className="px-4 py-2 border-b border-gray-100">
+                                        <h6 className="text-sm font-medium text-gray-900">การแจ้งเตือน</h6>
+                                    </div>
+                                    <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
+                                        <Dropdown.Item className="flex items-center space-x-3 !p-4">
+                                            <div className="flex-shrink-0">
+                                                <div className="p-2 bg-blue-100 rounded-full">
+                                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    มีคำสั่งซื้อใหม่
+                                                </p>
+                                                <p className="text-sm text-gray-500 truncate">
+                                                    คำสั่งซื้อ #1234 รอการยืนยัน
+                                                </p>
+                                                <span className="text-xs text-gray-400">5 นาทีที่แล้ว</span>
+                                            </div>
+                                        </Dropdown.Item>
+                                    </div>
+                                    <div className="py-2 text-center border-t border-gray-100">
+                                        <Link href="/notifications" className="text-sm font-medium text-primary-600 hover:text-primary-700">
+                                            ดูการแจ้งเตือนทั้งหมด
+                                        </Link>
+                                    </div>
+                                </div>
+                            </Dropdown>
+
+                            {/* Profile Dropdown */}
+                            <Dropdown
+                                label={
+                                    <div className="flex items-center space-x-3">
+                                        <div className="relative">
+                                            <Avatar
+                                                img={user.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`}
+                                                rounded
+                                                bordered
+                                                className="!w-10 !h-10"
+                                            />
+                                            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-400 border-2 border-white"></div>
+                                        </div>
+                                        <div className="hidden text-left md:block">
+                                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                            <div className="text-xs text-gray-500">{time}</div>
+                                        </div>
+                                    </div>
+                                }
+                                inline
+                                className="w-56"
+                            >
+                                <div className="px-1 py-1">
+                                    <Dropdown.Item className="rounded-lg">
+                                        <Link href="/profile" className="flex items-center space-x-2 w-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                            <span>โปรไฟล์</span>
+                                        </Link>
+                                    </Dropdown.Item>
+                                    <Dropdown.Item className="rounded-lg">
+                                        <Link href="/settings" className="flex items-center space-x-2 w-full">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            <span>ตั้งค่า</span>
+                                        </Link>
+                                    </Dropdown.Item>
+                                    <Dropdown.Divider />
+                                    <Dropdown.Item className="text-red-600 rounded-lg hover:text-red-700 hover:bg-red-50" onClick={handleLogout}>
+                                        <div className="flex items-center space-x-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                            <span>ออกจากระบบ</span>
+                                        </div>
+                                    </Dropdown.Item>
+                                </div>
+                            </Dropdown>
+                        </div>
+
                         <div className="flex items-center -me-2 sm:hidden">
                             <button
                                 onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
@@ -248,7 +356,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     src={user.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`}
                                     alt={user.name}
                                 />
-                                <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-green-400 border-2 border-white"></div>
+                                <div className="absolute -right-1 -bottom-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
                             </div>
                             <div>
                                 <div className="text-base font-medium text-gray-800">{user.name}</div>

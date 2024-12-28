@@ -17,7 +17,7 @@ const CartComponent = () => {
     const [selectedPromotion, setSelectedPromotion] = useState("");
     const [discountInput, setDiscountInput] = useState("");
     const [showOrderModal, setShowOrderModal] = useState(false);
-    
+
     const promotions = [
         { code: "NEWUSER", discount: 10, description: "ส่วนลดลูกค้าใหม่ 10%" },
         { code: "HOLIDAY", discount: 15, description: "ส่วนลดเทศกาล 15%" },
