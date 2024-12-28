@@ -21,8 +21,9 @@ const ConfirmOrderModal = ({
     const { state, dispatch } = useGlobalState();
 
     const selectedPromotionDetails = selectedPromotion
-        ? promotions.find((p) => p.code === selectedPromotion)
+        ? promotions.find((p) => p.id == selectedPromotion.id)
         : null;
+    console.log(promotions);
 
     return (
         <>
@@ -32,7 +33,7 @@ const ConfirmOrderModal = ({
                 size="xl"
                 className="dark:bg-gray-800"
             >
-                <Modal.Header className="border-b bg-gray-50 dark:bg-gray-700">
+                <Modal.Header className="bg-gray-50 border-b dark:bg-gray-700">
                     <div className="flex items-center space-x-2">
                         <ShoppingBag className="w-6 h-6 text-blue-600" />
                         <div className="flex flex-col">
@@ -47,7 +48,7 @@ const ConfirmOrderModal = ({
                 </Modal.Header>
                 <Modal.Body className="p-6">
                     <div className="space-y-6">
-                        <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                        <div className="flex items-center p-4 space-x-2 bg-blue-50 rounded-lg border border-blue-100">
                             <Receipt className="w-5 h-5 text-blue-600" />
                             <p className="text-base text-blue-700">
                                 กรุณาตรวจสอบรายการสั่งซื้อของคุณให้ถูกต้อง
@@ -55,7 +56,7 @@ const ConfirmOrderModal = ({
                         </div>
 
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold flex items-center space-x-2">
+                            <h3 className="flex items-center space-x-2 text-lg font-semibold">
                                 <span>รายการสินค้า</span>
                                 <span className="text-sm text-gray-500">
                                     ({totalItems} รายการ)
@@ -74,9 +75,9 @@ const ConfirmOrderModal = ({
                                                         <img
                                                             src={item.image}
                                                             alt={item.name}
-                                                            className="w-16 h-16 object-cover rounded-lg shadow-sm"
+                                                            className="object-cover w-16 h-16 rounded-lg shadow-sm"
                                                         />
-                                                        <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                                        <span className="absolute -top-2 -right-2 px-2 py-1 text-xs font-bold text-white bg-blue-600 rounded-full">
                                                             {item.quantity}
                                                         </span>
                                                     </div>
@@ -111,7 +112,7 @@ const ConfirmOrderModal = ({
                                                         )}
                                                     </div>
                                                 </div>
-                                                <p className="font-semibold text-lg">
+                                                <p className="text-lg font-semibold">
                                                     ฿
                                                     {item.price * item.quantity}
                                                 </p>
@@ -121,8 +122,8 @@ const ConfirmOrderModal = ({
                             </div>
                         </div>
 
-                        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                            <h3 className="font-semibold text-lg mb-3">
+                        <div className="p-4 space-y-3 bg-gray-50 rounded-lg">
+                            <h3 className="mb-3 text-lg font-semibold">
                                 สรุปคำสั่งซื้อ
                             </h3>
                             <div className="flex justify-between text-sm">
@@ -139,7 +140,7 @@ const ConfirmOrderModal = ({
                             </div>
                             {selectedPromotionDetails && (
                                 <div className="flex justify-between text-sm text-green-600">
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex gap-1 items-center">
                                         <Tag className="w-4 h-4" />
                                         <span>
                                             โปรโมชั่น:{" "}
@@ -172,7 +173,7 @@ const ConfirmOrderModal = ({
                                         </div>
                                     )
                             )}
-                            <div className="flex justify-between text-lg pt-3 border-t">
+                            <div className="flex justify-between pt-3 text-lg border-t">
                                 <span className="font-bold">ราคาสุทธิ:</span>
                                 <span className="font-bold text-blue-600">
                                     ฿{finalTotal}
@@ -181,7 +182,7 @@ const ConfirmOrderModal = ({
                         </div>
                     </div>
                 </Modal.Body>
-                <Modal.Footer className="border-t bg-gray-50 dark:bg-gray-700">
+                <Modal.Footer className="bg-gray-50 border-t dark:bg-gray-700">
                     <div className="flex justify-center space-x-3 w-full">
                         <Button onClick={onClose} color="gray" className="px-6">
                             ยกเลิก
