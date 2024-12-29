@@ -17,9 +17,7 @@ class NotificationController extends Controller
     {
         $notifications = $this->getIngredientsNotifications();
 
-        return [
-            'notifications' => $notifications
-        ];
+        return $notifications;
     }
 
     private function getIngredientsNotifications(): array
