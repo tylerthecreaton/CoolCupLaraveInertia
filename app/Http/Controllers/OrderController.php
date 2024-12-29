@@ -127,7 +127,7 @@ class OrderController extends Controller
         $ingredientUsage = new ProductIngredientUsage();
         $ingredientUsage->order_detail_id = $detail['order_detail_id'];
         $ingredientUsage->ingredient_id = $detail['ingredient_id'];
-        $ingredientUsage->amount = $detail['quantity'];
+        $ingredientUsage->amount = -$detail['quantity'];
         $ingredientUsage->usage_type = 'USE';
         $ingredientUsage->created_by = Auth::user()->id;
         $ingredientUsage->save();
