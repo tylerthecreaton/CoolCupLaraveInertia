@@ -30,8 +30,13 @@ export const initialCartState = {
 
 // Helper functions
 const getItemKey = (item) => {
-    if (!item.toppings && !item.sweetness) return item.id;
-    return `${item.id}_${item.toppings?.sort().join("_")}_${item.sweetness}`;
+    const customizations = [
+        item.id,
+        item.size,
+        item.sweetness,
+        item.toppings?.sort().join("_")
+    ].filter(Boolean);
+    return customizations.join("_");
 };
 
 const calculateCartTotals = (items) => {

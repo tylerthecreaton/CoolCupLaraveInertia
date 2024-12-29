@@ -1,71 +1,68 @@
 import React from "react";
-import { Button } from "flowbite-react";
 import { isAbsoluteUrl } from "@/helpers";
 
 export default function PromotionListing({ promotions }) {
     return (
-        <div className="container px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 gap-6 md:gap-8 lg:gap-10 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-                {promotions?.map((promotion) => (
-                    <Button
-                        key={promotion.id}
-                        type="button"
-                        className="p-0 h-auto aspect-[4/5] w-full transition-transform duration-300 hover:scale-105"
-                        href={promotion.url}
-                    >
-                        <div className="flex overflow-hidden flex-col justify-between items-center w-full h-full bg-white rounded-lg shadow-md">
-                            <div className="relative w-full bg-gray-100 aspect-square">
-                                <img
-                                    src={
-                                        promotion.image ??
-                                        "/images/defaults/default-promotion.jpg"
-                                    }
-                                    className="object-cover absolute inset-0 w-full h-full transition-opacity duration-300"
-                                    alt={promotion.title}
-                                    loading="lazy"
-                                    onError={(e) => {
-                                        e.target.src =
-                                            "/images/defaults/default-promotion.jpg";
-                                    }}
-                                />
-                                {promotion.is_new && (
-                                    <div className="absolute top-2 left-2 px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">
-                                        ใหม่
-                                    </div>
-                                )}
-                                {promotion.end_date && (
-                                    <div className="absolute right-2 bottom-2 px-2 py-1 text-xs text-white bg-black bg-opacity-70 rounded-md">
-                                        หมดเขต: {promotion.end_date}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="p-4 w-full">
-                                <h3 className="mb-2 text-lg font-semibold text-gray-800 line-clamp-2">
-                                    {promotion.title}
-                                </h3>
-                                <p className="mb-2 text-sm text-gray-600 line-clamp-2">
-                                    {promotion.description}
-                                </p>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-lg font-bold text-purple-600">
-                                        {promotion.discount_text}
-                                    </span>
-                                    {promotion.original_price && (
-                                        <span className="text-sm text-gray-400 line-through">
-                                            ฿{promotion.original_price}
-                                        </span>
-                                    )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-4 gap-8 p-8">
+            {promotions?.map((promotion) => (
+                <div
+                    key={promotion.id}
+                    className="group cursor-pointer transform transition-all duration-300 hover:-translate-y-1"
+                >
+                    <div className="bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-100 h-full flex flex-col">
+                        <div className="relative aspect-[4/3] overflow-hidden">
+                            <img
+                                src={
+                                    isAbsoluteUrl(promotion.image)
+                                        ? promotion.image
+                                        : promotion.image ?? "/images/defaults/default-promotion.jpg"
+                                }
+                                className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+                                alt={promotion.title}
+                                onError={(e) => {
+                                    e.target.src = "/images/defaults/default-promotion.jpg";
+                                }}
+                            />
+                            {promotion.is_new && (
+                                <div className="absolute top-4 left-4 px-3 py-1.5 text-xs font-bold text-white bg-red-500 rounded-full shadow-lg">
+                                    ใหม่
                                 </div>
-                            </div>
+                            )}
+                            {promotion.end_date && (
+                                <div className="absolute right-4 bottom-4 px-3 py-1.5 text-xs font-medium text-white bg-black bg-opacity-75 backdrop-blur-sm rounded-lg shadow-lg">
+                                    หมดเขต: {new Intl.DateTimeFormat("th-TH", {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: false,
+                                        timeZone: "Asia/Bangkok",
+                                    }).format(new Date(promotion.end_date))}
+                                </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>
-                    </Button>
-                ))}
-                {promotions?.length === 0 && (
-                    <div className="col-span-full py-10 text-center text-gray-500">
-                        ไม่พบโปรโมชั่นในหมวดหมู่นี้
+                        <div className="p-6 flex-1 flex flex-col">
+                            <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 min-h-[3.5rem]">
+                                {promotion.name}
+                            </h3>
+                            <p className="text-base text-gray-600 line-clamp-3 mb-4 flex-1">
+                                {promotion.description}
+                            </p>
+                        </div>
                     </div>
-                )}
-            </div>
+                </div>
+            ))}
+            {promotions?.length === 0 && (
+                <div className="col-span-full py-16 text-center">
+                    <div className="inline-block p-6 bg-gray-50 rounded-2xl">
+                        <p className="text-lg text-gray-500">
+                            ไม่พบโปรโมชั่นในหมวดหมู่นี้
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

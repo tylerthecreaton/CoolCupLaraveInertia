@@ -77,22 +77,35 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
     };
 
     const confirmOrder = async () => {
-        const response = await axios.post(route("order.store"), {
-            ...data,
-            cart: state.cart,
-        });
-        if (response.status === 200) {
-            Swal.fire({
-                title: "สำเร็จ!",
-                text: "ชำระเงินเรียบร้อยแล้ว",
-                icon: "success",
-                timer: 1500,
-                showConfirmButton: false,
+        try {
+            const response = await axios.post(route("order.store"), {
+                selectedMethod: data.selectedMethod,
+                cart: state.cart,
+                memberPhone: data.memberPhone,
+                cashReceived: data.selectedMethod === "cash" ? data.cashReceived : total,
+                paymentNote: data.paymentNote || "",
             });
-            dispatch(cartActions.clearCart());
-            onClose();
-            setReceipt(response.data);
-            setShowReceipt(true);
+
+            if (response.status === 200) {
+                Swal.fire({
+                    title: "สำเร็จ!",
+                    text: "ชำระเงินเรียบร้อยแล้ว",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+                dispatch(cartActions.clearCart());
+                onClose();
+                setReceipt(response.data);
+                setShowReceipt(true);
+            }
+        } catch (error) {
+            console.error("Error confirming order:", error);
+            Swal.fire({
+                title: "เกิดข้อผิดพลาด!",
+                text: "ไม่สามารถบันทึกคำสั่งซื้อได้ กรุณาลองใหม่อีกครั้ง",
+                icon: "error",
+            });
         }
     };
 
@@ -124,15 +137,6 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                 return;
             }
         }
-
-        const newOrderData = {
-            orderNumber: `ORD${new Date().getTime()}`,
-            items: state.cart,
-            total: total,
-            paymentMethod: data.selectedMethod,
-            cashReceived: data.cashReceived,
-            memberPhone: data.memberPhone,
-        };
 
         Swal.fire({
             title: "ยืนยันการชำระเงิน",
@@ -347,23 +351,21 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                         {data.selectedMethod === "promptpay" && (
                             <div className="mt-4 space-y-4">
                                 <div className="flex flex-col items-center p-4 space-y-4 bg-blue-50 rounded-lg">
-                                    {/* <img
-                                        src="https://promptpay.io/0899999999.png"
-                                        alt="QR Code"
-                                        className="w-64 h-64"
-                                    /> */}
                                     <ReactQrCode
                                         value={generatePayload("0942017100", {
-                                            amount: total,
+                                            amount: parseFloat(total),
                                         })}
                                         size={256}
                                     />
-                                    <div className="text-center">
+                                    <div className="text-center space-y-2">
                                         <p className="text-sm text-gray-600">
                                             สแกน QR Code เพื่อชำระเงิน
                                         </p>
-                                        <p className="text-lg font-semibold text-blue-600">
-                                            ยอดชำระ ฿{total}
+                                        <p className="font-medium text-gray-800">
+                                            PromptPay: 094-201-7100
+                                        </p>
+                                        <p className="text-lg font-bold text-blue-600">
+                                            ยอดชำระ: ฿{total}
                                         </p>
                                     </div>
                                 </div>
@@ -488,27 +490,23 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                             </div>
                                         </div>
                                     )}
-                                </div>
-                                <div className="flex gap-2 justify-between">
-                                    <Button type="button" onClick={() => {}}>
-                                        ใช้แต้ม
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        onClick={() => {
-                                            if (!data.memberPhone) {
-                                                return Swal.fire({
-                                                    title: "ไม่สำเร็จ",
-                                                    text: "กรุณากรอกเบอร์โทรศัพท์สมาชิก",
-                                                    icon: "error",
-                                                });
-                                            }
-
-                                            handleSearchMember();
-                                        }}
-                                    >
-                                        ค้นหา
-                                    </Button>
+                                    <div className="flex justify-end">
+                                        <Button
+                                            type="button"
+                                            onClick={() => {
+                                                if (!data.memberPhone) {
+                                                    return Swal.fire({
+                                                        title: "ไม่สำเร็จ",
+                                                        text: "กรุณากรอกเบอร์โทรศัพท์สมาชิก",
+                                                        icon: "error",
+                                                    });
+                                                }
+                                                handleSearchMember();
+                                            }}
+                                        >
+                                            ค้นหา
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         )}

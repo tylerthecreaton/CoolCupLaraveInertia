@@ -420,13 +420,17 @@ const CartComponent = () => {
                                                     </p>
                                                     {item.size && (
                                                         <p className="text-sm text-gray-500">
-                                                            ขนาด: {item.size}
+                                                            <span className="font-medium">ขนาด:</span> {item.size}
                                                         </p>
                                                     )}
-                                                    {item.options && (
+                                                    {item.sweetness && (
                                                         <p className="text-sm text-gray-500">
-                                                            ตัวเลือก:{" "}
-                                                            {item.options}
+                                                            <span className="font-medium">ความหวาน:</span> {item.sweetness}
+                                                        </p>
+                                                    )}
+                                                    {item.toppings && item.toppings.length > 0 && (
+                                                        <p className="text-sm text-gray-500">
+                                                            <span className="font-medium">ท็อปปิ้ง:</span> {item.toppings.join(", ")}
                                                         </p>
                                                     )}
                                                 </div>

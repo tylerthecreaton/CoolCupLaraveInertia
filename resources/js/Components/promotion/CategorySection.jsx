@@ -7,9 +7,9 @@ export default function CategorySection({ promotions, types, onTypeChange }) {
     const [currentTab, setCurrentTab] = useState(0);
     const [showAddModal, setShowAddModal] = useState(false);
 
-    const handleTabClick = (index) => {
-        setCurrentTab(index);
-        onTypeChange(index === 0 ? null : Object.keys(types[index - 1])[0]);
+    const handleTabChange = (tab) => {
+        setCurrentTab(tab);
+        onTypeChange(tab === 0 ? null : Object.keys(types[tab - 1])[0]);
     };
 
     const filterPromotionsByType = (typeId) => {
@@ -19,17 +19,15 @@ export default function CategorySection({ promotions, types, onTypeChange }) {
 
     return (
         <>
-            <div className="flex justify-between items-center bg-white border-b border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
                 <div className="relative w-full">
                     <Tabs aria-label="Default tabs" variant="default">
                         <Tabs.Item
-                            key="all-promotions"
                             active={currentTab === 0}
                             title="โปรโมชั่นทั้งหมด"
                             icon={HiUserCircle}
-                            onClick={() => handleTabClick(0)}
                         >
-                            <div key="all-promotions-content">
+                            <div className="bg-gray-50/50">
                                 <PromotionListing
                                     promotions={filterPromotionsByType(null)}
                                 />
@@ -44,13 +42,11 @@ export default function CategorySection({ promotions, types, onTypeChange }) {
                                     active={currentTab === index + 1}
                                     title={typeValue}
                                     icon={HiUserCircle}
-                                    onClick={() => handleTabClick(index + 1)}
+                                    onClick={() => handleTabChange(index + 1)}
                                 >
-                                    <div key={`type-${typeKey}-content`}>
+                                    <div className="bg-gray-50/50">
                                         <PromotionListing
-                                            promotions={filterPromotionsByType(
-                                                typeKey
-                                            )}
+                                            promotions={filterPromotionsByType(typeKey)}
                                         />
                                     </div>
                                 </Tabs.Item>
@@ -59,11 +55,10 @@ export default function CategorySection({ promotions, types, onTypeChange }) {
                     </Tabs>
                     <Button
                         type="button"
-                        size="sm"
-                        className="absolute top-2 right-4 bg-purple-600 hover:bg-purple-700"
+                        className="absolute top-2 right-4"
                         onClick={() => setShowAddModal(true)}
                     >
-                        <HiPlus className="mr-2 w-4 h-4" />
+                        <HiPlus className="mr-2 h-4 w-4" />
                         เพิ่มโปรโมชั่น
                     </Button>
                 </div>

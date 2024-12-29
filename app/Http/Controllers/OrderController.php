@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Ingredient;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\ProductIngredients;
+use App\Models\ProductIngredientUsage;
 use App\Models\PromotionUsage;
 use App\Models\Setting;
 use Illuminate\Http\Request;
@@ -42,6 +44,7 @@ class OrderController extends Controller
         }
 
         $this->saveOrderDetails($cart['items'], $order->id);
+
         if ($cart['appliedPromotion']) {
             $this->savePromotionUsage($cart['appliedPromotion'], $cart['discount'], $order->id);
         }
@@ -94,16 +97,44 @@ class OrderController extends Controller
         return $point ?? 0;
     }
 
-    private function calculateIngredients(String $productId)
+    private function calculateIngredients(array $item, $orderDetailId)
     {
-        $productIngredients = ProductIngredients::where('product_id', $productId)->get();
-        dd($productIngredients);
+
+        if (isset($item['isDiscount']) && $item['isDiscount']) {
+            return;
+        }
+        $product = Product::find($item['productId']);
+        if ($product) {
+            $productIngredients = ProductIngredients::where('product_id', $product->id)->get();
+            foreach ($productIngredients as $productIngredient) {
+                $ingredient = Ingredient::find($productIngredient->ingredient_id);
+                if ($ingredient) {
+                    $ingredient->quantity -= $item['quantity'] * $productIngredient->quantity_used;
+                    $ingredient->save();
+
+                    $this->saveToIngredientUsageTable([
+                        'order_detail_id' => $orderDetailId,
+                        'ingredient_id' => $ingredient->id,
+                        'quantity' => $item['quantity'] * $productIngredient->quantity_used
+                    ]);
+                }
+            }
+        }
     }
 
+    public function saveToIngredientUsageTable($detail)
+    {
+        $ingredientUsage = new ProductIngredientUsage();
+        $ingredientUsage->order_detail_id = $detail['order_detail_id'];
+        $ingredientUsage->ingredient_id = $detail['ingredient_id'];
+        $ingredientUsage->amount = $detail['quantity'];
+        $ingredientUsage->usage_type = 'USE';
+        $ingredientUsage->created_by = Auth::user()->id;
+        $ingredientUsage->save();
+    }
 
     private function saveOrderDetails(array $items, int $orderId)
     {
-
 
         foreach ($items as $item) {
             if (isset($item['isDiscount']) && $item['isDiscount']) {
@@ -122,6 +153,8 @@ class OrderController extends Controller
             $orderDetail->quantity = $item['quantity'];
             $orderDetail->subtotal = $item['quantity'] * $item['price']; // TODO: Calculate subtotal
             $orderDetail->save();
+
+            $this->calculateIngredients($item,  $orderDetail->id);
         }
     }
 
