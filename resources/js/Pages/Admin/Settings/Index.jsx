@@ -97,9 +97,12 @@ const Index = ({ settings, types }) => {
                                                     <Button color="info" size="sm" onClick={() => showModal(setting)}>
                                                         <HiOutlinePencilAlt className="h-4 w-4" />
                                                     </Button>
-                                                    <Button color="failure" size="sm" onClick={() => handleDelete(setting.id)}>
-                                                        <HiOutlineTrash className="h-4 w-4" />
-                                                    </Button>
+                                                    {/* ซ่อนปุ่ม 'ลบ' ถ้าหากเป็น type system */}
+                                                    {setting.type !== 'system' && (
+                                                        <Button color="failure" size="sm" onClick={() => handleDelete(setting.id)}>
+                                                            <HiOutlineTrash className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </Table.Cell>
                                         </Table.Row>

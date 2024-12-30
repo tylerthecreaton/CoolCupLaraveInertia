@@ -520,6 +520,72 @@ export default function AuthenticatedLayout({ header, children }) {
                                                     <Dropdown.Item
                                                         key={notification.id}
                                                         className="flex items-center space-x-3 !p-4"
+                                                        onClick={() => {
+                                                            if (
+                                                                notification.type ===
+                                                                "low_stock"
+                                                            ) {
+                                                                // Show modal to input quantity
+                                                                Swal.fire({
+                                                                    title: 'เพิ่มจำนวนวัตถุดิบ',
+                                                                    html: `
+                                                                        <div class="mb-4">
+                                                                            <p class="text-sm text-gray-600 mb-2">วัตถุดิบ: ${notification.data.name}</p>
+                                                                            <p class="text-sm text-gray-600 mb-4">จำนวนคงเหลือ: ${notification.data.quantity} ${notification.data.unit}</p>
+                                                                            <input 
+                                                                                type="number" 
+                                                                                id="quantity" 
+                                                                                class="w-full px-3 py-2 border rounded-lg"
+                                                                                placeholder="ระบุจำนวนที่ต้องการเพิ่ม"
+                                                                                min="0.01"
+                                                                                step="0.01"
+                                                                            />
+                                                                        </div>
+                                                                    `,
+                                                                    showCancelButton: true,
+                                                                    confirmButtonText: 'เพิ่มจำนวน',
+                                                                    cancelButtonText: 'ยกเลิก',
+                                                                    confirmButtonColor: '#0891b2',
+                                                                    cancelButtonColor: '#d33',
+                                                                    preConfirm: () => {
+                                                                        const quantity = document.getElementById('quantity').value;
+                                                                        if (!quantity || quantity <= 0) {
+                                                                            Swal.showValidationMessage('กรุณาระบุจำนวนที่ต้องการเพิ่ม');
+                                                                            return false;
+                                                                        }
+                                                                        return quantity;
+                                                                    }
+                                                                }).then((result) => {
+                                                                    if (result.isConfirmed) {
+                                                                        // Send request to increase quantity
+                                                                        router.post(
+                                                                            route('admin.ingredients.increase', { ingredient: notification.data.id }),
+                                                                            { quantity: result.value },
+                                                                            {
+                                                                                onSuccess: () => {
+                                                                                    Swal.fire({
+                                                                                        title: 'สำเร็จ!',
+                                                                                        text: 'เพิ่มจำนวนวัตถุดิบเรียบร้อยแล้ว',
+                                                                                        icon: 'success',
+                                                                                        timer: 1500,
+                                                                                        showConfirmButton: false
+                                                                                    });
+                                                                                },
+                                                                                onError: () => {
+                                                                                    Swal.fire({
+                                                                                        title: 'เกิดข้อผิดพลาด!',
+                                                                                        text: 'ไม่สามารถเพิ่มจำนวนวัตถุดิบได้',
+                                                                                        icon: 'error'
+                                                                                    });
+                                                                                }
+                                                                            }
+                                                                        );
+                                                                    }
+                                                                });
+                                                            } else {
+                                                                router.get(notification.url);
+                                                            }
+                                                        }}
                                                     >
                                                         <div className="flex-shrink-0">
                                                             {getNotificationIcon(

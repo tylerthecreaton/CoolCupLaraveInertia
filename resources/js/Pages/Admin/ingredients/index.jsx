@@ -7,8 +7,11 @@ import {
     Pagination,
     Table,
     TextInput,
+    Button,
+    Modal,
+    Label,
 } from "flowbite-react";
-import { HiHome, HiSearch, HiPlus, HiPencil, HiTrash } from "react-icons/hi";
+import { HiHome, HiSearch, HiPlus, HiPencil, HiTrash, HiPlus as HiPlusCircle } from "react-icons/hi";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import { router } from "@inertiajs/react";
@@ -26,6 +29,9 @@ export default function index({ ingredientsPaginate }) {
     const [showUnitModal, setShowUnitModal] = useState(false);
     const [showEditUnitModal, setShowEditUnitModal] = useState(false);
     const [selectedUnit, setSelectedUnit] = useState(null);
+    const [showIncreaseModal, setShowIncreaseModal] = useState(false);
+    const [selectedIngredient, setSelectedIngredient] = useState(null);
+    const [increaseQuantity, setIncreaseQuantity] = useState("");
 
     const onPageChange = (page) => {
         page > current_page
@@ -84,6 +90,23 @@ export default function index({ ingredientsPaginate }) {
     const handleEditUnit = (unit) => {
         setSelectedUnit(unit);
         setShowEditUnitModal(true);
+    };
+
+    const handleIncreaseQuantity = () => {
+        router.post(route('admin.ingredients.increase-quantity', selectedIngredient.id), {
+            quantity: parseFloat(increaseQuantity)
+        }, {
+            onSuccess: () => {
+                setShowIncreaseModal(false);
+                setIncreaseQuantity("");
+                setSelectedIngredient(null);
+            }
+        });
+    };
+
+    const openIncreaseModal = (ingredient) => {
+        setSelectedIngredient(ingredient);
+        setShowIncreaseModal(true);
     };
 
     return (
@@ -233,6 +256,13 @@ export default function index({ ingredientsPaginate }) {
                                             </Table.Cell>
                                             <Table.Cell className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => openIncreaseModal(ingredient)}
+                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 rounded-md hover:bg-green-100 transition-colors duration-150"
+                                                    >
+                                                        <HiPlusCircle className="w-4 h-4 mr-1.5" />
+                                                        เพิ่มจำนวน
+                                                    </button>
                                                     <Link
                                                         href={route(
                                                             "admin.ingredients.edit",
@@ -339,6 +369,38 @@ export default function index({ ingredientsPaginate }) {
                     setIsOpen={setShowEditUnitModal}
                     unit={selectedUnit}
                 />
+                <Modal show={showIncreaseModal} onClose={() => setShowIncreaseModal(false)}>
+                    <Modal.Header>
+                        เพิ่มจำนวนวัตถุดิบ {selectedIngredient?.name}
+                    </Modal.Header>
+                    <Modal.Body>
+                        <div className="space-y-4">
+                            <div>
+                                <Label htmlFor="quantity" value="จำนวนที่ต้องการเพิ่ม" />
+                                <div className="flex items-center gap-2">
+                                    <TextInput
+                                        id="quantity"
+                                        type="number"
+                                        step="0.01"
+                                        min="0.01"
+                                        value={increaseQuantity}
+                                        onChange={(e) => setIncreaseQuantity(e.target.value)}
+                                        placeholder="ระบุจำนวน"
+                                    />
+                                    <span className="text-gray-500">{selectedIngredient?.unit}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button color="gray" onClick={() => setShowIncreaseModal(false)}>
+                            ยกเลิก
+                        </Button>
+                        <Button onClick={handleIncreaseQuantity}>
+                            เพิ่มจำนวน
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             </AdminLayout>
         </AuthenticatedLayout>
     );

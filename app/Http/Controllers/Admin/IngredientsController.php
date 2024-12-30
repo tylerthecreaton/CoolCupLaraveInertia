@@ -150,4 +150,16 @@ class IngredientsController extends Controller
         $ingredient->delete();
         return redirect()->route('admin.ingredients.index')->with('success', '');
     }
+
+    public function increaseQuantity(Request $request, Ingredient $ingredient)
+    {
+        $request->validate([
+            'quantity' => 'required|numeric|min:0.01',
+        ]);
+
+        $ingredient->quantity += $request->quantity;
+        $ingredient->save();
+
+        return redirect()->back()->with('success', 'เพิ่มจำนวนวัตถุดิบสำเร็จ');
+    }
 }

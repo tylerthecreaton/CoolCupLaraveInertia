@@ -50,6 +50,10 @@ class SettingController extends Controller
 
     public function destroy(Setting $setting)
     {
+        if ($setting->type === 'system') {
+            return redirect()->back()->with('error', 'System settings cannot be deleted');
+        }
+
         $setting->delete();
         return redirect()->back()->with('success', 'Setting deleted successfully');
     }

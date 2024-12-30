@@ -26,7 +26,21 @@ class SettingsSeeder extends Seeder
                 'description' => 'อัตราคะแนนสำหรับแต้มสั่งซื้อ',
                 'type' => 'system',
                 'comment' => 'ใช้สำหรับคำนวณแต้มสั่งซื้อ'
-            ]
+            ],
+            [
+                'key'=> 'minimum_ingredient_stock_alert',
+                'value'=> '1000',
+                'description' => '	เตือนเมื่อวัตถุดิบน้อยกว่า',
+                'type' => 'system',
+                'comment' => 'ใช้สำหรับคำนวณเตือนเมื่อวัตถุดิบน้อยกว่า'
+            ],
+            [
+                'key'=> 'ingredient_expired_before_date',
+                'value'=> '5',
+                'description' => '	เตือนเมื่อวันหมดอายุเหลือน้อยกว่า 5 วัน',
+                'type' => 'system',
+                'comment' => 'ใช้สำหรับคำนวณเตือนเมื่อวัตถุดิบหมดอายุ'
+            ],
         ];
         Setting::insert($settings);
     }

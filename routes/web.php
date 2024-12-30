@@ -123,6 +123,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/ingredients/{id}/edit', [AdminIngredientsController::class, 'edit'])->name('admin.ingredients.edit');
         Route::put('/ingredients/{id}', [AdminIngredientsController::class, 'update'])->name('admin.ingredients.update');
         Route::delete('/ingredients/{id}', [AdminIngredientsController::class, 'destroy'])->name('admin.ingredients.destroy');
+        Route::post('/ingredients/{ingredient}/increase', [AdminIngredientsController::class, 'increaseQuantity'])->name('admin.ingredients.increase');
+        Route::post('/ingredients/{ingredient}/increase-quantity', [AdminIngredientsController::class, 'increaseQuantity'])
+            ->name('admin.ingredients.increase-quantity');
 
         // ---------------------------Units---------------------------
         Route::get('/units', [AdminUnitController::class, 'index'])->name('admin.units.index');
