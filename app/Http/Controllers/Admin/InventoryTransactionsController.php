@@ -5,17 +5,51 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Ingredient;
 use App\Http\Controllers\Controller;
 use App\Models\InventoryTransactions;
+use App\Models\ProductIngredientUsage;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class InventoryTransactionsController extends Controller
 {
     // Display all inventory transactions
     public function index()
     {
-        $transactions = InventoryTransactions::with('ingredient')->get();
-        return Inertia::render('Admin/transactions/index', compact('transactions'));
+        // Get all transactions with ingredient details and user details
+        $transactions = ProductIngredientUsage::with(['ingredient', 'createdBy'])
+            ->select(
+                'product_ingredient_usages.*',
+                'ingredients.name as ingredient_name',
+                'ingredients.unit_id',
+                'users.username as created_by_name',
+                'units.name as unit_name'
+            )
+            ->join('ingredients', 'ingredients.id', '=', 'product_ingredient_usages.ingredient_id')
+            ->join('users', 'users.id', '=', 'product_ingredient_usages.created_by')
+            ->join('units', 'units.id', '=', 'ingredients.unit_id')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'id' => $transaction->id,
+                    'ingredient' => [
+                        'id' => $transaction->ingredient_id,
+                        'name' => $transaction->ingredient_name,
+                        'unit' => $transaction->unit_name
+                    ],
+                    'amount' => abs($transaction->amount), // Convert to positive number for display
+                    'type' => $transaction->usage_type,
+                    'created_by' => $transaction->created_by_name,
+                    'created_at' => $transaction->created_at->setTimezone('Asia/Bangkok')->format('Y-m-d H:i:s'),
+                    'note' => $transaction->note
+                ];
+            });
+
+        return Inertia::render('Admin/transactions/index', [
+            'transactions' => $transactions
+        ]);
     }
 
     // Show form to create a new transaction
@@ -30,53 +64,38 @@ class InventoryTransactionsController extends Controller
     {
         $rules = [
             'ingredient_id' => 'required|exists:ingredients,id',
-            'type' => 'required|in:' . implode(',', InventoryTransactions::getTypes()),
-            'quantity' => 'required|integer|min:1',
-            'notes' => 'nullable|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
+            'note' => 'nullable|string|max:255',
         ];
 
         $messages = [
-            'ingredient_id.required' => 'Please select an ingredient.',
-            'ingredient_id.exists' => 'The selected ingredient does not exist.',
-            'type.required' => 'Please select a transaction type.',
-            'type.in' => 'Invalid transaction type selected.',
-            'quantity.required' => 'Please enter a quantity.',
-            'quantity.integer' => 'Quantity must be a whole number.',
-            'quantity.min' => 'Quantity must be at least 1.',
-            'notes.max' => 'Notes cannot exceed 255 characters.',
+            'ingredient_id.required' => 'กรุณาเลือกวัตถุดิบ',
+            'ingredient_id.exists' => 'วัตถุดิบที่เลือกไม่ถูกต้อง',
+            'amount.required' => 'กรุณาระบุจำนวน',
+            'amount.numeric' => 'จำนวนต้องเป็นตัวเลข',
+            'amount.min' => 'จำนวนต้องมากกว่า 0',
+            'note.max' => 'หมายเหตุต้องไม่เกิน 255 ตัวอักษร',
         ];
 
         $validated = $request->validate($rules, $messages);
 
-        try {
-            DB::beginTransaction();
-
-            $ingredient = Ingredient::lockForUpdate()->findOrFail($validated['ingredient_id']);
-
-            if ($validated['type'] === InventoryTransactions::TYPE_DEDUCTED) {
-                if ($ingredient->quantity < $validated['quantity']) {
-                    throw new \Exception("Insufficient quantity of {$ingredient->name} in stock. Available: {$ingredient->quantity}");
-                }
-                $ingredient->quantity -= $validated['quantity'];
-            } else {
-                $ingredient->quantity += $validated['quantity'];
-            }
-
+        DB::transaction(function () use ($validated, $request) {
+            // Update ingredient quantity
+            $ingredient = Ingredient::findOrFail($validated['ingredient_id']);
+            $ingredient->quantity += $validated['amount'];
             $ingredient->save();
 
-            InventoryTransactions::create($validated);
+            // Create transaction record
+            $usage = new ProductIngredientUsage();
+            $usage->ingredient_id = $validated['ingredient_id'];
+            $usage->amount = $validated['amount'];
+            $usage->usage_type = 'ADD';
+            $usage->created_by = Auth::user()->id;
+            $usage->note = $validated['note'] ?? null;
+            $usage->save();
+        });
 
-            DB::commit();
-
-            return redirect()->route('admin.transactions.index')
-                ->with('success', 'Inventory transaction completed successfully.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->withInput()
-                ->with('error', $e->getMessage());
-        }
+        return redirect()->route('admin.transactions.index')->with('success', 'เพิ่มวัตถุดิบสำเร็จ');
     }
 
     // Show a single transaction
@@ -115,5 +134,10 @@ class InventoryTransactionsController extends Controller
         $transaction->delete();
 
         return redirect()->route('inventory_transactions.index')->with('success', 'Transaction deleted successfully.');
+    }
+
+    public static function getTypes()
+    {
+        return ['ADD', 'USE'];
     }
 }

@@ -99,7 +99,6 @@ class OrderController extends Controller
 
     private function calculateIngredients(array $item, $orderDetailId)
     {
-
         if (isset($item['isDiscount']) && $item['isDiscount']) {
             return;
         }
@@ -109,14 +108,20 @@ class OrderController extends Controller
             foreach ($productIngredients as $productIngredient) {
                 $ingredient = Ingredient::find($productIngredient->ingredient_id);
                 if ($ingredient) {
-                    $ingredient->quantity -= $item['quantity'] * $productIngredient->quantity_used;
-                    $ingredient->save();
+                    $usedQuantity = $item['quantity'] * $productIngredient->quantity_used;
 
-                    $this->saveToIngredientUsageTable([
-                        'order_detail_id' => $orderDetailId,
-                        'ingredient_id' => $ingredient->id,
-                        'quantity' => $item['quantity'] * $productIngredient->quantity_used
-                    ]);
+                    // บันทึกการใช้วัตถุดิบ
+                    $usage = new ProductIngredientUsage();
+                    $usage->ingredient_id = $ingredient->id;
+                    $usage->amount = -$usedQuantity; // ใส่เครื่องหมายลบเพื่อแสดงว่าเป็นการใช้
+                    $usage->usage_type = 'USE';
+                    $usage->created_by = Auth::user()->id;
+                    $usage->note = "ใช้ในออเดอร์ #{$item['id']}";
+                    $usage->save();
+
+                    // อัพเดทจำนวนวัตถุดิบ
+                    $ingredient->quantity -= $usedQuantity;
+                    $ingredient->save();
                 }
             }
         }

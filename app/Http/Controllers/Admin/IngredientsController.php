@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Ingredient;
+use App\Models\ProductIngredientUsage;
 use App\Models\Unit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class IngredientsController extends Controller
@@ -157,8 +160,20 @@ class IngredientsController extends Controller
             'quantity' => 'required|numeric|min:0.01',
         ]);
 
-        $ingredient->quantity += $request->quantity;
-        $ingredient->save();
+        DB::transaction(function () use ($request, $ingredient) {
+            // บันทึกการเพิ่มวัตถุดิบ
+            $usage = new ProductIngredientUsage();
+            $usage->ingredient_id = $ingredient->id;
+            $usage->amount = $request->quantity;
+            $usage->usage_type = 'ADD';
+            $usage->created_by = Auth::user()->id;
+            $usage->note = "เพิ่มจำนวนวัตถุดิบจากการแจ้งเตือน";
+            $usage->save();
+
+            // อัพเดทจำนวนวัตถุดิบ
+            $ingredient->quantity += $request->quantity;
+            $ingredient->save();
+        });
 
         return redirect()->back()->with('success', 'เพิ่มจำนวนวัตถุดิบสำเร็จ');
     }
