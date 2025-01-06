@@ -30,6 +30,12 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
         memberPhone: "",
     });
 
+    const settings = state.app.settings;
+
+    const pointPerThb = settings.find(
+        (setting) => setting.key === "point_per_thb"
+    );
+
     const [showReceipt, setShowReceipt] = useState(false);
     const [receipt, setReceipt] = useState(null);
     const [member, setMember] = useState(null);
@@ -82,7 +88,8 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                 selectedMethod: data.selectedMethod,
                 cart: state.cart,
                 memberPhone: data.memberPhone,
-                cashReceived: data.selectedMethod === "cash" ? data.cashReceived : total,
+                cashReceived:
+                    data.selectedMethod === "cash" ? data.cashReceived : total,
                 paymentNote: data.paymentNote || "",
             });
 
@@ -510,6 +517,33 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                 </div>
                             </div>
                         )}
+                        <hr className="my-4 border-t border-gray-300" />
+                        <div className="grid grid-cols-2 gap-2">
+                            <Button
+                                onClick={() => setShowReceipt(true)}
+                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                            >
+                                ใช้ 20 คะแนน
+                            </Button>
+                            <Button
+                                onClick={() => setShowReceipt(true)}
+                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                            >
+                                ใช้ 20 คะแนน
+                            </Button>
+                            <Button
+                                onClick={() => setShowReceipt(true)}
+                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                            >
+                                ใช้ 20 คะแนน
+                            </Button>
+                            <Button
+                                onClick={() => setShowReceipt(true)}
+                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                            >
+                                ใช้ 20 คะแนน
+                            </Button>
+                        </div>
                     </div>
                 </Modal.Body>
                 <Modal.Footer className="bg-gray-50 border-t">

@@ -18,6 +18,12 @@ class SettingController extends Controller
         ]);
     }
 
+    public function settings()
+    {
+        $settings = Setting::all();
+        return response()->json($settings);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
