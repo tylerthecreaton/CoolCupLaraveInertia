@@ -39,6 +39,7 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
     const [showReceipt, setShowReceipt] = useState(false);
     const [receipt, setReceipt] = useState(null);
     const [member, setMember] = useState(null);
+    const [isSummary, setIsSummary] = useState(false);
 
     const paymentMethods = [
         {
@@ -194,81 +195,51 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                 ฿{total}
                             </span>
                         </div>
-
-                        <div className="grid grid-cols-1 gap-4">
-                            {paymentMethods.map((method) => (
-                                <div
-                                    key={method.id}
-                                    className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-                                        data.selectedMethod === method.id
-                                            ? "border-blue-500 bg-blue-50"
-                                            : "hover:bg-gray-50"
-                                    }`}
-                                    onClick={() =>
-                                        handleMethodSelect(method.id)
-                                    }
-                                >
-                                    <div className="flex flex-1 items-center space-x-4">
-                                        {method.icon === "banknotes" ? (
-                                            <Banknote className="w-8 h-8 text-gray-600" />
-                                        ) : (
-                                            <QrCode className="w-8 h-8 text-gray-600" />
-                                        )}
-                                        <div>
-                                            <h3 className="font-medium">
-                                                {method.name}
-                                            </h3>
-                                            <p className="text-sm text-gray-500">
-                                                {method.description}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <Radio
-                                        checked={
-                                            data.selectedMethod === method.id
-                                        }
-                                        onChange={() =>
-                                            handleMethodSelect(method.id)
-                                        }
-                                    />
-                                </div>
-                            ))}
-                        </div>
-
-                        {data.selectedMethod === "cash" && (
-                            <div className="p-4 space-y-4 rounded-lg border">
-                                <div>
-                                    <label className="block mb-1 text-sm font-medium text-gray-700">
-                                        จำนวนเงินที่รับมา
-                                    </label>
-                                    <div className="flex items-center space-x-2">
-                                        <TextInput
-                                            type="number"
-                                            value={data.cashReceived}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "cashReceived",
-                                                    e.target.value
-                                                )
+                        {!isSummary && (
+                            <>
+                                <div className="grid grid-cols-1 gap-4">
+                                    {paymentMethods.map((method) => (
+                                        <div
+                                            key={method.id}
+                                            className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
+                                                data.selectedMethod ===
+                                                method.id
+                                                    ? "border-blue-500 bg-blue-50"
+                                                    : "hover:bg-gray-50"
+                                            }`}
+                                            onClick={() =>
+                                                handleMethodSelect(method.id)
                                             }
-                                            placeholder="กรอกจำนวนเงิน"
-                                            className="flex-1"
-                                        />
-                                        <span className="text-gray-500">
-                                            บาท
-                                        </span>
-                                    </div>
+                                        >
+                                            <div className="flex flex-1 items-center space-x-4">
+                                                {method.icon === "banknotes" ? (
+                                                    <Banknote className="w-8 h-8 text-gray-600" />
+                                                ) : (
+                                                    <QrCode className="w-8 h-8 text-gray-600" />
+                                                )}
+                                                <div>
+                                                    <h3 className="font-medium">
+                                                        {method.name}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-500">
+                                                        {method.description}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <Radio
+                                                checked={
+                                                    data.selectedMethod ===
+                                                    method.id
+                                                }
+                                                onChange={() =>
+                                                    handleMethodSelect(
+                                                        method.id
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                    ))}
                                 </div>
-                                {calculateChange() !== null && (
-                                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                                        <span className="font-medium text-green-700">
-                                            เงินทอน:
-                                        </span>
-                                        <span className="text-lg font-bold text-green-700">
-                                            ฿{calculateChange()}
-                                        </span>
-                                    </div>
-                                )}
                                 <div className="p-4 space-y-4 rounded-lg border">
                                     <Label
                                         htmlFor="memberPhone"
@@ -352,10 +323,96 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                         ค้นหา
                                     </Button>
                                 </div>
+                                <hr className="my-4 border-t border-gray-300" />
+                                <h4 className="text-lg font-semibold">
+                                    ใช้คะแนน
+                                </h4>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <Button
+                                        onClick={() => setShowReceipt(true)}
+                                        className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                    >
+                                        100 P
+                                    </Button>
+                                    <Button
+                                        onClick={() => setShowReceipt(true)}
+                                        className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                    >
+                                        200 P
+                                    </Button>
+                                    <Button
+                                        onClick={() => setShowReceipt(true)}
+                                        className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                    >
+                                        300 P
+                                    </Button>
+                                    <Button
+                                        onClick={() => setShowReceipt(true)}
+                                        className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                    >
+                                        400 P
+                                    </Button>
+                                    <Button
+                                        onClick={() => setShowReceipt(true)}
+                                        className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                    >
+                                        500 P
+                                    </Button>
+                                    <Button
+                                        onClick={() => setShowReceipt(true)}
+                                        className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                    >
+                                        1000 P
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+
+                        <Button
+                            onClick={() => setIsSummary(!isSummary)}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md"
+                        >
+                            {isSummary ? "ย้อนกลับ" : "ดูรายละเอียด"}
+                        </Button>
+
+                        {isSummary && data.selectedMethod === "cash" && (
+                            <div className="p-4 space-y-4 rounded-lg border">
+                                <div>
+                                    <label className="block mb-1 text-sm font-medium text-gray-700">
+                                        จำนวนเงินที่รับมา
+                                    </label>
+                                    <div className="flex items-center space-x-2">
+                                        <TextInput
+                                            type="number"
+                                            value={data.cashReceived}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "cashReceived",
+                                                    e.target.value
+                                                )
+                                            }
+                                            placeholder="กรอกจำนวนเงิน"
+                                            className="flex-1"
+                                        />
+                                        <span className="text-gray-500">
+                                            บาท
+                                        </span>
+                                    </div>
+                                </div>
+                                {calculateChange() !== null && (
+                                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                                        <span className="font-medium text-green-700">
+                                            เงินทอน:
+                                        </span>
+                                        <span className="text-lg font-bold text-green-700">
+                                            ฿{calculateChange()}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        {data.selectedMethod === "promptpay" && (
+                        {isSummary && data.selectedMethod === "promptpay" && (
                             <div className="mt-4 space-y-4">
                                 <div className="flex flex-col items-center p-4 space-y-4 bg-blue-50 rounded-lg">
                                     <ReactQrCode
@@ -434,116 +491,8 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                         className="mt-1"
                                     />
                                 </div>
-                                <div className="p-4 space-y-4 rounded-lg border">
-                                    <Label
-                                        htmlFor="memberPhone"
-                                        value="เบอร์สมาชิกเพื่อสะสมแต้ม"
-                                    />
-                                    <TextInput
-                                        id="memberPhone"
-                                        type="tel"
-                                        value={data.memberPhone}
-                                        onChange={(e) =>
-                                            setData(
-                                                "memberPhone",
-                                                e.target.value
-                                            )
-                                        }
-                                        placeholder="กรอกเบอร์โทรศัพท์สมาชิก"
-                                        className="mt-1"
-                                    />
-                                    {member && (
-                                        <div className="space-y-2">
-                                            <div className="flex items-center space-x-2">
-                                                <span className="font-bold text-gray-700">
-                                                    ชื่อสมาชิก:
-                                                </span>
-                                                <span className="text-base font-normal">
-                                                    {member?.name}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <span className="font-bold text-gray-700">
-                                                    เบอร์โทรศัพท์:
-                                                </span>
-                                                <span className="text-base font-normal">
-                                                    {member?.phone_number}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <span className="font-bold text-gray-700">
-                                                    วันเกิด:
-                                                </span>
-                                                <span className="text-base font-normal">
-                                                    {new Date(
-                                                        member?.birthdate
-                                                    ).toLocaleDateString(
-                                                        "th-TH",
-                                                        {
-                                                            year: "numeric",
-                                                            month: "long",
-                                                            day: "numeric",
-                                                        }
-                                                    )}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <span className="font-bold text-gray-700">
-                                                    แต้มสะสม:
-                                                </span>
-                                                <span className="text-base font-normal">
-                                                    {member?.loyalty_points}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div className="flex justify-end">
-                                        <Button
-                                            type="button"
-                                            onClick={() => {
-                                                if (!data.memberPhone) {
-                                                    return Swal.fire({
-                                                        title: "ไม่สำเร็จ",
-                                                        text: "กรุณากรอกเบอร์โทรศัพท์สมาชิก",
-                                                        icon: "error",
-                                                    });
-                                                }
-                                                handleSearchMember();
-                                            }}
-                                        >
-                                            ค้นหา
-                                        </Button>
-                                    </div>
-                                </div>
                             </div>
                         )}
-                        <hr className="my-4 border-t border-gray-300" />
-                        <div className="grid grid-cols-2 gap-2">
-                            <Button
-                                onClick={() => setShowReceipt(true)}
-                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
-                            >
-                                ใช้ 20 คะแนน
-                            </Button>
-                            <Button
-                                onClick={() => setShowReceipt(true)}
-                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
-                            >
-                                ใช้ 20 คะแนน
-                            </Button>
-                            <Button
-                                onClick={() => setShowReceipt(true)}
-                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
-                            >
-                                ใช้ 20 คะแนน
-                            </Button>
-                            <Button
-                                onClick={() => setShowReceipt(true)}
-                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
-                            >
-                                ใช้ 20 คะแนน
-                            </Button>
-                        </div>
                     </div>
                 </Modal.Body>
                 <Modal.Footer className="bg-gray-50 border-t">

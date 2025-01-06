@@ -26,10 +26,11 @@ const CartComponent = () => {
         subtotal: 0,
         discount: 0,
         total: 0,
-        discountType: "", // 'promotion' | 'manual' | ''
+        discountType: "", // 'promotion' | 'manual' | 'point'
         totalItems: 0,
         appliedPromotion: null,
         manualDiscountAmount: 0,
+        pointDiscountAmount: 0,
         userId: user?.id || null,
         userName: user?.name || "ผู้ใช้ทั่วไป",
         timestamp: new Date().toISOString(),
@@ -123,6 +124,7 @@ const CartComponent = () => {
             discountType: state.cart.discountType,
             appliedPromotion: state.cart.appliedPromotion,
             manualDiscountAmount: state.cart.manualDiscountAmount,
+            pointDiscountAmount: state.cart.pointDiscountAmount,
             userId: user?.id || null,
             userName: user?.name || "ผู้ใช้ทั่วไป",
             timestamp: new Date().toISOString(),
@@ -331,6 +333,7 @@ const CartComponent = () => {
                     discountType: "",
                     appliedPromotion: null,
                     manualDiscountAmount: 0,
+                    pointDiscountAmount: 0,
                     timestamp: new Date().toISOString(),
                 }));
             } else {
@@ -420,19 +423,32 @@ const CartComponent = () => {
                                                     </p>
                                                     {item.size && (
                                                         <p className="text-sm text-gray-500">
-                                                            <span className="font-medium">ขนาด:</span> {item.size}
+                                                            <span className="font-medium">
+                                                                ขนาด:
+                                                            </span>{" "}
+                                                            {item.size}
                                                         </p>
                                                     )}
                                                     {item.sweetness && (
                                                         <p className="text-sm text-gray-500">
-                                                            <span className="font-medium">ความหวาน:</span> {item.sweetness}
+                                                            <span className="font-medium">
+                                                                ความหวาน:
+                                                            </span>{" "}
+                                                            {item.sweetness}
                                                         </p>
                                                     )}
-                                                    {item.toppings && item.toppings.length > 0 && (
-                                                        <p className="text-sm text-gray-500">
-                                                            <span className="font-medium">ท็อปปิ้ง:</span> {item.toppings.join(", ")}
-                                                        </p>
-                                                    )}
+                                                    {item.toppings &&
+                                                        item.toppings.length >
+                                                            0 && (
+                                                            <p className="text-sm text-gray-500">
+                                                                <span className="font-medium">
+                                                                    ท็อปปิ้ง:
+                                                                </span>{" "}
+                                                                {item.toppings.join(
+                                                                    ", "
+                                                                )}
+                                                            </p>
+                                                        )}
                                                 </div>
                                             </>
                                         ) : (

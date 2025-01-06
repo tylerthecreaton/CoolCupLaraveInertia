@@ -19,10 +19,11 @@ export const initialCartState = {
     subtotal: 0,
     discount: 0,
     total: 0,
-    discountType: "", // 'promotion' | 'manual' | ''
+    discountType: "", // 'promotion' | 'manual' | 'point'
     totalItems: 0,
     appliedPromotion: null,
     manualDiscountAmount: 0,
+    pointDiscountAmount: 0,
     userId: null,
     userName: null,
     timestamp: new Date().toISOString(),
@@ -34,7 +35,7 @@ const getItemKey = (item) => {
         item.id,
         item.size,
         item.sweetness,
-        item.toppings?.sort().join("_")
+        item.toppings?.sort().join("_"),
     ].filter(Boolean);
     return customizations.join("_");
 };
@@ -197,6 +198,19 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
             break;
         }
 
+        case "APPLY_POINT_DISCOUNT": {
+            const amount = Math.max(0, Number(action.payload) || 0);
+            newState = {
+                ...state,
+                discountType: amount > 0 ? "point" : "",
+                pointDiscountAmount: amount,
+                appliedPromotion: null,
+                discount: amount,
+                total: Math.max(0, state.subtotal - amount),
+            };
+            break;
+        }
+
         case "SET_ORDER_NUMBER": {
             const orderNumber = Math.max(1, parseInt(action.payload) || 1);
             newState = {
@@ -269,6 +283,11 @@ export const cartActions = {
         payload: amount,
     }),
 
+    applyPointDiscount: (amount) => ({
+        type: "APPLY_POINT_DISCOUNT",
+        payload: amount,
+    }),
+
     setOrderNumber: (number) => ({
         type: "SET_ORDER_NUMBER",
         payload: number,
@@ -314,6 +333,7 @@ export const cartActions = {
  * @property {number} totalItems
  * @property {Object|null} appliedPromotion
  * @property {number} manualDiscountAmount
+ * @property {number} pointDiscountAmount
  * @property {string|null} userId
  * @property {string|null} userName
  * @property {string} timestamp
