@@ -75,6 +75,9 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
         } else {
             setMember(null);
             setIsMemberLoading(false);
+            // Clear discount when member is cleared
+            setDiscount(0);
+            setUsePoints(false);
         }
     }, [data.memberPhone]);
 
@@ -191,29 +194,11 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
     };
 
     const handleUsePoints = (points) => {
-        if (!member) {
-            return Swal.fire({
-                title: "ไม่สำเร็จ",
-                text: "กรุณาค้นหาสมาชิกก่อนใช้คะแนน",
-                icon: "error",
-            });
-        }
-
-        if (member.loyalty_points < points) {
-            return Swal.fire({
-                title: "ไม่สำเร็จ",
-                text: "คะแนนสะสมไม่เพียงพอ",
-                icon: "error",
-            });
-        }
-
-        // Calculate discount based on pointPerThb (10 points = 1 baht)
-        const pointValue = pointPerThb ? parseFloat(pointPerThb.value) : 10;
-        const calculatedDiscount = points / pointValue;
-
-        // Apply point discount to cart state
-        dispatch(cartActions.applyPointDiscount(calculatedDiscount));
-        setDiscount(calculatedDiscount);
+        const pointValue = points / (pointPerThb ? parseFloat(pointPerThb.value) : 10);
+        // Ensure discount doesn't exceed total
+        const newDiscount = Math.min(pointValue, total);
+        setDiscount(newDiscount);
+        setUsePoints(true);
     };
 
     useEffect(() => {
@@ -389,6 +374,22 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                 </div>
                                 {member && (
                                     <>
+                                        <div className="space-y-2 p-4 bg-gray-50 rounded-lg mb-4">
+                                            <div className="flex justify-between">
+                                                <span>ยอดรวม:</span>
+                                                <span>฿{total.toFixed(2)}</span>
+                                            </div>
+                                            {discount > 0 && (
+                                                <div className="flex justify-between text-green-600">
+                                                    <span>ส่วนลดจากคะแนน:</span>
+                                                    <span>-฿{discount.toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                            <div className="flex justify-between font-semibold border-t pt-2">
+                                                <span>ยอดสุทธิ:</span>
+                                                <span>฿{Math.max(0, total - discount).toFixed(2)}</span>
+                                            </div>
+                                        </div>
                                         <div className="grid grid-cols-3 gap-2">
                                             <Button
                                                 onClick={() =>
