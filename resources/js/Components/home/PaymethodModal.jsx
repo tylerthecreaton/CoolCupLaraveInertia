@@ -194,7 +194,8 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
     };
 
     const handleUsePoints = (points) => {
-        const pointValue = points / (pointPerThb ? parseFloat(pointPerThb.value) : 10);
+        const pointValue =
+            points / (pointPerThb ? parseFloat(pointPerThb.value) : 10);
         // Ensure discount doesn't exceed total
         const newDiscount = Math.min(pointValue, total);
         setDiscount(newDiscount);
@@ -382,14 +383,61 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                             {discount > 0 && (
                                                 <div className="flex justify-between text-green-600">
                                                     <span>ส่วนลดจากคะแนน:</span>
-                                                    <span>-฿{discount.toFixed(2)}</span>
+                                                    <span>
+                                                        -฿{discount.toFixed(2)}
+                                                    </span>
                                                 </div>
                                             )}
                                             <div className="flex justify-between font-semibold border-t pt-2">
                                                 <span>ยอดสุทธิ:</span>
-                                                <span>฿{Math.max(0, total - discount).toFixed(2)}</span>
+                                                <span>
+                                                    ฿
+                                                    {Math.max(
+                                                        0,
+                                                        total - discount
+                                                    ).toFixed(2)}
+                                                </span>
                                             </div>
                                         </div>
+                                        {member &&
+                                            member.loyalty_points /
+                                                (pointPerThb
+                                                    ? parseFloat(
+                                                          pointPerThb.value
+                                                      )
+                                                    : 10) >=
+                                                total && (
+                                                <Button
+                                                    size="sm"
+                                                    color={
+                                                        usePoints
+                                                            ? "success"
+                                                            : "light"
+                                                    }
+                                                    onClick={() => {
+                                                        if (!usePoints) {
+                                                            setDiscount(total);
+                                                        } else {
+                                                            setDiscount(0);
+                                                        }
+                                                        setUsePoints(
+                                                            !usePoints
+                                                        );
+                                                    }}
+                                                    className="w-full mb-2"
+                                                >
+                                                    ใช้แต้มทั้งหมด{" "}
+                                                    {Math.ceil(
+                                                        total *
+                                                            (pointPerThb
+                                                                ? parseFloat(
+                                                                      pointPerThb.value
+                                                                  )
+                                                                : 10)
+                                                    )}{" "}
+                                                    แต้ม = ฿{total.toFixed(2)}
+                                                </Button>
+                                            )}
                                         <div className="grid grid-cols-3 gap-2">
                                             <Button
                                                 onClick={() =>
@@ -512,50 +560,48 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                                 ).toFixed(2)}
                                             </Button>
                                         </div>
-                                    </>
-                                )}
-
-                                {member && (
-                                    <div className="mt-2 text-sm text-gray-600">
-                                        คะแนนสะสมคงเหลือ:{" "}
-                                        {member.loyalty_points} คะแนน
-                                    </div>
-                                )}
-                                {member && (
-                                    <div className="flex items-center justify-between">
-                                        <Button
-                                            size="sm"
-                                            color={
-                                                usePoints ? "success" : "light"
-                                            }
-                                            onClick={() => {
-                                                if (!usePoints) {
-                                                    const pointValue =
-                                                        member.loyalty_points /
-                                                        (pointPerThb
-                                                            ? parseFloat(
-                                                                  pointPerThb.value
-                                                              )
-                                                            : 10);
-                                                    setDiscount(pointValue);
-                                                } else {
-                                                    setDiscount(0);
+                                        {/* <div className="mt-2 text-sm text-gray-600">
+                                            คะแนนสะสมคงเหลือ:{" "}
+                                            {member.loyalty_points} คะแนน
+                                        </div> */}
+                                        {/* <div className="flex items-center justify-between">
+                                            <Button
+                                                size="sm"
+                                                color={
+                                                    usePoints
+                                                        ? "success"
+                                                        : "light"
                                                 }
-                                                setUsePoints(!usePoints);
-                                            }}
-                                        >
-                                            ใช้คะแนนสะสม {member.loyalty_points}{" "}
-                                            คะแนน = ฿
-                                            {(
-                                                member.loyalty_points /
-                                                (pointPerThb
-                                                    ? parseFloat(
-                                                          pointPerThb.value
-                                                      )
-                                                    : 10)
-                                            ).toFixed(2)}
-                                        </Button>
-                                    </div>
+                                                onClick={() => {
+                                                    if (!usePoints) {
+                                                        const pointValue =
+                                                            member.loyalty_points /
+                                                            (pointPerThb
+                                                                ? parseFloat(
+                                                                      pointPerThb.value
+                                                                  )
+                                                                : 10);
+                                                        setDiscount(pointValue);
+                                                    } else {
+                                                        setDiscount(0);
+                                                    }
+                                                    setUsePoints(!usePoints);
+                                                }}
+                                            >
+                                                ใช้คะแนนสะสม{" "}
+                                                {member.loyalty_points} คะแนน =
+                                                ฿
+                                                {(
+                                                    member.loyalty_points /
+                                                    (pointPerThb
+                                                        ? parseFloat(
+                                                              pointPerThb.value
+                                                          )
+                                                        : 10)
+                                                ).toFixed(2)}
+                                            </Button>
+                                        </div> */}
+                                    </>
                                 )}
                             </>
                         )}
