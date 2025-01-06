@@ -1,15 +1,17 @@
 import { useForm } from "@inertiajs/react";
+import { useEffect } from "react";
 import {
     Button,
     FileInput,
     Label,
     Modal,
     Radio,
+    Spinner,
     TextInput,
 } from "flowbite-react";
 import { useState } from "react";
 
-import { Banknote, CreditCard, QrCode, Receipt } from "lucide-react";
+import { BadgeDollarSign, Banknote, CreditCard, QrCode, Receipt, SquarePercent } from "lucide-react";
 import Swal from "sweetalert2";
 
 import { useGlobalState } from "@/Store/state";
@@ -40,6 +42,8 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
     const [receipt, setReceipt] = useState(null);
     const [member, setMember] = useState(null);
     const [isSummary, setIsSummary] = useState(false);
+    const [isMemberLoading, setIsMemberLoading] = useState(false);
+    const [discount, setDiscount] = useState(0);
 
     const paymentMethods = [
         {
@@ -56,6 +60,16 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
         },
     ];
 
+    useEffect(() => {
+        if (data.memberPhone.length === 10) {
+            setIsMemberLoading(true);
+            handleSearchMember();
+        } else {
+            setMember(null);
+            setIsMemberLoading(false);
+        }
+    }, [data.memberPhone]);
+
     const handleSearchMember = async () => {
         const response = await axios.get(
             route("api.admin.member.memberWherePhoneNumber", {
@@ -63,6 +77,7 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
             })
         );
         setMember(response.data);
+        setIsMemberLoading(false);
     };
 
     const handleMethodSelect = (methodId) => {
@@ -167,6 +182,41 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
         onClose();
     };
 
+    const handleUsePoints = (points) => {
+        if (!member) {
+            return Swal.fire({
+                title: "ไม่สำเร็จ",
+                text: "กรุณาค้นหาสมาชิกก่อนใช้คะแนน",
+                icon: "error",
+            });
+        }
+
+        if (member.point < points) {
+            return Swal.fire({
+                title: "ไม่สำเร็จ",
+                text: "คะแนนสะสมไม่เพียงพอ",
+                icon: "error",
+            });
+        }
+
+        // Calculate discount based on pointPerThb (10 points = 1 baht)
+        const pointValue = pointPerThb ? parseFloat(pointPerThb.value) : 10;
+        const calculatedDiscount = points / pointValue;
+        
+        // Apply point discount to cart state
+        dispatch(cartActions.applyPointDiscount(calculatedDiscount));
+        setDiscount(calculatedDiscount);
+    };
+
+    useEffect(() => {
+        if (!show) {
+            setDiscount(0);
+            dispatch(cartActions.applyPointDiscount(0));
+        }
+    }, [show]);
+
+    const finalTotal = Math.max(0, total - discount);
+
     return (
         <>
             <Modal
@@ -193,6 +243,24 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                             </div>
                             <span className="text-xl font-bold text-blue-600">
                                 ฿{total}
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
+                            <div className="flex items-center space-x-2">
+                                <SquarePercent className="w-5 h-5 text-blue-600" />
+                                <span className="font-medium">ส่วนลด</span>
+                            </div>
+                            <span className="text-xl font-bold text-blue-600">
+                                ฿{discount}
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
+                            <div className="flex items-center space-x-2">
+                                <BadgeDollarSign className="w-5 h-5 text-green-600" />
+                                <span className="font-medium">ยอดชำระสุทธิ</span>
+                            </div>
+                            <span className="text-xl font-bold text-green-600">
+                                ฿{finalTotal}
                             </span>
                         </div>
                         {!isSummary && (
@@ -258,7 +326,11 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                         placeholder="กรอกเบอร์โทรศัพท์สมาชิก"
                                         className="mt-1"
                                     />
-
+                                    {isMemberLoading && (
+                                        <div className="flex justify-center">
+                                            <Spinner />
+                                        </div>
+                                    )}
                                     {member && (
                                         <div className="space-y-2">
                                             <div className="flex items-center space-x-2">
@@ -305,64 +377,42 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex justify-end">
-                                    <Button
-                                        type="button"
-                                        onClick={() => {
-                                            if (!data.memberPhone) {
-                                                return Swal.fire({
-                                                    title: "ไม่สำเร็จ",
-                                                    text: "กรุณากรอกเบอร์โทรศัพท์สมาชิก",
-                                                    icon: "error",
-                                                });
-                                            }
-
-                                            handleSearchMember();
-                                        }}
-                                    >
-                                        ค้นหา
-                                    </Button>
-                                </div>
-                                <hr className="my-4 border-t border-gray-300" />
-                                <h4 className="text-lg font-semibold">
-                                    ใช้คะแนน
-                                </h4>
                                 <div className="grid grid-cols-3 gap-2">
                                     <Button
-                                        onClick={() => setShowReceipt(true)}
+                                        onClick={() => handleUsePoints(100)}
                                         className="bg-blue-600 hover:bg-blue-700 col-span-1"
                                     >
-                                        100 P
+                                        100 P = ฿{(100 / (pointPerThb ? parseFloat(pointPerThb.value) : 10)).toFixed(2)}
                                     </Button>
                                     <Button
-                                        onClick={() => setShowReceipt(true)}
+                                        onClick={() => handleUsePoints(200)}
                                         className="bg-blue-600 hover:bg-blue-700 col-span-1"
                                     >
-                                        200 P
+                                        200 P = ฿{(200 / (pointPerThb ? parseFloat(pointPerThb.value) : 10)).toFixed(2)}
                                     </Button>
                                     <Button
-                                        onClick={() => setShowReceipt(true)}
+                                        onClick={() => handleUsePoints(300)}
                                         className="bg-blue-600 hover:bg-blue-700 col-span-1"
                                     >
-                                        300 P
+                                        300 P = ฿{(300 / (pointPerThb ? parseFloat(pointPerThb.value) : 10)).toFixed(2)}
                                     </Button>
                                     <Button
-                                        onClick={() => setShowReceipt(true)}
+                                        onClick={() => handleUsePoints(400)}
                                         className="bg-blue-600 hover:bg-blue-700 col-span-1"
                                     >
-                                        400 P
+                                        400 P = ฿{(400 / (pointPerThb ? parseFloat(pointPerThb.value) : 10)).toFixed(2)}
                                     </Button>
                                     <Button
-                                        onClick={() => setShowReceipt(true)}
+                                        onClick={() => handleUsePoints(500)}
                                         className="bg-blue-600 hover:bg-blue-700 col-span-1"
                                     >
-                                        500 P
+                                        500 P = ฿{(500 / (pointPerThb ? parseFloat(pointPerThb.value) : 10)).toFixed(2)}
                                     </Button>
                                     <Button
-                                        onClick={() => setShowReceipt(true)}
+                                        onClick={() => handleUsePoints(1000)}
                                         className="bg-blue-600 hover:bg-blue-700 col-span-1"
                                     >
-                                        1000 P
+                                        1000 P = ฿{(1000 / (pointPerThb ? parseFloat(pointPerThb.value) : 10)).toFixed(2)}
                                     </Button>
                                 </div>
                             </>
