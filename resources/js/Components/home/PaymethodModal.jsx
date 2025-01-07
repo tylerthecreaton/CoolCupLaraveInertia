@@ -116,7 +116,9 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                 cart: state.cart,
                 memberPhone: data.memberPhone,
                 cashReceived:
-                    data.selectedMethod === "cash" ? data.cashReceived : total,
+                    data.selectedMethod === "cash"
+                        ? data.cashReceived
+                        : finalTotal,
                 paymentNote: data.paymentNote || "",
             });
 
@@ -155,14 +157,14 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
 
         if (data.selectedMethod === "cash") {
             const received = parseFloat(data.cashReceived);
-            if (!received) {
+            if (!received && finalTotal > 0) {
                 Swal.fire({
                     title: "กรุณากรอกจำนวนเงินที่รับมา",
                     icon: "warning",
                 });
                 return;
             }
-            if (received < total) {
+            if (received < finalTotal) {
                 Swal.fire({
                     title: "จำนวนเงินไม่เพียงพอ",
                     text: "กรุณาตรวจสอบจำนวนเงินอีกครั้ง",
@@ -174,7 +176,7 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
 
         Swal.fire({
             title: "ยืนยันการชำระเงิน",
-            text: `ยอดชำระ: ฿${total}`,
+            text: `ยอดชำระ: ฿${finalTotal}`,
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "ยืนยัน",
@@ -667,7 +669,7 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                             PromptPay: 094-201-7100
                                         </p>
                                         <p className="text-lg font-bold text-blue-600">
-                                            ยอดชำระ: ฿{total}
+                                            ยอดชำระ: ฿{finalTotal}
                                         </p>
                                     </div>
                                 </div>

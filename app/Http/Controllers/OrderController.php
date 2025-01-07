@@ -19,6 +19,7 @@ class OrderController extends Controller
 {
     public function store(Request $request)
     {
+        dd($request->all());
         $order = new Order();
         $order->user_id = Auth::user()->id;
         $order->username = Auth::user()->username;
