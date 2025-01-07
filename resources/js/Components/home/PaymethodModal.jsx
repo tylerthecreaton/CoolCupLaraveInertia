@@ -50,7 +50,6 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
     const [member, setMember] = useState(null);
     const [isSummary, setIsSummary] = useState(false);
     const [isMemberLoading, setIsMemberLoading] = useState(false);
-    const [discount, setDiscount] = useState(0);
     const [usePoints, setUsePoints] = useState(false);
 
     const paymentMethods = [
@@ -76,8 +75,7 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
             setMember(null);
             setIsMemberLoading(false);
             // Clear discount when member is cleared
-            setDiscount(0);
-            setUsePoints(false);
+            dispatch(cartActions.applyPointDiscount({ amount: 0, point: 0 }));
         }
     }, [data.memberPhone]);
 
@@ -196,22 +194,28 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
     };
 
     const handleUsePoints = (points) => {
-        const pointValue =
-            points / (pointPerThb ? parseFloat(pointPerThb.value) : 10);
+        const pointValue = points / (pointPerThb ? parseFloat(pointPerThb.value) : 10);
         // Ensure discount doesn't exceed total
         const newDiscount = Math.min(pointValue, total);
-        setDiscount(newDiscount);
         setUsePoints(true);
+        // Apply point discount to cart state
+        dispatch(cartActions.applyPointDiscount({ amount: points, point: newDiscount }));
     };
 
     useEffect(() => {
         if (!show) {
-            setDiscount(0);
-            dispatch(cartActions.applyPointDiscount(0));
+            setUsePoints(false);
+            dispatch(cartActions.applyPointDiscount({ amount: 0, point: 0 }));
         }
     }, [show]);
 
-    const finalTotal = Math.max(0, total - discount);
+    // Get cart discounts
+    const cartDiscount = state.cart.discount || 0;
+    const pointDiscount = state.cart.pointDiscountAmount || 0;
+    const totalDiscount = cartDiscount + pointDiscount;
+
+    // Calculate final total including all discounts
+    const finalTotal = Math.max(0, total - totalDiscount);
 
     return (
         <>
@@ -246,9 +250,17 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                 <SquarePercent className="w-5 h-5 text-blue-600" />
                                 <span className="font-medium">ส่วนลด</span>
                             </div>
-                            <span className="text-xl font-bold text-blue-600">
-                                ฿{discount}
-                            </span>
+                            <div className="text-right">
+                                {cartDiscount > 0 && (
+                                    <div className="text-sm text-blue-600">โปรโมชั่น: ฿{cartDiscount}</div>
+                                )}
+                                {pointDiscount > 0 && (
+                                    <div className="text-sm text-blue-600">แต้มสะสม: ฿{pointDiscount}</div>
+                                )}
+                                <span className="text-xl font-bold text-blue-600">
+                                    รวม: ฿{totalDiscount}
+                                </span>
+                            </div>
                         </div>
                         <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
                             <div className="flex items-center space-x-2">
@@ -382,23 +394,27 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                                 <span>ยอดรวม:</span>
                                                 <span>฿{total.toFixed(2)}</span>
                                             </div>
-                                            {discount > 0 && (
+                                            {state.cart.discountType === 'promotion' && state.cart.appliedPromotion && (
+                                                <div className="flex justify-between text-green-600">
+                                                    <span>ส่วนลดโปรโมชั่น ({state.cart.appliedPromotion.name}):</span>
+                                                    <span>-฿{cartDiscount.toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                            {state.cart.discountType === 'manual' && state.cart.manualDiscountAmount > 0 && (
+                                                <div className="flex justify-between text-green-600">
+                                                    <span>ส่วนลดพิเศษ:</span>
+                                                    <span>-฿{cartDiscount.toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                            {pointDiscount > 0 && (
                                                 <div className="flex justify-between text-green-600">
                                                     <span>ส่วนลดจากคะแนน:</span>
-                                                    <span>
-                                                        -฿{discount.toFixed(2)}
-                                                    </span>
+                                                    <span>-฿{pointDiscount.toFixed(2)}</span>
                                                 </div>
                                             )}
                                             <div className="flex justify-between font-semibold border-t pt-2">
                                                 <span>ยอดสุทธิ:</span>
-                                                <span>
-                                                    ฿
-                                                    {Math.max(
-                                                        0,
-                                                        total - discount
-                                                    ).toFixed(2)}
-                                                </span>
+                                                <span>฿{finalTotal.toFixed(2)}</span>
                                             </div>
                                         </div>
                                         {member &&
@@ -418,9 +434,12 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                                     }
                                                     onClick={() => {
                                                         if (!usePoints) {
-                                                            setDiscount(total);
+                                                            dispatch(cartActions.applyPointDiscount({
+                                                                amount: Math.ceil(total * (pointPerThb ? parseFloat(pointPerThb.value) : 10)),
+                                                                point: total
+                                                            }));
                                                         } else {
-                                                            setDiscount(0);
+                                                            dispatch(cartActions.applyPointDiscount({ amount: 0, point: 0 }));
                                                         }
                                                         setUsePoints(
                                                             !usePoints
@@ -583,9 +602,12 @@ const PaymethodModal = ({ show, onClose, total, cartActions }) => {
                                                                       pointPerThb.value
                                                                   )
                                                                 : 10);
-                                                        setDiscount(pointValue);
+                                                        dispatch(cartActions.applyPointDiscount({
+                                                            amount: member.loyalty_points,
+                                                            point: pointValue
+                                                        }));
                                                     } else {
-                                                        setDiscount(0);
+                                                        dispatch(cartActions.applyPointDiscount({ amount: 0, point: 0 }));
                                                     }
                                                     setUsePoints(!usePoints);
                                                 }}
