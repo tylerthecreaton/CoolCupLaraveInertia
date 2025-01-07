@@ -17,7 +17,9 @@ export const initialCartState = {
     key: 0,
     items: [],
     subtotal: 0,
-    discount: 0,
+    cartDiscount: 0,
+    pointDiscount: 0,
+    totalDiscount: 0,
     total: 0,
     discountType: "", // 'promotion' | 'manual'
     totalItems: 0,
@@ -41,7 +43,7 @@ const getItemKey = (item) => {
     return customizations.join("_");
 };
 
-const calculateCartTotals = (items) => {
+const calculateCartTotals = (items, state) => {
     const regularItems = items.filter((item) => item.price > 0);
     const discountItems = items.filter((item) => item.price < 0);
 
@@ -50,21 +52,22 @@ const calculateCartTotals = (items) => {
         0
     );
 
-    const discountFromItems = discountItems.reduce(
+    const cartDiscount = discountItems.reduce(
         (sum, item) => sum + Math.abs(item.price) * item.quantity,
         0
     );
 
-    const totalItems = regularItems.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-    );
+    const pointDiscount = state.pointDiscountAmount || 0;
+    const totalDiscount = cartDiscount + pointDiscount;
+    const total = Math.max(0, subtotal - totalDiscount);
 
     return {
         subtotal,
-        discount: discountFromItems,
-        total: Math.max(0, subtotal - discountFromItems),
-        totalItems,
+        cartDiscount,
+        pointDiscount,
+        totalDiscount,
+        total,
+        totalItems: items.reduce((sum, item) => sum + item.quantity, 0),
     };
 };
 
@@ -128,7 +131,7 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                           },
                       ];
 
-            const totals = calculateCartTotals(newItems);
+            const totals = calculateCartTotals(newItems, state);
             newState = {
                 ...state,
                 key: state.key + 1,
@@ -142,7 +145,7 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
             const newItems = state.items.filter(
                 (item) => item.id !== action.payload
             );
-            const totals = calculateCartTotals(newItems);
+            const totals = calculateCartTotals(newItems, state);
             newState = {
                 ...state,
                 key: state.key + 1,
@@ -165,7 +168,7 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 )
                 .filter((item) => item.quantity > 0);
 
-            const totals = calculateCartTotals(newItems);
+            const totals = calculateCartTotals(newItems, state);
             newState = {
                 ...state,
                 key: state.key + 1,

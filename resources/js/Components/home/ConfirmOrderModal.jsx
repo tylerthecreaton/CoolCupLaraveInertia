@@ -129,30 +129,36 @@ const ConfirmOrderModal = ({ show, onClose }) => {
                                     ฿{summary.subtotal.toFixed(2)}
                                 </span>
                             </div>
-                            {summary.discountType === "promotion" &&
-                                summary.appliedPromotion && (
-                                    <div className="flex justify-between text-sm text-green-600">
-                                        <span className="flex gap-1 items-center">
-                                            <Tag className="w-4 h-4" />
-                                            <span>
-                                                โปรโมชั่น:{" "}
-                                                {summary.appliedPromotion.name}
-                                            </span>
-                                        </span>
-                                        <span className="font-medium">
-                                            -฿{summary.discount.toFixed(2)}
-                                        </span>
-                                    </div>
-                                )}
-                            {summary.discountType === "manual" && (
+                            {summary.cartDiscount > 0 && (
                                 <div className="flex justify-between text-sm text-green-600">
-                                    <span>ส่วนลด</span>
-                                    <span className="font-medium">
-                                        -฿
-                                        {summary.manualDiscountAmount.toFixed(
-                                            2
-                                        )}
+                                    <span className="flex gap-1 items-center">
+                                        <Tag className="w-4 h-4" />
+                                        <span>
+                                            {summary.appliedPromotion
+                                                ? `โปรโมชั่น: ${summary.appliedPromotion.name}`
+                                                : "ส่วนลดจากโปรโมชั่น/คูปอง"}
+                                        </span>
                                     </span>
+                                    <span className="font-medium">
+                                        -฿{summary.cartDiscount.toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            {summary.pointDiscount > 0 && (
+                                <div className="flex justify-between text-sm text-green-600">
+                                    <span className="flex gap-1 items-center">
+                                        <Tag className="w-4 h-4" />
+                                        <span>ส่วนลดจากแต้ม</span>
+                                    </span>
+                                    <span className="font-medium">
+                                        -฿{summary.pointDiscount.toFixed(2)}
+                                    </span>
+                                </div>
+                            )}
+                            {summary.totalDiscount > 0 && (
+                                <div className="flex justify-between text-sm text-green-600 font-medium border-t pt-2">
+                                    <span>ส่วนลดทั้งหมด:</span>
+                                    <span>-฿{summary.totalDiscount.toFixed(2)}</span>
                                 </div>
                             )}
                             <div className="flex justify-between pt-3 text-lg border-t">

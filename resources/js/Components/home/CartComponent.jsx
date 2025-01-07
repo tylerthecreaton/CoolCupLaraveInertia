@@ -24,7 +24,9 @@ const CartComponent = () => {
         key: 0,
         items: [],
         subtotal: 0,
-        discount: 0,
+        cartDiscount: 0,
+        pointDiscount: 0,
+        totalDiscount: 0,
         total: 0,
         discountType: "", // 'promotion' | 'manual' | 'point'
         totalItems: 0,
@@ -109,7 +111,7 @@ const CartComponent = () => {
 
     // Update summary whenever relevant values change
     useEffect(() => {
-        const { subtotal, discount, total, totalItems } = calculateTotals();
+        const { subtotal, cartDiscount, pointDiscount, totalDiscount, total, totalItems } = calculateTotals();
         const regularItems = items.filter((item) => item.price > 0);
 
         setSummary((prev) => ({
@@ -118,7 +120,9 @@ const CartComponent = () => {
             key: state.cart.key,
             items: regularItems,
             subtotal,
-            discount,
+            cartDiscount,
+            pointDiscount,
+            totalDiscount,
             total,
             totalItems,
             discountType: state.cart.discountType,
@@ -141,10 +145,13 @@ const CartComponent = () => {
             0
         );
 
-        const discountFromItems = discountItems.reduce(
+        const cartDiscount = discountItems.reduce(
             (sum, item) => sum + Math.abs(item.price) * item.quantity,
             0
         );
+
+        const pointDiscount = state.cart.pointDiscountAmount || 0;
+        const totalDiscount = cartDiscount + pointDiscount;
 
         const totalItems = regularItems.reduce(
             (sum, item) => sum + item.quantity,
@@ -153,8 +160,10 @@ const CartComponent = () => {
 
         return {
             subtotal,
-            discount: discountFromItems,
-            total: Math.max(0, subtotal - discountFromItems),
+            cartDiscount,
+            pointDiscount,
+            totalDiscount,
+            total: Math.max(0, subtotal - totalDiscount),
             totalItems,
         };
     };
@@ -297,11 +306,13 @@ const CartComponent = () => {
             handleRemoveItem(itemId);
         } else {
             dispatch(cartActions.updateQuantity({ itemId, delta }));
-            const { subtotal, discount, total, totalItems } = calculateTotals();
+            const { subtotal, cartDiscount, pointDiscount, totalDiscount, total, totalItems } = calculateTotals();
             setSummary((prev) => ({
                 ...prev,
                 subtotal,
-                discount,
+                cartDiscount,
+                pointDiscount,
+                totalDiscount,
                 total,
                 totalItems,
                 timestamp: new Date().toISOString(),
@@ -337,12 +348,13 @@ const CartComponent = () => {
                     timestamp: new Date().toISOString(),
                 }));
             } else {
-                const { subtotal, discount, total, totalItems } =
-                    calculateTotals();
+                const { subtotal, cartDiscount, pointDiscount, totalDiscount, total, totalItems } = calculateTotals();
                 setSummary((prev) => ({
                     ...prev,
                     subtotal,
-                    discount,
+                    cartDiscount,
+                    pointDiscount,
+                    totalDiscount,
                     total,
                     totalItems,
                     timestamp: new Date().toISOString(),
@@ -564,36 +576,32 @@ const CartComponent = () => {
                                 <span>จำนวนสินค้า:</span>
                                 <span>{calculateTotalItems()} ชิ้น</span>
                             </div>
-
-                            {/* Calculate and display totals */}
-                            {(() => {
-                                const {
-                                    subtotal,
-                                    discount,
-                                    total,
-                                    totalItems,
-                                } = calculateTotals();
-                                return (
-                                    <>
-                                        <div className="flex justify-between text-sm">
-                                            <span>ราคารวม:</span>
-                                            <span>฿{subtotal.toFixed(2)}</span>
-                                        </div>
-                                        {discount > 0 && (
-                                            <div className="flex justify-between text-sm text-green-600">
-                                                <span>ส่วนลด:</span>
-                                                <span>
-                                                    -฿{discount.toFixed(2)}
-                                                </span>
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between pt-2 text-lg font-semibold border-t">
-                                            <span>ราคาสุทธิ:</span>
-                                            <span>฿{total.toFixed(2)}</span>
-                                        </div>
-                                    </>
-                                );
-                            })()}
+                            <div className="flex justify-between text-sm">
+                                <span>ราคารวม:</span>
+                                <span>฿{summary.subtotal.toFixed(2)}</span>
+                            </div>
+                            {summary.cartDiscount > 0 && (
+                                <div className="flex justify-between text-sm text-green-600">
+                                    <span>ส่วนลดจากโปรโมชั่น/คูปอง:</span>
+                                    <span>-฿{summary.cartDiscount.toFixed(2)}</span>
+                                </div>
+                            )}
+                            {summary.pointDiscount > 0 && (
+                                <div className="flex justify-between text-sm text-green-600">
+                                    <span>ส่วนลดจากแต้ม:</span>
+                                    <span>-฿{summary.pointDiscount.toFixed(2)}</span>
+                                </div>
+                            )}
+                            {summary.totalDiscount > 0 && (
+                                <div className="flex justify-between text-sm text-green-600 font-medium">
+                                    <span>ส่วนลดทั้งหมด:</span>
+                                    <span>-฿{summary.totalDiscount.toFixed(2)}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between font-medium text-lg pt-2 border-t">
+                                <span>ยอดชำระ:</span>
+                                <span>฿{summary.total.toFixed(2)}</span>
+                            </div>
                         </div>
 
                         {/* Confirm Order Button */}
