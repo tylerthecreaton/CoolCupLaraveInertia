@@ -260,7 +260,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                             <div className="text-right">
                                 {cartDiscount > 0 && (
                                     <div className="text-sm text-blue-600">
-                                        {state.cart.appliedPromotion 
+                                        {state.cart.appliedPromotion
                                             ? `โปรโมชั่น (${state.cart.appliedPromotion.name}): ฿${cartDiscount.toFixed(2)}`
                                             : `ส่วนลดจากโปรโมชั่น/คูปอง: ฿${cartDiscount.toFixed(2)}`
                                         }
@@ -413,7 +413,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                             {cartDiscount > 0 && (
                                                 <div className="flex justify-between text-green-600">
                                                     <span>
-                                                        {state.cart.appliedPromotion 
+                                                        {state.cart.appliedPromotion
                                                             ? `ส่วนลดโปรโมชั่น (${state.cart.appliedPromotion.name})`
                                                             : 'ส่วนลดจากโปรโมชั่น/คูปอง'
                                                         }:
@@ -440,7 +440,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                             <div className="flex justify-between font-semibold border-t pt-2">
                                                 <span>ยอดสุทธิ:</span>
                                                 <span>
-                                                    ฿{finalTotal.toFixed(2)}
+                                                    ฿{total.toFixed(2)}
                                                 </span>
                                             </div>
                                         </div>
@@ -736,7 +736,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                             PromptPay: 094-201-7100
                                         </p>
                                         <p className="text-lg font-bold text-blue-600">
-                                            ยอดชำระ: ฿{finalTotal}
+                                            ยอดชำระ: ฿{total}
                                         </p>
                                     </div>
                                 </div>
