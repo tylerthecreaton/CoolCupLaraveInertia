@@ -196,7 +196,7 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 discountType: amount > 0 ? "manual" : "",
                 manualDiscountAmount: amount,
                 appliedPromotion: null,
-                discount: amount,
+                cartDiscount: amount,
                 total: Math.max(0, state.subtotal - amount),
             };
             break;
@@ -204,20 +204,17 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
 
         case "APPLY_POINT_DISCOUNT": {
             const { amount, point } = action.payload;
+            console.log("APPLY_POINT_DISCOUNT", action.payload);
             const pointDiscountAmount = Number(point) || 0;
             const usedPoints = Number(amount) || 0;
-            const baseDiscount =
-                state.discountType === "manual"
-                    ? state.manualDiscountAmount
-                    : state.discount;
             newState = {
                 ...state,
                 usedPoints: usedPoints,
                 pointDiscountAmount: pointDiscountAmount,
-                discount: baseDiscount + pointDiscountAmount,
+                totalDiscount: state.cartDiscount + pointDiscountAmount,
                 total: Math.max(
                     0,
-                    state.subtotal - (baseDiscount + pointDiscountAmount)
+                    state.subtotal - (state.cartDiscount + pointDiscountAmount)
                 ),
             };
             break;
