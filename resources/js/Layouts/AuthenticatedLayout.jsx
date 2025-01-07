@@ -461,7 +461,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                     strokeWidth={2}
-                                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                                 />
                                             </svg>
                                             <span>โปรโมชั่น</span>
@@ -530,12 +530,12 @@ export default function AuthenticatedLayout({ header, children }) {
                                                                     title: 'เพิ่มจำนวนวัตถุดิบ',
                                                                     html: `
                                                                         <div class="mb-4">
-                                                                            <p class="text-sm text-gray-600 mb-2">วัตถุดิบ: ${notification.data.name}</p>
-                                                                            <p class="text-sm text-gray-600 mb-4">จำนวนคงเหลือ: ${notification.data.quantity} ${notification.data.unit}</p>
-                                                                            <input 
-                                                                                type="number" 
-                                                                                id="quantity" 
-                                                                                class="w-full px-3 py-2 border rounded-lg"
+                                                                            <p class="mb-2 text-sm text-gray-600">วัตถุดิบ: ${notification.data.name}</p>
+                                                                            <p class="mb-4 text-sm text-gray-600">จำนวนคงเหลือ: ${notification.data.quantity} ${notification.data.unit}</p>
+                                                                            <input
+                                                                                type="number"
+                                                                                id="quantity"
+                                                                                class="px-3 py-2 w-full rounded-lg border"
                                                                                 placeholder="ระบุจำนวนที่ต้องการเพิ่ม"
                                                                                 min="0.01"
                                                                                 step="0.01"
@@ -608,7 +608,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 )
                                             )
                                         ) : (
-                                            <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                            <div className="px-4 py-3 text-sm text-center text-gray-500">
                                                 ไม่มีการแจ้งเตือนใหม่
                                             </div>
                                         )}
