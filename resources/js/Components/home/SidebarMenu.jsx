@@ -119,11 +119,16 @@ export default function SidebarMenu() {
 
                 <ul className="flex flex-col gap-5 justify-center items-center py-5">
                     <li className="flex items-center">
-                        {isOpen ? (
-                            <MenuText>Dashboard</MenuText>
-                        ) : (
-                            <MdDashboard className="text-2xl" />
-                        )}
+                    <Link
+                            href={route("sale.dashboard")}
+                            className="text-blue-500 hover:text-blue-700"
+                        >
+                            {isOpen ? (
+                                <MenuText>Dashboard</MenuText>
+                            ) : (
+                                <MdDashboard className="text-2xl" />
+                            )}
+                        </Link>
                     </li>
                     <li className="flex items-center">
                         <Link

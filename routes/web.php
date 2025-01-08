@@ -17,6 +17,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\RegisterMemberController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\SaleDashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -57,9 +58,12 @@ Route::get('/registermember', [RegisterMemberController::class, 'index'])->name(
 // ---------------------------Member---------------------------
 Route::get('/member', [MemberController::class, 'index'])->name('member');
 
+// ---------------------------ReceiptHistory---------------------------
 Route::middleware('auth')->group(function () {
     Route::get('/receipt-history', [OrderController::class, 'receiptHistory'])->name('receipt.history');
 
+// ---------------------------Sale Dashboard---------------------------
+Route::get('/sale-dashboard', [SaleDashboardController::class, 'index'])->name('sale.dashboard');
     // ---------------------------Promotions---------------------------
     Route::get('/promotions', [PromotionController::class, 'index'])->name('promotion.index');
 
