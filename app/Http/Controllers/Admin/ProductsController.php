@@ -13,7 +13,7 @@ class ProductsController extends Controller
 {
     public function index()
     {
-        $productsPaginate = Product::with('category')->paginate(10);
+        $productsPaginate = Product::with(['category', 'ingredients.ingredient.unit'])->paginate(10);
         return Inertia::render('Admin/products/index', compact('productsPaginate'));
     }
 

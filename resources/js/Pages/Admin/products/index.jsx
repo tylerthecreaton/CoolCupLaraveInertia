@@ -8,6 +8,7 @@ import {
     Table,
     TextInput,
     Badge,
+    Modal,
 } from "flowbite-react";
 import { useEffect, useState } from "react";
 import {
@@ -25,6 +26,8 @@ export default function Index({ productsPaginate }) {
     const [products, setProducts] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredProducts, setFilteredProducts] = useState([]);
+    const [showIngredientsModal, setShowIngredientsModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const onPageChange = (page) => {
         page > current_page
@@ -79,6 +82,11 @@ export default function Index({ productsPaginate }) {
                 });
             }
         });
+    };
+
+    const handleShowIngredients = (product) => {
+        setSelectedProduct(product);
+        setShowIngredientsModal(true);
     };
 
     return (
@@ -181,9 +189,14 @@ export default function Index({ productsPaginate }) {
                                             </div>
                                         </Table.Cell>
                                         <Table.Cell className="px-6 py-4">
-                                            <div className="font-medium text-gray-900">
+                                            <button
+                                                onClick={() =>
+                                                    handleShowIngredients(product)
+                                                }
+                                                className="text-blue-600 hover:underline"
+                                            >
                                                 {product.name}
-                                            </div>
+                                            </button>
                                             <p className="mt-1 text-sm text-gray-500">
                                                 {product.description}
                                             </p>
@@ -289,6 +302,42 @@ export default function Index({ productsPaginate }) {
                             />
                         </div>
                     </div>
+
+                    {/* Ingredients Modal */}
+                    <Modal
+                        show={showIngredientsModal}
+                        onClose={() => setShowIngredientsModal(false)}
+                    >
+                        <Modal.Header>
+                            วัตถุดิบที่ใช้ใน {selectedProduct?.name}
+                        </Modal.Header>
+                        <Modal.Body>
+                            {selectedProduct?.ingredients?.length > 0 ? (
+                                <div className="space-y-4">
+                                    {selectedProduct.ingredients.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="flex items-center justify-between p-4 border rounded-lg"
+                                        >
+                                            <div>
+                                                <p className="font-medium">
+                                                    {item?.ingredient?.name || 'ไม่ระบุชื่อวัตถุดิบ'}
+                                                </p>
+                                                <p className="text-sm text-gray-500">
+                                                    จำนวนที่ใช้: {item?.quantity_used || 0}{" "}
+                                                    {item?.ingredient?.unit?.name || 'หน่วย'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-center text-gray-500">
+                                    ไม่มีวัตถุดิบที่ใช้ในสินค้านี้
+                                </p>
+                            )}
+                        </Modal.Body>
+                    </Modal>
                 </div>
             </AdminLayout>
         </AuthenticatedLayout>
