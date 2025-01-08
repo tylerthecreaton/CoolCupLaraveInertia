@@ -7,36 +7,36 @@ import Swal from 'sweetalert2';
 import { Receipt, Home, Search } from "lucide-react";
 import ViewReceiptModal from "@/Components/home/ViewReceiptModal";
 import { useState } from "react";
-import { Breadcrumb, TextInput, Card, Table } from 'flowbite-react';
+import { Breadcrumb, TextInput, Card, Table, Modal } from 'flowbite-react';
 
 export default function ReceiptHistory({ orders }) {
     const [selectedReceipt, setSelectedReceipt] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+    const [showReceiptModal, setShowReceiptModal] = useState(false);
+    const [showOrderModal, setShowOrderModal] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
 
     const handleViewReceipt = (receiptPath) => {
         fetch(`/images/receipt/${receiptPath}`)
-            .then(response => {
+            .then((response) => {
                 if (!response.ok) {
-                    Swal.fire({
-                        title: 'ไม่พบใบเสร็จ',
-                        text: 'ไม่พบไฟล์ใบเสร็จในระบบ',
-                        icon: 'error',
-                        confirmButtonText: 'ตกลง'
-                    });
-                    return;
+                    throw new Error('ไม่พบไฟล์ใบเสร็จ');
                 }
-                setSelectedReceipt(receiptPath);
-                setShowModal(true);
+                setSelectedReceipt(`/images/receipt/${receiptPath}`);
+                setShowReceiptModal(true);
             })
             .catch(() => {
                 Swal.fire({
-                    title: 'เกิดข้อผิดพลาด',
-                    text: 'ไม่สามารถเปิดใบเสร็จได้',
-                    icon: 'error',
-                    confirmButtonText: 'ตกลง'
+                    icon: "error",
+                    title: "ไม่สามารถแสดงใบเสร็จได้",
+                    text: "ไม่พบไฟล์ใบเสร็จในระบบ",
                 });
             });
+    };
+
+    const handleViewOrder = (order) => {
+        setSelectedOrder(order);
+        setShowOrderModal(true);
     };
 
     // กรองรายการตามคำค้นหา
@@ -57,7 +57,7 @@ export default function ReceiptHistory({ orders }) {
                 </h2>
             }
         >
-            <Head title="ประวัติใบเสร็จ" />
+            <Head title="ประวัติการสั่งซื้อ" />
 
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -135,27 +135,12 @@ export default function ReceiptHistory({ orders }) {
                                                     )}
                                                 </Table.Cell>
                                                 <Table.Cell className="px-6 py-4">
-                                                    <ul className="space-y-3">
-                                                        {order.order_details.map((item) => (
-                                                            <li key={item.id} className="flex items-center space-x-3">
-                                                                <img
-                                                                    src={item.product_image}
-                                                                    alt={item.product_name}
-                                                                    className="w-10 h-10 rounded-lg object-cover border border-gray-200"
-                                                                />
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-sm font-medium text-gray-900">
-                                                                        {item.product_name}
-                                                                    </span>
-                                                                    <span className="text-xs text-gray-500">
-                                                                        {item.size}
-                                                                        {item.sweetness !== "100%" && ` • ${item.sweetness}`}
-                                                                        {` • ${item.quantity} แก้ว`}
-                                                                    </span>
-                                                                </div>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
+                                                    <button
+                                                        onClick={() => handleViewOrder(order)}
+                                                        className="text-blue-600 hover:text-blue-800 font-medium"
+                                                    >
+                                                        ดูรายการสินค้า ({order.order_details.length} รายการ)
+                                                    </button>
                                                 </Table.Cell>
                                                 <Table.Cell className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex flex-col">
@@ -247,11 +232,150 @@ export default function ReceiptHistory({ orders }) {
                 </div>
             </div>
 
+            {/* Receipt Modal */}
             <ViewReceiptModal
-                show={showModal}
-                onClose={() => setShowModal(false)}
-                receiptPath={selectedReceipt}
+                show={showReceiptModal}
+                onClose={() => setShowReceiptModal(false)}
+                receiptUrl={selectedReceipt}
             />
+
+            {/* Order Details Modal */}
+            <Modal
+                show={showOrderModal}
+                onClose={() => setShowOrderModal(false)}
+                size="xl"
+                className="dark:bg-gray-800"
+            >
+                <Modal.Header className="border-b border-gray-200 !p-6 bg-gray-50">
+                    <div className="flex flex-col w-full">
+                        <h3 className="text-xl font-semibold text-gray-900">รายละเอียดการสั่งซื้อ</h3>
+                        {selectedOrder && (
+                            <div className="flex justify-between items-center mt-2">
+                                <span className="text-sm font-medium text-gray-700">
+                                    ออเดอร์ #{selectedOrder.order_number}
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                    {format(new Date(selectedOrder.created_at), "dd MMMM yyyy HH:mm", { locale: th })}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </Modal.Header>
+                <Modal.Body className="!p-6">
+                    {selectedOrder && (
+                        <div className="space-y-6">
+                            {/* Customer Info */}
+                            <div className="bg-blue-50 rounded-lg p-4">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        {selectedOrder.customer ? (
+                                            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-white text-xl font-semibold">
+                                                {selectedOrder.customer.name.charAt(0)}
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-gray-500 text-xl">
+                                                G
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="ml-4">
+                                        <h4 className="text-lg font-medium text-gray-900">
+                                            {selectedOrder.customer ? selectedOrder.customer.name : "ลูกค้าทั่วไป"}
+                                        </h4>
+                                        <p className="text-sm text-gray-500">
+                                            ชำระเงินผ่าน: <span className="capitalize">{selectedOrder.payment_method}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Order Items */}
+                            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                                <div className="overflow-hidden">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead>
+                                            <tr className="bg-gray-50">
+                                                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    สินค้า
+                                                </th>
+                                                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    ขนาด
+                                                </th>
+                                                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    ความหวาน
+                                                </th>
+                                                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    จำนวน
+                                                </th>
+                                                <th scope="col" className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                    ราคา
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {selectedOrder.order_details.map((item, index) => (
+                                                <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="flex items-center">
+                                                            <img
+                                                                src={item.product_image}
+                                                                alt={item.product_name}
+                                                                className="w-12 h-12 rounded-lg object-cover border border-gray-200 shadow-sm"
+                                                            />
+                                                            <div className="ml-4 flex flex-col">
+                                                                <span className="text-sm font-medium text-gray-900">
+                                                                    {item.product_name}
+                                                                </span>
+                                                                {/* {item.toppings && item.toppings.length > 0 && (
+                                                                    <span className="text-xs text-gray-500 mt-1">
+                                                                        เพิ่ม: {item.toppings.map(topping => topping.name).join(", ")}
+                                                                    </span>
+                                                                )} */}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                                        {item.size}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                                        {item.sweetness}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                                        {item.quantity} แก้ว
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                                                        ฿{item.price.toLocaleString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* Order Summary */}
+                            <div className="bg-gray-50 rounded-lg p-6 space-y-3">
+                                <div className="flex justify-between text-sm">
+                                    <span className="font-medium text-gray-700">ยอดรวม</span>
+                                    <span className="font-medium text-gray-900">฿{selectedOrder.total_amount.toLocaleString()}</span>
+                                </div>
+                                {selectedOrder.discount > 0 && (
+                                    <div className="flex justify-between text-sm border-t border-gray-200 pt-3">
+                                        <span className="font-medium text-green-600">ส่วนลด {selectedOrder.discount}%</span>
+                                        <span className="font-medium text-green-600">
+                                            -฿{(selectedOrder.total_amount - selectedOrder.final_amount).toLocaleString()}
+                                        </span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between text-base border-t border-gray-200 pt-3">
+                                    <span className="font-semibold text-gray-900">ยอดสุทธิ</span>
+                                    <span className="font-semibold text-gray-900">฿{selectedOrder.final_amount.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </Modal.Body>
+            </Modal>
         </AuthenticatedLayout>
     );
 }

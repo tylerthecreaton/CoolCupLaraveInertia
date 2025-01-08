@@ -24,6 +24,13 @@ class ReceiptHistoryController extends Controller
                         'sweetness' => $detail->sweetness,
                         'quantity' => $detail->quantity,
                         'price' => $detail->price,
+                        'toppings' => $detail->toppings->map(function ($topping) {
+                            return [
+                                'id' => $topping->id,
+                                'name' => $topping->name,
+                                'price' => $topping->price
+                            ];
+                        })
                     ];
                 });
 
