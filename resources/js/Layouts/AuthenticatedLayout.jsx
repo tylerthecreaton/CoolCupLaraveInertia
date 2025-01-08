@@ -467,6 +467,28 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <span>โปรโมชั่น</span>
                                         </Link>
                                     </Dropdown.Item>
+                                    <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
+                                        <Link
+                                            href="/receipt-history"
+                                            className="flex items-center space-x-2 w-full"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="w-4 h-4"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H3a2 2 0 00-2 2z"
+                                                />
+                                            </svg>
+                                            <span>ประวัติใบเสร็จ</span>
+                                        </Link>
+                                    </Dropdown.Item>
                                 </Dropdown>
                             </div>
                         </div>
