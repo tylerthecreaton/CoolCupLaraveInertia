@@ -57,6 +57,7 @@ Route::get('/registermember', [RegisterMemberController::class, 'index'])->name(
 
 // ---------------------------Member---------------------------
 Route::get('/member', [MemberController::class, 'index'])->name('member');
+Route::get('/member/search', [MemberController::class, 'search'])->name('member.search');
 
 // ---------------------------ReceiptHistory---------------------------
 Route::middleware('auth')->group(function () {

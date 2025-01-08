@@ -1,8 +1,60 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { Button, Datepicker, Label, TextInput } from "flowbite-react";
 import { Table } from "flowbite-react";
+import { router } from '@inertiajs/react';
+import debounce from 'lodash/debounce';
 
 export default function MainContent() {
+    const [formData, setFormData] = useState({
+        name: '',
+        phone_number: '',
+        birthdate: '',
+        created_at: ''
+    });
+
+    // Create a debounced search function
+    const debouncedSearch = useCallback(
+        debounce((searchData) => {
+            router.get('/member', searchData, {
+                preserveState: true,
+                preserveScroll: true,
+                only: ['members']
+            });
+        }, 300),
+        []
+    );
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        if (name === 'phone_number' && value.length === 10) {
+            // When phone number is complete (10 digits), fetch customer details
+            router.get('/member/search', { phone_number: value }, {
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: ({ customer }) => {
+                    if (customer) {
+                        const formattedDate = customer.birthdate ? new Date(customer.birthdate) : null;
+                        setFormData(prev => ({
+                            ...prev,
+                            name: customer.name,
+                            birthdate: formattedDate,
+                            created_at: customer.created_at
+                        }));
+                    }
+                }
+            });
+        } else if (name === 'name' || name === 'phone_number') {
+            // Regular search functionality
+            const searchData = {
+                ...formData,
+                [name]: value
+            };
+            debouncedSearch(searchData);
+        }
+    };
+
     return (
         <main className="flex-1 relative py-6 px-4 bg-gray-50">
             <div className="space-y-6 max-w-screen-2xl mx-auto">
@@ -11,7 +63,7 @@ export default function MainContent() {
                         <h2 className="text-xl font-semibold text-gray-800">ข้อมูลสมาชิก</h2>
                         <p className="mt-1 text-sm text-gray-500">ค้นหาสมาชิก</p>
                     </div>
-                    <form className="p-6 space-y-6">
+                    <div className="p-6 space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <Label
@@ -23,8 +75,9 @@ export default function MainContent() {
                                     id="name"
                                     type="text"
                                     name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
                                     placeholder="กรุณากรอกชื่อ-นามสกุล"
-                                    required
                                     className="mt-1"
                                 />
                             </div>
@@ -38,8 +91,9 @@ export default function MainContent() {
                                     id="phone_number"
                                     type="number"
                                     name="phone_number"
+                                    value={formData.phone_number}
+                                    onChange={handleInputChange}
                                     placeholder="กรุณากรอกเบอร์โทรศัพท์"
-                                    required
                                     className="mt-1"
                                 />
                             </div>
@@ -55,8 +109,9 @@ export default function MainContent() {
                                     labelClearButton="ล้าง"
                                     id="birthdate"
                                     name="birthdate"
+                                    value={formData.birthdate}
+                                    onChange={date => handleInputChange({ target: { name: 'birthdate', value: date }})}
                                     placeholder="กรุณากรอกวัน/เดือน/ปีเกิด"
-                                    required
                                     className="mt-1"
                                 />
                             </div>
@@ -70,18 +125,14 @@ export default function MainContent() {
                                     id="created_at"
                                     type="text"
                                     name="created_at"
+                                    value={formData.created_at}
+                                    onChange={handleInputChange}
                                     placeholder="วันที่เริ่มเป็นสมาชิก"
-                                    required
                                     className="mt-1"
                                 />
                             </div>
                         </div>
-                        <div className="flex justify-end">
-                            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                                ค้นหาสมาชิก
-                            </Button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
 
                 <div className="bg-gray-300 rounded-lg shadow-sm p-6">
