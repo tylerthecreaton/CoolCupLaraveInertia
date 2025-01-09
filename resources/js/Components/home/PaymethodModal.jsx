@@ -175,7 +175,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
 
         Swal.fire({
             title: "ยืนยันการชำระเงิน",
-            text: `ยอดชำระ: ฿${finalTotal}`,
+            text: `ยอดชำระ: ฿${total.toFixed(2)}`,
             icon: "question",
             showCancelButton: true,
             confirmButtonText: "ยืนยัน",
@@ -261,9 +261,13 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                 {cartDiscount > 0 && (
                                     <div className="text-sm text-blue-600">
                                         {state.cart.appliedPromotion
-                                            ? `โปรโมชั่น (${state.cart.appliedPromotion.name}): ฿${cartDiscount.toFixed(2)}`
-                                            : `ส่วนลดจากโปรโมชั่น/คูปอง: ฿${cartDiscount.toFixed(2)}`
-                                        }
+                                            ? `โปรโมชั่น (${
+                                                  state.cart.appliedPromotion
+                                                      .name
+                                              }): ฿${cartDiscount.toFixed(2)}`
+                                            : `ส่วนลดจากโปรโมชั่น/คูปอง: ฿${cartDiscount.toFixed(
+                                                  2
+                                              )}`}
                                     </div>
                                 )}
                                 {pointDiscount > 0 && (
@@ -408,18 +412,24 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                         <div className="space-y-2 p-4 bg-gray-50 rounded-lg mb-4">
                                             <div className="flex justify-between">
                                                 <span>ยอดรวม:</span>
-                                                <span>฿{subtotal.toFixed(2)}</span>
+                                                <span>
+                                                    ฿{subtotal.toFixed(2)}
+                                                </span>
                                             </div>
                                             {cartDiscount > 0 && (
                                                 <div className="flex justify-between text-green-600">
                                                     <span>
-                                                        {state.cart.appliedPromotion
+                                                        {state.cart
+                                                            .appliedPromotion
                                                             ? `ส่วนลดโปรโมชั่น (${state.cart.appliedPromotion.name})`
-                                                            : 'ส่วนลดจากโปรโมชั่น/คูปอง'
-                                                        }:
+                                                            : "ส่วนลดจากโปรโมชั่น/คูปอง"}
+                                                        :
                                                     </span>
                                                     <span>
-                                                        -฿{cartDiscount.toFixed(2)}
+                                                        -฿
+                                                        {cartDiscount.toFixed(
+                                                            2
+                                                        )}
                                                     </span>
                                                 </div>
                                             )}
@@ -427,21 +437,27 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                 <div className="flex justify-between text-green-600">
                                                     <span>ส่วนลดจากแต้ม:</span>
                                                     <span>
-                                                        -฿{pointDiscount.toFixed(2)}
+                                                        -฿
+                                                        {pointDiscount.toFixed(
+                                                            2
+                                                        )}
                                                     </span>
                                                 </div>
                                             )}
                                             {totalDiscount > 0 && (
                                                 <div className="flex justify-between text-green-600 font-medium border-t pt-2">
                                                     <span>ส่วนลดทั้งหมด:</span>
-                                                    <span>-฿{totalDiscount.toFixed(2)}</span>
+                                                    <span>
+                                                        -฿
+                                                        {totalDiscount.toFixed(
+                                                            2
+                                                        )}
+                                                    </span>
                                                 </div>
                                             )}
                                             <div className="flex justify-between font-semibold border-t pt-2">
                                                 <span>ยอดสุทธิ:</span>
-                                                <span>
-                                                    ฿{total.toFixed(2)}
-                                                </span>
+                                                <span>฿{total.toFixed(2)}</span>
                                             </div>
                                         </div>
                                         {member &&
