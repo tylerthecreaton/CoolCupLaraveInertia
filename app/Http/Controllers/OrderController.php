@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Ingredient;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\PointUsage;
 use App\Models\Product;
 use App\Models\ProductIngredients;
 use App\Models\ProductIngredientUsage;
@@ -19,7 +20,6 @@ class OrderController extends Controller
 {
     public function store(Request $request)
     {
-        dd($request->all());
         $order = new Order();
         $order->user_id = Auth::user()->id;
         $order->username = Auth::user()->username;
@@ -29,7 +29,7 @@ class OrderController extends Controller
         $cart = $request->get("cart");
         $order->order_number = Order::generateOrderNumber();
         $order->total_amount = $cart['subtotal'];
-        $order->discount_amount = $cart['discount'];
+        $order->discount_amount = $cart['totalDiscount'];
         $order->discount_type = $cart['discountType'];
         $order->manual_discount_amount = $cart['manualDiscountAmount'];
         $order->final_amount = $cart['total'];
@@ -47,8 +47,13 @@ class OrderController extends Controller
         $this->saveOrderDetails($cart['items'], $order->id);
 
         if ($cart['appliedPromotion']) {
-            $this->savePromotionUsage($cart['appliedPromotion'], $cart['discount'], $order->id);
+            $onlyPromotionDiscount  = $cart['manualDiscountAmount'] + $cart['pointDiscountAmount'];
+            $this->savePromotionUsage($cart['appliedPromotion'], $onlyPromotionDiscount, $order->id);
         }
+        if ($cart['usedPoints']) {
+            $this->saveUsedPoints($cart['usedPoints'], $cart['pointDiscountAmount'], $order->id, $order->customer_id);
+        }
+
         return Order::with([
             'orderDetails',
             'user',
@@ -177,6 +182,36 @@ class OrderController extends Controller
             $promotionUsage->promotion_details = json_encode($appliedPromotion);
             $promotionUsage->save();
         }
+    }
+
+    private function saveUsedPoints($usedPoints, $pointDiscountAmount, $orderId, $customerId)
+    {
+        $order = Order::find($orderId);
+        $order->used_points = $usedPoints;
+        $order->point_discount_amount = $pointDiscountAmount;
+        $order->save();
+
+        $this->chargeCustomerPoints($customerId, $usedPoints);
+
+        $this->recordPointUsage($usedPoints, $pointDiscountAmount, $orderId, $customerId);
+    }
+
+    private function chargeCustomerPoints($customerId, $pointsUsed)
+    {
+        $customer = Customer::find($customerId);
+        $customer->loyalty_points -= $pointsUsed;
+        $customer->save();
+    }
+
+    private function recordPointUsage($usedPoints, $pointDiscountAmount, $orderId, $customerId)
+    {
+        $pointUsage = new PointUsage();
+        $pointUsage->order_id = $orderId;
+        $pointUsage->customer_id = $customerId;
+        $pointUsage->used_points = $usedPoints;
+        $pointUsage->point_discount_amount = $pointDiscountAmount;
+        $pointUsage->user_id = Auth::user()->id;
+        $pointUsage->save();
     }
 
     private function calculateTotalItems(array $items)
