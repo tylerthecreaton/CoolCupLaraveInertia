@@ -41,7 +41,7 @@ class OrderController extends Controller
         $order->total_Items = $this->calculateTotalItems($cart['items']);
         $order->save();
         if ($request->get("memberPhone")) {
-            $this->addPointToCustomer($cart['total'], $request->get("memberPhone"));
+            $this->addPointToCustomer($cart['total'], $request->get("memberPhone"), $order->id);
         }
 
         $this->saveOrderDetails($cart['items'], $order->id);
@@ -86,13 +86,15 @@ class OrderController extends Controller
         return $customer ? $customer->id : null;
     }
 
-    private function addPointToCustomer(float $total, string $phoneNumber)
+    private function addPointToCustomer(float $total, string $phoneNumber, $orderId)
     {
         $customer = Customer::where('phone_number', $phoneNumber)->first();
         if ($customer) {
             $customer->loyalty_points += $this->calculatePoint(total: $total);
             $customer->save();
         }
+
+        $this->recordPointUsage($this->calculatePoint(total: $total), $total, $orderId, $customer->id, 'plus');
     }
 
 
@@ -110,7 +112,7 @@ class OrderController extends Controller
         }
         $product = Product::find($item['productId']);
         if ($product) {
-            $productIngredients = ProductIngredients::where('product_id', $product->id)->get();
+            $productIngredients = ProductIngredients::where(column: 'product_id', value: $product->id)->get();
             foreach ($productIngredients as $productIngredient) {
                 $ingredient = Ingredient::find($productIngredient->ingredient_id);
                 if ($ingredient) {
@@ -196,21 +198,26 @@ class OrderController extends Controller
         $this->recordPointUsage($usedPoints, $pointDiscountAmount, $orderId, $customerId);
     }
 
-    private function chargeCustomerPoints($customerId, $pointsUsed)
+    private function chargeCustomerPoints($customerId, $pointsUsed, $type = 'minus')
     {
         $customer = Customer::find($customerId);
-        $customer->loyalty_points -= $pointsUsed;
+        if ($type == 'minus') {
+            $customer->loyalty_points -= $pointsUsed;
+        } else {
+            $customer->loyalty_points += $pointsUsed;
+        }
         $customer->save();
     }
 
-    private function recordPointUsage($usedPoints, $pointDiscountAmount, $orderId, $customerId)
+    private function recordPointUsage($pointAmount, $pointDiscountAmount, $orderId, $customerId, $type = 'minus')
     {
         $pointUsage = new PointUsage();
         $pointUsage->order_id = $orderId;
         $pointUsage->customer_id = $customerId;
-        $pointUsage->used_points = $usedPoints;
+        $pointUsage->point_amount = $pointAmount;
         $pointUsage->point_discount_amount = $pointDiscountAmount;
         $pointUsage->user_id = Auth::user()->id;
+        $pointUsage->type = $type;
         $pointUsage->save();
     }
 
