@@ -1,6 +1,7 @@
 #app {
     height: 100%;
 }
+
 html,
 body {
     position: relative;
@@ -8,8 +9,8 @@ body {
 }
 
 body {
-    background: #eee;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background: #fff;
+    font-family: "IBM Plex Sans Thai", sans-serif;
     font-size: 14px;
     color: #000;
     margin: 0;
@@ -18,7 +19,7 @@ body {
 
 .swiper-container {
     width: 100%;
-    height: 400px;
+    height: 500px;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
@@ -48,7 +49,12 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transform: scale(1.05);
+    transition: transform 6s ease;
+}
+
+.swiper-slide-active .slide-content img {
+    transform: scale(1);
 }
 
 .slide-overlay {
@@ -56,32 +62,57 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-    padding: 2rem;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.4) 50%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    padding: 4rem 2rem 2rem;
     color: white;
-    text-align: left;
+    text-align: center;
 }
 
 .slide-overlay h2 {
-    font-size: 2.5rem;
+    font-size: 3rem;
     margin: 0;
-    font-weight: 600;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease;
+}
+
+.slide-overlay .slide-subtitle {
+    font-size: 1.5rem;
+    margin-top: 0.5rem;
+    font-weight: 300;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s ease 0.2s;
+}
+
+.swiper-slide-active .slide-overlay h2,
+.swiper-slide-active .slide-overlay .slide-subtitle {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .swiper-button-next,
 .swiper-button-prev {
     color: white !important;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     width: 50px !important;
     height: 50px !important;
     border-radius: 50%;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .swiper-button-next:hover,
 .swiper-button-prev:hover {
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.6);
+    transform: scale(1.1);
 }
 
 .swiper-button-next:after,
@@ -115,8 +146,13 @@ body {
     justify-content: center;
     font-weight: bold;
     color: white;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.autoplay-progress:hover {
+    background: rgba(0, 0, 0, 0.6);
 }
 
 .autoplay-progress svg {
@@ -133,4 +169,16 @@ body {
     stroke-dashoffset: calc(125.6px * (1 - var(--progress)));
     stroke-dasharray: 125.6;
     transform: rotate(-90deg);
+}
+
+.feature-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
 }
