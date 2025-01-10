@@ -4,13 +4,17 @@ import { Receipt } from "lucide-react";
 import html2canvas from 'html2canvas';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { useGlobalState } from "@/Store/state";
 
 const ReceiptModal = ({ show, onClose, orderData }) => {
     const receiptRef = useRef(null);
     const [receiptUrl, setReceiptUrl] = React.useState(null);
     const [error, setError] = React.useState(null);
     const [isSaving, setIsSaving] = React.useState(false);
-    
+    const { state } = useGlobalState();
+    const settings = state.app.settings;
+    const vatRate = settings.find(setting => setting.key === 'vat_rate')?.value || 7;
+
     // แสดงใบเสร็จตอนกด Button พิมพ์ใบเสร็จ
     useEffect(() => {
         const style = document.createElement('style');
@@ -52,7 +56,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
         try {
             setError(null);
             console.log('Capturing receipt for order:', orderData);
-            
+
             if (!orderData?.id) {
                 console.error('No order ID available');
                 return;
@@ -86,7 +90,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
         try {
             setError(null);
             console.log('Manually saving receipt for order:', orderData);
-            
+
             if (!orderData?.id) {
                 throw new Error('No order ID available');
             }
@@ -155,120 +159,190 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                         {error}
                     </div>
                 )}
-                {receiptUrl && !error && (
+                {/* {receiptUrl && !error && (
                     <div className="p-4 mb-4 text-green-700 bg-green-100 rounded-lg">
                         Receipt saved successfully!
                     </div>
-                )}
-                <div className="space-y-6">
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold">Cool Cup</h2>
-                        <p className="text-gray-600">
-                            ใบเสร็จรับเงิน/ใบกำกับภาษีอย่างย่อ
-                        </p>
-                        <p className="text-gray-600">
-                            วันที่:{" "}
-                            {formatDate(new Date(orderData?.created_at))}
-                        </p>
-                        <p className="text-gray-600">
-                            เลขที่: {orderData?.order_number}
-                        </p>
+                )} */}
+                <div className="space-y-4 max-w-lg mx-auto bg-white p-6 rounded-lg shadow-sm">
+                    {/* ส่วนหัวใบเสร็จ */}
+                    <div className="text-center space-y-2">
+                        <img src="/images/CoolCup Dicut.png" alt="Cool Cup Logo" className="mx-auto h-20 w-auto drop-shadow-md" />
+                        <div>
+                            <p className="text-sm text-gray-600 mt-1">สาขา: {orderData?.branch?.name || 'สาขาหลัก'}</p>
+                        </div>
+                        <div className="text-gray-600 text-sm">
+                            <p className="font-medium">ใบเสร็จรับเงิน/ใบกำกับภาษีอย่างย่อ</p>
+                            <p className="text-xs">เลขประจำตัวผู้เสียภาษี: x-xxxx-xxxxx-xx-x</p>
+                            <p className="text-xs">ราคารวมภาษีมูลค่าเพิ่มแล้ว</p>
+                        </div>
                     </div>
-                    <div className="py-4 border-t border-b">
-                        <table className="w-full">
+
+                    {/* ข้อมูลใบเสร็จ */}
+                    <div className="text-sm bg-gray-50 rounded-md py-3 px-4 space-y-2">
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">วันที่:</span>
+                            <span className="font-medium">{formatDate(orderData?.created_at)}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">เลขที่:</span>
+                            <span className="font-medium">{orderData?.order_number}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">พนักงาน:</span>
+                            <span className="font-medium">{orderData?.user?.name || '-'}</span>
+                        </div>
+                    </div>
+
+                    {/* รายการสินค้า */}
+                    <div className="border rounded-md">
+                        <table className="w-full text-sm">
                             <thead>
-                                <tr className="text-gray-600">
-                                    <th className="text-left">รายการ</th>
-                                    <th className="text-center">จำนวน</th>
-                                    <th className="text-right">ราคา</th>
+                                <tr className="bg-gradient-to-r from-blue-50 to-blue-100">
+                                    <th className="text-left py-2 px-3 text-gray-700 font-medium">รายการ</th>
+                                    <th className="text-center w-16 py-2 px-2 text-gray-700 font-medium">จำนวน</th>
+                                    <th className="text-right w-24 py-2 px-3 text-gray-700 font-medium">ราคา</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {orderData?.order_details?.map(
-                                    (item, index) => (
-                                        <tr
-                                            key={item.id || index}
-                                            className="border-b last:border-b-0"
-                                        >
-                                            <td className="py-2">
-                                                <div>
-                                                    {item.product_name}
+                            <tbody className="divide-y divide-gray-100">
+                                {orderData?.order_details?.map((item, index) => (
+                                    <tr
+                                        key={item.id || index}
+                                        className="hover:bg-gray-50 transition duration-150 ease-in-out"
+                                    >
+                                        <td className="py-2 px-3">
+                                            <div className="font-medium text-gray-800">{item.product_name}</div>
+                                            {(item.size || item.sweetness || (item.toppings && item.toppings !== "[]")) && (
+                                                <div className="text-xs text-gray-500 mt-0.5">
+                                                    {[
+                                                        item.size && `ขนาด: ${item.size}`,
+                                                        item.sweetness && `หวาน: ${item.sweetness}`,
+                                                        item.toppings && item.toppings !== "[]" && `ท็อปปิ้ง: ${JSON.parse(item.toppings).join(", ")}`
+                                                    ].filter(Boolean).join(" • ")}
                                                 </div>
-                                                <div className="text-sm text-gray-500">
-                                                    {item.size && `ขนาด: ${item.size}`}
-                                                    {item.sweetness && `, หวาน: ${item.sweetness}`}
-                                                    {item.toppings && item.toppings !== "[]" &&
-                                                        `, ท็อปปิ้ง: ${JSON.parse(item.toppings).join(", ")}`}
-                                                </div>
-                                            </td>
-                                            <td className="text-center">
+                                            )}
+                                        </td>
+                                        <td className="text-center py-2 px-2">
+                                            <span className="inline-flex items-center justify-center bg-blue-100 text-blue-800 text-xs font-medium h-5 w-5 rounded">
                                                 {item.quantity}
-                                            </td>
-                                            <td className="text-right">
-                                                ฿{Number(item.subtotal).toFixed(2)}
-                                            </td>
-                                        </tr>
-                                    )
-                                )}
+                                            </span>
+                                        </td>
+                                        <td className="text-right py-2 px-3 font-medium text-gray-900">
+                                            ฿{Number(item.subtotal).toFixed(2)}
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
+
+                    {/* สรุปยอด */}
                     <div className="space-y-2">
-                        <div className="flex justify-between">
-                            <span>รวมทั้งสิ้น</span>
-                            <span className="font-bold">
-                                ฿{Number(orderData?.total_amount || 0).toFixed(2)}
-                            </span>
-                        </div>
-                        <div className="flex justify-between text-gray-600">
-                            <span>ส่วนลด</span>
-                            <span>
-                                ฿{Number(orderData?.discount_amount || 0).toFixed(2)}
-                            </span>
-                        </div>
-                        <div className="flex justify-between text-gray-600">
-                            <span>ยอดสุทธิ</span>
-                            <span>฿{Number(orderData?.final_amount || 0).toFixed(2)}</span>
-                        </div>
-                        {orderData?.payment_method === "cash" && (
-                            <>
-                                <div className="flex justify-between text-gray-600">
-                                    <span>รับเงิน</span>
-                                    <span>
-                                        ฿{Number(orderData?.cash || 0).toFixed(2)}
-                                    </span>
+                        <div className="bg-gray-50 rounded-md p-3 space-y-1.5 text-sm">
+                            <div className="flex justify-between text-gray-600">
+                                <span>รวมทั้งสิ้น</span>
+                                <span className="font-medium">฿{Number(orderData?.total_amount || 0).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-gray-600">
+                                <span>ส่วนลด</span>
+                                <span className="text-red-600">-฿{Number(orderData?.discount_amount || 0).toFixed(2)}</span>
+                            </div>
+                            {/* คำนวณ VAT */}
+                            {(() => {
+                                const totalAfterDiscount = Number(orderData?.total_amount || 0) - Number(orderData?.discount_amount || 0);
+                                const vatAmount = (totalAfterDiscount * vatRate) / (100 + Number(vatRate));
+                                const priceBeforeVat = totalAfterDiscount - vatAmount;
+                                return (
+                                    <div className="border-t border-gray-200 pt-1.5">
+                                        <div className="flex justify-between text-gray-600">
+                                            <span>ราคาก่อน VAT</span>
+                                            <span>฿{priceBeforeVat.toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-gray-600">
+                                            <span>VAT {vatRate}%</span>
+                                            <span>฿{vatAmount.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+                            <div className="border-t border-gray-200 pt-1.5">
+                                <div className="flex justify-between font-medium text-base">
+                                    <span>ยอดสุทธิ</span>
+                                    <span className="text-blue-600">฿{Number(orderData?.final_amount || 0).toFixed(2)}</span>
                                 </div>
-                                <div className="flex justify-between text-gray-600">
-                                    <span>เงินทอน</span>
-                                    <span>
-                                        ฿{(Number(orderData?.cash || 0) - Number(orderData?.final_amount || 0)).toFixed(2)}
-                                    </span>
+                            </div>
+                            {orderData?.payment_method === "cash" && (
+                                <div className="border-t border-gray-200 pt-1.5 space-y-1">
+                                    <div className="flex justify-between text-gray-600">
+                                        <span>รับเงิน</span>
+                                        <span>฿{Number(orderData?.cash || 0).toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-gray-600">
+                                        <span>เงินทอน</span>
+                                        <span>฿{(Number(orderData?.cash || 0) - Number(orderData?.final_amount || 0)).toFixed(2)}</span>
+                                    </div>
                                 </div>
-                            </>
-                        )}
-                        <div className="flex justify-between text-gray-600">
-                            <span>แต้มสะสม</span>
-                            <span>+{Number(orderData?.received_points || 0).toFixed(2)}</span>
+                            )}
                         </div>
+
+                        {/* แต้มสะสม */}
+                        <div className="bg-green-50 rounded-md p-3 space-y-2 text-sm">
+                            <div className="flex justify-between items-center">
+                                <span className="font-medium text-green-700">แต้มสะสมที่ได้รับ</span>
+                                <span className="bg-green-100 px-2 py-0.5 rounded font-medium text-green-700">
+                                    +{Number(orderData?.received_points || 0).toFixed(2)}
+                                </span>
+                            </div>
+                            {orderData?.customer && (
+                                <div className="pt-1.5 border-t border-green-100">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-green-700">แต้มสะสมทั้งหมด</span>
+                                        <span className="font-medium text-green-700">
+                                            {Number(orderData.customer.loyalty_points || 0).toFixed(2)} แต้ม
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* ข้อมูลลูกค้า */}
                         {orderData?.customer && (
-                            <div className="mt-4 text-base text-gray-600">
-                                <p>ลูกค้า: {orderData.customer.name || '-'}</p>
-                                <p>เบอร์โทร: {orderData.customer.phone_number || '-'}</p>
-                                <p>แต้มสะสมทั้งหมด: {Number(orderData.customer.loyalty_points || 0).toFixed(2)}</p>
+                            <div className="bg-gray-50 rounded-md p-4">
+                                <div className="border-b border-gray-200 pb-2 mb-3">
+                                    <div className="flex items-center justify-between">
+                                        <p className="font-medium text-gray-700">ข้อมูลลูกค้า</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-2.5">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600 text-sm">ชื่อ-นามสกุล:</span>
+                                        <span className="font-medium text-gray-800">{orderData.customer.name || '-'}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600 text-sm">หมายเลขโทรศัพท์:</span>
+                                        <span className="font-medium text-gray-800">{orderData.customer.phone_number || '-'}</span>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
-                    <div className="text-center text-gray-600">
-                        <p>
-                            ชำระโดย:{" "}
-                            {orderData?.payment_method === "cash"
-                                ? "เงินสด"
-                                : "พร้อมเพย์"}
-                        </p>
-                    </div>
-                    <div className="text-sm text-center text-gray-600">
-                        <p>ขอบคุณที่ใช้บริการ</p>
-                        <p>Cool Cup</p>
+
+                    {/* ส่วนท้ายใบเสร็จ */}
+                    <div className="text-center space-y-2">
+                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 py-2 px-3 rounded-md">
+                            <p className="text-sm">
+                                ชำระโดย:{" "}
+                                <span className="text-blue-600 font-medium">
+                                    {orderData?.payment_method === "cash"
+                                        ? "เงินสด"
+                                        : "พร้อมเพย์"}
+                                </span>
+                            </p>
+                        </div>
+                        <div className="text-gray-500 space-y-0.5 text-sm">
+                            <p className="font-medium">ขอบคุณที่ใช้บริการ</p>
+                            <p className="text-xs">Cool Cup</p>
+                        </div>
                     </div>
                 </div>
             </div>
