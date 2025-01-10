@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\PromotionController as AdminPromotionController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\UnitController as AdminUnitController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\OrderController;
@@ -50,6 +51,9 @@ Route::get('/dashboard', function () {
         ]
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// ---------------------------ClientPage---------------------------
+Route::get('/client', [ClientController::class, 'showClientPage'])->name('client');
 
 // ---------------------------RegisterMember---------------------------
 Route::get('/registermember', [RegisterMemberController::class, 'index'])->name('registermember');

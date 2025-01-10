@@ -14,7 +14,7 @@ import {
 } from "react-icons/md";
 import Swal from "sweetalert2";
 import { Link, router } from "@inertiajs/react";
-
+import { TbSlideshow } from "react-icons/tb";
 export default function SidebarMenu() {
     const [isOpen, setIsOpen] = useState(() => {
         // Check if we're on a different page (not home)
@@ -101,8 +101,7 @@ export default function SidebarMenu() {
                     >
                         <MdMenu
                             className={`text-4xl transition-transform duration-300 ${
-                                isOpen ? "" : "rotate-180"
-                            }`}
+                                isOpen ? "":"rotate-180"}`}
                         />
                     </button>
                 </div>
@@ -165,12 +164,26 @@ export default function SidebarMenu() {
             </div>
             <div>
                 <ul className="flex flex-col gap-5 justify-center items-center py-5">
+                <li>
+                        <Link
+                            href="/client"
+                            className="text-blue-500 hover:text-blue-700"
+                        >
+                            <span className="flex items-center text-base font-semibold">
+                                {isOpen ? (
+                                    <MenuText>Carousal</MenuText>
+                                ) : (
+                                    <TbSlideshow className="text-2xl" />
+                                )}
+                            </span>
+                        </Link>
+                    </li>
                     <li>
                         <Link
                             href="/member"
                             className="text-blue-500 hover:text-blue-700"
                         >
-                            <span className="text-base font-semibold flex items-center">
+                            <span className="flex items-center text-base font-semibold">
                                 {isOpen ? (
                                     <MenuText>สมาชิก</MenuText>
                                 ) : (
@@ -184,7 +197,7 @@ export default function SidebarMenu() {
                             href="/registermember"
                             className="text-blue-500 hover:text-blue-700"
                         >
-                            <span className="text-base font-semibold flex items-center">
+                            <span className="flex items-center text-base font-semibold">
                                 {isOpen ? (
                                     <MenuText>สมัครสมาชิก</MenuText>
                                 ) : (
@@ -203,13 +216,13 @@ export default function SidebarMenu() {
                     <li>
                         <button
                             type="button"
-                            className="text-red-500 w-full flex items-center justify-center"
+                            className="flex justify-center items-center w-full text-red-500"
                             onClick={handleLogout}
                         >
                             {isOpen ? (
                                 <MenuText>ออกจากระบบ</MenuText>
                             ) : (
-                                <MdExitToApp className="text-2xl hover:scale-110 transition-transform" />
+                                <MdExitToApp className="text-2xl transition-transform hover:scale-110" />
                             )}
                         </button>
                     </li>
