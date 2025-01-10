@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\PhoneValidationController;
 
 Route::get('/customer/loyalty-point', [CustomerController::class, 'getLoyaltyPoint']);
 Route::get('/admin/member/{phoneNumber}', [CustomerController::class, 'memberWherePhoneNumber'])->name('api.admin.member.memberWherePhoneNumber');
@@ -18,3 +19,5 @@ Route::get('/admin/notifications', [NotificationController::class, 'index'])->na
 
 # Settings
 Route::get('/settings', [SettingController::class, 'settings'])->name('api.settings');
+
+Route::post('/check-phone', [PhoneValidationController::class, 'checkPhone']);
