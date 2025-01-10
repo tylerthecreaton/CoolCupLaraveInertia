@@ -1,9 +1,10 @@
-
+import React from "react";
+import ReactDOM from "react-dom";
 import MainContent from "@/Components/clientpage/MainContent";
 import StorefrontLayout from "@/Layouts/StorefrontLayout";
 import { Head } from "@inertiajs/react";
-import React from "react";
 
+ReactDOM.render(<MainContent />, document.getElementById("app"));
 export default function ClientPage() {
     return (
         <StorefrontLayout>
