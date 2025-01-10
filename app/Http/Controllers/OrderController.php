@@ -112,7 +112,7 @@ class OrderController extends Controller
         }
         $product = Product::find($item['productId']);
         if ($product) {
-            $productIngredients = ProductIngredients::where(column: 'product_id', value: $product->id)->get();
+            $productIngredients = ProductIngredients::where('product_id', $product->id)->get();
             foreach ($productIngredients as $productIngredient) {
                 $ingredient = Ingredient::find($productIngredient->ingredient_id);
                 if ($ingredient) {
@@ -120,15 +120,16 @@ class OrderController extends Controller
 
                     // บันทึกการใช้วัตถุดิบ
                     $usage = new ProductIngredientUsage();
+                    $usage->order_detail_id = $orderDetailId;
                     $usage->ingredient_id = $ingredient->id;
-                    $usage->amount = -$usedQuantity; // ใส่เครื่องหมายลบเพื่อแสดงว่าเป็นการใช้
+                    $usage->amount = -$usedQuantity;
                     $usage->usage_type = 'USE';
                     $usage->created_by = Auth::user()->id;
-                    $usage->note = "ใช้ในออเดอร์ #{$item['id']}";
+                    $usage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId;
                     $usage->save();
 
                     // อัพเดทจำนวนวัตถุดิบ
-                    $ingredient->quantity -= $usedQuantity;
+                    $ingredient->quantity = max(0, $ingredient->quantity - $usedQuantity);
                     $ingredient->save();
                 }
             }

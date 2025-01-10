@@ -217,7 +217,7 @@ const ProductModal = ({ show, onClose, product }) => {
                                     />
                                     <span>{toppingOption.name}</span>
                                     <span className="text-blue-600">
-                                        +{toppingOption.price}฿
+                                        +฿{toppingOption.price}
                                     </span>
                                 </label>
                             ))}
