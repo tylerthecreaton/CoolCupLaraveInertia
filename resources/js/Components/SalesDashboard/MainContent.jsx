@@ -169,41 +169,41 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {/* Total Sales Card */}
                 <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 transform transition-all hover:scale-105">
-                    <h3 className="text-blue-100 text-sm font-medium">Total Sales</h3>
+                    <h3 className="text-blue-100 text-sm font-medium">ยอดขายรายเดือน</h3>
                     <p className="text-3xl font-bold text-white">฿{formatCurrency(statistics.totalSales || 0)}</p>
                     <p className="text-sm text-blue-100 flex items-center">
                         <span className="mr-1">{statistics.salesChange >= 0 ? '↑' : '↓'}</span>
-                        {statistics.salesChange >= 0 ? '+' : ''}{statistics.salesChange || 0}% from last month
+                        {statistics.salesChange >= 0 ? '+' : ''}{statistics.salesChange || 0}% จากเดือนที่แล้ว
                     </p>
                 </div>
 
                 {/* Orders Card */}
                 <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 transform transition-all hover:scale-105">
-                    <h3 className="text-purple-100 text-sm font-medium">Total Orders</h3>
+                    <h3 className="text-purple-100 text-sm font-medium">รายการสั่งซื้อรายเดือน</h3>
                     <p className="text-3xl font-bold text-white">{statistics.totalOrders || 0}</p>
                     <p className="text-sm text-purple-100 flex items-center">
                         <span className="mr-1">{statistics.ordersChange >= 0 ? '↑' : '↓'}</span>
-                        {statistics.ordersChange >= 0 ? '+' : ''}{statistics.ordersChange || 0}% from last month
+                        {statistics.ordersChange >= 0 ? '+' : ''}{statistics.ordersChange || 0}% จากเดือนที่แล้ว
                     </p>
                 </div>
 
                 {/* Average Order Value */}
                 <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 transform transition-all hover:scale-105">
-                    <h3 className="text-green-100 text-sm font-medium">Average Order Value</h3>
+                    <h3 className="text-green-100 text-sm font-medium">ค่าสินค้ารายเดือน</h3>
                     <p className="text-3xl font-bold text-white">฿{formatCurrency(statistics.averageOrderValue || 0)}</p>
                     <p className="text-sm text-green-100 flex items-center">
                         <span className="mr-1">{statistics.averageOrderChange >= 0 ? '↑' : '↓'}</span>
-                        {statistics.averageOrderChange >= 0 ? '+' : ''}{statistics.averageOrderChange || 0}% from last month
+                        {statistics.averageOrderChange >= 0 ? '+' : ''}{statistics.averageOrderChange || 0}% จากเดือนที่แล้ว
                     </p>
                 </div>
 
                 {/* Customers */}
                 <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-lg p-6 transform transition-all hover:scale-105">
-                    <h3 className="text-red-100 text-sm font-medium">Total Customers</h3>
+                    <h3 className="text-red-100 text-sm font-medium">จำนวนลูกค้ารายเดือน</h3>
                     <p className="text-3xl font-bold text-white">{statistics.totalCustomers || 0}</p>
                     <p className="text-sm text-red-100 flex items-center">
                         <span className="mr-1">{statistics.customersChange >= 0 ? '↑' : '↓'}</span>
-                        {statistics.customersChange >= 0 ? '+' : ''}{statistics.customersChange || 0}% from last month
+                        {statistics.customersChange >= 0 ? '+' : ''}{statistics.customersChange || 0}% จากเดือนที่แล้ว
                     </p>
                 </div>
             </div>
@@ -214,7 +214,7 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
                 <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
                     <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                         <span className="w-2 h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full mr-2"></span>
-                        Sales Overview
+                        กราฟข้อมูลการขาย
                     </h3>
                     <div className="h-80">
                         <Line data={chartData} options={chartOptions} />
@@ -225,7 +225,7 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
                 <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
                     <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                         <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-                        Latest Products
+                        สินค้ายอดนิยม
                     </h3>
                     <div className="space-y-4">
                         {Array.isArray(topProducts) && topProducts.map((product) => (
