@@ -1,6 +1,10 @@
 import { createContext, useReducer, useContext } from "react";
 import { cartReducer, initialCartState } from "./cartState";
 import { appReducer, initialAppState } from "./appState";
+import {
+    clientScreenReducer,
+    initialClientScreenState,
+} from "./clientScreenState";
 
 export const GlobalStateContext = createContext();
 
@@ -19,18 +23,14 @@ const combineReducers = (reducers) => {
 const rootReducer = combineReducers({
     cart: cartReducer,
     app: appReducer,
-    // Add more reducers here as needed
-    // example: user: userReducer,
-    // example: products: productsReducer,
+    clientScreen: clientScreenReducer,
 });
 
 // Initial state combining all feature states
 const initialState = {
     app: initialAppState,
     cart: initialCartState,
-    // Add more initial states here as needed
-    // example: user: initialUserState,
-    // example: products: initialProductsState,
+    clientScreen: initialClientScreenState,
 };
 
 // Global state provider component

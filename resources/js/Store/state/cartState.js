@@ -11,6 +11,9 @@ const isLocalStorageAvailable = () => {
     }
 };
 
+// BroadcastChannel for cross-tab state sync
+const cartChannel = new BroadcastChannel('cart_state');
+
 // Initial cart state
 export const initialCartState = {
     orderNumber: 1,
@@ -138,7 +141,11 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 items: newItems,
                 ...totals,
             };
-            break;
+
+            // Broadcast state update
+            cartChannel.postMessage({ type: 'UPDATE_CART_STATE', payload: newState });
+            saveCartToStorage(newState);
+            return newState;
         }
 
         case "REMOVE_FROM_CART": {
@@ -152,7 +159,8 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 items: newItems,
                 ...totals,
             };
-            break;
+            saveCartToStorage(newState);
+            return newState;
         }
 
         case "UPDATE_QUANTITY": {
@@ -175,7 +183,8 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 items: newItems,
                 ...totals,
             };
-            break;
+            saveCartToStorage(newState);
+            return newState;
         }
 
         case "APPLY_PROMOTION": {
@@ -186,7 +195,8 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 appliedPromotion: promotion,
                 manualDiscountAmount: 0,
             };
-            break;
+            saveCartToStorage(newState);
+            return newState;
         }
 
         case "APPLY_MANUAL_DISCOUNT": {
@@ -199,7 +209,8 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 cartDiscount: amount,
                 total: Math.max(0, state.subtotal - amount),
             };
-            break;
+            saveCartToStorage(newState);
+            return newState;
         }
 
         case "APPLY_POINT_DISCOUNT": {
@@ -217,7 +228,8 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                     state.subtotal - (state.cartDiscount + pointDiscountAmount)
                 ),
             };
-            break;
+            saveCartToStorage(newState);
+            return newState;
         }
 
         case "SET_ORDER_NUMBER": {
@@ -226,7 +238,8 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 ...state,
                 orderNumber,
             };
-            break;
+            saveCartToStorage(newState);
+            return newState;
         }
 
         case "INCREMENT_ORDER_NUMBER": {
@@ -234,7 +247,8 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 ...state,
                 orderNumber: state.orderNumber + 1,
             };
-            break;
+            saveCartToStorage(newState);
+            return newState;
         }
 
         case "CLEAR_CART": {
@@ -244,7 +258,8 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 key: state.key + 1,
                 timestamp: new Date().toISOString(),
             };
-            break;
+            saveCartToStorage(newState);
+            return newState;
         }
 
         case "SET_USER": {
@@ -253,16 +268,13 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 userId: action.payload?.id || null,
                 userName: action.payload?.name || null,
             };
-            break;
+            saveCartToStorage(newState);
+            return newState;
         }
 
         default:
             return state;
     }
-
-    // Save to localStorage and return new state
-    saveCartToStorage(newState);
-    return newState;
 };
 
 // Action creators
@@ -314,6 +326,13 @@ export const cartActions = {
         type: "SET_USER",
         payload: user,
     }),
+};
+
+// Setup broadcast channel listener
+cartChannel.onmessage = (event) => {
+    if (event.data.type === 'UPDATE_CART_STATE') {
+        saveCartToStorage(event.data.payload);
+    }
 };
 
 // Types for TypeScript (optional)
