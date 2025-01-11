@@ -153,7 +153,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                     </h3>
                 </div>
             </Modal.Header>
-            <div ref={receiptRef} className="receipt-content bg-white p-8">
+            <div ref={receiptRef} className="p-8 bg-white receipt-content">
                 {error && (
                     <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg">
                         {error}
@@ -164,22 +164,22 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                         Receipt saved successfully!
                     </div>
                 )} */}
-                <div className="space-y-4 max-w-lg mx-auto bg-white p-6 rounded-lg shadow-sm">
+                <div className="p-6 mx-auto space-y-4 max-w-lg bg-white rounded-lg shadow-sm">
                     {/* ส่วนหัวใบเสร็จ */}
-                    <div className="text-center space-y-2">
-                        <img src="/images/CoolCup Dicut.png" alt="Cool Cup Logo" className="mx-auto h-20 w-auto drop-shadow-md" />
+                    <div className="space-y-2 text-center">
+                        <img src="/images/CoolCup Dicut.png" alt="Cool Cup Logo" className="mx-auto w-auto h-20 drop-shadow-md" />
                         <div>
-                            <p className="text-sm text-gray-600 mt-1">สาขา: {orderData?.branch?.name || 'สาขาหลัก'}</p>
+                            <p className="mt-1 text-sm text-gray-600">สาขา: {orderData?.branch?.name || 'สาขาหลัก'}</p>
                         </div>
-                        <div className="text-gray-600 text-sm">
+                        <div className="text-sm text-gray-600">
                             <p className="font-medium">ใบเสร็จรับเงิน/ใบกำกับภาษีอย่างย่อ</p>
                             <p className="text-xs">เลขประจำตัวผู้เสียภาษี: x-xxxx-xxxxx-xx-x</p>
-                            <p className="text-xs">ราคารวมภาษีมูลค่าเพิ่มแล้ว</p>
+                            <p className="text-xs">ราคารวมภาษีมูลค่าเพิ่มแล้ว (VAT INCLUDED)</p>
                         </div>
                     </div>
 
                     {/* ข้อมูลใบเสร็จ */}
-                    <div className="text-sm bg-gray-50 rounded-md py-3 px-4 space-y-2">
+                    <div className="px-4 py-3 space-y-2 text-sm bg-gray-50 rounded-md">
                         <div className="flex justify-between items-center">
                             <span className="text-gray-600">วันที่:</span>
                             <span className="font-medium">{formatDate(orderData?.created_at)}</span>
@@ -195,22 +195,22 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                     </div>
 
                     {/* รายการสินค้า */}
-                    <div className="border rounded-md">
+                    <div className="rounded-md border">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="bg-gradient-to-r from-blue-50 to-blue-100">
-                                    <th className="text-left py-2 px-3 text-gray-700 font-medium">รายการ</th>
-                                    <th className="text-center w-16 py-2 px-2 text-gray-700 font-medium">จำนวน</th>
-                                    <th className="text-right w-24 py-2 px-3 text-gray-700 font-medium">ราคา</th>
+                                    <th className="px-3 py-2 font-medium text-left text-gray-700">รายการ</th>
+                                    <th className="px-2 py-2 w-16 font-medium text-center text-gray-700">จำนวน</th>
+                                    <th className="px-3 py-2 w-24 font-medium text-right text-gray-700">ราคา</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {orderData?.order_details?.map((item, index) => (
                                     <tr
                                         key={item.id || index}
-                                        className="hover:bg-gray-50 transition duration-150 ease-in-out"
+                                        className="transition duration-150 ease-in-out hover:bg-gray-50"
                                     >
-                                        <td className="py-2 px-3">
+                                        <td className="px-3 py-2">
                                             <div className="font-medium text-gray-800">{item.product_name}</div>
                                             {(item.size || item.sweetness || (item.toppings && item.toppings !== "[]")) && (
                                                 <div className="text-xs text-gray-500 mt-0.5">
@@ -222,12 +222,12 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="text-center py-2 px-2">
-                                            <span className="inline-flex items-center justify-center bg-blue-100 text-blue-800 text-xs font-medium h-5 w-5 rounded">
+                                        <td className="px-2 py-2 text-center">
+                                            <span className="inline-flex justify-center items-center w-5 h-5 text-xs font-medium text-blue-800 bg-blue-100 rounded">
                                                 {item.quantity}
                                             </span>
                                         </td>
-                                        <td className="text-right py-2 px-3 font-medium text-gray-900">
+                                        <td className="px-3 py-2 font-medium text-right text-gray-900">
                                             ฿{Number(item.subtotal).toFixed(2)}
                                         </td>
                                     </tr>
@@ -266,7 +266,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                                 );
                             })()}
                             <div className="border-t border-gray-200 pt-1.5">
-                                <div className="flex justify-between font-medium text-base">
+                                <div className="flex justify-between text-base font-medium">
                                     <span>ยอดสุทธิ</span>
                                     <span className="text-blue-600">฿{Number(orderData?.final_amount || 0).toFixed(2)}</span>
                                 </div>
@@ -286,7 +286,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                         </div>
 
                         {/* แต้มสะสม */}
-                        <div className="bg-green-50 rounded-md p-3 space-y-2 text-sm">
+                        <div className="p-3 space-y-2 text-sm bg-green-50 rounded-md">
                             <div className="flex justify-between items-center">
                                 <span className="font-medium text-green-700">แต้มสะสมที่ได้รับ</span>
                                 <span className="bg-green-100 px-2 py-0.5 rounded font-medium text-green-700">
@@ -307,19 +307,19 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
 
                         {/* ข้อมูลลูกค้า */}
                         {orderData?.customer && (
-                            <div className="bg-gray-50 rounded-md p-4">
-                                <div className="border-b border-gray-200 pb-2 mb-3">
-                                    <div className="flex items-center justify-between">
+                            <div className="p-4 bg-gray-50 rounded-md">
+                                <div className="pb-2 mb-3 border-b border-gray-200">
+                                    <div className="flex justify-between items-center">
                                         <p className="font-medium text-gray-700">ข้อมูลลูกค้า</p>
                                     </div>
                                 </div>
                                 <div className="space-y-2.5">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 text-sm">ชื่อ-นามสกุล:</span>
+                                        <span className="text-sm text-gray-600">ชื่อ-นามสกุล:</span>
                                         <span className="font-medium text-gray-800">{orderData.customer.name || '-'}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600 text-sm">หมายเลขโทรศัพท์:</span>
+                                        <span className="text-sm text-gray-600">หมายเลขโทรศัพท์:</span>
                                         <span className="font-medium text-gray-800">{orderData.customer.phone_number || '-'}</span>
                                     </div>
                                 </div>
@@ -328,11 +328,11 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                     </div>
 
                     {/* ส่วนท้ายใบเสร็จ */}
-                    <div className="text-center space-y-2">
-                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 py-2 px-3 rounded-md">
+                    <div className="space-y-2 text-center">
+                        <div className="px-3 py-2 bg-gradient-to-r from-blue-50 to-blue-100 rounded-md">
                             <p className="text-sm">
                                 ชำระโดย:{" "}
-                                <span className="text-blue-600 font-medium">
+                                <span className="font-medium text-blue-600">
                                     {orderData?.payment_method === "cash"
                                         ? "เงินสด"
                                         : "พร้อมเพย์"}
@@ -365,7 +365,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                         >
                             {isSaving ? (
                                 <>
-                                    <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                                    <svg className="mr-3 w-5 h-5 animate-spin" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                     </svg>
@@ -373,7 +373,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                                 </>
                             ) : (
                                 <>
-                                    <Receipt className="w-4 h-4 mr-2" />
+                                    <Receipt className="mr-2 w-4 h-4" />
                                     บันทึกใบเสร็จ
                                 </>
                             )}
