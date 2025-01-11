@@ -4,6 +4,9 @@ const clientScreenChannel = new BroadcastChannel('client_screen_state');
 export const initialClientScreenState = {
     isShowing: true,
     selectedClient: null,
+    qrCode: null,
+    customerInfo: null,
+    paymentInfo: null
 };
 
 export const clientScreenReducer = (state = initialClientScreenState, action) => {
@@ -28,6 +31,33 @@ export const clientScreenReducer = (state = initialClientScreenState, action) =>
             clientScreenChannel.postMessage({ type: 'UPDATE_CLIENT_SCREEN_STATE', payload: newState });
             return newState;
         }
+        case 'SHOW_QR_CODE': {
+            newState = {
+                ...state,
+                qrCode: action.payload,
+            };
+            // Broadcast state update
+            clientScreenChannel.postMessage({ type: 'UPDATE_CLIENT_SCREEN_STATE', payload: newState });
+            return newState;
+        }
+        case 'SHOW_CUSTOMER_INFO': {
+            newState = {
+                ...state,
+                customerInfo: action.payload,
+            };
+            // Broadcast state update
+            clientScreenChannel.postMessage({ type: 'UPDATE_CLIENT_SCREEN_STATE', payload: newState });
+            return newState;
+        }
+        case 'SHOW_PAYMENT_INFO': {
+            newState = {
+                ...state,
+                paymentInfo: action.payload,
+            };
+            // Broadcast state update
+            clientScreenChannel.postMessage({ type: 'UPDATE_CLIENT_SCREEN_STATE', payload: newState });
+            return newState;
+        }
         default:
             return state;
     }
@@ -36,17 +66,38 @@ export const clientScreenReducer = (state = initialClientScreenState, action) =>
 // Setup broadcast channel listener
 clientScreenChannel.onmessage = (event) => {
     if (event.data.type === 'UPDATE_CLIENT_SCREEN_STATE') {
-        // Update local state when receiving broadcast
-        return event.data.payload;
+        // Handle state update
     }
 };
 
 export const clientScreenActions = {
-    toggleClientScreen: () => ({
-        type: 'TOGGLE_CLIENT_SCREEN',
-    }),
-    setSelectedClient: (client) => ({
-        type: 'SET_SELECTED_CLIENT',
-        payload: client,
-    }),
+    toggleClientScreen() {
+        return {
+            type: 'TOGGLE_CLIENT_SCREEN',
+        };
+    },
+    setSelectedClient(client) {
+        return {
+            type: 'SET_SELECTED_CLIENT',
+            payload: client,
+        };
+    },
+    showQRCode(qrCode) {
+        return {
+            type: 'SHOW_QR_CODE',
+            payload: qrCode,
+        };
+    },
+    showCustomerInfo(customerInfo) {
+        return {
+            type: 'SHOW_CUSTOMER_INFO',
+            payload: customerInfo,
+        };
+    },
+    showPaymentInfo(paymentInfo) {
+        return {
+            type: 'SHOW_PAYMENT_INFO',
+            payload: paymentInfo,
+        };
+    },
 };

@@ -26,6 +26,9 @@ import generatePayload from "promptpay-qr";
 import ReactQrCode from "react-qr-code";
 import LoadingIndicator from "../LoadingIndicator";
 import ReceiptModal from "./ReceiptModal";
+import { appActions } from "@/Store/state/appState";
+import { cartActions } from "@/Store/state/cartState";
+import { clientScreenActions } from "@/Store/state/clientScreenState";
 
 const PaymethodModal = ({ show, onClose, cartActions }) => {
     const { state, dispatch } = useGlobalState();
@@ -61,7 +64,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
             description: "ชำระด้วยเงินสด",
         },
         {
-            id: "promptpay",
+            id: "qr",
             name: "QR Promptpay",
             icon: "qr-code",
             description: "สแกน QR Code เพื่อชำระเงิน",
@@ -71,7 +74,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     useEffect(() => {
         if (data.memberPhone.length === 10) {
             setIsMemberLoading(true);
-            handleSearchMember();
+            handleMemberSearch();
         } else {
             setMember(null);
             setIsMemberLoading(false);
@@ -80,27 +83,73 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
         }
     }, [data.memberPhone]);
 
-    const handleSearchMember = async () => {
-        const response = await axios.get(
-            route("api.admin.member.memberWherePhoneNumber", {
-                phoneNumber: data.memberPhone,
-            })
-        );
-        setMember(response.data);
-        setIsMemberLoading(false);
-    };
-
-    const handleMethodSelect = (methodId) => {
-        setData("selectedMethod", methodId);
-        if (methodId === "promptpay") {
+    // เมื่อเลือกวิธีชำระเงิน
+    const handleMethodSelect = (method) => {
+        setData("selectedMethod", method);
+        if (method === "qr") {
+            const promptpayNumber = settings.find(s => s.key === "promptpay_number")?.value || "";
+            const qrCodeValue = generatePayload(promptpayNumber, { amount: total });
             setData("showQR", true);
+            // ส่งข้อมูล QR Code ไปแสดงที่หน้า Client
+            dispatch(clientScreenActions.showQRCode({
+                qrCode: qrCodeValue,
+                amount: total
+            }));
         } else {
             setData("showQR", false);
+            dispatch(clientScreenActions.showQRCode(null));
         }
-        setData("cashReceived", "");
-        setData("paymentFile", null);
-        setData("paymentNote", "");
     };
+
+    // เมื่อค้นหาสมาชิก
+    const handleMemberSearch = async () => {
+        try {
+            const response = await axios.get(
+                route("api.admin.member.memberWherePhoneNumber", {
+                    phoneNumber: data.memberPhone,
+                })
+            );
+            if (response.data) {
+                setMember(response.data);
+                // ส่งข้อมูลลูกค้าไปแสดงที่หน้า Client
+                dispatch(clientScreenActions.showCustomerInfo({
+                    name: response.data.name,
+                    phone: response.data.phone,
+                    points: response.data.loyalty_points
+                }));
+            } else {
+                setMember(null);
+                dispatch(clientScreenActions.showCustomerInfo(null));
+            }
+        } catch (error) {
+            console.error("Error searching member:", error);
+            setMember(null);
+            dispatch(clientScreenActions.showCustomerInfo(null));
+        } finally {
+            setIsMemberLoading(false);
+        }
+    };
+
+    // เมื่อใส่จำนวนเงินที่รับ
+    const handleCashReceived = (value) => {
+        const amount = parseFloat(value) || 0;
+        setData("cashReceived", amount);
+        // ส่งข้อมูลการชำระเงินไปแสดงที่หน้า Client
+        dispatch(clientScreenActions.showPaymentInfo({
+            received: amount,
+            change: amount - total,
+            total
+        }));
+    };
+
+    // Clear client screen info when modal closes
+    useEffect(() => {
+        if (!show) {
+            dispatch(clientScreenActions.showQRCode(null));
+            dispatch(clientScreenActions.showCustomerInfo(null));
+            dispatch(clientScreenActions.showPaymentInfo(null));
+        }
+    }, [show]);
 
     const calculateChange = () => {
         const received = parseFloat(data.cashReceived);
@@ -665,10 +714,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                             type="number"
                                             value={data.cashReceived}
                                             onChange={(e) =>
-                                                setData(
-                                                    "cashReceived",
-                                                    e.target.value
-                                                )
+                                                handleCashReceived(e.target.value)
                                             }
                                             placeholder="กรอกจำนวนเงิน"
                                             className="flex-1"
@@ -691,11 +737,11 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                             </div>
                         )}
 
-                        {isSummary && data.selectedMethod === "promptpay" && (
+                        {isSummary && data.selectedMethod === "qr" && (
                             <div className="mt-4 space-y-4">
                                 <div className="flex flex-col items-center p-4 space-y-4 bg-blue-50 rounded-lg">
                                     <ReactQrCode
-                                        value={generatePayload("0942017100", {
+                                        value={generatePayload(settings.find(s => s.key === "promptpay_number")?.value || "", {
                                             amount: parseFloat(total),
                                         })}
                                         size={256}
@@ -705,7 +751,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                             สแกน QR Code เพื่อชำระเงิน
                                         </p>
                                         <p className="font-medium text-gray-800">
-                                            PromptPay: 094-201-7100
+                                            PromptPay: {settings.find(s => s.key === "promptpay_number")?.value || ""}
                                         </p>
                                         <p className="text-lg font-bold text-blue-600">
                                             ยอดชำระ: ฿{total}
@@ -721,10 +767,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                             type="number"
                                             value={data.cashReceived}
                                             onChange={(e) =>
-                                                setData(
-                                                    "cashReceived",
-                                                    e.target.value
-                                                )
+                                                handleCashReceived(e.target.value)
                                             }
                                             placeholder="กรอกจำนวนเงิน"
                                             className="flex-1"
