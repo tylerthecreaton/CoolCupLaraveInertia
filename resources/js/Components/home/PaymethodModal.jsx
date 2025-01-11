@@ -55,6 +55,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     const [isSummary, setIsSummary] = useState(false);
     const [isMemberLoading, setIsMemberLoading] = useState(false);
     const [usePoints, setUsePoints] = useState(false);
+    const [isCashFocused, setIsCashFocused] = useState(false);
 
     const paymentMethods = [
         {
@@ -171,17 +172,28 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
             pointsUsed: usePoints ? Math.ceil(total * (pointPerThb ? parseFloat(pointPerThb.value) : 10)) : 0,
             pointDiscount: usePoints ? total : 0,
             finalTotal: usePoints ? 0 : total,
-            paymentMethod: data.selectedMethod
+            paymentMethod: data.selectedMethod,
+            showAsModal: isCashFocused
         };
 
         // ส่งข้อมูลการชำระเงินไปแสดงที่หน้า Client
         dispatch(clientScreenActions.showPaymentInfo(paymentInfo));
     };
 
-    // เมื่อ focus ที่ input เงินสด
+    // เมื่อ focus ที่ช่องรับเงิน
     const handleCashFocus = () => {
-        const amount = parseFloat(data.cashReceived) || 0;
-        handleCashReceived(amount.toString());
+        setIsCashFocused(!isCashFocused);
+        
+        // ถ้ามีการรับเงินแล้ว ให้ส่งข้อมูลไปแสดงที่หน้า Client
+        if (data.cashReceived) {
+            const amount = parseFloat(data.cashReceived) || 0;
+            dispatch(clientScreenActions.showPaymentInfo({
+                ...paymentInfo,
+                showAsModal: isCashFocused,
+                received: amount,
+                change: amount - (usePoints ? 0 : total)
+            }));
+        }
     };
 
     // เมื่อใช้คะแนนสะสม
