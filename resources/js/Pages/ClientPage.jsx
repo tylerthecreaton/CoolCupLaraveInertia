@@ -128,73 +128,148 @@ export default function ClientPage() {
 
                         {/* QR Code Display */}
                         {localState.clientScreen.qrCode && (
-                            <div className="bg-white rounded-lg shadow-lg p-6 text-center">
-                                <h3 className="text-xl font-semibold mb-4">สแกนเพื่อชำระเงิน</h3>
-                                <div className="flex justify-center mb-4">
-                                    <ReactQrCode 
-                                        value={localState.clientScreen.qrCode.qrCode} 
-                                        size={256}
-                                        className="mx-auto"
-                                    />
+                            localState.clientScreen.qrCode.showAsModal ? (
+                                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                                    <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md w-full mx-4">
+                                        <h3 className="text-xl font-semibold mb-4">สแกนเพื่อชำระเงิน</h3>
+                                        <div className="flex justify-center mb-4">
+                                            <ReactQrCode 
+                                                value={localState.clientScreen.qrCode.qrCode} 
+                                                size={256}
+                                                className="mx-auto"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <p className="text-lg">ยอดรวม: ฿{localState.clientScreen.qrCode.subtotal.toFixed(2)}</p>
+                                            {localState.clientScreen.qrCode.discount > 0 && (
+                                                <p className="text-lg text-green-600">ส่วนลด: ฿{localState.clientScreen.qrCode.discount.toFixed(2)}</p>
+                                            )}
+                                            {localState.clientScreen.qrCode.pointDiscount > 0 && (
+                                                <p className="text-lg text-blue-600">ส่วนลดจากคะแนน: ฿{localState.clientScreen.qrCode.pointDiscount.toFixed(2)}</p>
+                                            )}
+                                            <p className="text-xl font-semibold text-blue-600">
+                                                ยอดชำระ: ฿{localState.clientScreen.qrCode.finalTotal.toFixed(2)}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <p className="text-xl font-semibold text-blue-600">
-                                    จำนวนเงิน: ฿{localState.clientScreen.qrCode.amount.toFixed(2)}
-                                </p>
+                            ) : (
+                                <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+                                    <h3 className="text-xl font-semibold mb-4">สแกนเพื่อชำระเงิน</h3>
+                                    <div className="flex justify-center mb-4">
+                                        <ReactQrCode 
+                                            value={localState.clientScreen.qrCode.qrCode} 
+                                            size={256}
+                                            className="mx-auto"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <p className="text-lg">ยอดรวม: ฿{localState.clientScreen.qrCode.subtotal.toFixed(2)}</p>
+                                        {localState.clientScreen.qrCode.discount > 0 && (
+                                            <p className="text-lg text-green-600">ส่วนลด: ฿{localState.clientScreen.qrCode.discount.toFixed(2)}</p>
+                                        )}
+                                        {localState.clientScreen.qrCode.pointDiscount > 0 && (
+                                            <p className="text-lg text-blue-600">ส่วนลดจากคะแนน: ฿{localState.clientScreen.qrCode.pointDiscount.toFixed(2)}</p>
+                                        )}
+                                        <p className="text-xl font-semibold text-blue-600">
+                                            ยอดชำระ: ฿{localState.clientScreen.qrCode.finalTotal.toFixed(2)}
+                                        </p>
+                                    </div>
+                                </div>
+                            )
+                        )}
+
+                        {/* Customer Info Display */}
+                        {localState.clientScreen.customerInfo && (
+                            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg z-40">
+                                <div className="container mx-auto max-w-4xl">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <h3 className="text-xl font-bold">
+                                                {localState.clientScreen.customerInfo.name}
+                                            </h3>
+                                            <p className="text-gray-600">
+                                                เบอร์โทร: {localState.clientScreen.customerInfo.phone}
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-lg font-medium text-blue-600">
+                                                คะแนนสะสม: {localState.clientScreen.customerInfo.points} คะแนน
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Payment Info Display */}
+                        {localState.clientScreen.paymentInfo && (
+                            <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg z-30">
+                                <div className="container mx-auto max-w-4xl">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="text-center">
+                                            <p className="text-gray-600">ยอดรวม</p>
+                                            <p className="text-2xl font-bold">
+                                                ฿{localState.clientScreen.paymentInfo.subtotal.toFixed(2)}
+                                            </p>
+                                        </div>
+                                        
+                                        {localState.clientScreen.paymentInfo.discount > 0 && (
+                                            <div className="text-center">
+                                                <p className="text-gray-600">ส่วนลด</p>
+                                                <p className="text-2xl font-bold text-green-600">
+                                                    ฿{localState.clientScreen.paymentInfo.discount.toFixed(2)}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {localState.clientScreen.paymentInfo.pointsUsed > 0 && (
+                                            <>
+                                                <div className="text-center">
+                                                    <p className="text-gray-600">ใช้คะแนน</p>
+                                                    <p className="text-2xl font-bold text-blue-600">
+                                                        {localState.clientScreen.paymentInfo.pointsUsed} คะแนน
+                                                    </p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-gray-600">ส่วนลดจากคะแนน</p>
+                                                    <p className="text-2xl font-bold text-blue-600">
+                                                        ฿{localState.clientScreen.paymentInfo.pointDiscount.toFixed(2)}
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
+
+                                        <div className="text-center">
+                                            <p className="text-gray-600">ยอดชำระสุทธิ</p>
+                                            <p className="text-2xl font-bold text-green-600">
+                                                ฿{localState.clientScreen.paymentInfo.finalTotal.toFixed(2)}
+                                            </p>
+                                        </div>
+
+                                        {localState.clientScreen.paymentInfo.received > 0 && (
+                                            <>
+                                                <div className="text-center">
+                                                    <p className="text-gray-600">รับเงิน</p>
+                                                    <p className="text-2xl font-bold text-green-600">
+                                                        ฿{localState.clientScreen.paymentInfo.received.toFixed(2)}
+                                                    </p>
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="text-gray-600">เงินทอน</p>
+                                                    <p className="text-2xl font-bold text-blue-600">
+                                                        ฿{Math.max(0, localState.clientScreen.paymentInfo.change).toFixed(2)}
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
                 </section>
 
-                {/* Customer Info Display */}
-                {localState.clientScreen.customerInfo && (
-                    <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg z-40">
-                        <div className="container mx-auto max-w-4xl">
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <h3 className="text-xl font-bold">
-                                        {localState.clientScreen.customerInfo.name}
-                                    </h3>
-                                    <p className="text-gray-600">
-                                        เบอร์โทร: {localState.clientScreen.customerInfo.phone}
-                                    </p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-lg font-medium text-blue-600">
-                                        คะแนนสะสม: {localState.clientScreen.customerInfo.points} คะแนน
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Payment Info Display */}
-                {localState.clientScreen.paymentInfo && (
-                    <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg z-30">
-                        <div className="container mx-auto max-w-4xl">
-                            <div className="grid grid-cols-3 gap-4 text-center">
-                                <div>
-                                    <p className="text-gray-600">ยอดรวม</p>
-                                    <p className="text-2xl font-bold">
-                                        ฿{localState.clientScreen.paymentInfo.total.toFixed(2)}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-gray-600">รับเงิน</p>
-                                    <p className="text-2xl font-bold text-green-600">
-                                        ฿{localState.clientScreen.paymentInfo.received.toFixed(2)}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="text-gray-600">เงินทอน</p>
-                                    <p className="text-2xl font-bold text-blue-600">
-                                        ฿{Math.max(0, localState.clientScreen.paymentInfo.change).toFixed(2)}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
         </StorefrontLayout>
     );

@@ -86,14 +86,22 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     // เมื่อเลือกวิธีชำระเงิน
     const handleMethodSelect = (method) => {
         setData("selectedMethod", method);
+        setData("cashReceived", "");
+        
         if (method === "qr") {
             const promptpayNumber = settings.find(s => s.key === "promptpay_number")?.value || "";
             const qrCodeValue = generatePayload(promptpayNumber, { amount: total });
             setData("showQR", true);
-            // ส่งข้อมูล QR Code ไปแสดงที่หน้า Client
+            // ส่งข้อมูล QR Code และข้อมูลการชำระเงินไปแสดงที่หน้า Client
             dispatch(clientScreenActions.showQRCode({
                 qrCode: qrCodeValue,
-                amount: total
+                amount: total,
+                showAsModal: true,
+                paymentMethod: 'qr',
+                subtotal: subtotal,
+                discount: discount,
+                pointDiscount: usePoints ? total : 0,
+                finalTotal: usePoints ? 0 : total
             }));
         } else {
             setData("showQR", false);
@@ -134,19 +142,80 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     const handleCashReceived = (value) => {
         const amount = parseFloat(value) || 0;
         setData("cashReceived", amount);
-        // ส่งข้อมูลการชำระเงินไปแสดงที่หน้า Client
-        dispatch(clientScreenActions.showPaymentInfo({
+        
+        // ถ้าเป็นการชำระด้วย QR และเงินที่รับมาน้อยกว่ายอดที่ต้องชำระ ให้ยังแสดง QR code
+        if (data.selectedMethod === "qr" && amount < (usePoints ? 0 : total)) {
+            const promptpayNumber = settings.find(s => s.key === "promptpay_number")?.value || "";
+            const qrCodeValue = generatePayload(promptpayNumber, { amount: total });
+            dispatch(clientScreenActions.showQRCode({
+                qrCode: qrCodeValue,
+                amount: total,
+                showAsModal: true,
+                paymentMethod: 'qr',
+                subtotal: subtotal,
+                discount: discount,
+                pointDiscount: usePoints ? total : 0,
+                finalTotal: usePoints ? 0 : total
+            }));
+        } else {
+            dispatch(clientScreenActions.showQRCode(null));
+        }
+        
+        // คำนวณข้อมูลการชำระเงิน
+        const paymentInfo = {
             received: amount,
-            change: amount - total,
-            total
-        }));
+            change: amount - (usePoints ? 0 : total),
+            total,
+            subtotal,
+            discount,
+            pointsUsed: usePoints ? Math.ceil(total * (pointPerThb ? parseFloat(pointPerThb.value) : 10)) : 0,
+            pointDiscount: usePoints ? total : 0,
+            finalTotal: usePoints ? 0 : total,
+            paymentMethod: data.selectedMethod
+        };
+
+        // ส่งข้อมูลการชำระเงินไปแสดงที่หน้า Client
+        dispatch(clientScreenActions.showPaymentInfo(paymentInfo));
     };
 
-    // Clear client screen info when modal closes
+    // เมื่อ focus ที่ input เงินสด
+    const handleCashFocus = () => {
+        const amount = parseFloat(data.cashReceived) || 0;
+        handleCashReceived(amount.toString());
+    };
+
+    // เมื่อใช้คะแนนสะสม
+    const handleUsePoints = (points = null) => {
+        // ถ้าไม่ระบุ points มา จะใช้คะแนนทั้งหมดที่มี
+        const pointsToUse = points || Math.ceil(total * (pointPerThb ? parseFloat(pointPerThb.value) : 10));
+        
+        if (!usePoints) {
+            dispatch(
+                cartActions.applyPointDiscount({
+                    amount: pointsToUse,
+                    point: points ? points / (pointPerThb ? parseFloat(pointPerThb.value) : 10) : total,
+                })
+            );
+            setUsePoints(true);
+        } else {
+            dispatch(
+                cartActions.applyPointDiscount({
+                    amount: 0,
+                    point: 0,
+                })
+            );
+            setUsePoints(false);
+        }
+
+        // อัพเดทข้อมูลการชำระเงินถ้ามีการใส่เงินสดไว้แล้ว
+        if (data.cashReceived) {
+            handleCashReceived(data.cashReceived);
+        }
+    };
+
+    // Clear payment info when modal closes
     useEffect(() => {
         if (!show) {
-            dispatch(clientScreenActions.showQRCode(null));
-            dispatch(clientScreenActions.showCustomerInfo(null));
             dispatch(clientScreenActions.showPaymentInfo(null));
         }
     }, [show]);
@@ -241,21 +310,6 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     const handleReceiptClose = () => {
         setShowReceipt(false);
         onClose();
-    };
-
-    const handleUsePoints = (points) => {
-        const pointValue =
-            points / (pointPerThb ? parseFloat(pointPerThb.value) : 10);
-        // Ensure discount doesn't exceed total
-        const newDiscount = Math.min(pointValue, total);
-        setUsePoints(true);
-        // Apply point discount to cart state
-        dispatch(
-            cartActions.applyPointDiscount({
-                amount: points,
-                point: newDiscount,
-            })
-        );
     };
 
     useEffect(() => {
@@ -704,34 +758,53 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                         </Button>
 
                         {isSummary && data.selectedMethod === "cash" && (
-                            <div className="p-4 space-y-4 rounded-lg border">
-                                <div>
-                                    <label className="block mb-1 text-sm font-medium text-gray-700">
-                                        จำนวนเงินที่รับมา
-                                    </label>
-                                    <div className="flex items-center space-x-2">
-                                        <TextInput
-                                            type="number"
-                                            value={data.cashReceived}
-                                            onChange={(e) =>
-                                                handleCashReceived(e.target.value)
-                                            }
-                                            placeholder="กรอกจำนวนเงิน"
-                                            className="flex-1"
-                                        />
-                                        <span className="text-gray-500">
-                                            บาท
-                                        </span>
-                                    </div>
-                                </div>
-                                {calculateChange() !== null && (
-                                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                                        <span className="font-medium text-green-700">
-                                            เงินทอน:
-                                        </span>
-                                        <span className="text-lg font-bold text-green-700">
-                                            ฿{calculateChange()}
-                                        </span>
+                            <div className="mt-4">
+                                <Label htmlFor="cashReceived">
+                                    จำนวนเงินที่รับ
+                                </Label>
+                                <TextInput
+                                    id="cashReceived"
+                                    type="number"
+                                    value={data.cashReceived}
+                                    onChange={(e) =>
+                                        handleCashReceived(e.target.value)
+                                    }
+                                    onFocus={handleCashFocus}
+                                    onBlur={handleCashFocus}
+                                    className="mt-1"
+                                    placeholder="0.00"
+                                />
+                                {parseFloat(data.cashReceived) > 0 && (
+                                    <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                                        <div className="grid grid-cols-2 gap-2 text-sm">
+                                            <div>ยอดรวม:</div>
+                                            <div className="text-right">฿{total.toFixed(2)}</div>
+                                            
+                                            {usePoints && (
+                                                <>
+                                                    <div className="text-blue-600">ใช้คะแนน:</div>
+                                                    <div className="text-right text-blue-600">
+                                                        {Math.ceil(total * (pointPerThb ? parseFloat(pointPerThb.value) : 10))} คะแนน
+                                                    </div>
+                                                    <div className="text-blue-600">ส่วนลดจากคะแนน:</div>
+                                                    <div className="text-right text-blue-600">
+                                                        ฿{total.toFixed(2)}
+                                                    </div>
+                                                    <div className="font-medium">ยอดชำระสุทธิ:</div>
+                                                    <div className="text-right font-medium">฿0.00</div>
+                                                </>
+                                            )}
+                                            
+                                            <div>รับเงิน:</div>
+                                            <div className="text-right text-green-600">
+                                                ฿{parseFloat(data.cashReceived).toFixed(2)}
+                                            </div>
+                                            
+                                            <div>เงินทอน:</div>
+                                            <div className="text-right text-blue-600">
+                                                ฿{Math.max(0, parseFloat(data.cashReceived) - (usePoints ? 0 : total)).toFixed(2)}
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
