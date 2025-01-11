@@ -12,7 +12,7 @@ const isLocalStorageAvailable = () => {
 };
 
 // BroadcastChannel for cross-tab state sync
-const cartChannel = new BroadcastChannel('cart_state');
+const cartChannel = new BroadcastChannel("cart_state");
 
 // Initial cart state
 export const initialCartState = {
@@ -143,14 +143,17 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
             };
 
             // Broadcast state update
-            cartChannel.postMessage({ type: 'UPDATE_CART_STATE', payload: newState });
+            cartChannel.postMessage({
+                type: "UPDATE_CART_STATE",
+                payload: newState,
+            });
             saveCartToStorage(newState);
             return newState;
         }
 
         case "REMOVE_FROM_CART": {
             const newItems = state.items.filter(
-                (item) => item.id !== action.payload
+                (item) => getItemKey(item) !== getItemKey(action.payload)
             );
             const totals = calculateCartTotals(newItems, state);
             newState = {
@@ -159,23 +162,22 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 items: newItems,
                 ...totals,
             };
+            // Broadcast state update
+            cartChannel.postMessage({
+                type: "UPDATE_CART_STATE",
+                payload: newState,
+            });
             saveCartToStorage(newState);
             return newState;
         }
 
         case "UPDATE_QUANTITY": {
             const { itemId, delta } = action.payload;
-            const newItems = state.items
-                .map((item) =>
-                    item.id === itemId
-                        ? {
-                              ...item,
-                              quantity: Math.max(0, item.quantity + delta),
-                          }
-                        : item
-                )
-                .filter((item) => item.quantity > 0);
-
+            const newItems = state.items.map((item) =>
+                getItemKey(item) === itemId
+                    ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+                    : item
+            );
             const totals = calculateCartTotals(newItems, state);
             newState = {
                 ...state,
@@ -183,6 +185,11 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 items: newItems,
                 ...totals,
             };
+            // Broadcast state update
+            cartChannel.postMessage({
+                type: "UPDATE_CART_STATE",
+                payload: newState,
+            });
             saveCartToStorage(newState);
             return newState;
         }
@@ -195,6 +202,11 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 appliedPromotion: promotion,
                 manualDiscountAmount: 0,
             };
+            // Broadcast state update
+            cartChannel.postMessage({
+                type: "UPDATE_CART_STATE",
+                payload: newState,
+            });
             saveCartToStorage(newState);
             return newState;
         }
@@ -209,6 +221,11 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 cartDiscount: amount,
                 total: Math.max(0, state.subtotal - amount),
             };
+            // Broadcast state update
+            cartChannel.postMessage({
+                type: "UPDATE_CART_STATE",
+                payload: newState,
+            });
             saveCartToStorage(newState);
             return newState;
         }
@@ -228,6 +245,11 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                     state.subtotal - (state.cartDiscount + pointDiscountAmount)
                 ),
             };
+            // Broadcast state update
+            cartChannel.postMessage({
+                type: "UPDATE_CART_STATE",
+                payload: newState,
+            });
             saveCartToStorage(newState);
             return newState;
         }
@@ -238,6 +260,11 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 ...state,
                 orderNumber,
             };
+            // Broadcast state update
+            cartChannel.postMessage({
+                type: "UPDATE_CART_STATE",
+                payload: newState,
+            });
             saveCartToStorage(newState);
             return newState;
         }
@@ -247,6 +274,11 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 ...state,
                 orderNumber: state.orderNumber + 1,
             };
+            // Broadcast state update
+            cartChannel.postMessage({
+                type: "UPDATE_CART_STATE",
+                payload: newState,
+            });
             saveCartToStorage(newState);
             return newState;
         }
@@ -258,6 +290,11 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 key: state.key + 1,
                 timestamp: new Date().toISOString(),
             };
+            // Broadcast state update
+            cartChannel.postMessage({
+                type: "UPDATE_CART_STATE",
+                payload: newState,
+            });
             saveCartToStorage(newState);
             return newState;
         }
@@ -268,6 +305,11 @@ export const cartReducer = (state = getCartFromStorage(), action) => {
                 userId: action.payload?.id || null,
                 userName: action.payload?.name || null,
             };
+            // Broadcast state update
+            cartChannel.postMessage({
+                type: "UPDATE_CART_STATE",
+                payload: newState,
+            });
             saveCartToStorage(newState);
             return newState;
         }
@@ -284,14 +326,14 @@ export const cartActions = {
         payload: item,
     }),
 
-    removeFromCart: (itemId) => ({
+    removeFromCart: (item) => ({
         type: "REMOVE_FROM_CART",
-        payload: itemId,
+        payload: item,
     }),
 
-    updateQuantity: (itemId, delta) => ({
+    updateQuantity: (item, delta) => ({
         type: "UPDATE_QUANTITY",
-        payload: { itemId, delta },
+        payload: { itemId: getItemKey(item), delta },
     }),
 
     applyPromotion: (promotion) => ({
@@ -330,7 +372,7 @@ export const cartActions = {
 
 // Setup broadcast channel listener
 cartChannel.onmessage = (event) => {
-    if (event.data.type === 'UPDATE_CART_STATE') {
+    if (event.data.type === "UPDATE_CART_STATE") {
         saveCartToStorage(event.data.payload);
     }
 };

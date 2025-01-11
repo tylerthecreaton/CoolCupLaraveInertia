@@ -11,29 +11,29 @@ export default function ClientPage() {
         cart: {},
         clientScreen: {
             isShowing: false,
-            selectedClient: null
-        }
+            selectedClient: null,
+        },
     });
 
     // Setup broadcast channel listeners
     useEffect(() => {
-        const cartChannel = new BroadcastChannel('cart_state');
-        const clientScreenChannel = new BroadcastChannel('client_screen_state');
+        const cartChannel = new BroadcastChannel("cart_state");
+        const clientScreenChannel = new BroadcastChannel("client_screen_state");
 
         cartChannel.onmessage = (event) => {
-            if (event.data.type === 'UPDATE_CART_STATE') {
-                setLocalState(prev => ({
+            if (event.data.type === "UPDATE_CART_STATE") {
+                setLocalState((prev) => ({
                     ...prev,
-                    cart: event.data.payload
+                    cart: event.data.payload,
                 }));
             }
         };
 
         clientScreenChannel.onmessage = (event) => {
-            if (event.data.type === 'UPDATE_CLIENT_SCREEN_STATE') {
-                setLocalState(prev => ({
+            if (event.data.type === "UPDATE_CLIENT_SCREEN_STATE") {
+                setLocalState((prev) => ({
                     ...prev,
-                    clientScreen: event.data.payload
+                    clientScreen: event.data.payload,
                 }));
             }
         };
@@ -47,10 +47,10 @@ export default function ClientPage() {
 
     // Initial state sync
     useEffect(() => {
-        setLocalState(prev => ({
+        setLocalState((prev) => ({
             ...prev,
             cart: state.cart,
-            clientScreen: state.clientScreen
+            clientScreen: state.clientScreen,
         }));
     }, [state.cart, state.clientScreen]);
 
@@ -91,36 +91,146 @@ export default function ClientPage() {
                                 </p>
                             </div>
                             {/* Debug info */}
-                            <div className="debug-info">
+                            {/* <div className="debug-info">
                                 <pre>
                                     {JSON.stringify(localState, null, 2)}
                                 </pre>
-                            </div>
+                            </div> */}
+                            <Modal
+                                show={localState.clientScreen.isShowing}
+                                size="md"
+                                popup
+                                onClose={() => {
+                                    dispatch(
+                                        clientScreenActions.hideClientScreenModal()
+                                    );
+                                }}
+                            >
+                                <Modal.Header>
+                                    <h3 className="text-xl font-medium text-gray-900 dark:text-white">
+                                        รายการสั่งซื้อ
+                                    </h3>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <div className="space-y-4">
+                                        {/* Order Number */}
+                                        <div className="text-sm text-gray-500">
+                                            เลขที่คำสั่งซื้อ:{" "}
+                                            {localState.cart.orderNumber}
+                                        </div>
+
+                                        {/* Items List */}
+                                        <div className="space-y-3">
+                                            {localState.cart.items?.map(
+                                                (item, index) => (
+                                                    <div
+                                                        key={item.id}
+                                                        className="flex items-start space-x-3 p-2 bg-gray-50 rounded-lg"
+                                                    >
+                                                        <img
+                                                            src={item.image}
+                                                            alt={item.name}
+                                                            className="w-16 h-16 object-cover rounded"
+                                                        />
+                                                        <div className="flex-1">
+                                                            <div className="font-medium">
+                                                                {item.name}
+                                                            </div>
+                                                            <div className="text-sm text-gray-500">
+                                                                ขนาด:{" "}
+                                                                {item.size} |
+                                                                ความหวาน:{" "}
+                                                                {item.sweetness}
+                                                            </div>
+                                                            {item.toppings
+                                                                ?.length >
+                                                                0 && (
+                                                                <div className="text-sm text-gray-500">
+                                                                    ท็อปปิ้ง:{" "}
+                                                                    {item.toppings.join(
+                                                                        ", "
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                            <div className="flex justify-between mt-1">
+                                                                <span>
+                                                                    x
+                                                                    {
+                                                                        item.quantity
+                                                                    }
+                                                                </span>
+                                                                <span className="font-medium">
+                                                                    ฿
+                                                                    {item.price *
+                                                                        item.quantity}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+
+                                        {/* Summary */}
+                                        <div className="border-t pt-3 space-y-2">
+                                            <div className="flex justify-between">
+                                                <span>ยอดรวม</span>
+                                                <span>
+                                                    ฿{localState.cart.subtotal}
+                                                </span>
+                                            </div>
+                                            {localState.cart.cartDiscount >
+                                                0 && (
+                                                <div className="flex justify-between text-green-600">
+                                                    <span>ส่วนลด</span>
+                                                    <span>
+                                                        -฿
+                                                        {
+                                                            localState.cart
+                                                                .cartDiscount
+                                                        }
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {localState.cart.pointDiscount >
+                                                0 && (
+                                                <div className="flex justify-between text-green-600">
+                                                    <span>ส่วนลดจากคะแนน</span>
+                                                    <span>
+                                                        -฿
+                                                        {
+                                                            localState.cart
+                                                                .pointDiscount
+                                                        }
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div className="flex justify-between font-medium text-lg pt-2 border-t">
+                                                <span>ยอดสุทธิ</span>
+                                                <span>
+                                                    ฿{localState.cart.total}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <button
+                                        type="button"
+                                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        onClick={() => {
+                                            dispatch(
+                                                clientScreenActions.hideClientScreenModal()
+                                            );
+                                        }}
+                                    >
+                                        ปิด
+                                    </button>
+                                </Modal.Footer>
+                            </Modal>
                         </div>
                     </div>
                 </section>
-                <Modal
-                    show={localState.clientScreen.isShowing}
-                    size="md"
-                    popup
-                    onClose={() => {
-                        console.log("close");
-                    }}
-                >
-                    <Modal.Header />
-                    <Modal.Body>{JSON.stringify(localState.cart, null, 2)}</Modal.Body>
-                    <Modal.Footer>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                console.log("close");
-                            }}
-                            className="text-gray-500 hover:text-gray-700"
-                        >
-                            ปิด
-                        </button>
-                    </Modal.Footer>
-                </Modal>
             </div>
         </StorefrontLayout>
     );

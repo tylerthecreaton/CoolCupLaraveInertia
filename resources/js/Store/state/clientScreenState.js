@@ -2,13 +2,13 @@
 const clientScreenChannel = new BroadcastChannel('client_screen_state');
 
 export const initialClientScreenState = {
-    isShowing: false,
+    isShowing: true,
     selectedClient: null,
 };
 
 export const clientScreenReducer = (state = initialClientScreenState, action) => {
     let newState;
-    
+
     switch (action.type) {
         case 'TOGGLE_CLIENT_SCREEN': {
             newState = {

@@ -297,15 +297,12 @@ const CartComponent = () => {
     };
 
     // Handle quantity updates
-    const handleUpdateQuantity = (itemId, delta) => {
-        const item = items.find((item) => item.id === itemId);
-        if (!item) return;
-
+    const handleUpdateQuantity = (item, delta) => {
         const newQuantity = item.quantity + delta;
         if (newQuantity <= 0) {
-            handleRemoveItem(itemId);
+            handleRemoveItem(item);
         } else {
-            dispatch(cartActions.updateQuantity({ itemId, delta }));
+            dispatch(cartActions.updateQuantity(item, delta));
             const { subtotal, cartDiscount, pointDiscount, totalDiscount, total, totalItems } = calculateTotals();
             setSummary((prev) => ({
                 ...prev,
@@ -321,7 +318,7 @@ const CartComponent = () => {
     };
 
     // Handle item removal
-    const handleRemoveItem = async (itemId) => {
+    const handleRemoveItem = async (item) => {
         const result = await Swal.fire({
             title: "ยืนยันการลบ",
             text: "คุณต้องการลบรายการนี้ใช่หรือไม่?",
@@ -334,10 +331,9 @@ const CartComponent = () => {
         });
 
         if (result.isConfirmed) {
-            dispatch(cartActions.removeFromCart(itemId));
+            dispatch(cartActions.removeFromCart(item));
 
             // Reset promotion if removing a discount item
-            const item = items.find((item) => item.id === itemId);
             if (item?.isManualDiscount) {
                 setSummary((prev) => ({
                     ...prev,
@@ -482,7 +478,7 @@ const CartComponent = () => {
                                                     color="light"
                                                     onClick={() =>
                                                         handleUpdateQuantity(
-                                                            item.id,
+                                                            item,
                                                             -1
                                                         )
                                                     }
@@ -498,7 +494,7 @@ const CartComponent = () => {
                                                     color="light"
                                                     onClick={() =>
                                                         handleUpdateQuantity(
-                                                            item.id,
+                                                            item,
                                                             1
                                                         )
                                                     }
@@ -512,7 +508,7 @@ const CartComponent = () => {
                                             size="xs"
                                             color="failure"
                                             onClick={() =>
-                                                handleRemoveItem(item.id)
+                                                handleRemoveItem(item)
                                             }
                                             className="p-1"
                                         >
