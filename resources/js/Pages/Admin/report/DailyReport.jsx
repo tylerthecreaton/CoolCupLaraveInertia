@@ -1,20 +1,46 @@
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import { Card } from 'flowbite-react';
 import {
-    HiCurrencyDollar,
-    HiShoppingBag,
-    HiChartBar,
-    HiUsers,
-    HiCreditCard,
-    HiClock,
-    HiScale,
-    HiBeaker
-} from 'react-icons/hi';
-import { BarChart, DonutChart, Title, Text, Flex, Legend, BadgeDelta } from '@tremor/react';
+    Card,
+    CardContent,
+    Typography,
+    Grid,
+    Box,
+    Chip,
+    Stack,
+    IconButton,
+    Paper,
+    useTheme
+} from '@mui/material';
+import {
+    BarChart,
+    PieChart
+} from '@mui/x-charts';
+import {
+    CurrencyExchange as CurrencyIcon,
+    ShoppingBag as BagIcon,
+    Assessment as ChartIcon,
+    People as UsersIcon,
+    CreditCard as CardIcon,
+    Schedule as ClockIcon,
+    Scale as ScaleIcon,
+    Science as BeakerIcon,
+    TrendingUp as TrendingUpIcon,
+    CalendarToday as CalendarIcon
+} from '@mui/icons-material';
 
 export default function DailyReport({ stats }) {
+    const theme = useTheme();
+
+    // กำหนดชุดสีสำหรับ charts
+    const chartColors = {
+        sales: ['#2196f3', '#4dabf5', '#1976d2', '#1565c0', '#0d47a1'],
+        drinks: ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5'],
+        payment: ['#4caf50', '#009688', '#00bcd4'],
+        member: ['#ff9800', '#ff5722']
+    };
+
     const sections = [
         {
             title: 'ข้อมูลการขาย',
@@ -23,22 +49,25 @@ export default function DailyReport({ stats }) {
                 {
                     label: 'ยอดขายรวม',
                     value: stats?.totalSales || '0',
-                    icon: HiCurrencyDollar,
+                    icon: CurrencyIcon,
                     format: 'currency',
-                    color: 'blue'
+                    color: 'primary',
+                    bgColor: '#e3f2fd'
                 },
                 {
                     label: 'กำไรรวม',
                     value: stats?.totalProfit || '0',
-                    icon: HiCurrencyDollar,
+                    icon: CurrencyIcon,
                     format: 'currency',
-                    color: 'green'
+                    color: 'success',
+                    bgColor: '#e8f5e9'
                 },
                 {
                     label: 'จำนวนออเดอร์',
                     value: stats?.totalOrders || '0',
-                    icon: HiShoppingBag,
-                    color: 'purple'
+                    icon: BagIcon,
+                    color: 'secondary',
+                    bgColor: '#fce4ec'
                 }
             ]
         }
@@ -56,217 +85,306 @@ export default function DailyReport({ stats }) {
         return value;
     };
 
-    const getBackgroundColor = (color) => {
-        const colors = {
-            blue: 'bg-blue-100 text-blue-600',
-            green: 'bg-green-100 text-green-600',
-            purple: 'bg-purple-100 text-purple-600',
-            yellow: 'bg-yellow-100 text-yellow-600',
-            cyan: 'bg-cyan-100 text-cyan-600',
-            pink: 'bg-pink-100 text-pink-600',
-            indigo: 'bg-indigo-100 text-indigo-600',
-            red: 'bg-red-100 text-red-600'
-        };
-        return colors[color] || colors.blue;
+    // Format data for MUI X Charts
+    const salesByTimeData = {
+        xAxis: [{
+            data: stats?.salesByTimeChart?.labels || [],
+            scaleType: 'band',
+        }],
+        series: [
+            {
+                data: stats?.salesByTimeChart?.data || [],
+                type: 'bar',
+                label: 'ยอดขาย',
+                color: chartColors.sales[0]
+            },
+            {
+                data: stats?.salesByTimeChart?.data?.map(value => value * 1.2) || [],
+                type: 'bar',
+                label: 'เป้าหมาย',
+                color: chartColors.sales[2]
+            }
+        ]
     };
 
-    // Format data for Tremor charts
-    const salesByTimeData = stats?.salesByTimeChart?.labels?.map((label, index) => ({
-        name: label,
-        'ยอดขาย': stats.salesByTimeChart.data[index],
-        'เป้าหมาย': stats.salesByTimeChart.data[index] * 1.2
+    const topDrinksData = stats?.topDrinksChart?.data?.map((value, index) => ({
+        value,
+        label: stats.topDrinksChart.labels[index],
+        color: chartColors.drinks[index]
     })) || [];
 
-    const topDrinksData = stats?.topDrinksChart?.labels?.map((label, index) => ({
-        name: label,
-        value: stats.topDrinksChart.data[index]
-    })) || [];
-
-    const paymentMethodsData = stats?.paymentMethodsChart?.labels?.map((label, index) => ({
-        name: label,
-        value: stats.paymentMethodsChart.data[index]
+    const paymentMethodsData = stats?.paymentMethodsChart?.data?.map((value, index) => ({
+        value,
+        label: stats.paymentMethodsChart.labels[index],
+        color: chartColors.payment[index]
     })) || [];
 
     const memberData = [
-        { name: 'สมาชิก', value: stats?.memberPercentage || 0 },
-        { name: 'ไม่เป็นสมาชิก', value: 100 - (stats?.memberPercentage || 0) }
+        { value: stats?.memberPercentage || 0, label: 'สมาชิก', color: chartColors.member[0] },
+        { value: 100 - (stats?.memberPercentage || 0), label: 'ไม่เป็นสมาชิก', color: chartColors.member[1] }
     ];
-
-    const chartColors = {
-        salesByTime: ['#000000', '#666666'],  // ดำและเทา
-        topDrinks: ['#000000', '#333333', '#666666', '#999999', '#CCCCCC'],  // โทนสีเทา-ดำ
-        paymentMethods: ['#000000', '#333333', '#666666'],  // โทนสีเทา-ดำ
-        memberStats: ['#000000', '#666666']  // ดำและเทา
-    };
 
     return (
         <AuthenticatedLayout
             header={
-                <div className="space-y-2">
-                    <h2 className="text-2xl font-bold text-gray-800">
-                        รายงานประจำวัน
-                    </h2>
-                    <p className="text-sm text-gray-600">
-                        ข้อมูล ณ วันที่ {new Date().toLocaleDateString('th-TH', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        })}
-                    </p>
-                </div>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Stack spacing={1}>
+                        <Typography variant="h5" component="h2" fontWeight="bold" color="primary">
+                            รายงานประจำวัน
+                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                            <CalendarIcon fontSize="small" color="action" />
+                            <Typography variant="body2" color="text.secondary">
+                                ข้อมูล ณ วันที่ {new Date().toLocaleDateString('th-TH', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                })}
+                            </Typography>
+                        </Stack>
+                    </Stack>
+                    <Chip
+                        icon={<TrendingUpIcon />}
+                        label="+15.3% จากเมื่อวาน"
+                        color="success"
+                        sx={{
+                            background: '#e8f5e9',
+                            '& .MuiChip-icon': { color: '#2e7d32' }
+                        }}
+                    />
+                </Box>
             }
         >
             <Head title="รายงานประจำวัน" />
 
-            <div className="py-6">
-                <div className="px-4 mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
-                    {/* Summary Cards */}
-                    {sections.map((section, index) => (
-                        <div key={index} className="overflow-hidden bg-white rounded-lg shadow">
-                            <div className="px-4 py-5 bg-white border-b border-gray-200 sm:px-6">
-                                <h3 className="text-lg font-medium leading-6 text-gray-900">
-                                    {section.title}
-                                </h3>
-                                <p className="mt-1 max-w-2xl text-sm text-gray-500">
-                                    {section.description}
-                                </p>
-                            </div>
-                            <div className="p-4 sm:p-6">
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                    {section.items.map((item, itemIndex) => (
-                                        <Card key={itemIndex}>
-                                            <div className="flex items-center space-x-4">
-                                                <div className={`rounded-lg p-3 ${getBackgroundColor(item.color)}`}>
-                                                    <item.icon className="w-6 h-6" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-500">
-                                                        {item.label}
-                                                    </p>
-                                                    <p className="mt-1 text-xl font-semibold text-gray-900">
-                                                        {formatValue(item.value, item.format)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </Card>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+            <Box sx={{ py: 3, bgcolor: '#f5f5f5' }}>
+                <Box sx={{ px: { xs: 2, sm: 3, lg: 4 }, maxWidth: 'lg', mx: 'auto' }}>
+                    <Stack spacing={3}>
+                        {/* Summary Cards */}
+                        {sections.map((section, index) => (
+                            <Paper key={index} elevation={0} sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: theme.shadows[2] }}>
+                                <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+                                    <Typography variant="h6" component="h3" color="primary">
+                                        {section.title}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        {section.description}
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ p: 2, bgcolor: 'background.paper' }}>
+                                    <Grid container spacing={2}>
+                                        {section.items.map((item, itemIndex) => (
+                                            <Grid item xs={12} md={4} key={itemIndex}>
+                                                <Card 
+                                                    elevation={0}
+                                                    sx={{
+                                                        borderRadius: 2,
+                                                        background: 'white',
+                                                        transition: 'transform 0.2s',
+                                                        '&:hover': {
+                                                            transform: 'translateY(-4px)',
+                                                            boxShadow: theme.shadows[4]
+                                                        }
+                                                    }}
+                                                >
+                                                    <CardContent>
+                                                        <Stack direction="row" spacing={2} alignItems="center">
+                                                            <Box
+                                                                sx={{
+                                                                    p: 1.5,
+                                                                    borderRadius: 2,
+                                                                    bgcolor: item.bgColor,
+                                                                    color: theme.palette[item.color].main
+                                                                }}
+                                                            >
+                                                                <item.icon />
+                                                            </Box>
+                                                            <Box>
+                                                                <Typography color="text.secondary" variant="body2" gutterBottom>
+                                                                    {item.label}
+                                                                </Typography>
+                                                                <Typography variant="h6" component="div" color={item.color}>
+                                                                    {formatValue(item.value, item.format)}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Stack>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                </Box>
+                            </Paper>
+                        ))}
 
-                    {/* Charts Section */}
-                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        {/* Sales by Time Chart */}
-                        <div className="overflow-hidden bg-white rounded-lg shadow">
-                            <div className="px-4 py-5 bg-white border-b border-gray-200 sm:px-6">
-                                <div>
-                                    <Title>ยอดขายตามช่วงเวลา</Title>
-                                    <Text>เปรียบเทียบยอดขายกับเป้าหมาย</Text>
-                                </div>
-                            </div>
-                            <div className="p-4 sm:p-6">
-                                <BarChart
-                                    data={salesByTimeData}
-                                    index="name"
-                                    categories={['ยอดขาย', 'เป้าหมาย']}
-                                    colors={chartColors.salesByTime}
-                                    valueFormatter={(value) => 
-                                        new Intl.NumberFormat('th-TH', {
-                                            style: 'currency',
-                                            currency: 'THB',
-                                            minimumFractionDigits: 0,
-                                            maximumFractionDigits: 0
-                                        }).format(value)
-                                    }
-                                    yAxisWidth={100}
-                                    showAnimation={true}
-                                    className="h-72"
-                                />
-                            </div>
-                        </div>
+                        {/* Charts Section */}
+                        <Grid container spacing={3}>
+                            {/* Sales by Time Chart */}
+                            <Grid item xs={12} lg={6}>
+                                <Paper elevation={0} sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: theme.shadows[2] }}>
+                                    <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+                                        <Typography variant="h6" gutterBottom color="primary">
+                                            ยอดขายตามช่วงเวลา
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            เปรียบเทียบยอดขายกับเป้าหมาย
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ p: 3, height: 400, bgcolor: 'background.paper' }}>
+                                        <BarChart
+                                            xAxis={salesByTimeData.xAxis}
+                                            series={salesByTimeData.series}
+                                            height={350}
+                                            sx={{
+                                                '.MuiChartsAxis-line': { stroke: theme.palette.divider },
+                                                '.MuiChartsAxis-tick': { stroke: theme.palette.divider }
+                                            }}
+                                        />
+                                    </Box>
+                                </Paper>
+                            </Grid>
 
-                        {/* Top Drinks Chart */}
-                        <div className="overflow-hidden bg-white rounded-lg shadow">
-                            <div className="px-4 py-5 bg-white border-b border-gray-200 sm:px-6">
-                                <Flex>
-                                    <div>
-                                        <Title>เครื่องดื่มยอดนิยม</Title>
-                                        <Text>5 อันดับเครื่องดื่มที่ขายดีที่สุด</Text>
-                                    </div>
-                                    <BadgeDelta deltaType="increase" size="xs">
-                                        +10.3%
-                                    </BadgeDelta>
-                                </Flex>
-                            </div>
-                            <div className="p-4 sm:p-6">
-                                <DonutChart
-                                    data={topDrinksData}
-                                    category="value"
-                                    index="name"
-                                    colors={chartColors.topDrinks}
-                                    valueFormatter={(value) => `${value} แก้ว`}
-                                    showAnimation={true}
-                                    className="h-72"
-                                />
-                            </div>
-                        </div>
+                            {/* Top Drinks Chart */}
+                            <Grid item xs={12} lg={6}>
+                                <Paper elevation={0} sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: theme.shadows[2] }}>
+                                    <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <Box>
+                                                <Typography variant="h6" gutterBottom color="primary">
+                                                    เครื่องดื่มยอดนิยม
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    5 อันดับเครื่องดื่มที่ขายดีที่สุด
+                                                </Typography>
+                                            </Box>
+                                            <Chip
+                                                size="small"
+                                                label="+10.3%"
+                                                color="success"
+                                                sx={{
+                                                    background: '#e8f5e9',
+                                                    '& .MuiChip-label': { color: '#2e7d32' }
+                                                }}
+                                            />
+                                        </Box>
+                                    </Box>
+                                    <Box sx={{ p: 3, height: 400, bgcolor: 'background.paper' }}>
+                                        <PieChart
+                                            series={[{
+                                                data: topDrinksData,
+                                                highlightScope: { faded: 'global', highlighted: 'item' },
+                                                faded: { innerRadius: 30, additionalRadius: -30 },
+                                                innerRadius: 60,
+                                                paddingAngle: 2,
+                                                cornerRadius: 4
+                                            }]}
+                                            height={350}
+                                            slotProps={{
+                                                legend: {
+                                                    direction: 'row',
+                                                    position: { vertical: 'bottom', horizontal: 'middle' },
+                                                    padding: 0
+                                                }
+                                            }}
+                                        />
+                                    </Box>
+                                </Paper>
+                            </Grid>
 
-                        {/* Payment Methods Chart */}
-                        <div className="overflow-hidden bg-white rounded-lg shadow">
-                            <div className="px-4 py-5 bg-white border-b border-gray-200 sm:px-6">
-                                <div>
-                                    <Title>วิธีการชำระเงิน</Title>
-                                    <Text>สัดส่วนการชำระเงินแต่ละประเภท</Text>
-                                </div>
-                            </div>
-                            <div className="p-4 sm:p-6">
-                                <DonutChart
-                                    data={paymentMethodsData}
-                                    category="value"
-                                    index="name"
-                                    colors={chartColors.paymentMethods}
-                                    valueFormatter={(value) => `${value} ครั้ง`}
-                                    showAnimation={true}
-                                    className="h-72"
-                                />
-                                <div className="mt-2 text-center">
-                                    <Text>{paymentMethodsData[0]?.value || 0} ครั้ง</Text>
-                                </div>
-                            </div>
-                        </div>
+                            {/* Payment Methods Chart */}
+                            <Grid item xs={12} lg={6}>
+                                <Paper elevation={0} sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: theme.shadows[2] }}>
+                                    <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+                                        <Typography variant="h6" gutterBottom color="primary">
+                                            วิธีการชำระเงิน
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            สัดส่วนการชำระเงินแต่ละประเภท
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ p: 3, height: 400, bgcolor: 'background.paper' }}>
+                                        <PieChart
+                                            series={[{
+                                                data: paymentMethodsData,
+                                                highlightScope: { faded: 'global', highlighted: 'item' },
+                                                faded: { innerRadius: 30, additionalRadius: -30 },
+                                                innerRadius: 60,
+                                                paddingAngle: 2,
+                                                cornerRadius: 4
+                                            }]}
+                                            height={350}
+                                            slotProps={{
+                                                legend: {
+                                                    direction: 'row',
+                                                    position: { vertical: 'bottom', horizontal: 'middle' },
+                                                    padding: 0
+                                                }
+                                            }}
+                                        />
+                                        <Box sx={{ mt: 2, textAlign: 'center' }}>
+                                            <Typography variant="h6" color="primary">
+                                                {paymentMethodsData[0]?.value || 0} ครั้ง
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Paper>
+                            </Grid>
 
-                        {/* Member Stats */}
-                        <div className="overflow-hidden bg-white rounded-lg shadow">
-                            <div className="px-4 py-5 bg-white border-b border-gray-200 sm:px-6">
-                                <Flex>
-                                    <div>
-                                        <Title>สัดส่วนลูกค้า</Title>
-                                        <Text>เปรียบเทียบสัดส่วนลูกค้าสมาชิกและไม่เป็นสมาชิก</Text>
-                                    </div>
-                                    <BadgeDelta deltaType="increase" size="xs">
-                                        +5.2%
-                                    </BadgeDelta>
-                                </Flex>
-                            </div>
-                            <div className="p-4 sm:p-6">
-                                <DonutChart
-                                    data={memberData}
-                                    category="value"
-                                    index="name"
-                                    colors={chartColors.memberStats}
-                                    valueFormatter={(value) => `${value}%`}
-                                    showAnimation={true}
-                                    className="h-72"
-                                />
-                                <div className="mt-2 text-center">
-                                    <Text>100%</Text>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                            {/* Member Stats */}
+                            <Grid item xs={12} lg={6}>
+                                <Paper elevation={0} sx={{ borderRadius: 2, overflow: 'hidden', boxShadow: theme.shadows[2] }}>
+                                    <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <Box>
+                                                <Typography variant="h6" gutterBottom color="primary">
+                                                    สัดส่วนลูกค้า
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    เปรียบเทียบสัดส่วนลูกค้าสมาชิกและไม่เป็นสมาชิก
+                                                </Typography>
+                                            </Box>
+                                            <Chip
+                                                size="small"
+                                                label="+5.2%"
+                                                color="success"
+                                                sx={{
+                                                    background: '#e8f5e9',
+                                                    '& .MuiChip-label': { color: '#2e7d32' }
+                                                }}
+                                            />
+                                        </Box>
+                                    </Box>
+                                    <Box sx={{ p: 3, height: 400, bgcolor: 'background.paper' }}>
+                                        <PieChart
+                                            series={[{
+                                                data: memberData,
+                                                highlightScope: { faded: 'global', highlighted: 'item' },
+                                                faded: { innerRadius: 30, additionalRadius: -30 },
+                                                innerRadius: 60,
+                                                paddingAngle: 2,
+                                                cornerRadius: 4
+                                            }]}
+                                            height={350}
+                                            slotProps={{
+                                                legend: {
+                                                    direction: 'row',
+                                                    position: { vertical: 'bottom', horizontal: 'middle' },
+                                                    padding: 0
+                                                }
+                                            }}
+                                        />
+                                        <Box sx={{ mt: 2, textAlign: 'center' }}>
+                                            <Typography variant="h6" color="primary">
+                                                100%
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Paper>
+                            </Grid>
+                        </Grid>
+                    </Stack>
+                </Box>
+            </Box>
         </AuthenticatedLayout>
     );
 }
