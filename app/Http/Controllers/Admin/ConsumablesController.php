@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,12 +13,12 @@ class ConsumablesController extends Controller
     public function index()
     {
         $consumables = Consumable::all();
-        return Inertia::render('Consumables/Index', compact('consumables'));
+        return Inertia::render('admin/consumables/index', compact('consumables'));
     }
 
     public function create()
     {
-        return Inertia::render('Consumables/Create');
+        return Inertia::render('admin/consumables/create');
     }
 
     public function store(Request $request)
@@ -59,5 +59,5 @@ class ConsumablesController extends Controller
         $consumable->delete();
         return redirect()->route('consumables.index');
     }
-    
+
 }
