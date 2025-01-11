@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\PromotionController as AdminPromotionController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\UnitController as AdminUnitController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
@@ -69,6 +70,7 @@ Route::middleware('auth')->group(function () {
 
 // ---------------------------Sale Dashboard---------------------------
 Route::get('/sale-dashboard', [SaleDashboardController::class, 'index'])->name('sale.dashboard');
+
     // ---------------------------Promotions---------------------------
     Route::get('/promotions', [PromotionController::class, 'index'])->name('promotion.index');
 
@@ -168,6 +170,9 @@ Route::get('/sale-dashboard', [SaleDashboardController::class, 'index'])->name('
         Route::get('/promotions/{id}/edit', [AdminPromotionController::class, 'edit'])->name('admin.promotions.edit');
         Route::put('/promotions/{id}', [AdminPromotionController::class, 'update'])->name('admin.promotions.update');
         Route::delete('/promotions/{id}', [AdminPromotionController::class, 'destroy'])->name('admin.promotions.destroy');
+
+        // ---------------------------Daily Reports---------------------------
+        Route::get('/report', [AdminReportController::class, 'index'])->name('admin.report.index');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -409,7 +409,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                 </div>
                                 {member && (
                                     <>
-                                        <div className="space-y-2 p-4 bg-gray-50 rounded-lg mb-4">
+                                        <div className="p-4 mb-4 space-y-2 bg-gray-50 rounded-lg">
                                             <div className="flex justify-between">
                                                 <span>ยอดรวม:</span>
                                                 <span>
@@ -445,7 +445,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                 </div>
                                             )}
                                             {totalDiscount > 0 && (
-                                                <div className="flex justify-between text-green-600 font-medium border-t pt-2">
+                                                <div className="flex justify-between pt-2 font-medium text-green-600 border-t">
                                                     <span>ส่วนลดทั้งหมด:</span>
                                                     <span>
                                                         -฿
@@ -455,7 +455,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     </span>
                                                 </div>
                                             )}
-                                            <div className="flex justify-between font-semibold border-t pt-2">
+                                            <div className="flex justify-between pt-2 font-semibold border-t">
                                                 <span>ยอดสุทธิ:</span>
                                                 <span>฿{total.toFixed(2)}</span>
                                             </div>
@@ -506,7 +506,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                             !usePoints
                                                         );
                                                     }}
-                                                    className="w-full mb-2"
+                                                    className="mb-2 w-full"
                                                 >
                                                     ใช้แต้มทั้งหมด{" "}
                                                     {Math.ceil(
@@ -525,7 +525,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                 onClick={() =>
                                                     handleUsePoints(100)
                                                 }
-                                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                                className="col-span-1 bg-blue-600 hover:bg-blue-700"
                                                 disabled={
                                                     !member ||
                                                     member.loyalty_points < 100
@@ -545,7 +545,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                 onClick={() =>
                                                     handleUsePoints(200)
                                                 }
-                                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                                className="col-span-1 bg-blue-600 hover:bg-blue-700"
                                                 disabled={
                                                     !member ||
                                                     member.loyalty_points < 200
@@ -565,7 +565,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                 onClick={() =>
                                                     handleUsePoints(300)
                                                 }
-                                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                                className="col-span-1 bg-blue-600 hover:bg-blue-700"
                                                 disabled={
                                                     !member ||
                                                     member.loyalty_points < 300
@@ -585,7 +585,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                 onClick={() =>
                                                     handleUsePoints(400)
                                                 }
-                                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                                className="col-span-1 bg-blue-600 hover:bg-blue-700"
                                                 disabled={
                                                     !member ||
                                                     member.loyalty_points < 400
@@ -605,7 +605,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                 onClick={() =>
                                                     handleUsePoints(500)
                                                 }
-                                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                                className="col-span-1 bg-blue-600 hover:bg-blue-700"
                                                 disabled={
                                                     !member ||
                                                     member.loyalty_points < 500
@@ -625,7 +625,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                 onClick={() =>
                                                     handleUsePoints(1000)
                                                 }
-                                                className="bg-blue-600 hover:bg-blue-700 col-span-1"
+                                                className="col-span-1 bg-blue-600 hover:bg-blue-700"
                                                 disabled={
                                                     !member ||
                                                     member.loyalty_points < 1000
@@ -642,50 +642,6 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                 ).toFixed(2)}
                                             </Button>
                                         </div>
-                                        {/* <div className="mt-2 text-sm text-gray-600">
-                                            คะแนนสะสมคงเหลือ:{" "}
-                                            {member.loyalty_points} คะแนน
-                                        </div> */}
-                                        {/* <div className="flex items-center justify-between">
-                                            <Button
-                                                size="sm"
-                                                color={
-                                                    usePoints
-                                                        ? "success"
-                                                        : "light"
-                                                }
-                                                onClick={() => {
-                                                    if (!usePoints) {
-                                                        const pointValue =
-                                                            member.loyalty_points /
-                                                            (pointPerThb
-                                                                ? parseFloat(
-                                                                      pointPerThb.value
-                                                                  )
-                                                                : 10);
-                                                        dispatch(cartActions.applyPointDiscount({
-                                                            amount: member.loyalty_points,
-                                                            point: pointValue
-                                                        }));
-                                                    } else {
-                                                        dispatch(cartActions.applyPointDiscount({ amount: 0, point: 0 }));
-                                                    }
-                                                    setUsePoints(!usePoints);
-                                                }}
-                                            >
-                                                ใช้คะแนนสะสม{" "}
-                                                {member.loyalty_points} คะแนน =
-                                                ฿
-                                                {(
-                                                    member.loyalty_points /
-                                                    (pointPerThb
-                                                        ? parseFloat(
-                                                              pointPerThb.value
-                                                          )
-                                                        : 10)
-                                                ).toFixed(2)}
-                                            </Button>
-                                        </div> */}
                                     </>
                                 )}
                             </>
@@ -693,7 +649,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
 
                         <Button
                             onClick={() => setIsSummary(!isSummary)}
-                            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md"
+                            className="px-4 py-2 w-full font-semibold text-white bg-green-600 rounded-md hover:bg-green-700"
                         >
                             {isSummary ? "ย้อนกลับ" : "ดูรายละเอียด"}
                         </Button>
@@ -744,7 +700,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                         })}
                                         size={256}
                                     />
-                                    <div className="text-center space-y-2">
+                                    <div className="space-y-2 text-center">
                                         <p className="text-sm text-gray-600">
                                             สแกน QR Code เพื่อชำระเงิน
                                         </p>
@@ -820,15 +776,19 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                 </Modal.Body>
                 <Modal.Footer className="bg-gray-50 border-t">
                     <div className="flex justify-center space-x-3 w-full">
-                        <Button onClick={onClose} color="gray">
-                            ยกเลิก
-                        </Button>
-                        <Button
-                            onClick={handleConfirm}
-                            className="bg-blue-600 hover:bg-blue-700"
-                        >
-                            ยืนยันการชำระเงิน
-                        </Button>
+                        {data.cashReceived > 0 && (
+                            <>
+                                <Button onClick={onClose} color="gray">
+                                    ยกเลิก
+                                </Button>
+                                <Button
+                                    onClick={handleConfirm}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                    ยืนยันการชำระเงิน
+                                </Button>
+                            </>
+                        )}
                     </div>
                 </Modal.Footer>
             </Modal>

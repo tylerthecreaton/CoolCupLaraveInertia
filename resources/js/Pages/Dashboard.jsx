@@ -1,8 +1,19 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
-import { Card, Badge, Button } from 'flowbite-react';
-import { HiUsers, HiShoppingBag, HiCurrencyDollar, HiClipboardList, HiTrendingUp, HiChartPie, HiArrowSmUp, HiClock, HiEye } from 'react-icons/hi';
-import { usePage } from '@inertiajs/react';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { Head } from "@inertiajs/react";
+import { Card, Badge, Button } from "flowbite-react";
+import {
+    HiUsers,
+    HiShoppingBag,
+    HiCurrencyDollar,
+    HiClipboardList,
+    HiTrendingUp,
+    HiChartPie,
+    HiArrowSmUp,
+    HiClock,
+    HiEye,
+} from "react-icons/hi";
+import { usePage } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
 
 export default function Dashboard({ stats }) {
     const { user } = usePage().props.auth;
@@ -18,10 +29,12 @@ export default function Dashboard({ stats }) {
                             ยินดีต้อนรับสู่ระบบจัดการร้าน CoolCupPOS
                         </p>
                     </div>
-                    <Button gradientDuoTone="purpleToBlue" className="hidden gap-2 items-center sm:flex">
-                        <HiChartPie className="w-4 h-4" />
-                        รายงานประจำวัน
-                    </Button>
+                    <Link href={route("admin.report.index")}>
+                        <Button gradientDuoTone="purpleToBlue">
+                            <HiChartPie className="w-4 h-4" />
+                            รายงานประจำวัน
+                        </Button>
+                    </Link>
                 </div>
             }
         >
@@ -44,9 +57,13 @@ export default function Dashboard({ stats }) {
                                         </p>
                                         <div className="flex gap-2 items-center">
                                             <p className="text-2xl font-bold text-gray-700">
-                                                {stats?.customers?.toLocaleString() || 0}
+                                                {stats?.customers?.toLocaleString() ||
+                                                    0}
                                             </p>
-                                            <Badge color="success" className="flex gap-1 items-center">
+                                            <Badge
+                                                color="success"
+                                                className="flex gap-1 items-center"
+                                            >
                                                 <HiArrowSmUp className="w-3 h-3" />
                                                 12%
                                             </Badge>
@@ -72,9 +89,13 @@ export default function Dashboard({ stats }) {
                                         </p>
                                         <div className="flex gap-2 items-center">
                                             <p className="text-2xl font-bold text-gray-700">
-                                                {stats?.products?.toLocaleString() || 0}
+                                                {stats?.products?.toLocaleString() ||
+                                                    0}
                                             </p>
-                                            <Badge color="success" className="flex gap-1 items-center">
+                                            <Badge
+                                                color="success"
+                                                className="flex gap-1 items-center"
+                                            >
                                                 <HiArrowSmUp className="w-3 h-3" />
                                                 8%
                                             </Badge>
@@ -100,9 +121,13 @@ export default function Dashboard({ stats }) {
                                         </p>
                                         <div className="flex gap-2 items-center">
                                             <p className="text-2xl font-bold text-gray-700">
-                                                {stats?.orders?.toLocaleString() || 0}
+                                                {stats?.orders?.toLocaleString() ||
+                                                    0}
                                             </p>
-                                            <Badge color="success" className="flex gap-1 items-center">
+                                            <Badge
+                                                color="success"
+                                                className="flex gap-1 items-center"
+                                            >
                                                 <HiArrowSmUp className="w-3 h-3" />
                                                 15%
                                             </Badge>
@@ -128,9 +153,14 @@ export default function Dashboard({ stats }) {
                                         </p>
                                         <div className="flex gap-2 items-center">
                                             <p className="text-2xl font-bold text-gray-700">
-                                                ฿{stats?.revenue?.toLocaleString() || '0'}
+                                                ฿
+                                                {stats?.revenue?.toLocaleString() ||
+                                                    "0"}
                                             </p>
-                                            <Badge color="success" className="flex gap-1 items-center">
+                                            <Badge
+                                                color="success"
+                                                className="flex gap-1 items-center"
+                                            >
                                                 <HiArrowSmUp className="w-3 h-3" />
                                                 20%
                                             </Badge>
@@ -157,7 +187,11 @@ export default function Dashboard({ stats }) {
                                         รายการสั่งซื้อล่าสุด 5 รายการ
                                     </p>
                                 </div>
-                                <Button color="gray" size="sm" className="flex gap-2 items-center">
+                                <Button
+                                    color="gray"
+                                    size="sm"
+                                    className="flex gap-2 items-center"
+                                >
                                     <HiEye className="w-4 h-4" />
                                     ดูทั้งหมด
                                 </Button>
@@ -165,7 +199,10 @@ export default function Dashboard({ stats }) {
                             <div className="flow-root">
                                 <ul className="divide-y divide-gray-200">
                                     {stats?.recentOrders?.map((order) => (
-                                        <li key={order.id} className="py-4 transition-colors hover:bg-gray-50">
+                                        <li
+                                            key={order.id}
+                                            className="py-4 transition-colors hover:bg-gray-50"
+                                        >
                                             <div className="flex items-center space-x-4">
                                                 <div className="flex-shrink-0">
                                                     <div className="flex justify-center items-center w-10 h-10 bg-blue-100 rounded-full">
@@ -179,19 +216,30 @@ export default function Dashboard({ stats }) {
                                                     <div className="flex gap-2 items-center mt-1">
                                                         <HiClock className="w-4 h-4 text-gray-400" />
                                                         <p className="text-sm text-gray-500">
-                                                            {new Date(order.created_at).toLocaleDateString('th-TH', {
-                                                                year: 'numeric',
-                                                                month: 'long',
-                                                                day: 'numeric',
-                                                                hour: '2-digit',
-                                                                minute: '2-digit'
-                                                            })}
+                                                            {new Date(
+                                                                order.created_at
+                                                            ).toLocaleDateString(
+                                                                "th-TH",
+                                                                {
+                                                                    year: "numeric",
+                                                                    month: "long",
+                                                                    day: "numeric",
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                }
+                                                            )}
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <div className="inline-flex items-center text-base font-bold text-gray-900">
                                                     <span className="text-sm font-semibold text-green-600">
-                                                        {order.status === 'pending' ? 'รอการจัดส่ง' : order.status === 'shipping' ? 'กำลังส่ง' : 'เสร็จสิ้น'}
+                                                        {order.status ===
+                                                        "pending"
+                                                            ? "รอการจัดส่ง"
+                                                            : order.status ===
+                                                              "shipping"
+                                                            ? "กำลังส่ง"
+                                                            : "เสร็จสิ้น"}
                                                     </span>
                                                     <span className="hidden sm:inline-block sm:mx-2 sm:px-2 sm:py-1 sm:rounded-full sm:bg-gray-200">
                                                         {order.payment_method}
@@ -200,10 +248,13 @@ export default function Dashboard({ stats }) {
                                             </div>
                                         </li>
                                     ))}
-                                    {(!stats?.recentOrders || stats.recentOrders.length === 0) && (
+                                    {(!stats?.recentOrders ||
+                                        stats.recentOrders.length === 0) && (
                                         <li className="py-8 text-center">
                                             <HiClipboardList className="mx-auto w-12 h-12 text-gray-400" />
-                                            <p className="mt-2 text-gray-500">ไม่มีข้อมูลออเดอร์</p>
+                                            <p className="mt-2 text-gray-500">
+                                                ไม่มีข้อมูลออเดอร์
+                                            </p>
                                         </li>
                                     )}
                                 </ul>
@@ -221,57 +272,90 @@ export default function Dashboard({ stats }) {
                                         สินค้าที่มียอดขายสูงสุด 5 อันดับ
                                     </p>
                                 </div>
-                                <Button color="gray" size="sm" className="flex gap-2 items-center">
+                                <Button
+                                    color="gray"
+                                    size="sm"
+                                    className="flex gap-2 items-center"
+                                >
                                     <HiTrendingUp className="w-4 h-4" />
                                     ดูเพิ่มเติม
                                 </Button>
                             </div>
                             <div className="flow-root">
                                 <ul className="divide-y divide-gray-200">
-                                    {stats?.popularProducts?.map((product, index) => (
-                                        <li key={product.id} className="py-4 transition-colors hover:bg-gray-50">
-                                            <div className="flex items-center space-x-4">
-                                                <div className="flex-shrink-0">
-                                                    {product.image_url ? (
-                                                        <img
-                                                            className="object-cover w-16 h-16 rounded-xl ring-2 ring-gray-200"
-                                                            src={product.image_url}
-                                                            alt={product.name}
-                                                        />
-                                                    ) : (
-                                                        <div className="flex justify-center items-center w-16 h-16 bg-gray-100 rounded-xl ring-2 ring-gray-200">
-                                                            <HiShoppingBag className="w-8 h-8 text-gray-400" />
+                                    {stats?.popularProducts?.map(
+                                        (product, index) => (
+                                            <li
+                                                key={product.id}
+                                                className="py-4 transition-colors hover:bg-gray-50"
+                                            >
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="flex-shrink-0">
+                                                        {product.image_url ? (
+                                                            <img
+                                                                className="object-cover w-16 h-16 rounded-xl ring-2 ring-gray-200"
+                                                                src={
+                                                                    product.image_url
+                                                                }
+                                                                alt={
+                                                                    product.name
+                                                                }
+                                                            />
+                                                        ) : (
+                                                            <div className="flex justify-center items-center w-16 h-16 bg-gray-100 rounded-xl ring-2 ring-gray-200">
+                                                                <HiShoppingBag className="w-8 h-8 text-gray-400" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex gap-2 items-center">
+                                                            <p className="text-sm font-semibold text-gray-900">
+                                                                {product.name}
+                                                            </p>
+                                                            <Badge
+                                                                color="gray"
+                                                                size="sm"
+                                                            >
+                                                                #{index + 1}
+                                                            </Badge>
                                                         </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex gap-2 items-center">
-                                                        <p className="text-sm font-semibold text-gray-900">
-                                                            {product.name}
-                                                        </p>
-                                                        <Badge color="gray" size="sm">
-                                                            #{index + 1}
-                                                        </Badge>
+                                                        <div className="flex gap-2 items-center mt-1">
+                                                            <Badge
+                                                                color="info"
+                                                                className="font-medium"
+                                                            >
+                                                                {
+                                                                    product.category
+                                                                }
+                                                            </Badge>
+                                                            <p className="text-sm text-gray-600">
+                                                                {
+                                                                    product.total_sales
+                                                                }{" "}
+                                                                ขาย
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex gap-2 items-center mt-1">
-                                                        <Badge color="info" className="font-medium">
-                                                            {product.category}
-                                                        </Badge>
-                                                        <p className="text-sm text-gray-600">
-                                                            {product.total_sales} ขาย
-                                                        </p>
+                                                    <div className="inline-flex items-center text-lg font-bold text-gray-900">
+                                                        <HiTrendingUp
+                                                            className={`w-5 h-5 ${
+                                                                index < 3
+                                                                    ? "text-green-500"
+                                                                    : "text-gray-400"
+                                                            }`}
+                                                        />
                                                     </div>
                                                 </div>
-                                                <div className="inline-flex items-center text-lg font-bold text-gray-900">
-                                                    <HiTrendingUp className={`w-5 h-5 ${index < 3 ? 'text-green-500' : 'text-gray-400'}`} />
-                                                </div>
-                                            </div>
-                                        </li>
-                                    ))}
-                                    {(!stats?.popularProducts || stats.popularProducts.length === 0) && (
+                                            </li>
+                                        )
+                                    )}
+                                    {(!stats?.popularProducts ||
+                                        stats.popularProducts.length === 0) && (
                                         <li className="py-8 text-center">
                                             <HiShoppingBag className="mx-auto w-12 h-12 text-gray-400" />
-                                            <p className="mt-2 text-gray-500">ไม่มีข้อมูลสินค้า</p>
+                                            <p className="mt-2 text-gray-500">
+                                                ไม่มีข้อมูลสินค้า
+                                            </p>
                                         </li>
                                     )}
                                 </ul>
