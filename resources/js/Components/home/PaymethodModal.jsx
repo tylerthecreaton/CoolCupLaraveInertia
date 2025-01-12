@@ -1,5 +1,4 @@
 import { useForm } from "@inertiajs/react";
-import { useEffect } from "react";
 import {
     Button,
     FileInput,
@@ -9,7 +8,7 @@ import {
     Spinner,
     TextInput,
 } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
     BadgeDollarSign,
@@ -22,13 +21,11 @@ import {
 import Swal from "sweetalert2";
 
 import { useGlobalState } from "@/Store/state";
+import { clientScreenActions } from "@/Store/state/clientScreenState";
 import generatePayload from "promptpay-qr";
 import ReactQrCode from "react-qr-code";
 import LoadingIndicator from "../LoadingIndicator";
 import ReceiptModal from "./ReceiptModal";
-import { appActions } from "@/Store/state/appState";
-import { cartActions } from "@/Store/state/cartState";
-import { clientScreenActions } from "@/Store/state/clientScreenState";
 
 const PaymethodModal = ({ show, onClose, cartActions }) => {
     const { state, dispatch } = useGlobalState();
@@ -283,6 +280,21 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                 setReceipt(response.data);
                 setShowReceipt(true);
 
+                dispatch(
+                    clientScreenActions.showPaymentInfo({
+                        ...response.data,
+                        showAsModal: true,
+                        status: "confirmed",
+                        received:
+                            data.selectedMethod === "cash"
+                                ? data.cashReceived
+                                : finalTotal,
+                        change:
+                            data.selectedMethod === "cash"
+                                ? calculateChange(data.cashReceived)
+                                : 0,
+                    })
+                );
                 // Show success message
                 Swal.fire({
                     title: "สำเร็จ!",
@@ -295,22 +307,6 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                 // Clear cart and close modal
                 dispatch(cartActions.clearCart());
                 onClose();
-
-                // Update client screen to show thank you message
-                dispatch(
-                    clientScreenActions.showPaymentInfo({
-                        ...response.data,
-                        showAsModal: true,
-                        received:
-                            data.selectedMethod === "cash"
-                                ? data.cashReceived
-                                : finalTotal,
-                        change:
-                            data.selectedMethod === "cash"
-                                ? calculateChange(data.cashReceived)
-                                : 0,
-                    })
-                );
             }
         } catch (error) {
             console.error("Error confirming order:", error);

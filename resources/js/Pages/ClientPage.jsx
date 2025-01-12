@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
-import MainContent from "@/Components/clientpage/MainContent";
 import StorefrontLayout from "@/Layouts/StorefrontLayout";
-import { Head } from "@inertiajs/react";
-import { Modal } from "flowbite-react";
 import { useGlobalState } from "@/Store/state";
+import { Head } from "@inertiajs/react";
+import { useEffect, useState } from "react";
 import ReactQrCode from "react-qr-code";
 
 export default function ClientPage() {
-    const { state, dispatch } = useGlobalState();
+    const { dispatch } = useGlobalState();
     const [localState, setLocalState] = useState({
         cart: {},
         clientScreen: {
@@ -17,6 +15,7 @@ export default function ClientPage() {
             customerInfo: null,
             paymentInfo: null,
         },
+        isShowingThankYouModal: false,
     });
 
     // Setup broadcast channel listeners
@@ -35,6 +34,10 @@ export default function ClientPage() {
 
         clientScreenChannel.onmessage = (event) => {
             if (event.data.type === "UPDATE_CLIENT_SCREEN_STATE") {
+                console.log(
+                    "Received client screen update:",
+                    event.data.payload
+                );
                 setLocalState((prev) => ({
                     ...prev,
                     clientScreen: event.data.payload,
@@ -48,14 +51,33 @@ export default function ClientPage() {
         };
     }, []);
 
-    // Initial state sync
+    // Watch for payment confirmation
     useEffect(() => {
-        setLocalState((prev) => ({
-            ...prev,
-            cart: state.cart,
-            clientScreen: state.clientScreen,
-        }));
-    }, [state.cart, state.clientScreen]);
+        console.log(
+            "Payment status changed:",
+            localState.clientScreen?.paymentInfo
+        );
+        if (localState.clientScreen?.paymentInfo?.status === "confirmed") {
+            console.log("Showing thank you modal");
+            setLocalState((prev) => ({
+                ...prev,
+                isShowingThankYouModal: true,
+            }));
+
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                setLocalState((prev) => ({
+                    ...prev,
+                    isShowingThankYouModal: false,
+                }));
+                // Also clear the payment info
+                dispatch({
+                    type: "SHOW_PAYMENT_INFO",
+                    payload: null,
+                });
+            }, 5000);
+        }
+    }, [localState.clientScreen?.paymentInfo?.status]);
 
     return (
         <StorefrontLayout>
@@ -352,41 +374,96 @@ export default function ClientPage() {
                         )}
 
                         {/* Payment Info Modal */}
-                        {localState.clientScreen.paymentInfo?.showAsModal && (
-                            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                                <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-8 rounded-xl shadow-2xl text-center max-w-3xl w-full mx-4 transform transition-all duration-300">
-                                    <div className="space-y-8">
-                                        <div className="text-white">
-                                            <p className="text-2xl mb-2">
-                                                รับเงิน
-                                            </p>
-                                            <p className="text-6xl font-bold bg-white bg-opacity-10 rounded-lg py-4">
-                                                ฿
-                                                {localState.clientScreen.paymentInfo.received.toFixed(
-                                                    2
-                                                )}
-                                            </p>
-                                        </div>
-                                        <div className="text-white">
-                                            <p className="text-2xl mb-2">
-                                                เงินทอน
-                                            </p>
-                                            <p className="text-6xl font-bold bg-white bg-opacity-10 rounded-lg py-4">
-                                                ฿
-                                                {Math.max(
-                                                    0,
-                                                    localState.clientScreen
-                                                        .paymentInfo.change
-                                                ).toFixed(2)}
-                                            </p>
+                        {localState.clientScreen.paymentInfo?.showAsModal &&
+                            !localState.clientScreen.paymentInfo?.status ==
+                                "confirmed" && (
+                                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                                    <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-8 rounded-xl shadow-2xl text-center max-w-3xl w-full mx-4 transform transition-all duration-300">
+                                        <div className="space-y-8">
+                                            <div className="text-white">
+                                                <p className="text-2xl mb-2">
+                                                    รับเงิน
+                                                </p>
+                                                <p className="text-6xl font-bold bg-white bg-opacity-10 rounded-lg py-4">
+                                                    ฿
+                                                    {localState.clientScreen.paymentInfo.received.toFixed(
+                                                        2
+                                                    )}
+                                                </p>
+                                            </div>
+                                            <div className="text-white">
+                                                <p className="text-2xl mb-2">
+                                                    เงินทอน
+                                                </p>
+                                                <p className="text-6xl font-bold bg-white bg-opacity-10 rounded-lg py-4">
+                                                    ฿
+                                                    {Math.max(
+                                                        0,
+                                                        localState.clientScreen
+                                                            .paymentInfo.change
+                                                    ).toFixed(2)}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
                     </div>
                 </section>
             </div>
+            <ShowThankYouModal
+                localState={localState}
+                isShowing={localState.isShowingThankYouModal}
+            />
         </StorefrontLayout>
     );
 }
+
+const ShowThankYouModal = ({ localState, isShowing = false }) => {
+    return (
+        isShowing && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fade-in">
+                <div className="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-md w-full mx-4 transform transition-all duration-500 animate-scale-in">
+                    <div className="mb-6">
+                        <div className="w-20 h-20 bg-green-100 rounded-full mx-auto flex items-center justify-center mb-4">
+                            <svg
+                                className="w-12 h-12 text-green-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                            ขอบคุณที่ใช้บริการ
+                        </h2>
+                        <p className="text-gray-600 text-lg mb-4">
+                            เราหวังว่าคุณจะได้รับความประทับใจกับเครื่องดื่มของเรา
+                        </p>
+                        {localState.clientScreen?.customerInfo?.points && (
+                            <div className="bg-blue-50 p-4 rounded-lg">
+                                <p className="text-blue-800 font-medium">
+                                    คะแนนสะสมของคุณ
+                                </p>
+                                <p className="text-2xl font-bold text-blue-600">
+                                    {
+                                        localState.clientScreen.customerInfo
+                                            .points
+                                    }{" "}
+                                    คะแนน
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        )
+    );
+};
