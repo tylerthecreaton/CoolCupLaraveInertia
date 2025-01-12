@@ -88,7 +88,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     const handleMethodSelect = (method) => {
         setData("selectedMethod", method);
         setData("cashReceived", "");
-        
+
         if (method === "qr") {
             const promptpayNumber = settings.find(s => s.key === "promptpay_number")?.value || "";
             const qrCodeValue = generatePayload(promptpayNumber, { amount: total });
@@ -143,7 +143,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     const handleCashReceived = (value) => {
         const amount = parseFloat(value) || 0;
         setData("cashReceived", amount);
-        
+
         // ถ้าเป็นการชำระด้วย QR และเงินที่รับมาน้อยกว่ายอดที่ต้องชำระ ให้ยังแสดง QR code
         if (data.selectedMethod === "qr" && amount < (usePoints ? 0 : total)) {
             const promptpayNumber = settings.find(s => s.key === "promptpay_number")?.value || "";
@@ -161,7 +161,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
         } else {
             dispatch(clientScreenActions.showQRCode(null));
         }
-        
+
         // คำนวณข้อมูลการชำระเงิน
         const paymentInfo = {
             received: amount,
@@ -183,7 +183,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     // เมื่อ focus ที่ช่องรับเงิน
     const handleCashFocus = () => {
         setIsCashFocused(!isCashFocused);
-        
+
         // ถ้ามีการรับเงินแล้ว ให้ส่งข้อมูลไปแสดงที่หน้า Client
         if (data.cashReceived) {
             const amount = parseFloat(data.cashReceived) || 0;
@@ -200,7 +200,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     const handleUsePoints = (points = null) => {
         // ถ้าไม่ระบุ points มา จะใช้คะแนนทั้งหมดที่มี
         const pointsToUse = points || Math.ceil(total * (pointPerThb ? parseFloat(pointPerThb.value) : 10));
-        
+
         if (!usePoints) {
             dispatch(
                 cartActions.applyPointDiscount({
@@ -770,52 +770,42 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                         </Button>
 
                         {isSummary && data.selectedMethod === "cash" && (
-                            <div className="mt-4">
-                                <Label htmlFor="cashReceived">
-                                    จำนวนเงินที่รับ
-                                </Label>
-                                <TextInput
-                                    id="cashReceived"
-                                    type="number"
-                                    value={data.cashReceived}
-                                    onChange={(e) =>
-                                        handleCashReceived(e.target.value)
-                                    }
-                                    onFocus={handleCashFocus}
-                                    onBlur={handleCashFocus}
-                                    className="mt-1"
-                                    placeholder="0.00"
-                                />
-                                {parseFloat(data.cashReceived) > 0 && (
-                                    <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                            <div>ยอดรวม:</div>
-                                            <div className="text-right">฿{total.toFixed(2)}</div>
-                                            
-                                            {usePoints && (
-                                                <>
-                                                    <div className="text-blue-600">ใช้คะแนน:</div>
-                                                    <div className="text-right text-blue-600">
-                                                        {Math.ceil(total * (pointPerThb ? parseFloat(pointPerThb.value) : 10))} คะแนน
-                                                    </div>
-                                                    <div className="text-blue-600">ส่วนลดจากคะแนน:</div>
-                                                    <div className="text-right text-blue-600">
-                                                        ฿{total.toFixed(2)}
-                                                    </div>
-                                                    <div className="font-medium">ยอดชำระสุทธิ:</div>
-                                                    <div className="text-right font-medium">฿0.00</div>
-                                                </>
-                                            )}
-                                            
-                                            <div>รับเงิน:</div>
-                                            <div className="text-right text-green-600">
-                                                ฿{parseFloat(data.cashReceived).toFixed(2)}
-                                            </div>
-                                            
-                                            <div>เงินทอน:</div>
-                                            <div className="text-right text-blue-600">
-                                                ฿{Math.max(0, parseFloat(data.cashReceived) - (usePoints ? 0 : total)).toFixed(2)}
-                                            </div>
+                            <div className="p-4 space-y-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <Label
+                                        htmlFor="cash-received"
+                                        value="รับเงินจากลูกค้า"
+                                        className="mb-2"
+                                    />
+                                    <div className="flex items-center space-x-2">
+                                        <TextInput
+                                            id="cash-received"
+                                            type="number"
+                                            value={data.cashReceived}
+                                            onChange={(e) =>
+                                                handleCashReceived(e.target.value)
+                                            }
+                                            onFocus={handleCashFocus}
+                                            onBlur={handleCashFocus}
+                                            placeholder="กรอกจำนวนเงินที่รับจากลูกค้า"
+                                            className="flex-1"
+                                        />
+                                        <span className="text-gray-500">บาท</span>
+                                    </div>
+                                </div>
+                                {data.cashReceived > 0 && (
+                                    <div className="grid grid-cols-2 gap-y-2 p-4 bg-white rounded-lg">
+                                        <div className="font-medium">ยอดที่ต้องชำระ:</div>
+                                        <div className="text-right font-medium">฿{total.toFixed(2)}</div>
+
+                                        <div>รับเงิน:</div>
+                                        <div className="text-right text-green-600">
+                                            ฿{parseFloat(data.cashReceived).toFixed(2)}
+                                        </div>
+
+                                        <div>เงินทอน:</div>
+                                        <div className="text-right text-blue-600">
+                                            ฿{Math.max(0, parseFloat(data.cashReceived) - total).toFixed(2)}
                                         </div>
                                     </div>
                                 )}

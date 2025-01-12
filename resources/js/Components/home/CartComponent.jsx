@@ -177,6 +177,21 @@ const CartComponent = () => {
 
     // Handle promotion selection
     const handlePromotionSelect = async (promotionId) => {
+        // Check if there's already a selected promotion
+        const existingPromotionItems = items.filter(
+            (item) => item.isDiscount && item.isPromotionDiscount
+        );
+
+        if (existingPromotionItems.length > 0 && promotionId) {
+            await Swal.fire({
+                title: "ไม่สามารถใช้โปรโมชั่นได้",
+                text: "สามารถใช้โปรโมชั่นได้เพียง 1 รายการเท่านั้น กรุณายกเลิกโปรโมชั่นที่มีอยู่ก่อน",
+                icon: "warning",
+            });
+            setSelectedPromotion("");
+            return;
+        }
+
         if (!promotionId) {
             setSelectedPromotion("");
             dispatch(cartActions.applyPromotion(null));

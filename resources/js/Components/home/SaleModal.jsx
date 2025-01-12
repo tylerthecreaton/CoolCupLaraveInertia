@@ -47,7 +47,8 @@ const ProductModal = ({ show, onClose, product }) => {
                     toppings.find((t) => t.name === topping)?.price || 0;
                 return total + toppingPrice;
             }, 0);
-            setTotalPrice((basePrice + sizePrice + toppingsPrice) * quantity);
+            const pricePerItem = basePrice + sizePrice + toppingsPrice;
+            setTotalPrice(pricePerItem * quantity);
         }
     }, [size, selectedToppings, quantity, product]);
 
@@ -78,15 +79,23 @@ const ProductModal = ({ show, onClose, product }) => {
     };
 
     const handleAddToCart = () => {
+        const basePrice = parseFloat(product.sale_price || 0);
+        const sizePrice = sizes.find((s) => s.label === size)?.price || 0;
+        const toppingsPrice = selectedToppings.reduce((total, topping) => {
+            const toppingPrice = toppings.find((t) => t.name === topping)?.price || 0;
+            return total + toppingPrice;
+        }, 0);
+        const pricePerItem = basePrice + sizePrice + toppingsPrice;
+
         const cartItem = {
-            id: new Date().getTime(), // Use timestamp for unique ID
+            id: new Date().getTime(),
             productId: product.id,
             categoryId: product.category_id,
             name: product.name,
             image: isAbsoluteUrl(product.image)
                 ? product.image
                 : `/images/products/${product.image}`,
-            price: totalPrice,
+            price: pricePerItem,
             quantity: quantity,
             size: size,
             sweetness: sweetness,
