@@ -284,37 +284,43 @@ export default function DailyReport({ stats }) {
         >
             <Head title="รายงานประจำวัน" />
 
-            <div className="py-6 bg-gray-50">
+            <div className="py-6 bg-gradient-to-br from-gray-50 to-blue-50">
                 <div className="px-2 sm:px-4 lg:px-6 max-w-[1600px] mx-auto">
-                    <div className="space-y-4">
+                    <div className="space-y-6">
+                        {/* Header Section */}
+                        <div className="text-center mb-8">
+                            <h2 className="text-3xl font-bold text-blue-600 mb-2">รายงานประจำวัน</h2>
+                            <p className="text-gray-600">ข้อมูลสรุปผลการดำเนินงานและยอดขายประจำวัน</p>
+                        </div>
+
                         {/* Summary Cards */}
                         {sections.map((section, index) => (
-                            <div key={index} className={`${section.backgroundColor} rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1`}>
-                                <div className="p-6 border-b border-gray-100/50 backdrop-blur-sm">
-                                    <h3 className="text-xl font-semibold text-blue-600 mb-2">
+                            <div key={index} className={`${section.backgroundColor} rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}>
+                                <div className="p-6 border-b border-white/20 backdrop-blur-sm">
+                                    <h3 className="text-2xl font-bold text-white mb-2">
                                         {section.title}
                                     </h3>
-                                    <p className="text-gray-500 text-sm">
+                                    <p className="text-white/80">
                                         {section.description}
                                     </p>
                                 </div>
-                                <div className="p-6">
+                                <div className="p-6 backdrop-blur-sm">
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         {section.items.map((item, itemIndex) => (
                                             <div
                                                 key={itemIndex}
-                                                className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
+                                                className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-white/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
                                             >
                                                 <div className="p-6">
                                                     <div className="flex items-center space-x-4">
-                                                        <div className={`p-3 rounded-lg ${item.bgColor} ${item.color} transition-transform duration-300 hover:rotate-6`}>
-                                                            <item.icon className="w-7 h-7" />
+                                                        <div className={`p-3 rounded-xl ${item.bgColor} ${item.color} transform transition-all duration-300 hover:scale-110 hover:rotate-6`}>
+                                                            <item.icon className="w-8 h-8" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-gray-500 text-sm font-medium tracking-wide mb-1">
+                                                            <p className="text-gray-600 text-sm font-medium tracking-wide mb-1">
                                                                 {item.label}
                                                             </p>
-                                                            <p className={`text-xl font-semibold ${item.color}`}>
+                                                            <p className={`text-2xl font-bold ${item.color}`}>
                                                                 {formatValue(item.value, item.format)}
                                                             </p>
                                                         </div>
@@ -330,16 +336,16 @@ export default function DailyReport({ stats }) {
                         {/* Charts Section */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Sales by Time Chart */}
-                            <div className="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                                <div className="p-6 border-b border-gray-100">
-                                    <h3 className="text-xl font-semibold text-blue-600 mb-2">
+                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-500 to-blue-600">
+                                    <h3 className="text-xl font-bold text-white mb-2">
                                         ยอดขายตามช่วงเวลา
                                     </h3>
-                                    <p className="text-gray-500 text-sm">
+                                    <p className="text-white/80">
                                         เปรียบเทียบยอดขายกับเป้าหมาย
                                     </p>
                                 </div>
-                                <div className="p-4 h-[300px]">
+                                <div className="p-6">
                                     <Bar
                                         data={salesByTimeData}
                                         options={barOptions}
@@ -349,88 +355,67 @@ export default function DailyReport({ stats }) {
                             </div>
 
                             {/* Top Drinks Chart */}
-                            <div className="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                                <div className="p-6 border-b border-gray-100">
+                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-orange-500 to-amber-500">
                                     <div className="flex justify-between items-center">
                                         <div>
-                                            <h3 className="text-xl font-semibold text-blue-600 mb-2">
+                                            <h3 className="text-xl font-bold text-white mb-2">
                                                 เครื่องดื่มยอดนิยม
                                             </h3>
-                                            <p className="text-gray-500 text-sm">
-                                                5 อันดับเครื่องดื่มที่ขายดีที่สุด
+                                            <p className="text-white/80">
+                                                5 อันดับเครื่องดื่มขายดีประจำวัน
                                             </p>
-                                        </div>
-                                        <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
-                                            +10.3%
                                         </div>
                                     </div>
                                 </div>
-                                <div className="p-4 h-[300px]">
+                                <div className="p-6">
                                     <Doughnut
                                         data={topDrinksData}
                                         options={pieOptions}
                                         height={270}
                                     />
-                                    <div className="mt-2 text-center">
-                                        <p className="text-lg font-semibold text-blue-600">
-                                            {topDrinksData.datasets[0].data.reduce((a, b) => a + b, 0)} แก้ว
-                                        </p>
-                                    </div>
                                 </div>
                             </div>
 
                             {/* Payment Methods Chart */}
-                            <div className="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                                <div className="p-6 border-b border-gray-100">
-                                    <h3 className="text-xl font-semibold text-blue-600 mb-2">
+                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-green-500 to-emerald-500">
+                                    <h3 className="text-xl font-bold text-white mb-2">
                                         วิธีการชำระเงิน
                                     </h3>
-                                    <p className="text-gray-500 text-sm">
+                                    <p className="text-white/80">
                                         สัดส่วนการชำระเงินแต่ละประเภท
                                     </p>
                                 </div>
-                                <div className="p-4 h-[300px]">
+                                <div className="p-6">
                                     <Doughnut
                                         data={paymentMethodsData}
                                         options={pieOptions}
                                         height={270}
                                     />
-                                    <div className="mt-2 text-center">
-                                        <p className="text-lg font-semibold text-blue-600">
-                                            {paymentMethodsData.datasets[0].data.reduce((a, b) => a + b, 0)} ครั้ง
-                                        </p>
-                                    </div>
                                 </div>
                             </div>
 
                             {/* Member Stats */}
-                            <div className="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                                <div className="p-6 border-b border-gray-100">
+                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-purple-500 to-indigo-500">
                                     <div className="flex justify-between items-center">
                                         <div>
-                                            <h3 className="text-xl font-semibold text-blue-600 mb-2">
-                                                สัดส่วนลูกค้า
+                                            <h3 className="text-xl font-bold text-white mb-2">
+                                                สัดส่วนสมาชิก
                                             </h3>
-                                            <p className="text-gray-500 text-sm">
-                                                เปรียบเทียบสัดส่วนลูกค้าสมาชิกและไม่เป็นสมาชิก
+                                            <p className="text-white/80">
+                                                เปอร์เซ็นต์การใช้งานของสมาชิก
                                             </p>
-                                        </div>
-                                        <div className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-medium">
-                                            +5.2%
                                         </div>
                                     </div>
                                 </div>
-                                <div className="p-4 h-[300px]">
+                                <div className="p-6">
                                     <Doughnut
                                         data={memberData}
                                         options={pieOptions}
                                         height={270}
                                     />
-                                    <div className="mt-2 text-center">
-                                        <p className="text-lg font-semibold text-blue-600">
-                                            {memberData.datasets[0].data[0]}%
-                                        </p>
-                                    </div>
                                 </div>
                             </div>
                         </div>
