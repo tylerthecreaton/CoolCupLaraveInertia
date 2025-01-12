@@ -265,7 +265,10 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     const confirmOrder = async () => {
         try {
             const response = await axios.post(route("order.store"), {
-                selectedMethod: data.selectedMethod,
+                selectedMethod:
+                    data.selectedMethod === "qr"
+                        ? "qr_code"
+                        : data.selectedMethod,
                 cart: state.cart,
                 memberPhone: data.memberPhone,
                 cashReceived:
@@ -276,24 +279,45 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
             });
 
             if (response.status === 200) {
+                // Show receipt modal with success message
+                setReceipt(response.data);
+                setShowReceipt(true);
+
+                // Show success message
                 Swal.fire({
                     title: "สำเร็จ!",
-                    text: "ชำระเงินเรียบร้อยแล้ว",
+                    text: "ขอบคุณที่ใช้บริการ",
                     icon: "success",
                     timer: 1500,
                     showConfirmButton: false,
                 });
+
+                // Clear cart and close modal
                 dispatch(cartActions.clearCart());
                 onClose();
-                setReceipt(response.data);
-                setShowReceipt(true);
+
+                // Update client screen to show thank you message
+                dispatch(
+                    clientScreenActions.showPaymentInfo({
+                        ...response.data,
+                        showAsModal: true,
+                        received:
+                            data.selectedMethod === "cash"
+                                ? data.cashReceived
+                                : finalTotal,
+                        change:
+                            data.selectedMethod === "cash"
+                                ? calculateChange(data.cashReceived)
+                                : 0,
+                    })
+                );
             }
         } catch (error) {
             console.error("Error confirming order:", error);
             Swal.fire({
+                icon: "error",
                 title: "เกิดข้อผิดพลาด!",
                 text: "ไม่สามารถบันทึกคำสั่งซื้อได้ กรุณาลองใหม่อีกครั้ง",
-                icon: "error",
             });
         }
     };
@@ -804,11 +828,14 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                     <div className="flex items-center space-x-2">
                                         <TextInput
                                             id="cash-received"
-                                            type="number"
+                                            type="text"
                                             value={data.cashReceived}
                                             onChange={(e) =>
                                                 handleCashReceived(
-                                                    e.target.value
+                                                    e.target.value.replace(
+                                                        /[^0-9]/g,
+                                                        ""
+                                                    )
                                                 )
                                             }
                                             onFocus={handleCashFocus}
@@ -889,11 +916,14 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                     </label>
                                     <div className="flex items-center space-x-2">
                                         <TextInput
-                                            type="number"
+                                            type="text"
                                             value={data.cashReceived}
                                             onChange={(e) =>
                                                 handleCashReceived(
-                                                    e.target.value
+                                                    e.target.value.replace(
+                                                        /[^0-9]/g,
+                                                        ""
+                                                    )
                                                 )
                                             }
                                             placeholder="กรอกจำนวนเงิน"
