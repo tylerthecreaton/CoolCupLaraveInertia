@@ -48,7 +48,7 @@ export default function DailyReport({ stats }) {
         sales: ['rgba(63, 81, 181, 0.8)', 'rgba(92, 107, 192, 0.6)'],
         salesBg: ['rgba(63, 81, 181, 0.1)', 'rgba(92, 107, 192, 0.1)'],
         drinks: ['#FF5722', '#FFA000', '#4CAF50', '#00BCD4', '#3F51B5'],
-        payment: ['#4caf50', '#66bb6a', '#81c784'],
+        payment: ['#4caf50', '#067bc2', '#81c784'],
         member: ['#ff9800', '#ffa726']
     };
 
@@ -275,7 +275,7 @@ export default function DailyReport({ stats }) {
                             </span>
                         </div>
                     </div>
-                    <div className="flex items-center space-x-1 px-3 py-1 bg-green-50 text-green-700 rounded-full">
+                    <div className="flex items-center px-3 py-1 space-x-1 text-green-700 bg-green-50 rounded-full">
                         <ArrowTrendingUpIcon className="w-4 h-4" />
                         <span className="text-sm font-medium">+15.3% จากเมื่อวาน</span>
                     </div>
@@ -288,16 +288,16 @@ export default function DailyReport({ stats }) {
                 <div className="px-2 sm:px-4 lg:px-6 max-w-[1600px] mx-auto">
                     <div className="space-y-6">
                         {/* Header Section */}
-                        <div className="text-center mb-8">
-                            <h2 className="text-3xl font-bold text-blue-600 mb-2">รายงานประจำวัน</h2>
+                        <div className="mb-8 text-center">
+                            <h2 className="mb-2 text-3xl font-bold text-blue-600">รายงานประจำวัน</h2>
                             <p className="text-gray-600">ข้อมูลสรุปผลการดำเนินงานและยอดขายประจำวัน</p>
                         </div>
 
                         {/* Summary Cards */}
                         {sections.map((section, index) => (
                             <div key={index} className={`${section.backgroundColor} rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}>
-                                <div className="p-6 border-b border-white/20 backdrop-blur-sm">
-                                    <h3 className="text-2xl font-bold text-white mb-2">
+                                <div className="p-6 border-b backdrop-blur-sm border-white/20">
+                                    <h3 className="mb-2 text-2xl font-bold text-white">
                                         {section.title}
                                     </h3>
                                     <p className="text-white/80">
@@ -305,7 +305,7 @@ export default function DailyReport({ stats }) {
                                     </p>
                                 </div>
                                 <div className="p-6 backdrop-blur-sm">
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                                         {section.items.map((item, itemIndex) => (
                                             <div
                                                 key={itemIndex}
@@ -317,7 +317,7 @@ export default function DailyReport({ stats }) {
                                                             <item.icon className="w-8 h-8" />
                                                         </div>
                                                         <div>
-                                                            <p className="text-gray-600 text-sm font-medium tracking-wide mb-1">
+                                                            <p className="mb-1 text-sm font-medium tracking-wide text-gray-600">
                                                                 {item.label}
                                                             </p>
                                                             <p className={`text-2xl font-bold ${item.color}`}>
@@ -334,11 +334,11 @@ export default function DailyReport({ stats }) {
                         ))}
 
                         {/* Charts Section */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                             {/* Sales by Time Chart */}
-                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-500 to-blue-600">
-                                    <h3 className="text-xl font-bold text-white mb-2">
+                            <div className="overflow-hidden bg-white rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 border-b border-gray-100">
+                                    <h3 className="mb-2 text-xl font-bold text-white">
                                         ยอดขายตามช่วงเวลา
                                     </h3>
                                     <p className="text-white/80">
@@ -355,11 +355,11 @@ export default function DailyReport({ stats }) {
                             </div>
 
                             {/* Top Drinks Chart */}
-                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-orange-500 to-amber-500">
+                            <div className="overflow-hidden bg-white rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <div className="p-6 bg-gradient-to-r from-orange-500 to-amber-500 border-b border-gray-100">
                                     <div className="flex justify-between items-center">
                                         <div>
-                                            <h3 className="text-xl font-bold text-white mb-2">
+                                            <h3 className="mb-2 text-xl font-bold text-white">
                                                 เครื่องดื่มยอดนิยม
                                             </h3>
                                             <p className="text-white/80">
@@ -378,9 +378,9 @@ export default function DailyReport({ stats }) {
                             </div>
 
                             {/* Payment Methods Chart */}
-                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-green-500 to-emerald-500">
-                                    <h3 className="text-xl font-bold text-white mb-2">
+                            <div className="overflow-hidden bg-white rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <div className="p-6 bg-gradient-to-r from-green-500 to-emerald-500 border-b border-gray-100">
+                                    <h3 className="mb-2 text-xl font-bold text-white">
                                         วิธีการชำระเงิน
                                     </h3>
                                     <p className="text-white/80">
@@ -397,11 +397,11 @@ export default function DailyReport({ stats }) {
                             </div>
 
                             {/* Member Stats */}
-                            <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-purple-500 to-indigo-500">
+                            <div className="overflow-hidden bg-white rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <div className="p-6 bg-gradient-to-r from-purple-500 to-indigo-500 border-b border-gray-100">
                                     <div className="flex justify-between items-center">
                                         <div>
-                                            <h3 className="text-xl font-bold text-white mb-2">
+                                            <h3 className="mb-2 text-xl font-bold text-white">
                                                 สัดส่วนสมาชิก
                                             </h3>
                                             <p className="text-white/80">

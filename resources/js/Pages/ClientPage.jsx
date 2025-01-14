@@ -1,3 +1,4 @@
+import MainContent from "@/Components/clientpage/MainContent";
 import StorefrontLayout from "@/Layouts/StorefrontLayout";
 import { useGlobalState } from "@/Store/state";
 import { Head } from "@inertiajs/react";
@@ -82,28 +83,29 @@ export default function ClientPage() {
     return (
         <StorefrontLayout>
             <Head title="ClientPage" />
-            <div className="client-page min-h-screen bg-gradient-to-b from-blue-50 to-white">
+            <MainContent />
+            <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white client-page">
                 <section className="featured-section">
                     <div className="container px-4 py-8 mx-auto">
                         {/* Hero Section */}
-                        <div className="text-center mb-12 animate-fade-in">
-                            <h1 className="text-4xl font-bold text-blue-600 mb-4">
+                        <div className="mb-12 text-center animate-fade-in">
+                            <h1 className="mb-4 text-4xl font-bold text-blue-600">
                                 ยินดีต้อนรับสู่ร้าน CoolCup
                             </h1>
-                            <p className="text-gray-600 text-lg">
+                            <p className="text-lg text-gray-600">
                                 เครื่องดื่มสดใหม่ รสชาติเยี่ยม พร้อมเสิร์ฟคุณ
                             </p>
                         </div>
 
                         {/* Member Information */}
                         {localState.clientScreen.customerInfo && (
-                            <div className="bg-white rounded-xl shadow-lg p-6 mb-8 transform transition-all duration-300 hover:shadow-xl">
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                            <div className="p-6 mb-8 bg-white rounded-xl shadow-lg transition-all duration-300 transform hover:shadow-xl">
+                                <div className="flex flex-col justify-between items-start space-y-4 md:flex-row md:items-center md:space-y-0">
                                     <div className="flex items-center space-x-4">
-                                        <div className="bg-blue-100 p-3 rounded-full">
+                                        <div className="p-3 bg-blue-100 rounded-full">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
-                                                className="h-8 w-8 text-blue-600"
+                                                className="w-8 h-8 text-blue-600"
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -127,13 +129,13 @@ export default function ClientPage() {
                                     </div>
                                     <div className="flex items-center space-x-6">
                                         <div className="text-center">
-                                            <p className="text-sm text-gray-600 mb-1">
+                                            <p className="mb-1 text-sm text-gray-600">
                                                 คะแนนสะสม
                                             </p>
                                             <div className="flex items-center">
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
-                                                    className="h-5 w-5 text-yellow-500 mr-1"
+                                                    className="mr-1 w-5 h-5 text-yellow-500"
                                                     fill="none"
                                                     viewBox="0 0 24 24"
                                                     stroke="currentColor"
@@ -160,8 +162,8 @@ export default function ClientPage() {
 
                         {/* Cart Items */}
                         {localState.cart.items?.length > 0 && (
-                            <div className="bg-white rounded-xl shadow-lg p-6 mb-8 transform transition-all duration-300 hover:shadow-xl">
-                                <h3 className="text-2xl font-semibold mb-6 text-gray-800 border-b pb-4">
+                            <div className="p-6 mb-8 bg-white rounded-xl shadow-lg transition-all duration-300 transform hover:shadow-xl">
+                                <h3 className="pb-4 mb-6 text-2xl font-semibold text-gray-800 border-b">
                                     รายการสินค้า
                                 </h3>
                                 <div className="space-y-4">
@@ -169,7 +171,7 @@ export default function ClientPage() {
                                         (item, index) => (
                                             <div
                                                 key={item.id}
-                                                className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                                                className="flex items-start p-4 space-x-4 bg-gray-50 rounded-lg transition-colors duration-200 hover:bg-gray-100"
                                                 style={{
                                                     animationDelay: `${
                                                         index * 100
@@ -179,24 +181,24 @@ export default function ClientPage() {
                                                 <img
                                                     src={item.image}
                                                     alt={item.name}
-                                                    className="w-20 h-20 object-cover rounded-lg shadow-sm"
+                                                    className="object-cover w-20 h-20 rounded-lg shadow-sm"
                                                 />
                                                 <div className="flex-1">
-                                                    <div className="font-semibold text-lg text-gray-800">
+                                                    <div className="text-lg font-semibold text-gray-800">
                                                         {item.name}
                                                     </div>
-                                                    <div className="text-gray-600 mt-1">
-                                                        <span className="inline-block bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm mr-2">
+                                                    <div className="mt-1 text-gray-600">
+                                                        <span className="inline-block px-3 py-1 mr-2 text-sm text-blue-800 bg-blue-100 rounded-full">
                                                             {item.size}
                                                         </span>
-                                                        <span className="inline-block bg-green-100 text-green-800 rounded-full px-3 py-1 text-sm">
+                                                        <span className="inline-block px-3 py-1 text-sm text-green-800 bg-green-100 rounded-full">
                                                             ความหวาน:{" "}
                                                             {item.sweetness}
                                                         </span>
                                                     </div>
                                                     {item.toppings?.length >
                                                         0 && (
-                                                        <div className="text-sm text-gray-600 mt-2">
+                                                        <div className="mt-2 text-sm text-gray-600">
                                                             <span className="font-medium">
                                                                 ท็อปปิ้ง:{" "}
                                                             </span>
@@ -209,7 +211,7 @@ export default function ClientPage() {
                                                                         key={
                                                                             idx
                                                                         }
-                                                                        className="inline-block bg-yellow-100 text-yellow-800 rounded-full px-2 py-1 text-xs mr-1 mb-1"
+                                                                        className="inline-block px-2 py-1 mr-1 mb-1 text-xs text-yellow-800 bg-yellow-100 rounded-full"
                                                                     >
                                                                         {
                                                                             topping
@@ -238,7 +240,7 @@ export default function ClientPage() {
                                     )}
 
                                     {/* Summary Section */}
-                                    <div className="border-t pt-6 space-y-3 mt-6">
+                                    <div className="pt-6 mt-6 space-y-3 border-t">
                                         <div className="flex justify-between text-gray-600">
                                             <span>ยอดรวม</span>
                                             <span className="font-medium">
@@ -271,7 +273,7 @@ export default function ClientPage() {
                                                 </span>
                                             </div>
                                         )}
-                                        <div className="flex justify-between font-semibold text-xl pt-4 border-t text-blue-600">
+                                        <div className="flex justify-between pt-4 text-xl font-semibold text-blue-600 border-t">
                                             <span>ยอดสุทธิ</span>
                                             <span>
                                                 ฿
@@ -303,10 +305,10 @@ export default function ClientPage() {
                                     }`}
                                 >
                                     <div className="text-center">
-                                        <h3 className="text-2xl font-semibold mb-6 text-gray-800">
+                                        <h3 className="mb-6 text-2xl font-semibold text-gray-800">
                                             สแกนเพื่อชำระเงิน
                                         </h3>
-                                        <div className="bg-white p-4 rounded-lg shadow-inner mb-6 inline-block">
+                                        <div className="inline-block p-4 mb-6 bg-white rounded-lg shadow-inner">
                                             <ReactQrCode
                                                 value={
                                                     localState.clientScreen
@@ -321,7 +323,7 @@ export default function ClientPage() {
                                                 <span className="text-gray-600">
                                                     ยอดรวม:
                                                 </span>
-                                                <span className="font-semibold text-lg">
+                                                <span className="text-lg font-semibold">
                                                     ฿
                                                     {localState.clientScreen.qrCode.subtotal.toFixed(
                                                         2
@@ -334,7 +336,7 @@ export default function ClientPage() {
                                                     <span className="text-green-600">
                                                         ส่วนลด:
                                                     </span>
-                                                    <span className="font-semibold text-lg text-green-600">
+                                                    <span className="text-lg font-semibold text-green-600">
                                                         ฿
                                                         {localState.cart.totalDiscount.toFixed(
                                                             2
@@ -348,7 +350,7 @@ export default function ClientPage() {
                                                     <span className="text-blue-600">
                                                         ส่วนลดจากคะแนน:
                                                     </span>
-                                                    <span className="font-semibold text-lg text-blue-600">
+                                                    <span className="text-lg font-semibold text-blue-600">
                                                         ฿
                                                         {localState.cart.pointDiscountAmount.toFixed(
                                                             2
@@ -357,10 +359,10 @@ export default function ClientPage() {
                                                 </div>
                                             )}
                                             <div className="flex justify-between items-center px-4 pt-3 border-t">
-                                                <span className="text-gray-800 font-medium">
+                                                <span className="font-medium text-gray-800">
                                                     ยอดชำระ:
                                                 </span>
-                                                <span className="font-bold text-xl text-blue-600">
+                                                <span className="text-xl font-bold text-blue-600">
                                                     ฿
                                                     {localState.cart.total.toFixed(
                                                         2
@@ -377,14 +379,14 @@ export default function ClientPage() {
                         {localState.clientScreen.paymentInfo?.showAsModal &&
                             !localState.clientScreen.paymentInfo?.status ==
                                 "confirmed" && (
-                                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                                    <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-8 rounded-xl shadow-2xl text-center max-w-3xl w-full mx-4 transform transition-all duration-300">
+                                <div className="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-50">
+                                    <div className="p-8 mx-4 w-full max-w-3xl text-center bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-2xl transition-all duration-300 transform">
                                         <div className="space-y-8">
                                             <div className="text-white">
-                                                <p className="text-2xl mb-2">
+                                                <p className="mb-2 text-2xl">
                                                     รับเงิน
                                                 </p>
-                                                <p className="text-6xl font-bold bg-white bg-opacity-10 rounded-lg py-4">
+                                                <p className="py-4 text-6xl font-bold bg-white bg-opacity-10 rounded-lg">
                                                     ฿
                                                     {localState.clientScreen.paymentInfo.received.toFixed(
                                                         2
@@ -392,10 +394,10 @@ export default function ClientPage() {
                                                 </p>
                                             </div>
                                             <div className="text-white">
-                                                <p className="text-2xl mb-2">
+                                                <p className="mb-2 text-2xl">
                                                     เงินทอน
                                                 </p>
-                                                <p className="text-6xl font-bold bg-white bg-opacity-10 rounded-lg py-4">
+                                                <p className="py-4 text-6xl font-bold bg-white bg-opacity-10 rounded-lg">
                                                     ฿
                                                     {Math.max(
                                                         0,
@@ -422,10 +424,10 @@ export default function ClientPage() {
 const ShowThankYouModal = ({ localState, isShowing = false }) => {
     return (
         isShowing && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 animate-fade-in">
-                <div className="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-md w-full mx-4 transform transition-all duration-500 animate-scale-in">
+            <div className="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-50 animate-fade-in">
+                <div className="p-8 mx-4 w-full max-w-md text-center bg-white rounded-2xl shadow-2xl transition-all duration-500 transform animate-scale-in">
                     <div className="mb-6">
-                        <div className="w-20 h-20 bg-green-100 rounded-full mx-auto flex items-center justify-center mb-4">
+                        <div className="flex justify-center items-center mx-auto mb-4 w-20 h-20 bg-green-100 rounded-full">
                             <svg
                                 className="w-12 h-12 text-green-500"
                                 fill="none"
@@ -441,15 +443,15 @@ const ShowThankYouModal = ({ localState, isShowing = false }) => {
                                 />
                             </svg>
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                        <h2 className="mb-2 text-3xl font-bold text-gray-800">
                             ขอบคุณที่ใช้บริการ
                         </h2>
-                        <p className="text-gray-600 text-lg mb-4">
+                        <p className="mb-4 text-lg text-gray-600">
                             เราหวังว่าคุณจะได้รับความประทับใจกับเครื่องดื่มของเรา
                         </p>
                         {localState.clientScreen?.customerInfo?.points && (
-                            <div className="bg-blue-50 p-4 rounded-lg">
-                                <p className="text-blue-800 font-medium">
+                            <div className="p-4 bg-blue-50 rounded-lg">
+                                <p className="font-medium text-blue-800">
                                     คะแนนสะสมของคุณ
                                 </p>
                                 <p className="text-2xl font-bold text-blue-600">
