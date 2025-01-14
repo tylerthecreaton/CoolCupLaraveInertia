@@ -41,6 +41,27 @@ class SettingsSeeder extends Seeder
                 'type' => 'system',
                 'comment' => 'ใช้สำหรับคำนวณเตือนเมื่อวัตถุดิบหมดอายุ'
             ],
+            [
+                'key'=> 'point_per_thb',
+                'value'=> '10',
+                'description' => '10 คะแนนเท่ากับ 1 บาท',
+                'type' => 'system',
+                'comment' => 'Rate แลกคะแนนเป็นเงิน'
+            ],
+            [
+                'key'=> 'promptpay_number',
+                'value'=> 'xxx-xxx-xxx',
+                'description' => 'เบอร์พร้อมเพย์สำหรับจ่ายเงิน',
+                'type' => 'system',
+                'comment' => 'เบอร์พร้อมเพย์สำหรับจ่ายเงิน'
+            ],
+            [
+                'key'=> 'taxpayer_number',
+                'value'=> 'xxx-xxx-xxx',
+                'description' => 'เลขประจำตัวผู้เสียภาษี',
+                'type' => '',
+                'comment' => 'เลขประจำตัวผู้เสียภาษี'
+            ],
         ];
         Setting::insert($settings);
     }
