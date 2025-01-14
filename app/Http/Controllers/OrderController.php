@@ -20,6 +20,7 @@ class OrderController extends Controller
 {
     public function store(Request $request)
     {
+
         $order = new Order();
         $order->user_id = Auth::user()->id;
         $order->username = Auth::user()->username;
@@ -50,6 +51,7 @@ class OrderController extends Controller
             $onlyPromotionDiscount  = $cart['manualDiscountAmount'] + $cart['pointDiscountAmount'];
             $this->savePromotionUsage($cart['appliedPromotion'], $onlyPromotionDiscount, $order->id);
         }
+
         if ($cart['usedPoints']) {
             $this->saveUsedPoints($cart['usedPoints'], $cart['pointDiscountAmount'], $order->id, $order->customer_id);
         }
@@ -105,35 +107,48 @@ class OrderController extends Controller
         return $point ?? 0;
     }
 
-    private function calculateIngredients(array $item, $orderDetailId)
+    private function calculateIngredients(array $item, $orderDetailId, string $sweetness)
     {
         if (isset($item['isDiscount']) && $item['isDiscount']) {
             return;
         }
         $product = Product::find($item['productId']);
         if ($product) {
-            $productIngredients = ProductIngredients::where('product_id', $product->id)->get();
-            foreach ($productIngredients as $productIngredient) {
-                $ingredient = Ingredient::find($productIngredient->ingredient_id);
-                if ($ingredient) {
-                    $usedQuantity = $item['quantity'] * $productIngredient->quantity_used;
+            try {
+                $productIngredients = ProductIngredients::where('product_id', $product->id)->get();
+                foreach ($productIngredients as $productIngredient) {
+                    $ingredient = Ingredient::find($productIngredient->ingredient_id);
+                    if ($ingredient) {
+                        $usedQuantity = $item['quantity'] * $productIngredient->quantity_used;
+                        $sweetnessRate = $ingredient->is_sweetness ? -$this->calculateSweetnessUsage($usedQuantity, $sweetness) : -$usedQuantity;
 
-                    // บันทึกการใช้วัตถุดิบ
-                    $usage = new ProductIngredientUsage();
-                    $usage->order_detail_id = $orderDetailId;
-                    $usage->ingredient_id = $ingredient->id;
-                    $usage->amount = -$usedQuantity;
-                    $usage->usage_type = 'USE';
-                    $usage->created_by = Auth::user()->id;
-                    $usage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId;
-                    $usage->save();
+                        // บันทึกการใช้วัตถุดิบ
+                        $usage = new ProductIngredientUsage();
+                        $usage->order_detail_id = $orderDetailId;
+                        $usage->ingredient_id = $ingredient->id;
+                        $usage->amount =  $sweetnessRate;
+                        $usage->usage_type = 'USE';
+                        $usage->created_by = Auth::user()->id;
+                        $usage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId;
+                        $usage->save();
 
-                    // อัพเดทจำนวนวัตถุดิบ
-                    $ingredient->quantity = max(0, $ingredient->quantity - $usedQuantity);
-                    $ingredient->save();
+                        // อัพเดทจำนวนวัตถุดิบ
+                        $ingredient->quantity = max(0, $ingredient->quantity + $sweetnessRate);
+                        $ingredient->save();
+                    }
                 }
+            } catch (\Exception $e) {
+                dd($e);
             }
         }
+    }
+
+    private function calculateSweetnessUsage($usedQuantity, $sweetness): float
+    {
+        $sweetnessRate = (int) preg_replace('/[^0-9]/', '', $sweetness);
+        $result =  $usedQuantity * $sweetnessRate / 100;
+
+        return $result;
     }
 
     public function saveToIngredientUsageTable($detail)
@@ -168,7 +183,7 @@ class OrderController extends Controller
             $orderDetail->subtotal = $item['quantity'] * $item['price']; // TODO: Calculate subtotal
             $orderDetail->save();
 
-            $this->calculateIngredients($item,  $orderDetail->id);
+            $this->calculateIngredients($item,  $orderDetail->id, $item['sweetness']);
         }
     }
 

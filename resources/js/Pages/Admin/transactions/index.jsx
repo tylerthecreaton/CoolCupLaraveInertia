@@ -1,30 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { Table, Badge, Breadcrumb, TextInput } from "flowbite-react";
+import { Table, Badge, Breadcrumb, TextInput, Pagination } from "flowbite-react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import { HiHome, HiSearch } from "react-icons/hi";
 
 export default function Index({ transactions }) {
     const [searchTerm, setSearchTerm] = useState("");
-    const [filteredTransactions, setFilteredTransactions] = useState([]);
 
-    useEffect(() => {
-        setFilteredTransactions(transactions);
-    }, [transactions]);
-
-    useEffect(() => {
-        const results = transactions.filter((transaction) =>
-            Object.values({
-                ingredient_name: transaction.ingredient.name,
-                note: transaction.note,
-                created_by: transaction.created_by,
-            }).some((value) =>
-                value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-            )
+    const handleSearch = (value) => {
+        setSearchTerm(value);
+        router.get(
+            route("admin.transactions.index"),
+            { search: value },
+            { preserveState: true }
         );
-        setFilteredTransactions(results);
-    }, [searchTerm, transactions]);
+    };
+
+    const handlePageChange = (page) => {
+        router.get(
+            route("admin.transactions.index"),
+            { page, search: searchTerm },
+            { preserveState: true }
+        );
+    };
 
     const getTypeLabel = (type) => {
         switch (type) {
@@ -47,36 +46,45 @@ export default function Index({ transactions }) {
 
     const formatDate = (dateString) => {
         try {
-            // แปลง UTC เป็นเวลาท้องถิ่น (ประเทศไทย)
-            const utcDate = new Date(dateString + 'Z'); // เพิ่ม 'Z' เพื่อระบุว่าเป็น UTC
+            const utcDate = new Date(dateString);
             const date = new Date(utcDate.getTime());
 
             if (isNaN(date.getTime())) {
-                return '-';
+                return "-";
             }
 
             const thaiMonths = [
-                'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-                'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+                "มกราคม",
+                "กุมภาพันธ์",
+                "มีนาคม",
+                "เมษายน",
+                "พฤษภาคม",
+                "มิถุนายน",
+                "กรกฎาคม",
+                "สิงหาคม",
+                "กันยายน",
+                "ตุลาคม",
+                "พฤศจิกายน",
+                "ธันวาคม",
             ];
 
             const day = date.getDate();
             const month = thaiMonths[date.getMonth()];
-            const year = date.getFullYear() + 543; // แปลงเป็นปี พ.ศ.
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const year = date.getFullYear() + 543;
+            const hours = String(date.getHours()).padStart(2, "0");
+            const minutes = String(date.getMinutes()).padStart(2, "0");
 
             return `${day} ${month} ${year} ${hours}:${minutes} น.`;
         } catch (error) {
-            console.error('Error formatting date:', error);
-            return '-';
+            console.error("Error formatting date:", error);
+            return "-";
         }
     };
 
     const formatAmount = (amount) => {
-        return new Intl.NumberFormat('th-TH', {
+        return new Intl.NumberFormat("th-TH", {
             minimumFractionDigits: 0,
-            maximumFractionDigits: 2
+            maximumFractionDigits: 2,
         }).format(Math.abs(amount));
     };
 
@@ -115,7 +123,7 @@ export default function Index({ transactions }) {
                                 icon={HiSearch}
                                 placeholder="ค้นหาประวัติ..."
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => handleSearch(e.target.value)}
                                 className="transition-all duration-200 focus:ring-2 focus:ring-primary-500"
                             />
                         </div>
@@ -137,12 +145,6 @@ export default function Index({ transactions }) {
                                     จำนวน
                                 </Table.HeadCell>
                                 <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    หน่วย
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    ผู้ดำเนินการ
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
                                     หมายเหตุ
                                 </Table.HeadCell>
                                 <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
@@ -150,41 +152,43 @@ export default function Index({ transactions }) {
                                 </Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y divide-gray-200">
-                                {filteredTransactions?.map(
-                                    (transaction, index) => (
-                                        <Table.Row
-                                            key={transaction.id}
-                                            className="bg-white transition-colors hover:bg-gray-50"
-                                        >
-                                            <Table.Cell className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                                {index + 1}
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4 font-medium">
-                                                {transaction.ingredient.name}
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                {getTypeLabel(transaction.type)}
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4 text-right font-medium">
-                                                {formatAmount(transaction.amount)}
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                {transaction.ingredient.unit}
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                {transaction.created_by || "-"}
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4 max-w-xs truncate">
-                                                {transaction.note || "-"}
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4 whitespace-nowrap">
-                                                {formatDate(transaction.created_at)}
-                                            </Table.Cell>
-                                        </Table.Row>
-                                    )
-                                )}
+                                {transactions.data?.map((transaction, index) => (
+                                    <Table.Row
+                                        key={transaction.id}
+                                        className="bg-white transition-colors hover:bg-gray-50"
+                                    >
+                                        <Table.Cell className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                                            {transactions.from + index}
+                                        </Table.Cell>
+                                        <Table.Cell className="px-6 py-4 font-medium">
+                                            {transaction.ingredient.name}
+                                        </Table.Cell>
+                                        <Table.Cell className="px-6 py-4">
+                                            {getTypeLabel(transaction.usage_type)}
+                                        </Table.Cell>
+                                        <Table.Cell className="px-6 py-4 text-right font-medium">
+                                            {formatAmount(transaction.amount)}
+                                        </Table.Cell>
+                                        <Table.Cell className="px-6 py-4">
+                                            {transaction.note}
+                                        </Table.Cell>
+                                        <Table.Cell className="px-6 py-4">
+                                            {formatDate(transaction.created_at)}
+                                        </Table.Cell>
+                                    </Table.Row>
+                                ))}
                             </Table.Body>
                         </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex items-center justify-center">
+                        <Pagination
+                            currentPage={transactions.current_page}
+                            totalPages={transactions.last_page}
+                            onPageChange={handlePageChange}
+                            showIcons={true}
+                        />
                     </div>
                 </div>
             </AdminLayout>

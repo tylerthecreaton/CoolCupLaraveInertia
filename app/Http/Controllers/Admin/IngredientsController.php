@@ -31,6 +31,7 @@ class IngredientsController extends Controller
             "unit_id" => "required|exists:units,id",
             "expiration_date" => "required",
             "image" => "image|mimes:jpeg,png,jpg,gif,svg|max:2048",
+            'is_sweetness' => 'required|boolean',
         ];
         $message = [
             "name.required" => "กรุณากรอกชื่อ",
@@ -38,7 +39,7 @@ class IngredientsController extends Controller
             "name.max" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
             "name.unique" => "ชื่อนี้ถูกใช้ไปแล้ว",
             "quantity.required" => "กรุณากรอกจํานวน",
-            "quantity.numeric"=> "กรุณากรอกจํานวนให้ถูกต้อง",
+            "quantity.numeric" => "กรุณากรอกจํานวนให้ถูกต้อง",
             "unit_id.required" => "กรุณาเลือกหน่วยวัด",
             "unit_id.exists" => "หน่วยวัดที่เลือกไม่ถูกต้อง",
             "expiration_date.required" => "กรุณากรอกวันหมดอายุ",
@@ -46,6 +47,8 @@ class IngredientsController extends Controller
             "image.image" => "กรุณาอัปโหลดรูปภาพให้ถูกต้อง",
             "image.mimes" => "กรุณาอัปโหลดรูปภาพให้ถูกต้อง",
             "image.max" => "กรุณาอัปโหลดรูปภาพให้ถูกต้อง",
+            'is_sweetness.required' => 'กรุณาเลือกรูปแบบวัตถุดิบ',
+            'is_sweetness.boolean' => 'กรุณาเลือกรูปแบบวัตถุดิบให้ถูกต้อง',
         ];
 
         if ($request->hasFile('image')) {
@@ -70,6 +73,7 @@ class IngredientsController extends Controller
             'quantity' => $request->quantity,
             'unit_id' => $request->unit_id,
             'expiration_date' => $request->expiration_date,
+            'is_sweetness' => $request->is_sweetness,
             'image' => $imageName == '' ? '' : $imageName,
         ]);
 
@@ -78,7 +82,8 @@ class IngredientsController extends Controller
 
         return redirect()->route('admin.ingredients.index')->with('success', '');
     }
-    public function show($id) {
+    public function show($id)
+    {
         //
     }
     public function edit($id)
@@ -87,14 +92,14 @@ class IngredientsController extends Controller
         $units = Unit::all();
         return Inertia::render('Admin/ingredients/Edit', compact('ingredient', 'units'));
     }
-    public function update(Request $request,String $id)
+    public function update(Request $request, String $id)
     {
         $rules = [
             'name' => 'required|min:3|max:255|unique:ingredients,name,' . $id,
             'quantity' => 'required|numeric',
             'unit_id' => 'required|exists:units,id',
             'expiration_date' => 'required',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'is_sweetness' => 'required|boolean',
         ];
 
         $message = [
@@ -107,10 +112,9 @@ class IngredientsController extends Controller
             'unit_id.required' => 'กรุณาเลือกหน่วยวัด',
             'unit_id.exists' => 'หน่วยวัดที่เลือกไม่ถูกต้อง',
             'expiration_date.required' => 'กรุณากรอกวันหมดอายุ',
-            'required'=> 'กรุณากรอกข้อมูล',
-            'image.image' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
-            'image.mimes' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
-            'image.max' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
+            'required' => 'กรุณากรอกข้อมูล',
+            'is_sweetness.required' => 'กรุณาเลือกรูปแบบวัตถุดิบ',
+            'is_sweetness.boolean' => 'กรุณาเลือกรูปแบบวัตถุดิบให้ถูกต้อง',
         ];
 
         if ($request->hasFile('image')) {
@@ -144,6 +148,7 @@ class IngredientsController extends Controller
         $ingredient->quantity = $request->quantity;
         $ingredient->unit_id = $request->unit_id;
         $ingredient->expiration_date = $request->expiration_date;
+        $ingredient->is_sweetness = $request->is_sweetness;
         $ingredient->save();
         return redirect()->route('admin.ingredients.index')->with('success', '');
     }

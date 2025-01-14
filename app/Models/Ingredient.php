@@ -12,6 +12,7 @@ class Ingredient extends Model
         'quantity',
         'unit_id',
         'expiration_date',
+        'is_sweetness',
         'image',
     ];
 

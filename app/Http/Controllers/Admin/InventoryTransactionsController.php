@@ -18,34 +18,7 @@ class InventoryTransactionsController extends Controller
     public function index()
     {
         // Get all transactions with ingredient details and user details
-        $transactions = ProductIngredientUsage::with(['ingredient', 'createdBy'])
-            ->select(
-                'product_ingredient_usages.*',
-                'ingredients.name as ingredient_name',
-                'ingredients.unit_id',
-                'users.username as created_by_name',
-                'units.name as unit_name'
-            )
-            ->join('ingredients', 'ingredients.id', '=', 'product_ingredient_usages.ingredient_id')
-            ->join('users', 'users.id', '=', 'product_ingredient_usages.created_by')
-            ->join('units', 'units.id', '=', 'ingredients.unit_id')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($transaction) {
-                return [
-                    'id' => $transaction->id,
-                    'ingredient' => [
-                        'id' => $transaction->ingredient_id,
-                        'name' => $transaction->ingredient_name,
-                        'unit' => $transaction->unit_name
-                    ],
-                    'amount' => abs($transaction->amount), // Convert to positive number for display
-                    'type' => $transaction->usage_type,
-                    'created_by' => $transaction->created_by_name,
-                    'created_at' => $transaction->created_at->setTimezone('Asia/Bangkok')->format('Y-m-d H:i:s'),
-                    'note' => $transaction->note
-                ];
-            });
+        $transactions = ProductIngredientUsage::with(['ingredient'])->orderBy('created_at', 'desc')->paginate(20);
 
         return Inertia::render('Admin/transactions/index', [
             'transactions' => $transactions

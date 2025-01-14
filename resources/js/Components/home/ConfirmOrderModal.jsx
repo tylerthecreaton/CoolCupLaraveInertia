@@ -158,7 +158,9 @@ const ConfirmOrderModal = ({ show, onClose }) => {
                             {summary.totalDiscount > 0 && (
                                 <div className="flex justify-between text-sm text-green-600 font-medium border-t pt-2">
                                     <span>ส่วนลดทั้งหมด:</span>
-                                    <span>-฿{summary.totalDiscount.toFixed(2)}</span>
+                                    <span>
+                                        -฿{summary.totalDiscount.toFixed(2)}
+                                    </span>
                                 </div>
                             )}
                             <div className="flex justify-between pt-3 text-lg border-t">

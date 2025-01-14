@@ -21,9 +21,4 @@ class ProductIngredientUsage extends Model
     {
         return $this->belongsTo(Ingredient::class);
     }
-
-    public function createdBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
 }
