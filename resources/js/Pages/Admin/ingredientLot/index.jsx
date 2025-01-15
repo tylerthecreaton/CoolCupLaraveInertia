@@ -1,228 +1,288 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, useForm } from "@inertiajs/react";
-import { Breadcrumb } from "flowbite-react";
-import { useState } from "react";
+import { Head, Link, router } from "@inertiajs/react";
+import { Breadcrumb, Table, Button, Modal } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
+import { FaPlus } from "react-icons/fa";
+import { useState } from "react";
+import Swal from "sweetalert2";
+import axios from "axios";
 
-export default function IngredientLot({ ingredients }) {
-    const { data, setData } = useForm([
-        {
-            ingredient_id: "",
-            expire_date: "",
-            quantity: "",
-            unit_name: "", // Add unit_name to store the selected ingredient's unit
-        },
-    ]);
+export default function IngredientLotHistory({ lots }) {
+    const [showModal, setShowModal] = useState(false);
+    const [selectedLotDetails, setSelectedLotDetails] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(null);
 
-    const handleIngredientChange = (index, value) => {
-        const newData = [...data];
-        // Only check for duplicates if selecting a new ingredient (not clearing)
-        if (value !== "") {
-            // Check if ingredient is already selected in another row
-            const isDuplicate = data.some(
-                (item, i) => i !== index && item.ingredient_id === value
+    const handleShowDetails = async (date) => {
+        try {
+            const response = await axios.get(
+                route("admin.ingredient-lots.details", date)
             );
-            if (isDuplicate) {
-                alert("วัตถุดิบนี้ถูกเลือกไปแล้ว");
-                return;
+            setSelectedLotDetails(response.data);
+            setSelectedDate(date);
+            setShowModal(true);
+        } catch (error) {
+            console.error("Error fetching lot details:", error);
+        }
+    };
+
+    const handleRevert = (id) => {
+        Swal.fire({
+            title: "ยืนยันการคืนค่า",
+            text: "การคืนค่าจะลบ Lot นี้และลดจำนวนวัตถุดิบ คุณต้องการดำเนินการต่อหรือไม่?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "ยืนยัน",
+            cancelButtonText: "ยกเลิก",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("admin.ingredient-lots.revert", id), {
+                    onSuccess: () => {
+                        setShowModal(false);
+                        Swal.fire({
+                            title: "สำเร็จ!",
+                            text: "คืนค่า Lot เรียบร้อยแล้ว",
+                            icon: "success",
+                        });
+                    },
+                });
             }
-        }
-        
-        newData[index].ingredient_id = value;
-        // Clear unit name if deselecting ingredient
-        if (value === "") {
-            newData[index].unit_name = "";
-        } else {
-            // Find the selected ingredient and get its unit
-            const selectedIngredient = ingredients.find(
-                (ing) => ing.id.toString() === value
-            );
-            newData[index].unit_name = selectedIngredient?.unit?.name || "";
-        }
-        setData(newData);
+        });
     };
 
-    const handleQuantityChange = (index, value) => {
-        const newData = [...data];
-        newData[index].quantity = value;
-        setData(newData);
-    };
-
-    const handleRemoveRow = (index) => {
-        const newData = [...data];
-        newData.splice(index, 1);
-        setData(newData);
-    };
-
-    const handleAddRow = () => {
-        // Count how many ingredients are already selected
-        const selectedCount = data.filter(item => item.ingredient_id !== "").length;
-        // Count available (unselected) ingredients
-        const availableCount = ingredients.length - selectedCount;
-
-        if (availableCount === 0) {
-            alert("ไม่มีวัตถุดิบที่สามารถเพิ่มได้แล้ว");
-            return;
-        }
-
-        setData([
-            ...data,
-            {
-                ingredient_id: "",
-                expire_date: "",
-                quantity: "",
-                unit_name: "",
-            },
-        ]);
-    };
-
-    // Function to get available ingredients for dropdown
-    const getAvailableIngredients = (currentIndex) => {
-        const selectedIngredients = data
-            .map((item, index) => index !== currentIndex && item.ingredient_id ? item.ingredient_id : null)
-            .filter(id => id !== null);
-        
-        return ingredients.filter(ing => !selectedIngredients.includes(ing.id.toString()));
+    const formatDate = (date) => {
+        return new Date(date).toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
     };
 
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    เพิ่ม lot วัตถุดิบ
+                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                    ประวัติการเพิ่ม Lot วัตถุดิบ
                 </h2>
             }
         >
-            <Head title="เพิ่มวัตถุดิบ" />
-            <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
-                <Breadcrumb aria-label="Default breadcrumb example">
-                    <Breadcrumb.Item href="/dashboard" icon={HiHome}>
-                        Home
-                    </Breadcrumb.Item>
-                    <Breadcrumb.Item href="/admin/ingredients">
-                        วัตถุดิบทั้งหมด
+            <Head title="ประวัติการเพิ่ม Lot วัตถุดิบ" />
+
+            <div className="py-12">
+                <Breadcrumb className="px-4 lg:px-6 py-2 mb-4">
+                    <Breadcrumb.Item href={route("dashboard")} icon={HiHome}>
+                        หน้าแรก
                     </Breadcrumb.Item>
                     <Breadcrumb.Item>จัดการวัตถุดิบ</Breadcrumb.Item>
                 </Breadcrumb>
+
                 <AdminLayout>
-                    <div className="space-y-4">
-                        {data.map((item, index) => (
-                            <div
-                                key={index}
-                                className="p-4 bg-white rounded-lg shadow"
-                            >
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                                    <div>
-                                        <label
-                                            htmlFor={`ingredient-${index}`}
-                                            className="block mb-2 text-sm font-medium text-gray-900"
-                                        >
-                                            วัตถุดิบ
-                                        </label>
-                                        <select
-                                            id={`ingredient-${index}`}
-                                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                            value={item.ingredient_id}
-                                            onChange={(e) =>
-                                                handleIngredientChange(
-                                                    index,
-                                                    e.target.value
-                                                )
-                                            }
-                                        >
-                                            <option value="">เลือกวัตถุดิบ</option>
-                                            {getAvailableIngredients(index).map((ingredient) => (
-                                                <option
-                                                    key={ingredient.id}
-                                                    value={ingredient.id}
-                                                >
-                                                    {ingredient.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label
-                                            htmlFor={`quantity-${index}`}
-                                            className="block mb-2 text-sm font-medium text-gray-900"
-                                        >
-                                            จำนวน{" "}
-                                            {item.unit_name && (
-                                                <>({item.unit_name})</>
-                                            )}
-                                        </label>
-                                        <div className="flex items-center">
-                                            <input
-                                                type="number"
-                                                id={`quantity-${index}`}
-                                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                                value={item.quantity}
-                                                onChange={(e) =>
-                                                    handleQuantityChange(
-                                                        index,
-                                                        e.target.value
+                    <div className="flex justify-end mb-4">
+                        <Link href={route("admin.ingredient-lots.create")}>
+                            <Button>
+                                <FaPlus className="mr-2 h-4 w-4" />
+                                เพิ่ม Lot ใหม่
+                            </Button>
+                        </Link>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <Table hoverable>
+                            <Table.Head>
+                                <Table.HeadCell>วันที่บันทึก</Table.HeadCell>
+                                <Table.HeadCell>จำนวนรายการ</Table.HeadCell>
+                                <Table.HeadCell>การจัดการ</Table.HeadCell>
+                            </Table.Head>
+                            <Table.Body className="divide-y">
+                                {lots.data.map((lot) => (
+                                    <Table.Row
+                                        key={lot.created_at}
+                                        className="bg-white"
+                                    >
+                                        <Table.Cell>
+                                            <button
+                                                onClick={() =>
+                                                    handleShowDetails(
+                                                        lot.created_at.split(
+                                                            "T"
+                                                        )[0]
                                                     )
                                                 }
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label
-                                            htmlFor={`expire-${index}`}
-                                            className="block mb-2 text-sm font-medium text-gray-900"
-                                        >
-                                            วันหมดอายุ
-                                        </label>
-                                        <input
-                                            type="date"
-                                            id={`expire-${index}`}
-                                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                            value={item.expire_date}
-                                            onChange={(e) => {
-                                                const newData = [...data];
-                                                newData[index].expire_date =
-                                                    e.target.value;
-                                                setData(newData);
-                                            }}
-                                            min={
-                                                new Date()
-                                                    .toISOString()
-                                                    .split("T")[0]
-                                            }
-                                        />
-                                    </div>
-                                    <div className="flex items-end">
-                                        {data.length > 1 && (
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleRemoveRow(index)
-                                                }
-                                                className="text-red-700 hover:text-white border border-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                                                className="text-blue-600 hover:text-blue-800 hover:underline"
                                             >
-                                                ลบ
+                                                {formatDate(lot.created_at)}
                                             </button>
-                                        )}
-                                    </div>
-                                </div>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            {lot.total_items} รายการ
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <Button
+                                                color="info"
+                                                size="sm"
+                                                onClick={() =>
+                                                    handleShowDetails(
+                                                        lot.created_at.split(
+                                                            "T"
+                                                        )[0]
+                                                    )
+                                                }
+                                            >
+                                                ดูรายละเอียด
+                                            </Button>
+                                        </Table.Cell>
+                                    </Table.Row>
+                                ))}
+                            </Table.Body>
+                        </Table>
+                    </div>
+
+                    {/* Lot Details Modal */}
+                    <Modal
+                        show={showModal}
+                        onClose={() => setShowModal(false)}
+                        size="4xl"
+                    >
+                        <Modal.Header>
+                            รายละเอียด Lot วันที่{" "}
+                            {selectedDate && formatDate(selectedDate)}
+                        </Modal.Header>
+                        <Modal.Body>
+                            <div className="overflow-x-auto">
+                                <Table hoverable>
+                                    <Table.Head>
+                                        <Table.HeadCell>
+                                            วัตถุดิบ
+                                        </Table.HeadCell>
+                                        <Table.HeadCell>จำนวน</Table.HeadCell>
+                                        <Table.HeadCell>
+                                            วันหมดอายุ
+                                        </Table.HeadCell>
+                                        <Table.HeadCell>
+                                            หมายเหตุ
+                                        </Table.HeadCell>
+                                        <Table.HeadCell>
+                                            ผู้บันทึก
+                                        </Table.HeadCell>
+                                        <Table.HeadCell>
+                                            การจัดการ
+                                        </Table.HeadCell>
+                                    </Table.Head>
+                                    <Table.Body className="divide-y">
+                                        {selectedLotDetails.map((detail) => (
+                                            <Table.Row
+                                                key={detail.id}
+                                                className="bg-white"
+                                            >
+                                                <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
+                                                    {detail.ingredient.name}
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    {detail.quantity}{" "}
+                                                    {
+                                                        detail.ingredient.unit
+                                                            ?.abbreviation
+                                                    }
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    {formatDate(
+                                                        detail.expiration_date
+                                                    )}
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    {detail.notes}
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    {detail.user.name}
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    <Button
+                                                        color="failure"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            handleRevert(
+                                                                detail.id
+                                                            )
+                                                        }
+                                                    >
+                                                        คืนค่า
+                                                    </Button>
+                                                </Table.Cell>
+                                            </Table.Row>
+                                        ))}
+                                    </Table.Body>
+                                </Table>
                             </div>
-                        ))}
-                        <div className="flex justify-between">
-                            <button
-                                type="button"
-                                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none"
-                                onClick={handleAddRow}
-                                disabled={data.length >= ingredients.length}
-                            >
-                                เพิ่มวัตถุดิบ
-                            </button>
-                            <button
-                                type="submit"
-                                className="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-                            >
-                                บันทึก
-                            </button>
+                        </Modal.Body>
+                    </Modal>
+
+                    {/* Pagination */}
+                    <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4">
+                        <div className="flex flex-1 justify-between sm:hidden">
+                            {lots.prev_page_url && (
+                                <Link
+                                    href={lots.prev_page_url}
+                                    className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                >
+                                    ก่อนหน้า
+                                </Link>
+                            )}
+                            {lots.next_page_url && (
+                                <Link
+                                    href={lots.next_page_url}
+                                    className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                >
+                                    ถัดไป
+                                </Link>
+                            )}
+                        </div>
+                        <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                            <div>
+                                <p className="text-sm text-gray-700">
+                                    แสดง{" "}
+                                    <span className="font-medium">
+                                        {lots.from || 0}
+                                    </span>{" "}
+                                    ถึง{" "}
+                                    <span className="font-medium">
+                                        {lots.to || 0}
+                                    </span>{" "}
+                                    จากทั้งหมด{" "}
+                                    <span className="font-medium">
+                                        {lots.total}
+                                    </span>{" "}
+                                    รายการ
+                                </p>
+                            </div>
+                            <div>
+                                <nav
+                                    className="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                                    aria-label="Pagination"
+                                >
+                                    {lots.links.map((link, i) => (
+                                        <Link
+                                            key={i}
+                                            href={link.url}
+                                            className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+                                                link.active
+                                                    ? "z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                                    : "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:outline-offset-0"
+                                            } ${
+                                                !link.url
+                                                    ? "cursor-not-allowed opacity-50"
+                                                    : ""
+                                            }`}
+                                            dangerouslySetInnerHTML={{
+                                                __html: link.label,
+                                            }}
+                                        />
+                                    ))}
+                                </nav>
+                            </div>
                         </div>
                     </div>
                 </AdminLayout>

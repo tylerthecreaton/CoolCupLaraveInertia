@@ -141,7 +141,10 @@ Route::middleware('auth')->group(function () {
 
         // ---------------------------Ingredient lots---------------------------
         Route::get('/ingredient-lots', [AdminIngredientLotController::class, 'index'])->name('admin.ingredient-lots.index');
+        Route::get('/ingredient-lots/create', [AdminIngredientLotController::class, 'create'])->name('admin.ingredient-lots.create');
         Route::post('/ingredient-lots', [AdminIngredientLotController::class, 'store'])->name('admin.ingredient-lots.store');
+        Route::delete('/ingredient-lots/{id}/revert', [AdminIngredientLotController::class, 'revert'])->name('admin.ingredient-lots.revert');
+        Route::get('/ingredient-lots/{date}/details', [AdminIngredientLotController::class, 'getLotDetails'])->name('admin.ingredient-lots.details');
 
         // ---------------------------Units---------------------------
         Route::get('/units', [AdminUnitController::class, 'index'])->name('admin.units.index');
