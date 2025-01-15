@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CategoriesController as AdminCategoriesController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\IngredientsController as AdminIngredientsController;
+use App\Http\Controllers\Admin\IngredientLotController as AdminIngredientLotController;
 use App\Http\Controllers\Admin\InventoryTransactionsController as AdminInventoryTransactionsController;
 use App\Http\Controllers\Admin\ProductIngredientsController as AdminProductIngredientsController;
 use App\Http\Controllers\Admin\ProductsController as AdminProductsController;
@@ -68,8 +69,8 @@ Route::get('/member/search', [MemberController::class, 'search'])->name('member.
 Route::middleware('auth')->group(function () {
     Route::get('/receipt-history', [OrderController::class, 'receiptHistory'])->name('receipt.history');
 
-// ---------------------------Sale Dashboard---------------------------
-Route::get('/sale-dashboard', [SaleDashboardController::class, 'index'])->name('sale.dashboard');
+    // ---------------------------Sale Dashboard---------------------------
+    Route::get('/sale-dashboard', [SaleDashboardController::class, 'index'])->name('sale.dashboard');
 
     // ---------------------------Promotions---------------------------
     Route::get('/promotions', [PromotionController::class, 'index'])->name('promotion.index');
@@ -137,6 +138,10 @@ Route::get('/sale-dashboard', [SaleDashboardController::class, 'index'])->name('
         Route::post('/ingredients/{ingredient}/increase', [AdminIngredientsController::class, 'increaseQuantity'])->name('admin.ingredients.increase');
         Route::post('/ingredients/{ingredient}/increase-quantity', [AdminIngredientsController::class, 'increaseQuantity'])
             ->name('admin.ingredients.increase-quantity');
+
+        // ---------------------------Ingredient lots---------------------------
+        Route::get('/ingredient-lots', [AdminIngredientLotController::class, 'index'])->name('admin.ingredient-lots.index');
+        Route::post('/ingredient-lots', [AdminIngredientLotController::class, 'store'])->name('admin.ingredient-lots.store');
 
         // ---------------------------Units---------------------------
         Route::get('/units', [AdminUnitController::class, 'index'])->name('admin.units.index');
