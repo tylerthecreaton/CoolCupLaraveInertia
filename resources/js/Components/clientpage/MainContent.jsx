@@ -6,6 +6,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import "swiper/css/effect-fade";
 
+import "@/../../resources/css/client-page.css";
 import "/resources/css/styles.css";
 
 import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
@@ -61,7 +62,7 @@ export default function MainContent() {
     ];
 
     return (
-        <div className="swiper-container">
+        <div className="swiper-container h-[600px] relative overflow-hidden">
             <Swiper
                 spaceBetween={0}
                 centeredSlides={true}
@@ -77,24 +78,32 @@ export default function MainContent() {
                 navigation={true}
                 modules={[Autoplay, Pagination, Navigation, EffectFade]}
                 onAutoplayTimeLeft={onAutoplayTimeLeft}
-                className="mySwiper"
+                className="mySwiper h-full"
             >
                 {slides.map((slide) => (
                     <SwiperSlide key={slide.id}>
-                        <div className="h-full slide-content">
-                            <img src={slide.image} alt={slide.title} />
-                            <div className="slide-overlay">
-                                <h2>{slide.title}</h2>
-                                <p className="slide-subtitle">{slide.subtitle}</p>
+                        <div className="relative h-full slide-content">
+                            <img 
+                                src={slide.image} 
+                                alt={slide.title} 
+                                className="object-cover w-full h-full brightness-75"
+                            />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center slide-overlay bg-black/30">
+                                <h2 className="px-4 mb-4 text-4xl font-bold text-white transition-all duration-500 ease-in-out transform md:text-5xl hover:scale-105">
+                                    {slide.title}
+                                </h2>
+                                <p className="px-4 text-lg text-white/90 md:text-xl slide-subtitle max-w-2xl">
+                                    {slide.subtitle}
+                                </p>
                             </div>
                         </div>
                     </SwiperSlide>
                 ))}
-                <div className="autoplay-progress" slot="container-end">
-                    <svg viewBox="0 0 48 48" ref={progressCircle}>
-                        <circle cx="24" cy="24" r="20"></circle>
+                <div className="absolute bottom-4 right-4 z-10 autoplay-progress" slot="container-end">
+                    <svg viewBox="0 0 48 48" ref={progressCircle} className="w-12 h-12">
+                        <circle cx="24" cy="24" r="20" className="stroke-white/50 fill-none"></circle>
                     </svg>
-                    <span ref={progressContent}></span>
+                    <span ref={progressContent} className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white"></span>
                 </div>
             </Swiper>
         </div>
