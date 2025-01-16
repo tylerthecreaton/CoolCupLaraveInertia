@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\UnitController as AdminUnitController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\Admin\ExpiredController as AdminExpiredController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NotificationController;
@@ -93,102 +94,105 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
     Route::get('/api/admin/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.get');
 
-    Route::group(['prefix' => '/admin'], function () {
+    Route::prefix('admin')->name('admin.')->group(function () {
         // ---------------------------Users---------------------------
-        Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
-        Route::get('/users/create', [AdminUserController::class, 'create'])->name('admin.users.create');
-        Route::post('/users', [AdminUserController::class, 'store'])->name('admin.users.store');
-        Route::get('/users/{id}', [AdminUserController::class, 'show'])->name('admin.user');
-        Route::get('/users/{id}/edit', [AdminUserController::class, 'edit'])->name('admin.users.edit');
-        Route::put('/users/{id}', [AdminUserController::class, 'update'])->name('admin.users.update');
-        Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+        Route::get('/users/{id}', [AdminUserController::class, 'show'])->name('user');
+        Route::get('/users/{id}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{id}', [AdminUserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 
         // ---------------------------Categories---------------------------
-        Route::get('/categories', [AdminCategoriesController::class, 'index'])->name('admin.categories.index');
-        Route::get('/categories/create', [AdminCategoriesController::class, 'create'])->name('admin.categories.create');
-        Route::post('/categories', [AdminCategoriesController::class, 'store'])->name('admin.categories.store');
-        Route::get('/categories/{id}', [AdminCategoriesController::class, 'show'])->name('admin.categories.show');
-        Route::get('/categories/{id}/edit', [AdminCategoriesController::class, 'edit'])->name('admin.categories.edit');
-        Route::put('/categories/{id}', [AdminCategoriesController::class, 'update'])->name('admin.categories.update');
-        Route::delete('/categories/{id}', [AdminCategoriesController::class, 'destroy'])->name('admin.categories.destroy');
+        Route::get('/categories', [AdminCategoriesController::class, 'index'])->name('categories.index');
+        Route::get('/categories/create', [AdminCategoriesController::class, 'create'])->name('categories.create');
+        Route::post('/categories', [AdminCategoriesController::class, 'store'])->name('categories.store');
+        Route::get('/categories/{id}', [AdminCategoriesController::class, 'show'])->name('categories.show');
+        Route::get('/categories/{id}/edit', [AdminCategoriesController::class, 'edit'])->name('categories.edit');
+        Route::put('/categories/{id}', [AdminCategoriesController::class, 'update'])->name('categories.update');
+        Route::delete('/categories/{id}', [AdminCategoriesController::class, 'destroy'])->name('categories.destroy');
 
         // ---------------------------Products---------------------------
-        Route::get('/products', [AdminProductsController::class, 'index'])->name('admin.products.index');
-        Route::get('/products/create', [AdminProductsController::class, 'create'])->name('admin.products.create');
-        Route::post('/products', [AdminProductsController::class, 'store'])->name('admin.products.store');
-        Route::get('/products/{id}', [AdminProductsController::class, 'show'])->name('admin.products.show');
-        Route::get('/products/{id}/edit', [AdminProductsController::class, 'edit'])->name('admin.products.edit');
-        Route::put('/products/{id}', [AdminProductsController::class, 'update'])->name('admin.products.update');
-        Route::delete('/products/{id}', [AdminProductsController::class, 'destroy'])->name('admin.products.destroy');
+        Route::get('/products', [AdminProductsController::class, 'index'])->name('products.index');
+        Route::get('/products/create', [AdminProductsController::class, 'create'])->name('products.create');
+        Route::post('/products', [AdminProductsController::class, 'store'])->name('products.store');
+        Route::get('/products/{id}', [AdminProductsController::class, 'show'])->name('products.show');
+        Route::get('/products/{id}/edit', [AdminProductsController::class, 'edit'])->name('products.edit');
+        Route::put('/products/{id}', [AdminProductsController::class, 'update'])->name('products.update');
+        Route::delete('/products/{id}', [AdminProductsController::class, 'destroy'])->name('products.destroy');
 
         // ---------------------------Product Ingredients---------------------------
         Route::post('/product-ingredients/batch-update', [AdminProductIngredientsController::class, 'batchUpdate'])
-            ->name('admin.product-ingredients.batch-update');
+            ->name('product-ingredients.batch-update');
 
         // ---------------------------Customers---------------------------
-        Route::get('/customers', [AdminCustomerController::class, 'index'])->name('admin.customers.index');
-        Route::get('/customers/create', [AdminCustomerController::class, 'create'])->name('admin.customers.create');
-        Route::post('/customers', [AdminCustomerController::class, 'store'])->name('admin.customers.store');
-        Route::get('/customers/{id}', [AdminCustomerController::class, 'show'])->name('admin.customers.show');
-        Route::get('/customers/{id}/edit', [AdminCustomerController::class, 'edit'])->name('admin.customers.edit');
-        Route::put('/customers/{id}', [AdminCustomerController::class, 'update'])->name('admin.customers.update');
-        Route::delete('/customers/{id}', [AdminCustomerController::class, 'destroy'])->name('admin.customers.destroy');
+        Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/create', [AdminCustomerController::class, 'create'])->name('customers.create');
+        Route::post('/customers', [AdminCustomerController::class, 'store'])->name('customers.store');
+        Route::get('/customers/{id}', [AdminCustomerController::class, 'show'])->name('customers.show');
+        Route::get('/customers/{id}/edit', [AdminCustomerController::class, 'edit'])->name('customers.edit');
+        Route::put('/customers/{id}', [AdminCustomerController::class, 'update'])->name('customers.update');
+        Route::delete('/customers/{id}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
 
         // ---------------------------Ingredients---------------------------
-        Route::get('/ingredients', [AdminIngredientsController::class, 'index'])->name('admin.ingredients.index');
-        Route::get('/ingredients/create', [AdminIngredientsController::class, 'create'])->name('admin.ingredients.create');
-        Route::post('/ingredients', [AdminIngredientsController::class, 'store'])->name('admin.ingredients.store');
-        Route::get('/ingredients/{id}', [AdminIngredientsController::class, 'show'])->name('admin.ingredients.show');
-        Route::get('/ingredients/{id}/edit', [AdminIngredientsController::class, 'edit'])->name('admin.ingredients.edit');
-        Route::put('/ingredients/{id}', [AdminIngredientsController::class, 'update'])->name('admin.ingredients.update');
-        Route::delete('/ingredients/{id}', [AdminIngredientsController::class, 'destroy'])->name('admin.ingredients.destroy');
-        Route::post('/ingredients/{ingredient}/increase', [AdminIngredientsController::class, 'increaseQuantity'])->name('admin.ingredients.increase');
+        Route::get('/ingredients', [AdminIngredientsController::class, 'index'])->name('ingredients.index');
+        Route::get('/ingredients/create', [AdminIngredientsController::class, 'create'])->name('ingredients.create');
+        Route::post('/ingredients', [AdminIngredientsController::class, 'store'])->name('ingredients.store');
+        Route::get('/ingredients/{id}', [AdminIngredientsController::class, 'show'])->name('ingredients.show');
+        Route::get('/ingredients/{id}/edit', [AdminIngredientsController::class, 'edit'])->name('ingredients.edit');
+        Route::put('/ingredients/{id}', [AdminIngredientsController::class, 'update'])->name('ingredients.update');
+        Route::delete('/ingredients/{id}', [AdminIngredientsController::class, 'destroy'])->name('ingredients.destroy');
+        Route::post('/ingredients/{ingredient}/increase', [AdminIngredientsController::class, 'increaseQuantity'])->name('ingredients.increase');
         Route::post('/ingredients/{ingredient}/increase-quantity', [AdminIngredientsController::class, 'increaseQuantity'])
-            ->name('admin.ingredients.increase-quantity');
+            ->name('ingredients.increase-quantity');
 
         // ---------------------------Ingredient lots---------------------------
-        Route::get('/ingredient-lots', [AdminIngredientLotController::class, 'index'])->name('admin.ingredient-lots.index');
-        Route::get('/ingredient-lots/create', [AdminIngredientLotController::class, 'create'])->name('admin.ingredient-lots.create');
-        Route::post('/ingredient-lots', [AdminIngredientLotController::class, 'store'])->name('admin.ingredient-lots.store');
-        Route::delete('/ingredient-lots/{id}/revert', [AdminIngredientLotController::class, 'revert'])->name('admin.ingredient-lots.revert');
-        Route::get('/ingredient-lots/{date}/details', [AdminIngredientLotController::class, 'getLotDetails'])->name('admin.ingredient-lots.details');
-        Route::post('/ingredient-lots/{lot}/dispose', [AdminIngredientLotController::class, 'dispose'])->name('admin.ingredient-lots.dispose');
+        Route::get('/ingredient-lots', [AdminIngredientLotController::class, 'index'])->name('ingredient-lots.index');
+        Route::get('/ingredient-lots/create', [AdminIngredientLotController::class, 'create'])->name('ingredient-lots.create');
+        Route::post('/ingredient-lots', [AdminIngredientLotController::class, 'store'])->name('ingredient-lots.store');
+        Route::delete('/ingredient-lots/{id}/revert', [AdminIngredientLotController::class, 'revert'])->name('ingredient-lots.revert');
+        Route::get('/ingredient-lots/{date}/details', [AdminIngredientLotController::class, 'getLotDetails'])->name('ingredient-lots.details');
 
+        // ---------------------------Ingredient lots dispose---------------------------
+        // Expired Ingredients Routes
+        Route::get('/ingredient-lots/expired', [AdminExpiredController::class, 'index'])->name('ingredient-lots.expired.index');
+        Route::delete('/ingredient-lots/expired/{ingredientLot}', [AdminExpiredController::class, 'dispose'])->name('ingredient-lots.expired.dispose');
         // ---------------------------Units---------------------------
-        Route::get('/units', [AdminUnitController::class, 'index'])->name('admin.units.index');
-        Route::get('/units/create', [AdminUnitController::class, 'create'])->name('admin.units.create');
-        Route::post('/units', [AdminUnitController::class, 'store'])->name('admin.units.store');
-        Route::get('/units/{id}', [AdminUnitController::class, 'show'])->name('admin.units.show');
-        Route::get('/units/{id}/edit', [AdminUnitController::class, 'edit'])->name('admin.units.edit');
-        Route::put('/units/{id}', [AdminUnitController::class, 'update'])->name('admin.units.update');
-        Route::delete('/units/{id}', [AdminUnitController::class, 'destroy'])->name('admin.units.destroy');
+        Route::get('/units', [AdminUnitController::class, 'index'])->name('units.index');
+        Route::get('/units/create', [AdminUnitController::class, 'create'])->name('units.create');
+        Route::post('/units', [AdminUnitController::class, 'store'])->name('units.store');
+        Route::get('/units/{id}', [AdminUnitController::class, 'show'])->name('units.show');
+        Route::get('/units/{id}/edit', [AdminUnitController::class, 'edit'])->name('units.edit');
+        Route::put('/units/{id}', [AdminUnitController::class, 'update'])->name('units.update');
+        Route::delete('/units/{id}', [AdminUnitController::class, 'destroy'])->name('units.destroy');
 
         // ---------------------------Inventory Transactions---------------------------
-        Route::get('/transactions', [AdminInventoryTransactionsController::class, 'index'])->name('admin.transactions.index');
-        Route::get('/transactions/create', [AdminInventoryTransactionsController::class, 'create'])->name('admin.transactions.create');
-        Route::post('/transactions', [AdminInventoryTransactionsController::class, 'store'])->name('admin.transactions.store');
-        Route::get('/transactions/{id}', [AdminInventoryTransactionsController::class, 'show'])->name('admin.transactions.show');
-        Route::get('/transactions/{id}/edit', [AdminInventoryTransactionsController::class, 'edit'])->name('admin.transactions.edit');
-        Route::put('/transactions/{id}', [AdminInventoryTransactionsController::class, 'update'])->name('admin.transactions.update');
-        Route::delete('/transactions/{id}', [AdminInventoryTransactionsController::class, 'destroy'])->name('admin.transactions.destroy');
+        Route::get('/transactions', [AdminInventoryTransactionsController::class, 'index'])->name('transactions.index');
+        Route::get('/transactions/create', [AdminInventoryTransactionsController::class, 'create'])->name('transactions.create');
+        Route::post('/transactions', [AdminInventoryTransactionsController::class, 'store'])->name('transactions.store');
+        Route::get('/transactions/{id}', [AdminInventoryTransactionsController::class, 'show'])->name('transactions.show');
+        Route::get('/transactions/{id}/edit', [AdminInventoryTransactionsController::class, 'edit'])->name('transactions.edit');
+        Route::put('/transactions/{id}', [AdminInventoryTransactionsController::class, 'update'])->name('transactions.update');
+        Route::delete('/transactions/{id}', [AdminInventoryTransactionsController::class, 'destroy'])->name('transactions.destroy');
 
         // ---------------------------Settings---------------------------
-        Route::get('/settings', [AdminSettingController::class, 'index'])->name('admin.settings.index');
-        Route::post('/settings', [AdminSettingController::class, 'store'])->name('admin.settings.store');
-        Route::put('/settings/{setting}', [AdminSettingController::class, 'update'])->name('admin.settings.update');
-        Route::delete('/settings/{setting}', [AdminSettingController::class, 'destroy'])->name('admin.settings.destroy');
+        Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
+        Route::post('/settings', [AdminSettingController::class, 'store'])->name('settings.store');
+        Route::put('/settings/{setting}', [AdminSettingController::class, 'update'])->name('settings.update');
+        Route::delete('/settings/{setting}', [AdminSettingController::class, 'destroy'])->name('settings.destroy');
 
         // ---------------------------Promotions---------------------------
-        Route::get('/promotions', [AdminPromotionController::class, 'index'])->name('admin.promotions.index');
-        Route::get('/promotions/create', [AdminPromotionController::class, 'create'])->name('admin.promotions.create');
-        Route::post('/promotions', [AdminPromotionController::class, 'store'])->name('admin.promotions.store');
-        Route::get('/promotions/{id}', [AdminPromotionController::class, 'show'])->name('admin.promotions.show');
-        Route::get('/promotions/{id}/edit', [AdminPromotionController::class, 'edit'])->name('admin.promotions.edit');
-        Route::put('/promotions/{id}', [AdminPromotionController::class, 'update'])->name('admin.promotions.update');
-        Route::delete('/promotions/{id}', [AdminPromotionController::class, 'destroy'])->name('admin.promotions.destroy');
+        Route::get('/promotions', [AdminPromotionController::class, 'index'])->name('promotions.index');
+        Route::get('/promotions/create', [AdminPromotionController::class, 'create'])->name('promotions.create');
+        Route::post('/promotions', [AdminPromotionController::class, 'store'])->name('promotions.store');
+        Route::get('/promotions/{id}', [AdminPromotionController::class, 'show'])->name('promotions.show');
+        Route::get('/promotions/{id}/edit', [AdminPromotionController::class, 'edit'])->name('promotions.edit');
+        Route::put('/promotions/{id}', [AdminPromotionController::class, 'update'])->name('promotions.update');
+        Route::delete('/promotions/{id}', [AdminPromotionController::class, 'destroy'])->name('promotions.destroy');
 
         // ---------------------------Daily Reports---------------------------
-        Route::get('/report', [AdminReportController::class, 'index'])->name('admin.report.index');
+        Route::get('/report', [AdminReportController::class, 'index'])->name('report.index');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

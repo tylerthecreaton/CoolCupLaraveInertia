@@ -121,17 +121,4 @@ class IngredientLotController extends Controller
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-
-    public function dispose(IngredientLot $lot)
-    {
-        // ตรวจสอบว่าหมดอายุจริงๆ
-        if (Carbon::parse($lot->expiration_date)->isPast()) {
-            // อัปเดตสถานะเป็นจำหน่ายแล้ว
-            $lot->update(['status' => 'disposed']);
-
-            return redirect()->back()->with('success', 'จำหน่ายวัตถุดิบเรียบร้อยแล้ว');
-        }
-
-        return redirect()->back()->with('error', 'ไม่สามารถจำหน่ายวัตถุดิบที่ยังไม่หมดอายุได้');
-    }
 }

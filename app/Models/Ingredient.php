@@ -27,4 +27,9 @@ class Ingredient extends Model
             ->withPivot('quantity_used')
             ->withTimestamps();
     }
+
+    public function lots()
+    {
+        return $this->hasMany(IngredientLot::class);
+    }
 }

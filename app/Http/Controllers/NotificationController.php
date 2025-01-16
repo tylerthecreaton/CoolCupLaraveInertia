@@ -110,7 +110,7 @@ class NotificationController extends Controller
                     'days_until_expiration' => $daysUntilExpiration
                 ]),
                 url: $isExpired
-                    ? route('admin.ingredient-lots.dispose', $ingredient->id)
+                    ? route('admin.ingredient-lots.expired.index', $ingredient->id)
                     : route('admin.ingredient-lots.create', ['ingredient_id' => $ingredient->ingredient_id]),
                 color: $isExpired ? 'error' : 'danger',
                 id: count($notifications) + $index + 1
