@@ -10,7 +10,7 @@ export default function HeaderPanel() {
     const { totalItems } = state.cart;
     const [time, setTime] = useState(new Date().toLocaleTimeString());
     const user = usePage().props.auth.user;
-    
+
     useEffect(() => {
         setInterval(() => {
             setTime(new Date().toLocaleTimeString());
@@ -18,14 +18,14 @@ export default function HeaderPanel() {
     }, []);
 
     return (
-        <div 
-            className="flex justify-between bg-blue-300 min-h-24 relative z-50 transition-all duration-300 ease-in-out"
+        <div
+            className="flex relative z-50 justify-between bg-green-200 transition-all duration-300 ease-in-out min-h-24"
             style={{ marginRight: state.app.isCartOpen ? '384px' : '0' }}
         >
             <div className="py-10 text-4xl font-bold text-black ms-8">
                 หน้าขาย
             </div>
-            <div className="flex items-center space-x-6 py-10 mr-8">
+            <div className="flex items-center py-10 mr-8 space-x-6">
                 <Button
                     color="light"
                     size="lg"
@@ -34,7 +34,7 @@ export default function HeaderPanel() {
                 >
                     <ShoppingCart className="w-6 h-6" />
                     {totalItems > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm">
+                        <span className="flex absolute -top-2 -right-2 justify-center items-center w-6 h-6 text-sm text-white bg-red-500 rounded-full">
                             {totalItems}
                         </span>
                     )}
