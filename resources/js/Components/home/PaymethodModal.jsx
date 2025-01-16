@@ -829,7 +829,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                             onChange={(e) =>
                                                 handleCashReceived(
                                                     e.target.value.replace(
-                                                        /[^0-9]/g,
+                                                        /[^0-9.]/g,
                                                         ""
                                                     )
                                                 )
@@ -849,7 +849,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                         <div className="font-medium">
                                             ยอดที่ต้องชำระ:
                                         </div>
-                                        <div className="text-right font-medium">
+                                        <div className="font-medium text-right">
                                             ฿{total.toFixed(2)}
                                         </div>
 
@@ -917,7 +917,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                             onChange={(e) =>
                                                 handleCashReceived(
                                                     e.target.value.replace(
-                                                        /[^0-9]/g,
+                                                        /[^0-9.]/g,
                                                         ""
                                                     )
                                                 )

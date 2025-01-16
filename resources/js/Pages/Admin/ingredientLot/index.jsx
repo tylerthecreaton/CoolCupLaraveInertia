@@ -79,7 +79,7 @@ export default function IngredientLotHistory({ lots }) {
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     ประวัติการเพิ่ม Lot วัตถุดิบ
                 </h2>
             }
@@ -87,7 +87,7 @@ export default function IngredientLotHistory({ lots }) {
             <Head title="ประวัติการเพิ่ม Lot วัตถุดิบ" />
 
             <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <Breadcrumb className="mb-4">
                         <Breadcrumb.Item href={route("dashboard")} icon={HiHome}>
                             หน้าแรก
@@ -95,16 +95,16 @@ export default function IngredientLotHistory({ lots }) {
                         <Breadcrumb.Item>จัดการวัตถุดิบ</Breadcrumb.Item>
                     </Breadcrumb>
 
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6">
                             <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-                                    <HiCalendar className="w-6 h-6 mr-2 text-gray-600" />
+                                <h2 className="flex items-center text-xl font-semibold text-gray-800">
+                                    <HiCalendar className="mr-2 w-6 h-6 text-gray-600" />
                                     ประวัติการเพิ่ม Lot วัตถุดิบ
                                 </h2>
                                 <Link href={route("admin.ingredient-lots.create")}>
                                     <Button gradientDuoTone="greenToBlue">
-                                        <FaPlus className="mr-2 h-4 w-4" />
+                                        <FaPlus className="mr-2 w-4 h-4" />
                                         เพิ่ม Lot ใหม่
                                     </Button>
                                 </Link>
@@ -121,7 +121,7 @@ export default function IngredientLotHistory({ lots }) {
                                         {lots.data.map((lot) => (
                                             <Table.Row
                                                 key={lot.created_at}
-                                                className="bg-white hover:bg-gray-50 transition-colors duration-150"
+                                                className="bg-white transition-colors duration-150 hover:bg-gray-50"
                                             >
                                                 <Table.Cell className="whitespace-nowrap">
                                                     <button
@@ -130,7 +130,7 @@ export default function IngredientLotHistory({ lots }) {
                                                                 lot.created_at.split("T")[0]
                                                             )
                                                         }
-                                                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                                                        className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
                                                     >
                                                         {formatDate(lot.created_at)}
                                                     </button>
@@ -150,7 +150,7 @@ export default function IngredientLotHistory({ lots }) {
                                                             )
                                                         }
                                                     >
-                                                        <HiEye className="mr-2 h-4 w-4" />
+                                                        <HiEye className="mr-2 w-4 h-4" />
                                                         ดูรายละเอียด
                                                     </Button>
                                                 </Table.Cell>
@@ -164,13 +164,13 @@ export default function IngredientLotHistory({ lots }) {
                             <Modal
                                 show={showModal}
                                 onClose={() => setShowModal(false)}
-                                size="6xl"
+                                size="7xl"
                             >
                                 <Modal.Header className="bg-gray-50">
                                     <div className="flex items-center">
-                                        <HiCalendar className="w-5 h-5 mr-2 text-gray-600" />
+                                        <HiCalendar className="mr-2 w-5 h-5 text-gray-600" />
                                         รายละเอียด Lot วันที่{" "}
-                                        <span className="font-medium ml-1">
+                                        <span className="ml-1 font-medium">
                                             {selectedDate && formatDate(selectedDate)}
                                         </span>
                                     </div>
@@ -193,7 +193,7 @@ export default function IngredientLotHistory({ lots }) {
                                                     return (
                                                         <Table.Row
                                                             key={detail.id}
-                                                            className="bg-white hover:bg-gray-50 transition-colors duration-150"
+                                                            className="bg-white transition-colors duration-150 hover:bg-gray-50"
                                                         >
                                                             <Table.Cell className="font-medium text-gray-900">
                                                                 {detail.ingredient.name}
@@ -239,7 +239,7 @@ export default function IngredientLotHistory({ lots }) {
                                                                                 type="submit"
                                                                                 className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300"
                                                                             >
-                                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-2">
+                                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="mr-2 w-4 h-4">
                                                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                                                                 </svg>
                                                                                 จำหน่าย
@@ -251,7 +251,7 @@ export default function IngredientLotHistory({ lots }) {
                                                                         color="failure"
                                                                         onClick={() => handleRevert(detail.id)}
                                                                     >
-                                                                        <HiArrowPath className="mr-2 h-4 w-4" />
+                                                                        <HiArrowPath className="mr-2 w-4 h-4" />
                                                                         คืนค่า
                                                                     </Button>
                                                                 </div>
@@ -266,14 +266,14 @@ export default function IngredientLotHistory({ lots }) {
                             </Modal>
 
                             {/* Pagination */}
-                            <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4">
+                            <div className="flex justify-between items-center px-4 py-3 mt-4 bg-white border-t border-gray-200 sm:px-6">
                                 <div className="flex flex-1 justify-between sm:hidden">
                                     {lots.prev_page_url && (
                                         <Link
                                             href={lots.prev_page_url}
-                                            className="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline-offset-0"
+                                            className="inline-flex relative items-center px-3 py-2 text-sm font-semibold text-gray-900 bg-white rounded-md ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline-offset-0"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 mr-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="mr-1 w-5 h-5">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                                             </svg>
                                             ก่อนหน้า
@@ -282,10 +282,10 @@ export default function IngredientLotHistory({ lots }) {
                                     {lots.next_page_url && (
                                         <Link
                                             href={lots.next_page_url}
-                                            className="relative ml-3 inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline-offset-0"
+                                            className="inline-flex relative items-center px-3 py-2 ml-3 text-sm font-semibold text-gray-900 bg-white rounded-md ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:outline-offset-0"
                                         >
                                             ถัดไป
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 ml-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="ml-1 w-5 h-5">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                             </svg>
                                         </Link>
@@ -304,7 +304,7 @@ export default function IngredientLotHistory({ lots }) {
                                         </p>
                                     </div>
                                     <div>
-                                        <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                                        <nav className="inline-flex isolate -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                                             {lots.links.map((link, i) => {
                                                 // ข้าม link ที่เป็น prev/next เพราะเราจะแสดงปุ่มของเราเอง
                                                 if (link.label.includes('Previous') || link.label.includes('Next')) {
@@ -336,7 +336,7 @@ export default function IngredientLotHistory({ lots }) {
                                             {lots.next_page_url && (
                                                 <Link
                                                     href={lots.next_page_url}
-                                                    className="relative inline-flex items-center rounded-r-md px-3 py-2 text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                                                    className="inline-flex relative items-center px-3 py-2 text-gray-900 rounded-r-md ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
                                                 >
                                                     <span className="sr-only">ถัดไป</span>
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">

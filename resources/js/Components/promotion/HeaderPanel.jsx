@@ -19,7 +19,7 @@ export default function HeaderPanel() {
 
     return (
         <div
-            className="flex relative z-50 justify-between bg-blue-300 transition-all duration-300 ease-in-out min-h-24"
+            className="flex relative z-50 justify-between bg-green-200 transition-all duration-300 ease-in-out min-h-24"
             style={{ marginRight: state.app.isCartOpen ? '384px' : '0' }}
         >
             <div className="py-10 text-4xl font-bold text-black ms-8">
