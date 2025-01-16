@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Ingredient;
 use App\Models\IngredientLot;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -119,5 +120,18 @@ class IngredientLotController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    public function dispose(IngredientLot $lot)
+    {
+        // ตรวจสอบว่าหมดอายุจริงๆ
+        if (Carbon::parse($lot->expiration_date)->isPast()) {
+            // อัปเดตสถานะเป็นจำหน่ายแล้ว
+            $lot->update(['status' => 'disposed']);
+
+            return redirect()->back()->with('success', 'จำหน่ายวัตถุดิบเรียบร้อยแล้ว');
+        }
+
+        return redirect()->back()->with('error', 'ไม่สามารถจำหน่ายวัตถุดิบที่ยังไม่หมดอายุได้');
     }
 }

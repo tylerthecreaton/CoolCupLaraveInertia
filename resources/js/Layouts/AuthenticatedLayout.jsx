@@ -22,7 +22,18 @@ export default function AuthenticatedLayout({ header, children }) {
         // Fetch notifications
         const fetchNotifications = async () => {
             try {
-                const response = await fetch("/api/admin/notifications");
+                const response = await fetch("/api/admin/notifications", {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 setNotifications(data.data || []);
                 setUnreadNotifications(data.total || 0);
@@ -47,9 +58,9 @@ export default function AuthenticatedLayout({ header, children }) {
         switch (type) {
             case "low_stock":
                 return (
-                    <div className="p-2 bg-yellow-100 rounded-full">
+                    <div className="p-2 bg-yellow-100 rounded-lg">
                         <svg
-                            className="w-4 h-4 text-yellow-600"
+                            className="w-5 h-5 text-yellow-600"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -63,11 +74,11 @@ export default function AuthenticatedLayout({ header, children }) {
                         </svg>
                     </div>
                 );
-            case "expired":
+            case "expiring":
                 return (
-                    <div className="p-2 bg-red-100 rounded-full">
+                    <div className="p-2 bg-red-100 rounded-lg">
                         <svg
-                            className="w-4 h-4 text-red-600"
+                            className="w-5 h-5 text-red-600"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -76,16 +87,34 @@ export default function AuthenticatedLayout({ header, children }) {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                    </div>
+                );
+            case "product_low_stock":
+                return (
+                    <div className="p-2 bg-orange-100 rounded-lg">
+                        <svg
+                            className="w-5 h-5 text-orange-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                             />
                         </svg>
                     </div>
                 );
             default:
                 return (
-                    <div className="p-2 bg-blue-100 rounded-full">
+                    <div className="p-2 bg-blue-100 rounded-lg">
                         <svg
-                            className="w-4 h-4 text-blue-600"
+                            className="w-5 h-5 text-blue-600"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -94,13 +123,117 @@ export default function AuthenticatedLayout({ header, children }) {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                             />
                         </svg>
                     </div>
                 );
         }
     };
+
+    const renderNotificationDropdown = () => (
+        <div className="relative">
+            <Dropdown
+                label={
+                    <div className="relative">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-6 h-6 text-gray-600 transition-colors hover:text-gray-900"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                            />
+                        </svg>
+                        {unreadNotifications > 0 && (
+                            <div className="absolute -top-1 -right-1">
+                                <Badge
+                                    color="failure"
+                                    className="px-1.5 !text-xs"
+                                >
+                                    {unreadNotifications}
+                                </Badge>
+                            </div>
+                        )}
+                    </div>
+                }
+                arrowIcon={false}
+                inline
+                className="w-96 !p-0"
+            >
+                <div className="py-2">
+                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                        <div className="flex justify-between items-center">
+                            <h6 className="text-sm font-semibold text-gray-900">
+                                การแจ้งเตือน
+                            </h6>
+                            {notifications.length > 0 && (
+                                <span className="text-xs text-gray-500">
+                                    {notifications.length} รายการ
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                    <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
+                        {notifications.length > 0 ? (
+                            notifications.map((notification) => (
+                                <Dropdown.Item
+                                    key={notification.id}
+                                    className="flex items-start space-x-3 !p-4 hover:bg-gray-50 transition-colors duration-150"
+                                    onClick={() => router.get(notification.url)}
+                                >
+                                    <div className="flex-shrink-0 mt-1">
+                                        {getNotificationIcon(notification.type)}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold text-gray-900 mb-0.5">
+                                            {notification.title}
+                                        </p>
+                                        <p className="text-sm text-gray-600 line-clamp-2">
+                                            {notification.message}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            เมื่อสักครู่
+                                        </p>
+                                    </div>
+                                </Dropdown.Item>
+                            ))
+                        ) : (
+                            <div className="px-4 py-8 text-sm text-center text-gray-500">
+                                <svg
+                                    className="mx-auto h-12 w-12 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="1"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                    />
+                                </svg>
+                                <p className="mt-2">ไม่มีการแจ้งเตือนใหม่</p>
+                            </div>
+                        )}
+                    </div>
+                    <div className="py-2 text-center border-t border-gray-100 bg-gray-50">
+                        <Link
+                            href={route('notifications.index')}
+                            className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors duration-150"
+                        >
+                            ดูการแจ้งเตือนทั้งหมด
+                        </Link>
+                    </div>
+                </div>
+            </Dropdown>
+        </div>
+    );
 
     const handleLogout = () => {
         Swal.fire({
@@ -426,7 +559,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                     strokeWidth={2}
-                                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H5z"
                                                 />
                                             </svg>
                                             <span>สินค้า</span>
@@ -448,7 +581,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                     strokeWidth={2}
-                                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                                    d="M17 20h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                                                 />
                                             </svg>
                                             <span>สมาชิก</span>
@@ -492,7 +625,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                     strokeWidth={2}
-                                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H3a2 2 0 00-2 2z"
+                                                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
                                                 />
                                             </svg>
                                             <span>ประวัติใบเสร็จ</span>
@@ -505,155 +638,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         {/* Add Profile and Notifications Section */}
                         <div className="hidden gap-x-4 space-x-4 sm:flex sm:items-center sm:ms-6">
                             {/* Notifications Dropdown */}
-                            <Dropdown
-                                label={
-                                    <div className="relative">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="w-6 h-6 text-gray-600 transition-colors hover:text-gray-900"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                                            />
-                                        </svg>
-                                        {unreadNotifications > 0 && (
-                                            <div className="absolute -top-1 -right-1">
-                                                <Badge
-                                                    color="failure"
-                                                    className="px-1.5 !text-xs"
-                                                >
-                                                    {unreadNotifications}
-                                                </Badge>
-                                            </div>
-                                        )}
-                                    </div>
-                                }
-                                arrowIcon={false}
-                                inline
-                                className="w-80 !p-0"
-                            >
-                                <div className="py-2">
-                                    <div className="px-4 py-2 border-b border-gray-100">
-                                        <h6 className="text-sm font-medium text-gray-900">
-                                            การแจ้งเตือน
-                                        </h6>
-                                    </div>
-                                    <div className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
-                                        {notifications.length > 0 ? (
-                                            notifications.map(
-                                                (notification) => (
-                                                    <Dropdown.Item
-                                                        key={notification.id}
-                                                        className="flex items-center space-x-3 !p-4"
-                                                        onClick={() => {
-                                                            if (
-                                                                notification.type ===
-                                                                "low_stock"
-                                                            ) {
-                                                                // Show modal to input quantity
-                                                                Swal.fire({
-                                                                    title: 'เพิ่มจำนวนวัตถุดิบ',
-                                                                    html: `
-                                                                        <div class="mb-4">
-                                                                            <p class="mb-2 text-sm text-gray-600">วัตถุดิบ: ${notification.data.name}</p>
-                                                                            <p class="mb-4 text-sm text-gray-600">จำนวนคงเหลือ: ${notification.data.quantity} ${notification.data.unit}</p>
-                                                                            <input
-                                                                                type="number"
-                                                                                id="quantity"
-                                                                                class="px-3 py-2 w-full rounded-lg border"
-                                                                                placeholder="ระบุจำนวนที่ต้องการเพิ่ม"
-                                                                                min="0.01"
-                                                                                step="0.01"
-                                                                            />
-                                                                        </div>
-                                                                    `,
-                                                                    showCancelButton: true,
-                                                                    confirmButtonText: 'เพิ่มจำนวน',
-                                                                    cancelButtonText: 'ยกเลิก',
-                                                                    confirmButtonColor: '#0891b2',
-                                                                    cancelButtonColor: '#d33',
-                                                                    preConfirm: () => {
-                                                                        const quantity = document.getElementById('quantity').value;
-                                                                        if (!quantity || quantity <= 0) {
-                                                                            Swal.showValidationMessage('กรุณาระบุจำนวนที่ต้องการเพิ่ม');
-                                                                            return false;
-                                                                        }
-                                                                        return quantity;
-                                                                    }
-                                                                }).then((result) => {
-                                                                    if (result.isConfirmed) {
-                                                                        // Send request to increase quantity
-                                                                        router.post(
-                                                                            route('admin.ingredients.increase', { ingredient: notification.data.id }),
-                                                                            { quantity: result.value },
-                                                                            {
-                                                                                onSuccess: () => {
-                                                                                    Swal.fire({
-                                                                                        title: 'สำเร็จ!',
-                                                                                        text: 'เพิ่มจำนวนวัตถุดิบเรียบร้อยแล้ว',
-                                                                                        icon: 'success',
-                                                                                        timer: 1500,
-                                                                                        showConfirmButton: false
-                                                                                    });
-                                                                                },
-                                                                                onError: () => {
-                                                                                    Swal.fire({
-                                                                                        title: 'เกิดข้อผิดพลาด!',
-                                                                                        text: 'ไม่สามารถเพิ่มจำนวนวัตถุดิบได้',
-                                                                                        icon: 'error'
-                                                                                    });
-                                                                                }
-                                                                            }
-                                                                        );
-                                                                    }
-                                                                });
-                                                            } else {
-                                                                router.get(notification.url);
-                                                            }
-                                                        }}
-                                                    >
-                                                        <div className="flex-shrink-0">
-                                                            {getNotificationIcon(
-                                                                notification.type
-                                                            )}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="text-sm font-medium text-gray-900">
-                                                                {
-                                                                    notification.title
-                                                                }
-                                                            </p>
-                                                            <p className="text-sm text-gray-500 truncate">
-                                                                {
-                                                                    notification.message
-                                                                }
-                                                            </p>
-                                                        </div>
-                                                    </Dropdown.Item>
-                                                )
-                                            )
-                                        ) : (
-                                            <div className="px-4 py-3 text-sm text-center text-gray-500">
-                                                ไม่มีการแจ้งเตือนใหม่
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="py-2 text-center border-t border-gray-100">
-                                        <Link
-                                            href="/notifications"
-                                            className="text-sm font-medium text-primary-600 hover:text-primary-700"
-                                        >
-                                            ดูการแจ้งเตือนทั้งหมด
-                                        </Link>
-                                    </div>
-                                </div>
-                            </Dropdown>
+                            {renderNotificationDropdown()}
 
                             {/* Profile Dropdown */}
                             <Dropdown

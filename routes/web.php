@@ -8,13 +8,14 @@ use App\Http\Controllers\Admin\InventoryTransactionsController as AdminInventory
 use App\Http\Controllers\Admin\ProductIngredientsController as AdminProductIngredientsController;
 use App\Http\Controllers\Admin\ProductsController as AdminProductsController;
 use App\Http\Controllers\Admin\PromotionController as AdminPromotionController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\UnitController as AdminUnitController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromotionController;
@@ -86,6 +87,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/get-last-order-number', [OrderController::class, 'getLastOrderNumber'])->name('order.lastNumber');
     Route::post('/receipt/store', [ReceiptController::class, 'store'])->name('receipt.store');
 
+    // Notification routes
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+    Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
+    Route::get('/api/admin/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.get');
+
     Route::group(['prefix' => '/admin'], function () {
         // ---------------------------Users---------------------------
         Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users.index');
@@ -145,6 +152,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/ingredient-lots', [AdminIngredientLotController::class, 'store'])->name('admin.ingredient-lots.store');
         Route::delete('/ingredient-lots/{id}/revert', [AdminIngredientLotController::class, 'revert'])->name('admin.ingredient-lots.revert');
         Route::get('/ingredient-lots/{date}/details', [AdminIngredientLotController::class, 'getLotDetails'])->name('admin.ingredient-lots.details');
+        Route::post('/ingredient-lots/{lot}/dispose', [AdminIngredientLotController::class, 'dispose'])->name('admin.ingredient-lots.dispose');
 
         // ---------------------------Units---------------------------
         Route::get('/units', [AdminUnitController::class, 'index'])->name('admin.units.index');

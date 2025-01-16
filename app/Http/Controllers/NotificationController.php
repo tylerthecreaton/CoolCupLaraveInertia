@@ -7,6 +7,8 @@ use App\Models\IngredientLot;
 use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use JsonSerializable;
 
 class NotificationController extends Controller
 {
@@ -18,7 +20,32 @@ class NotificationController extends Controller
     {
         $notifications = $this->getIngredientsNotifications();
 
-        return $notifications;
+        return Inertia::render('Notifications/Index', [
+            'auth' => [
+                'user' => auth()->user(),
+            ],
+            'notifications' => $notifications['data'],
+            'total' => $notifications['total']
+        ]);
+    }
+
+    public function markAsRead($id)
+    {
+        // Implementation for marking notification as read
+        // This could be stored in a notifications table
+        return redirect()->back();
+    }
+
+    public function markAllAsRead()
+    {
+        // Implementation for marking all notifications as read
+        return redirect()->back();
+    }
+
+    public function getNotifications()
+    {
+        $notifications = $this->getIngredientsNotifications();
+        return response()->json($notifications);
     }
 
     private function getIngredientsNotifications(): array
@@ -47,11 +74,15 @@ class NotificationController extends Controller
             $notifications[] = new Notification(
                 type: "low_stock",
                 title: 'แจ้งเตือนวัตถุดิบใกล้หมด',
-                message: "วัตถุดิบ {$ingredient->name} เหลือน้อยกว่าจำนวนขั้นต่ำ ({$ingredient->quantity} {$ingredient->unit?->abbreviation})",
-                data: $ingredient->toArray(),
-                url: "/admin/ingredients/{$ingredient->id}",
+                message: "วัตถุดิบ {$ingredient->name} เหลือน้อยกว่าจำนวนขั้นต่ำ ({$ingredient->quantity} {$ingredient->unit?->abbreviation}) กรุณาเพิ่มวัตถุดิบที่หน้า Lot",
+                data: array_merge($ingredient->toArray(), [
+                    'minimum_stock' => $minimumStock,
+                    'current_stock' => $ingredient->quantity,
+                    'unit' => $ingredient->unit?->abbreviation
+                ]),
+                url: route('admin.ingredient-lots.create', ['ingredient_id' => $ingredient->id]),
                 color: 'warning',
-                id: $this->generateNotificationId('low_stock', $index)
+                id: $index + 1
             );
         }
 
@@ -60,35 +91,30 @@ class NotificationController extends Controller
 
     private function createExpiringLotNotifications(): array
     {
-        $lots = $this->getExpiringLots();
+        $expiringIngredients = $this->getExpiringIngredients();
         $notifications = [];
+        $warningDays = $this->setting->where('key', 'expiration_warning_days')->first()?->value ?? 30;
 
-        foreach ($lots as $index => $lot) {
-            $daysUntilExpiry = Carbon::now()->diffInDays($lot->expiration_date, false);
-            
-            if ($daysUntilExpiry < 0) {
-                // Already expired
-                $notifications[] = new Notification(
-                    type: "expired",
-                    title: 'แจ้งเตือนวัตถุดิบหมดอายุ',
-                    message: "Lot วัตถุดิบ {$lot->ingredient->name} หมดอายุแล้ว ({$lot->quantity} {$lot->ingredient->unit?->abbreviation})",
-                    data: $lot->toArray(),
-                    url: "/admin/ingredient-lots",
-                    color: 'danger',
-                    id: $this->generateNotificationId('expired', $index)
-                );
-            } else {
-                // Expiring soon
-                $notifications[] = new Notification(
-                    type: "expiring_soon",
-                    title: 'แจ้งเตือนวัตถุดิบใกล้หมดอายุ',
-                    message: "Lot วัตถุดิบ {$lot->ingredient->name} จะหมดอายุในอีก {$daysUntilExpiry} วัน ({$lot->quantity} {$lot->ingredient->unit?->abbreviation})",
-                    data: $lot->toArray(),
-                    url: "/admin/ingredient-lots",
-                    color: 'warning',
-                    id: $this->generateNotificationId('expiring_soon', $index)
-                );
-            }
+        foreach ($expiringIngredients as $index => $ingredient) {
+            $daysUntilExpiration = Carbon::now()->diffInDays(Carbon::parse($ingredient->expiration_date), false);
+            $isExpired = $daysUntilExpiration <= 0;
+
+            $notifications[] = new Notification(
+                type: $isExpired ? "expired" : "expiring",
+                title: $isExpired ? 'แจ้งเตือนวัตถุดิบหมดอายุ' : 'แจ้งเตือนวัตถุดิบใกล้หมดอายุ',
+                message: $isExpired
+                    ? "วัตถุดิบ {$ingredient->name} หมดอายุแล้ว กรุณาจำหน่ายออกจากระบบ"
+                    : "วัตถุดิบ {$ingredient->name} จะหมดอายุในอีก {$daysUntilExpiration}",
+                data: array_merge($ingredient->toArray(), [
+                    'is_expired' => $isExpired,
+                    'days_until_expiration' => $daysUntilExpiration
+                ]),
+                url: $isExpired
+                    ? route('admin.ingredient-lots.dispose', $ingredient->id)
+                    : route('admin.ingredient-lots.create', ['ingredient_id' => $ingredient->ingredient_id]),
+                color: $isExpired ? 'error' : 'danger',
+                id: count($notifications) + $index + 1
+            );
         }
 
         return $notifications;
@@ -102,7 +128,7 @@ class NotificationController extends Controller
             ->get();
     }
 
-    private function getExpiringLots()
+    private function getExpiringIngredients()
     {
         $expiringDays = (int) ($this->setting->where('key', 'ingredient_expired_before_date')->first()?->value ?? 7);
         $expiryDate = now()->addDays($expiringDays);
@@ -128,7 +154,7 @@ class NotificationController extends Controller
     }
 }
 
-class Notification
+class Notification implements JsonSerializable
 {
     public function __construct(
         public string $type,
@@ -139,4 +165,17 @@ class Notification
         public string $color,
         public int $id
     ) {}
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'type' => $this->type,
+            'title' => $this->title,
+            'message' => $this->message,
+            'data' => $this->data,
+            'url' => $this->url,
+            'color' => $this->color,
+        ];
+    }
 }
