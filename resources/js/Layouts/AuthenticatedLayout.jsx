@@ -29,11 +29,11 @@ export default function AuthenticatedLayout({ header, children }) {
                     },
                     credentials: 'same-origin'
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 setNotifications(data.data || []);
                 setUnreadNotifications(data.total || 0);
@@ -418,6 +418,28 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 />
                                             </svg>
                                             <span>วัตถุดิบ</span>
+                                        </Link>
+                                    </Dropdown.Item>
+                                    <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
+                                        <Link
+                                            href="/admin/ingredients"
+                                            className="flex items-center space-x-2 w-full"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="w-4 h-4"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                                />
+                                            </svg>
+                                            <span>วัตถุดิบสิ้นเปลือง</span>
                                         </Link>
                                     </Dropdown.Item>
                                     <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
