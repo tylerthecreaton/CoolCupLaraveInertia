@@ -12,6 +12,8 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Admin\UnitController as AdminUnitController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\ConsumablesController as AdminConsumablesController;
+use App\Http\Controllers\Admin\ConsumableLotController as AdminConsumableLotController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\Admin\ExpiredController as AdminExpiredController;
 use App\Http\Controllers\HomeController;
@@ -134,6 +136,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/customers/{id}/edit', [AdminCustomerController::class, 'edit'])->name('customers.edit');
         Route::put('/customers/{id}', [AdminCustomerController::class, 'update'])->name('customers.update');
         Route::delete('/customers/{id}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
+
+        // ---------------------------Consumables---------------------------
+        Route::get('/consumables', [AdminConsumablesController::class, 'index'])->name('consumables.index');
+        Route::get('/consumables/create', [AdminConsumablesController::class, 'create'])->name('consumables.create');
+        Route::post('/consumables', [AdminConsumablesController::class, 'store'])->name('consumables.store');
+        Route::get('/consumables/{id}', [AdminConsumablesController::class, 'show'])->name('consumables.show');
+        Route::get('/consumables/{id}/edit', [AdminConsumablesController::class, 'edit'])->name('consumables.edit');
+        Route::put('/consumables/{id}', [AdminConsumablesController::class, 'update'])->name('consumables.update');
+        Route::delete('/consumables/{id}', [AdminConsumablesController::class, 'destroy'])->name('consumables.destroy');
 
         // ---------------------------Ingredients---------------------------
         Route::get('/ingredients', [AdminIngredientsController::class, 'index'])->name('ingredients.index');

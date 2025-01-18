@@ -422,7 +422,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     </Dropdown.Item>
                                     <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
                                         <Link
-                                            href="/admin/ingredients"
+                                            href={route('admin.consumables.index')}
                                             className="flex items-center space-x-2 w-full"
                                         >
                                             <svg

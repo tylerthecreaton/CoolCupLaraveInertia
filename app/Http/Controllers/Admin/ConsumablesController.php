@@ -12,52 +12,51 @@ class ConsumablesController extends Controller
 
     public function index()
     {
-        $consumables = Consumable::all();
-        return Inertia::render('admin/consumables/index', compact('consumables'));
+        $consumables = Consumable::orderBy('created_at', 'desc')->paginate(10);
+        return Inertia::render('Admin/consumables/index', compact('consumables'));
     }
 
     public function create()
     {
-        return Inertia::render('admin/consumables/create');
+        return Inertia::render('Admin/consumables/create');
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric'],
-            'stock' => ['required', 'numeric'],
+            'unit' => ['required', 'string', 'max:255'],
+            'quantity' => ['required', 'numeric'],
+            'is_depend_on_sale' => ['required', 'boolean'],
         ]);
 
         Consumable::create($request->all());
 
-        return redirect()->route('consumables.index');
+        return redirect()->route('admin.consumables.index')->with('success', 'บันทึกข้อมูลเรียบร้อย');
     }
 
     public function edit(Consumable $consumable)
     {
-        return Inertia::render('Consumables/Edit', compact('consumable'));
+        return Inertia::render('Admin/consumables/edit', compact('consumable'));
     }
 
     public function update(Request $request, Consumable $consumable)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric'],
-            'stock' => ['required', 'numeric'],
+            'unit' => ['required', 'string', 'max:255'],
+            'quantity' => ['required', 'numeric'],
+            'is_depend_on_sale' => ['required', 'boolean'],
         ]);
 
         $consumable->update($request->all());
 
-        return redirect()->route('consumables.index');
+        return redirect()->route('admin.consumables.index')->with('success', 'บันทึกข้อมูลเรียบร้อย');
     }
 
     public function destroy(Consumable $consumable)
     {
         $consumable->delete();
-        return redirect()->route('consumables.index');
+        return redirect()->route('admin.consumables.index');
     }
-
 }
