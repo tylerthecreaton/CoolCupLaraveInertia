@@ -15,10 +15,15 @@ export default function Edit({ auth, consumable }) {
                     <div className="mb-1 w-full">
                         <div className="mb-4">
                             <Breadcrumb aria-label="Default breadcrumb example">
-                                <Breadcrumb.Item href={route("admin.dashboard")} icon={HiHome}>
+                                <Breadcrumb.Item
+                                    href={route("dashboard")}
+                                    icon={HiHome}
+                                >
                                     Dashboard
                                 </Breadcrumb.Item>
-                                <Breadcrumb.Item href={route("admin.consumables.index")}>
+                                <Breadcrumb.Item
+                                    href={route("admin.consumables.index")}
+                                >
                                     Consumables
                                 </Breadcrumb.Item>
                                 <Breadcrumb.Item>Edit</Breadcrumb.Item>

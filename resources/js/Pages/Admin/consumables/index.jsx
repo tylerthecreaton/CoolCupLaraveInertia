@@ -43,6 +43,15 @@ export default function Index({ auth, consumables }) {
             if (result.isConfirmed) {
                 router.delete(route("admin.consumables.destroy", id), {
                     preserveState: true,
+                    onSuccess: () => {
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: "Consumable has been deleted.",
+                            icon: "success",
+                            timer: 1500,
+                            showConfirmButton: false,
+                        });
+                    },
                 });
             }
         });
@@ -95,11 +104,19 @@ export default function Index({ auth, consumables }) {
                                     <Table.Head>
                                         <Table.HeadCell>Name</Table.HeadCell>
                                         <Table.HeadCell>Unit</Table.HeadCell>
-                                        <Table.HeadCell>Quantity</Table.HeadCell>
-                                        <Table.HeadCell>Depends on Sales</Table.HeadCell>
-                                        <Table.HeadCell>Last Updated</Table.HeadCell>
                                         <Table.HeadCell>
-                                            <span className="sr-only">Actions</span>
+                                            Quantity
+                                        </Table.HeadCell>
+                                        <Table.HeadCell>
+                                            Depends on Sales
+                                        </Table.HeadCell>
+                                        <Table.HeadCell>
+                                            Last Updated
+                                        </Table.HeadCell>
+                                        <Table.HeadCell>
+                                            <span className="sr-only">
+                                                Actions
+                                            </span>
                                         </Table.HeadCell>
                                     </Table.Head>
                                     <Table.Body className="divide-y">
@@ -111,8 +128,12 @@ export default function Index({ auth, consumables }) {
                                                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
                                                     {consumable.name}
                                                 </Table.Cell>
-                                                <Table.Cell>{consumable.unit}</Table.Cell>
-                                                <Table.Cell>{consumable.quantity}</Table.Cell>
+                                                <Table.Cell>
+                                                    {consumable.unit}
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    {consumable.quantity}
+                                                </Table.Cell>
                                                 <Table.Cell>
                                                     {consumable.is_depend_on_sale ? (
                                                         <span className="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">
@@ -125,7 +146,9 @@ export default function Index({ auth, consumables }) {
                                                     )}
                                                 </Table.Cell>
                                                 <Table.Cell>
-                                                    {new Date(consumable.updated_at).toLocaleDateString()}
+                                                    {new Date(
+                                                        consumable.updated_at
+                                                    ).toLocaleDateString()}
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     <div className="flex items-center gap-2">

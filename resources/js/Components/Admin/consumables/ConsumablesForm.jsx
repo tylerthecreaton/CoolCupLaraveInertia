@@ -4,9 +4,11 @@ import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
 import { Button, Textarea, Select } from "flowbite-react";
+import Swal from "sweetalert2";
 
 export default function ConsumablesForm({ consumable }) {
-    const { data, setData, post, patch, processing, errors } = useForm({
+    console.log(consumable);
+    const { data, setData, post, put, processing, errors } = useForm({
         name: consumable?.name || "",
         quantity: consumable?.quantity || "0",
         unit: consumable?.unit || "",
@@ -16,7 +18,22 @@ export default function ConsumablesForm({ consumable }) {
     const submit = (e) => {
         e.preventDefault();
         if (consumable) {
-            patch(route("admin.consumables.update", consumable.id));
+            put(route("admin.consumables.update", consumable.id), {
+                onSuccess: () => {
+                    Swal.fire({
+                        title: "Success",
+                        text: "Consumable updated successfully",
+                        icon: "success",
+                    });
+                },
+                onError: (errors) => {
+                    Swal.fire({
+                        title: "Error",
+                        text: "Something went wrong",
+                        icon: "error",
+                    });
+                },
+            });
         } else {
             post(route("admin.consumables.store"));
         }
@@ -50,11 +67,16 @@ export default function ConsumablesForm({ consumable }) {
                             name="quantity"
                             value={data.quantity}
                             className="mt-1 block w-full"
-                            onChange={(e) => setData("quantity", e.target.value)}
+                            onChange={(e) =>
+                                setData("quantity", e.target.value)
+                            }
                             required
                             min="0"
                         />
-                        <InputError message={errors.quantity} className="mt-2" />
+                        <InputError
+                            message={errors.quantity}
+                            className="mt-2"
+                        />
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -72,22 +94,38 @@ export default function ConsumablesForm({ consumable }) {
                         <InputError message={errors.unit} className="mt-2" />
                     </div>
                     <div>
-                        <InputLabel htmlFor="is_depend_on_sale" value="Depends on Sales" />
+                        <InputLabel
+                            htmlFor="is_depend_on_sale"
+                            value="Depends on Sales"
+                        />
                         <Select
                             id="is_depend_on_sale"
                             name="is_depend_on_sale"
                             value={data.is_depend_on_sale}
                             className="mt-1 block w-full"
-                            onChange={(e) => setData("is_depend_on_sale", e.target.value === "true")}
+                            onChange={(e) =>
+                                setData(
+                                    "is_depend_on_sale",
+                                    e.target.value === "true"
+                                )
+                            }
                         >
                             <option value={false}>No</option>
                             <option value={true}>Yes</option>
                         </Select>
-                        <InputError message={errors.is_depend_on_sale} className="mt-2" />
+                        <InputError
+                            message={errors.is_depend_on_sale}
+                            className="mt-2"
+                        />
                     </div>
                 </div>
                 <div className="flex items-center justify-end pt-4">
-                    <Button type="submit" disabled={processing} color="blue" size="lg">
+                    <Button
+                        type="submit"
+                        disabled={processing}
+                        color="blue"
+                        size="lg"
+                    >
                         {consumable ? "Update Consumable" : "Create Consumable"}
                     </Button>
                 </div>

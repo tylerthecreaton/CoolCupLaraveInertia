@@ -16,11 +16,9 @@ class Consumable extends Model
      */
     protected $fillable = [
         'name',
-        'category',
-        'quantity',
         'unit',
-        'cost_per_unit',
-        'minimum_stock',
+        'quantity',
+        'is_depend_on_sale',
     ];
 
     /**
@@ -29,8 +27,9 @@ class Consumable extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'cost_per_unit' => 'decimal:2',
         'quantity' => 'integer',
-        'minimum_stock' => 'integer',
+        'unit' => 'string',
+        'name' => 'string',
+        'is_depend_on_sale' => 'boolean',
     ];
 }

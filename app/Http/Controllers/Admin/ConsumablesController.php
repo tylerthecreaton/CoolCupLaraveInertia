@@ -35,12 +35,13 @@ class ConsumablesController extends Controller
         return redirect()->route('admin.consumables.index')->with('success', 'บันทึกข้อมูลเรียบร้อย');
     }
 
-    public function edit(Consumable $consumable)
+    public function edit($id)
     {
+        $consumable = Consumable::find($id);
         return Inertia::render('Admin/consumables/edit', compact('consumable'));
     }
 
-    public function update(Request $request, Consumable $consumable)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -49,13 +50,15 @@ class ConsumablesController extends Controller
             'is_depend_on_sale' => ['required', 'boolean'],
         ]);
 
+        $consumable = Consumable::find($id);
         $consumable->update($request->all());
 
         return redirect()->route('admin.consumables.index')->with('success', 'บันทึกข้อมูลเรียบร้อย');
     }
 
-    public function destroy(Consumable $consumable)
+    public function destroy($id)
     {
+        $consumable = Consumable::find($id);
         $consumable->delete();
         return redirect()->route('admin.consumables.index');
     }
