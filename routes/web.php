@@ -141,10 +141,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/consumables', [AdminConsumablesController::class, 'index'])->name('consumables.index');
         Route::get('/consumables/create', [AdminConsumablesController::class, 'create'])->name('consumables.create');
         Route::post('/consumables', [AdminConsumablesController::class, 'store'])->name('consumables.store');
-        Route::get('/consumables/{id}', [AdminConsumablesController::class, 'show'])->name('consumables.show');
+        // Route::get('/consumables/{id}', [AdminConsumablesController::class, 'show'])->name('consumables.show');
         Route::get('/consumables/{id}/edit', [AdminConsumablesController::class, 'edit'])->name('consumables.edit');
         Route::put('/consumables/{id}', [AdminConsumablesController::class, 'update'])->name('consumables.update');
         Route::delete('/consumables/{id}', [AdminConsumablesController::class, 'destroy'])->name('consumables.destroy');
+
+        // ---------------------------Consumables Lots---------------------------
+        Route::get('/consumables/lots', [AdminConsumableLotController::class, 'index'])->name('consumables.lots.index');
+        Route::get('/consumables/lots/create', [AdminConsumableLotController::class, 'create'])->name('consumables.lots.create');
+        Route::post('/consumables/lots', [AdminConsumableLotController::class, 'store'])->name('consumables.lots.store');
+        // Route::get('/consumables/lots/{lot}/edit', [AdminConsumableLotController::class, 'edit'])->name('consumables.lots.edit');
+        // Route::put('/consumables/lots/{lot}', [AdminConsumableLotController::class, 'update'])->name('consumables.lots.update');
+        // Route::delete('/consumables/lots/{lot}', [AdminConsumableLotController::class, 'destroy'])->name('consumables.lots.destroy');
 
         // ---------------------------Ingredients---------------------------
         Route::get('/ingredients', [AdminIngredientsController::class, 'index'])->name('ingredients.index');

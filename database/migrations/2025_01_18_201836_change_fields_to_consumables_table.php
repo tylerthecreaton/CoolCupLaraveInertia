@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('category')->nullable();
             $table->integer('minimum_stock')->default(0);
             $table->decimal('cost_per_unit', 10, 2)->nullable();
+            $table->dropColumn('is_depend_on_sale');
         });
     }
 };
