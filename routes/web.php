@@ -14,6 +14,8 @@ use App\Http\Controllers\Admin\UnitController as AdminUnitController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\ConsumablesController as AdminConsumablesController;
 use App\Http\Controllers\Admin\ConsumableLotController as AdminConsumableLotController;
+use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
+use App\Http\Controllers\Admin\ExpenseCategoryController as AdminExpenseCategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\Admin\ExpiredController as AdminExpiredController;
 use App\Http\Controllers\HomeController;
@@ -115,6 +117,24 @@ Route::middleware('auth')->group(function () {
         Route::put('/categories/{id}', [AdminCategoriesController::class, 'update'])->name('categories.update');
         Route::delete('/categories/{id}', [AdminCategoriesController::class, 'destroy'])->name('categories.destroy');
 
+        // ---------------------------Expense Categories---------------------------
+        Route::get('/expense-categories', [AdminExpenseCategoryController::class, 'index'])->name('expense-categories.index');
+        Route::get('/expense-categories/create', [AdminExpenseCategoryController::class, 'create'])->name('expense-categories.create');
+        Route::post('/expense-categories', [AdminExpenseCategoryController::class, 'store'])->name('expense-categories.store');
+        Route::get('/expense-categories/{id}/edit', [AdminExpenseCategoryController::class, 'edit'])->name('expense-categories.edit');
+        Route::put('/expense-categories/{id}', [AdminExpenseCategoryController::class, 'update'])->name('expense-categories.update');
+        Route::delete('/expense-categories/{id}', [AdminExpenseCategoryController::class, 'destroy'])->name('expense-categories.destroy');
+
+        // ---------------------------Expenses---------------------------
+        Route::get('/expenses', [AdminExpenseController::class, 'index'])->name('expenses.index');
+        Route::get('/expenses/create', action: [AdminExpenseController::class, 'create'])->name('expenses.create');
+        Route::post('/expenses', [AdminExpenseController::class, 'store'])->name('expenses.store');
+        Route::get('/expenses/{id}', [AdminExpenseController::class, 'show'])->name('expenses.show');
+        Route::get('/expenses/{id}/edit', [AdminExpenseController::class, 'edit'])->name('expenses.edit');
+        Route::put('/expenses/{id}', [AdminExpenseController::class, 'update'])->name('expenses.update');
+        Route::delete('/expenses/{id}', [AdminExpenseController::class, 'destroy'])->name('expenses.destroy');
+
+
         // ---------------------------Products---------------------------
         Route::get('/products', [AdminProductsController::class, 'index'])->name('products.index');
         Route::get('/products/create', [AdminProductsController::class, 'create'])->name('products.create');
@@ -177,7 +197,7 @@ Route::middleware('auth')->group(function () {
         // Expired Ingredients Routes
         Route::get('/ingredient-lots/expired', [AdminExpiredController::class, 'index'])->name('ingredient-lots.expired.index');
         Route::delete('/ingredient-lots/expired/{ingredientLot}', [AdminExpiredController::class, 'dispose'])->name('ingredient-lots.expired.dispose');
-        
+
         // ---------------------------Units---------------------------
         Route::get('/units', [AdminUnitController::class, 'index'])->name('units.index');
         Route::get('/units/create', [AdminUnitController::class, 'create'])->name('units.create');

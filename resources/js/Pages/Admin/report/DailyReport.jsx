@@ -82,6 +82,28 @@ export default function DailyReport({ stats }) {
                     bgColor: 'bg-gradient-to-br from-purple-100 to-purple-50'
                 }
             ]
+        },
+        {
+            title: 'ข้อมูลรายจ่าย',
+            description: 'สรุปรายจ่ายจากการซื้อวัตถุดิบประจำวัน',
+            backgroundColor: 'bg-gradient-to-br from-red-300 to-orange-100',
+            items: [
+                {
+                    label: 'รายจ่ายรวม',
+                    value: stats?.totalExpenses || '0',
+                    icon: CurrencyDollarIcon,
+                    format: 'currency',
+                    color: 'text-red-600',
+                    bgColor: 'bg-gradient-to-br from-red-100 to-red-50'
+                },
+                {
+                    label: 'จำนวนรายการ',
+                    value: stats?.totalExpenseItems || '0',
+                    icon: ShoppingBagIcon,
+                    color: 'text-orange-600',
+                    bgColor: 'bg-gradient-to-br from-orange-100 to-orange-50'
+                }
+            ]
         }
     ];
 
@@ -267,7 +289,7 @@ export default function DailyReport({ stats }) {
                         <div className="flex items-center space-x-1 text-gray-500">
                             <CalendarDaysIcon className="w-4 h-4" />
                             <span className="text-sm">
-                                ข้อมูล ณ วันที่ {new Date().toLocaleDateString('th-TH', {
+                                ข้อมูลสรุปผลการดำเนินงานและยอดขายประจำวัน ณ วันที่ {new Date().toLocaleDateString('th-TH', {
                                     year: 'numeric',
                                     month: 'long',
                                     day: 'numeric'
@@ -283,17 +305,9 @@ export default function DailyReport({ stats }) {
             }
         >
             <Head title="รายงานประจำวัน" />
-
             <div className="py-6 bg-gradient-to-br from-gray-50 to-blue-50">
                 <div className="px-2 sm:px-4 lg:px-6 max-w-[1600px] mx-auto">
                     <div className="space-y-6">
-                        {/* Header Section */}
-                        <div className="mb-8 text-center">
-                            <h2 className="mb-2 text-3xl font-bold text-blue-600">รายงานประจำวัน</h2>
-                            <p className="text-gray-600">ข้อมูลสรุปผลการดำเนินงานและยอดขายประจำวัน</p>
-                        </div>
-
-                        {/* Summary Cards */}
                         {sections.map((section, index) => (
                             <div key={index} className={`${section.backgroundColor} rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}>
                                 <div className="p-6 border-b backdrop-blur-sm border-white/20">

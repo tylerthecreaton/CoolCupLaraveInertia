@@ -59,7 +59,7 @@ class ConsumableLotController extends Controller
                 'user_id' => Auth::user()->id
             ]);
 
-
+            // เพิ่มการรับ ConsumableLot ไปยัง Consumable
             $consumable = Consumable::find($lotData['consumable_id']);
             $oldQuantity = $consumable->quantity;
             $consumable->increment('quantity', $lotData['quantity']);

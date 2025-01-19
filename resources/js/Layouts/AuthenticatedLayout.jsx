@@ -24,10 +24,10 @@ export default function AuthenticatedLayout({ header, children }) {
             try {
                 const response = await fetch("/api/admin/notifications", {
                     headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+                        Accept: "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
                     },
-                    credentials: 'same-origin'
+                    credentials: "same-origin",
                 });
 
                 if (!response.ok) {
@@ -224,7 +224,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     </div>
                     <div className="py-2 text-center border-t border-gray-100 bg-gray-50">
                         <Link
-                            href={route('notifications.index')}
+                            href={route("notifications.index")}
                             className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors duration-150"
                         >
                             ดูการแจ้งเตือนทั้งหมด
@@ -422,7 +422,9 @@ export default function AuthenticatedLayout({ header, children }) {
                                     </Dropdown.Item>
                                     <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
                                         <Link
-                                            href={route('admin.consumables.index')}
+                                            href={route(
+                                                "admin.consumables.index"
+                                            )}
                                             className="flex items-center space-x-2 w-full"
                                         >
                                             <svg
@@ -485,14 +487,14 @@ export default function AuthenticatedLayout({ header, children }) {
                                                     d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                                                 />
                                             </svg>
-                                            <span>
-                                                เพิ่ม Lot วัตถุดิบ
-                                            </span>
+                                            <span>เพิ่ม Lot วัตถุดิบ</span>
                                         </Link>
                                     </Dropdown.Item>
                                     <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
                                         <Link
-                                            href={route('admin.consumables.lots.index')}
+                                            href={route(
+                                                "admin.consumables.lots.index"
+                                            )}
                                             className="flex items-center space-x-2 w-full"
                                         >
                                             <svg
@@ -514,7 +516,6 @@ export default function AuthenticatedLayout({ header, children }) {
                                             </span>
                                         </Link>
                                     </Dropdown.Item>
-
                                 </Dropdown>
                                 <Dropdown
                                     label={
@@ -589,6 +590,53 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <span>หมวดหมู่</span>
                                         </Link>
                                     </Dropdown.Item>
+                                    <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
+                                        <Link
+                                            href={route(
+                                                "admin.expense-categories.index"
+                                            )}
+                                            className="flex items-center space-x-2 w-full"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="w-4 h-4"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                                />
+                                            </svg>
+                                            <span>หมวดหมู่รายจ่าย</span>
+                                        </Link>
+                                    </Dropdown.Item>
+                                    <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
+                                        <Link
+                                            href={route("admin.expenses.index")}
+                                            className="flex items-center space-x-2 w-full"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="w-4 h-4"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                                                />
+                                            </svg>
+                                            <span>รายจ่าย</span>
+                                        </Link>
+                                    </Dropdown.Item>
+
                                     <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
                                         <Link
                                             href="/admin/products"

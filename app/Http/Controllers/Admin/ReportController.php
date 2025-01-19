@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\ConsumableLot;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -54,6 +55,11 @@ class ReportController extends Controller
             ->orderByDesc('count')
             ->get();
 
+        // Get daily expenses from ConsumableLot
+        $dailyExpenses = ConsumableLot::whereDate('created_at', $today);
+        $totalExpenses = $dailyExpenses->sum(DB::raw('price * quantity'));
+        $totalExpenseItems = $dailyExpenses->count();
+
         $stats = [
             // ข้อมูลการขาย
             'totalSales' => $dailyOrders->sum('total_amount'),
@@ -99,6 +105,10 @@ class ReportController extends Controller
                     return $item->payment_method . ': ' . $item->count;
                 })
                 ->implode(', '),
+
+            // ข้อมูลรายจ่าย
+            'totalExpenses' => $totalExpenses,
+            'totalExpenseItems' => $totalExpenseItems,
         ];
 
         return Inertia::render('Admin/report/DailyReport', [
