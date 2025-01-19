@@ -32,21 +32,23 @@ export default function Index({ auth, consumables }) {
 
     const handleDelete = (id) => {
         Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
+            title: "ยืนยันการลบ?",
+            text: "คุณไม่สามารถย้อนกลับการกระทำนี้ได้!",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!",
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "ใช่, ลบเลย!",
+            cancelButtonText: "ยกเลิก",
+            reverseButtons: true,
         }).then((result) => {
             if (result.isConfirmed) {
                 router.delete(route("admin.consumables.destroy", id), {
                     preserveState: true,
                     onSuccess: () => {
                         Swal.fire({
-                            title: "Deleted!",
-                            text: "Consumable has been deleted.",
+                            title: "ลบสำเร็จ!",
+                            text: "วัตถุดิบสิ้นเปลืองถูกลบเรียบร้อยแล้ว",
                             icon: "success",
                             timer: 1500,
                             showConfirmButton: false,
@@ -66,20 +68,22 @@ export default function Index({ auth, consumables }) {
                         <div className="mb-4">
                             <Breadcrumb aria-label="Default breadcrumb example">
                                 <Breadcrumb.Item href="#" icon={HiHome}>
-                                    Dashboard
+                                    แดชบอร์ด
                                 </Breadcrumb.Item>
-                                <Breadcrumb.Item>Consumables</Breadcrumb.Item>
+                                <Breadcrumb.Item>
+                                    รายการวัตถุดิบสิ้นเปลือง
+                                </Breadcrumb.Item>
                             </Breadcrumb>
                         </div>
                         <div className="block sm:flex items-center md:divide-x md:divide-gray-100">
                             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                                Consumables
+                                รายการวัตถุดิบสิ้นเปลือง
                             </h1>
                             <div className="flex items-center sm:justify-end w-full">
                                 <TextInput
                                     id="search"
                                     type="text"
-                                    placeholder="Search for consumables"
+                                    placeholder="ค้นหาวัตถุดิบสิ้นเปลือง"
                                     required={true}
                                     icon={HiSearch}
                                     value={search}
@@ -89,7 +93,7 @@ export default function Index({ auth, consumables }) {
                                 <Link href={route("admin.consumables.create")}>
                                     <Button size="sm">
                                         <HiPlus className="mr-2 h-5 w-5" />
-                                        Add Consumable
+                                        เพิ่มวัตถุดิบสิ้นเปลือง
                                     </Button>
                                 </Link>
                             </div>
@@ -102,16 +106,16 @@ export default function Index({ auth, consumables }) {
                             <div className="overflow-hidden shadow">
                                 <Table hoverable={true}>
                                     <Table.Head>
-                                        <Table.HeadCell>Name</Table.HeadCell>
-                                        <Table.HeadCell>Unit</Table.HeadCell>
                                         <Table.HeadCell>
-                                            Quantity
+                                            ชื่อวัตถุดิบสิ้นเปลือง
+                                        </Table.HeadCell>
+                                        <Table.HeadCell>จำนวน</Table.HeadCell>
+                                        <Table.HeadCell>หน่วย</Table.HeadCell>
+                                        <Table.HeadCell>
+                                            ใช้ในการขาย
                                         </Table.HeadCell>
                                         <Table.HeadCell>
-                                            Depends on Sales
-                                        </Table.HeadCell>
-                                        <Table.HeadCell>
-                                            Last Updated
+                                            วันที่เพิ่มรายการ
                                         </Table.HeadCell>
                                         <Table.HeadCell>
                                             <span className="sr-only">
@@ -128,11 +132,12 @@ export default function Index({ auth, consumables }) {
                                                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
                                                     {consumable.name}
                                                 </Table.Cell>
-                                                <Table.Cell>
-                                                    {consumable.unit}
-                                                </Table.Cell>
+
                                                 <Table.Cell>
                                                     {consumable.quantity}
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    {consumable.unit}
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     {consumable.is_depend_on_sale ? (
@@ -164,7 +169,7 @@ export default function Index({ auth, consumables }) {
                                                                 color="info"
                                                             >
                                                                 <HiPencil className="mr-2 h-5 w-5" />
-                                                                Edit
+                                                                แก้ไข
                                                             </Button>
                                                         </Link>
                                                         <Button
@@ -177,7 +182,7 @@ export default function Index({ auth, consumables }) {
                                                             }
                                                         >
                                                             <HiTrash className="mr-2 h-5 w-5" />
-                                                            Delete
+                                                            ลบ
                                                         </Button>
                                                     </div>
                                                 </Table.Cell>

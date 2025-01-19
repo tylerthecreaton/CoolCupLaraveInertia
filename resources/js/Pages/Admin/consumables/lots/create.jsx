@@ -3,7 +3,7 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, useForm } from "@inertiajs/react";
 import { Breadcrumb, Button } from "flowbite-react";
-import { HiHome } from "react-icons/hi";
+import { HiHome, HiPlus, HiTrash } from "react-icons/hi2";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
@@ -12,7 +12,7 @@ export default function Create({ auth, consumables }) {
     const { data, setData, post, processing, errors } = useForm([
         {
             consumable_id: "",
-            cost_per_unit: 0,
+            cost_per_unit: "",
             quantity: "",
             note: "",
             per_pack: "",
@@ -36,7 +36,7 @@ export default function Create({ auth, consumables }) {
             ...data,
             {
                 consumable_id: "",
-                cost_per_unit: 0,
+                cost_per_unit: "",
                 quantity: "",
                 note: "",
                 per_pack: "",
@@ -108,13 +108,10 @@ export default function Create({ auth, consumables }) {
         const errors = [];
 
         data.forEach((item, index) => {
-            // Check required fields
             if (!item.consumable_id)
                 errors.push(`รายการที่ ${index + 1}: กรุณาเลือกวัตถุดิบ`);
             if (!item.supplier)
                 errors.push(`รายการที่ ${index + 1}: กรุณาระบุผู้จำหน่าย`);
-
-            // Validate numbers
             if (!validatePositiveNumber(item.cost_per_unit))
                 errors.push(
                     `รายการที่ ${index + 1}: ราคาต่อหน่วยต้องมากกว่า 0`
@@ -148,7 +145,6 @@ export default function Create({ auth, consumables }) {
             return;
         }
 
-        // Sanitize data before submitting
         const sanitizedData = data.map((item) => ({
             ...item,
             note: item.note.trim(),
@@ -165,7 +161,7 @@ export default function Create({ auth, consumables }) {
                 setData([
                     {
                         consumable_id: "",
-                        cost_per_unit: 0,
+                        cost_per_unit: "",
                         quantity: "",
                         note: "",
                         per_pack: "",
@@ -178,7 +174,13 @@ export default function Create({ auth, consumables }) {
     };
 
     return (
-        <AuthenticatedLayout user={auth.user}>
+        <AuthenticatedLayout
+            header={
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                    เพิ่ม Lot วัตถุดิบสิ้นเปลือง
+                </h2>
+            }
+        >
             <AdminLayout>
                 <Head title="เพิ่ม Lot วัตถุดิบสิ้นเปลือง" />
 
@@ -206,28 +208,32 @@ export default function Create({ auth, consumables }) {
                                         {data.map((item, index) => (
                                             <div
                                                 key={index}
-                                                className="p-6 bg-white border border-gray-200 rounded-lg shadow"
+                                                className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow transition-shadow duration-200"
                                             >
                                                 <div className="flex justify-between items-center mb-4">
-                                                    <h3 className="text-lg font-semibold">
-                                                        รายการที่ {index + 1}
+                                                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                                                        <span className="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded">
+                                                            รายการที่ {index + 1}
+                                                        </span>
                                                     </h3>
                                                     {data.length > 1 && (
                                                         <Button
                                                             type="button"
                                                             color="failure"
+                                                            size="sm"
                                                             onClick={() =>
                                                                 handleRemoveRow(
                                                                     index
                                                                 )
                                                             }
                                                         >
+                                                            <HiTrash className="mr-2 h-4 w-4" />
                                                             ลบรายการ
                                                         </Button>
                                                     )}
                                                 </div>
 
-                                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                                                     <div>
                                                         <InputLabel
                                                             htmlFor={`consumable-${index}`}
@@ -246,7 +252,7 @@ export default function Create({ auth, consumables }) {
                                                                         .value
                                                                 )
                                                             }
-                                                            className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                                            className="mt-1 block w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
                                                         >
                                                             <option value="">
                                                                 เลือกวัตถุดิบ
@@ -276,6 +282,39 @@ export default function Create({ auth, consumables }) {
                                                             message={
                                                                 errors[
                                                                     `${index}.consumable_id`
+                                                                ]
+                                                            }
+                                                            className="mt-2"
+                                                        />
+                                                    </div>
+
+                                                    <div>
+                                                        <InputLabel
+                                                            htmlFor={`quantity-${index}`}
+                                                        >
+                                                            จำนวน *
+                                                        </InputLabel>
+                                                        <TextInput
+                                                            id={`quantity-${index}`}
+                                                            type="number"
+                                                            min="0.01"
+                                                            step="0.01"
+                                                            value={item.quantity}
+                                                            className="mt-1 block w-full"
+                                                            onChange={(e) =>
+                                                                handleNumberChange(
+                                                                    index,
+                                                                    "quantity",
+                                                                    e.target
+                                                                        .value,
+                                                                    validatePositiveNumber
+                                                                )
+                                                            }
+                                                        />
+                                                        <InputError
+                                                            message={
+                                                                errors[
+                                                                    `${index}.quantity`
                                                                 ]
                                                             }
                                                             className="mt-2"
@@ -328,9 +367,7 @@ export default function Create({ auth, consumables }) {
                                                             type="number"
                                                             min="1"
                                                             step="1"
-                                                            value={
-                                                                item.per_pack
-                                                            }
+                                                            value={item.per_pack}
                                                             className="mt-1 block w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
@@ -389,25 +426,22 @@ export default function Create({ auth, consumables }) {
                                                         <InputLabel
                                                             htmlFor={`supplier-${index}`}
                                                         >
-                                                            ผู้จําหน่าย *
+                                                            ผู้จำหน่าย *
                                                         </InputLabel>
                                                         <TextInput
                                                             id={`supplier-${index}`}
                                                             type="text"
-                                                            value={
-                                                                item.supplier
-                                                            }
+                                                            value={item.supplier}
                                                             className="mt-1 block w-full"
                                                             onChange={(e) => {
-                                                                const newData =
-                                                                    [...data];
+                                                                const newData = [
+                                                                    ...data,
+                                                                ];
                                                                 newData[
                                                                     index
                                                                 ].supplier =
                                                                     e.target.value;
-                                                                setData(
-                                                                    newData
-                                                                );
+                                                                setData(newData);
                                                             }}
                                                         />
                                                         <InputError
@@ -420,43 +454,7 @@ export default function Create({ auth, consumables }) {
                                                         />
                                                     </div>
 
-                                                    <div>
-                                                        <InputLabel
-                                                            htmlFor={`quantity-${index}`}
-                                                        >
-                                                            จำนวน *
-                                                        </InputLabel>
-                                                        <TextInput
-                                                            id={`quantity-${index}`}
-                                                            type="number"
-                                                            min="0.01"
-                                                            step="0.01"
-                                                            value={
-                                                                item.quantity
-                                                            }
-                                                            className="
-mt-1 block w-full"
-                                                            onChange={(e) =>
-                                                                handleNumberChange(
-                                                                    index,
-                                                                    "quantity",
-                                                                    e.target
-                                                                        .value,
-                                                                    validatePositiveNumber
-                                                                )
-                                                            }
-                                                        />
-                                                        <InputError
-                                                            message={
-                                                                errors[
-                                                                    `${index}.quantity`
-                                                                ]
-                                                            }
-                                                            className="mt-2"
-                                                        />
-                                                    </div>
-
-                                                    <div className="md:col-span-2">
+                                                    <div className="md:col-span-3">
                                                         <InputLabel
                                                             htmlFor={`note-${index}`}
                                                         >
@@ -465,19 +463,18 @@ mt-1 block w-full"
                                                         <textarea
                                                             id={`note-${index}`}
                                                             value={item.note}
-                                                            className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                                                            rows="3"
                                                             onChange={(e) => {
-                                                                const newData =
-                                                                    [...data];
+                                                                const newData = [
+                                                                    ...data,
+                                                                ];
                                                                 newData[
                                                                     index
                                                                 ].note =
                                                                     e.target.value;
-                                                                setData(
-                                                                    newData
-                                                                );
+                                                                setData(newData);
                                                             }}
+                                                            className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                                            rows="2"
                                                         />
                                                         <InputError
                                                             message={
@@ -491,18 +488,22 @@ mt-1 block w-full"
                                                 </div>
                                             </div>
                                         ))}
+                                    </div>
 
-                                        <div className="flex justify-between">
-                                            <Button
-                                                type="button"
-                                                color="gray"
-                                                onClick={handleAddRow}
-                                            >
-                                                เพิ่มรายการ
-                                            </Button>
+                                    <div className="mt-6 flex justify-between items-center">
+                                        <Button
+                                            type="button"
+                                            gradientDuoTone="purpleToBlue"
+                                            onClick={handleAddRow}
+                                        >
+                                            <HiPlus className="mr-2 h-4 w-4" />
+                                            เพิ่มรายการ
+                                        </Button>
 
+                                        <div className="flex gap-4">
                                             <Button
                                                 type="submit"
+                                                gradientDuoTone="greenToBlue"
                                                 disabled={processing}
                                             >
                                                 บันทึก

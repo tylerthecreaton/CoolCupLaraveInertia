@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link, router } from "@inertiajs/react";
 import { Breadcrumb, Table, Button, Modal, Badge } from "flowbite-react";
-import { HiHome, HiCalendar, HiEye, HiArrowPath } from "react-icons/hi2";
+import { HiHome, HiCalendar, HiEye } from "react-icons/hi2";
 import { FaPlus } from "react-icons/fa";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -36,30 +36,14 @@ export default function ConsumableLotHistory({ lots }) {
         });
     };
 
-    const getExpirationStatus = (expiryDate) => {
-        const today = new Date();
-        const expDate = new Date(expiryDate);
-        const daysUntilExpiration = Math.ceil(
-            (expDate - today) / (1000 * 60 * 60 * 24)
-        );
-
-        if (daysUntilExpiration < 0) {
-            return { color: "failure", text: "หมดอายุแล้ว" };
-        } else if (daysUntilExpiration <= 7) {
-            return {
-                color: "warning",
-                text: `อีก ${daysUntilExpiration} วันจะหมดอายุ`,
-            };
-        } else {
-            return {
-                color: "success",
-                text: `อีก ${daysUntilExpiration} วันจะหมดอายุ`,
-            };
-        }
-    };
-
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout
+            header={
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                    ประวัติการเพิ่ม Lot วัตถุดิบสิ้นเปลือง
+                </h2>
+            }
+        >
             <AdminLayout>
                 <Head title="ประวัติการเพิ่ม Lot วัตถุดิบสิ้นเปลือง" />
 
@@ -119,16 +103,12 @@ export default function ConsumableLotHistory({ lots }) {
                                                         <button
                                                             onClick={() =>
                                                                 handleShowDetails(
-                                                                    lot.created_at.split(
-                                                                        "T"
-                                                                    )[0]
+                                                                    lot.created_at.split("T")[0]
                                                                 )
                                                             }
                                                             className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
                                                         >
-                                                            {formatDate(
-                                                                lot.created_at
-                                                            )}
+                                                            {formatDate(lot.created_at)}
                                                         </button>
                                                     </Table.Cell>
                                                     <Table.Cell>
@@ -146,9 +126,7 @@ export default function ConsumableLotHistory({ lots }) {
                                                             gradientDuoTone="purpleToBlue"
                                                             onClick={() =>
                                                                 handleShowDetails(
-                                                                    lot.created_at.split(
-                                                                        "T"
-                                                                    )[0]
+                                                                    lot.created_at.split("T")[0]
                                                                 )
                                                             }
                                                         >
@@ -162,7 +140,6 @@ export default function ConsumableLotHistory({ lots }) {
                                     </Table>
                                 </div>
 
-                                {/* Lot Details Modal */}
                                 <Modal
                                     show={showModal}
                                     onClose={() => setShowModal(false)}
@@ -172,8 +149,9 @@ export default function ConsumableLotHistory({ lots }) {
                                         <div className="flex items-center">
                                             <HiCalendar className="mr-2 w-5 h-5 text-gray-600" />
                                             รายละเอียด Lot วันที่{" "}
-                                            {selectedDate &&
-                                                formatDate(selectedDate)}
+                                            <span className="ml-1 font-medium">
+                                                {selectedDate && formatDate(selectedDate)}
+                                            </span>
                                         </div>
                                     </Modal.Header>
                                     <Modal.Body>
@@ -181,28 +159,22 @@ export default function ConsumableLotHistory({ lots }) {
                                             <Table hoverable>
                                                 <Table.Head>
                                                     <Table.HeadCell className="bg-gray-50">
-                                                        ชื่อวัตถุดิบ
-                                                    </Table.HeadCell>
-                                                    <Table.HeadCell className="bg-gray-50">
-                                                        Lot Number
+                                                        วัตถุดิบ
                                                     </Table.HeadCell>
                                                     <Table.HeadCell className="bg-gray-50">
                                                         จำนวน
                                                     </Table.HeadCell>
                                                     <Table.HeadCell className="bg-gray-50">
-                                                        จำนวนคงเหลือ
-                                                    </Table.HeadCell>
-                                                    <Table.HeadCell className="bg-gray-50">
-                                                        หน่วย
-                                                    </Table.HeadCell>
-                                                    <Table.HeadCell className="bg-gray-50">
                                                         ราคาต่อหน่วย
                                                     </Table.HeadCell>
                                                     <Table.HeadCell className="bg-gray-50">
-                                                        วันหมดอายุ
+                                                        จำนวนต่อแพ็ค
                                                     </Table.HeadCell>
                                                     <Table.HeadCell className="bg-gray-50">
-                                                        สถานะ
+                                                        ราคา
+                                                    </Table.HeadCell>
+                                                    <Table.HeadCell className="bg-gray-50">
+                                                        ผู้จำหน่าย
                                                     </Table.HeadCell>
                                                     <Table.HeadCell className="bg-gray-50">
                                                         หมายเหตุ
@@ -212,92 +184,48 @@ export default function ConsumableLotHistory({ lots }) {
                                                     </Table.HeadCell>
                                                 </Table.Head>
                                                 <Table.Body className="divide-y">
-                                                    {selectedLotDetails.map(
-                                                        (detail) => {
-                                                            const expirationStatus =
-                                                                getExpirationStatus(
-                                                                    detail.expiry_date
-                                                                );
-                                                            return (
-                                                                <Table.Row
-                                                                    key={
-                                                                        detail.id
-                                                                    }
-                                                                    className="bg-white"
-                                                                >
-                                                                    <Table.Cell>
-                                                                        <div className="font-medium text-gray-900">
-                                                                            {
-                                                                                detail.name
-                                                                            }
-                                                                        </div>
-                                                                    </Table.Cell>
-                                                                    <Table.Cell>
-                                                                        {
-                                                                            detail.lot_number
-                                                                        }
-                                                                    </Table.Cell>
-                                                                    <Table.Cell>
-                                                                        <span className="font-medium">
-                                                                            {
-                                                                                detail.quantity
-                                                                            }{" "}
-                                                                            {
-                                                                                detail.unit
-                                                                            }
-                                                                        </span>
-                                                                    </Table.Cell>
-                                                                    <Table.Cell>
-                                                                        <span className="font-medium">
-                                                                            {
-                                                                                detail.remaining_quantity
-                                                                            }{" "}
-                                                                            {
-                                                                                detail.unit
-                                                                            }
-                                                                        </span>
-                                                                    </Table.Cell>
-                                                                    <Table.Cell>
-                                                                        {
-                                                                            detail.unit
-                                                                        }
-                                                                    </Table.Cell>
-                                                                    <Table.Cell>
-                                                                        ฿
-                                                                        {detail.unit_price.toLocaleString()}
-                                                                    </Table.Cell>
-                                                                    <Table.Cell>
-                                                                        {formatDate(
-                                                                            detail.expiry_date
-                                                                        )}
-                                                                    </Table.Cell>
-                                                                    <Table.Cell>
-                                                                        <Badge
-                                                                            color={
-                                                                                expirationStatus.color
-                                                                            }
-                                                                        >
-                                                                            {
-                                                                                expirationStatus.text
-                                                                            }
-                                                                        </Badge>
-                                                                    </Table.Cell>
-                                                                    <Table.Cell>
-                                                                        {
-                                                                            detail.note
-                                                                        }
-                                                                    </Table.Cell>
-                                                                    <Table.Cell>
-                                                                        {
-                                                                            detail
-                                                                                .user
-                                                                                ?.name
-                                                                        }
-                                                                    </Table.Cell>
-                                                                </Table.Row>
-                                                            );
-                                                        }
-                                                    )}
+                                                    {selectedLotDetails.map((detail) => (
+                                                        <Table.Row
+                                                            key={detail.id}
+                                                            className="bg-white hover:bg-gray-50"
+                                                        >
+                                                            <Table.Cell>
+                                                                <div className="font-medium text-gray-900">
+                                                                    {detail.consumable.name}
+                                                                </div>
+                                                            </Table.Cell>
+                                                            <Table.Cell>
+                                                                <span className="font-medium">
+                                                                    {detail.quantity}{" "}
+                                                                    {detail.consumable.unit}
+                                                                </span>
+                                                            </Table.Cell>
+                                                            <Table.Cell>
+                                                                <span className="font-medium">
+                                                                    ฿{detail.cost_per_unit.toLocaleString()}
+                                                                </span>
+                                                            </Table.Cell>
+                                                            <Table.Cell>
+                                                                <span className="font-medium">
+                                                                    {detail.per_pack}
+                                                                </span>
+                                                            </Table.Cell>
+                                                            <Table.Cell>
+                                                                <span className="font-medium">
+                                                                    ฿{detail.price.toLocaleString()}
+                                                                </span>
+                                                            </Table.Cell>
+                                                            <Table.Cell>
+                                                                {detail.supplier}
+                                                            </Table.Cell>
+                                                            <Table.Cell>
+                                                                {detail.note}
+                                                            </Table.Cell>
+                                                            <Table.Cell>
+                                                                {detail.user.name}
+                                                            </Table.Cell>
+                                                        </Table.Row>
+                                                    ))}
                                                 </Table.Body>
                                             </Table>
                                         </div>
