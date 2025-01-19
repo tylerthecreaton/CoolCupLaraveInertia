@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Consumable;
 use App\Models\ConsumableLot;
+use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -71,8 +72,22 @@ class ConsumableLotController extends Controller
             ]);
         }
 
+        // TODO: Please implement the logic to update the Consumable quantity
+        $this->updateExpenses();
+
         return redirect()->route('admin.consumables.lots.index')
             ->with('success', 'บันทึกข้อมูล Lot สำเร็จ');
+    }
+
+    // TODO: Please implement the logic to update the Consumable quantity
+    private function updateExpenses()
+    {
+        $expesnse = new Expense();
+        $expesnse->name = '[ค่าเข้าคลัง] รับ ConsumableLot จาก Supplier';
+        $expesnse->user_id = Auth::user()->id;
+        $expesnse->amount = 0;
+        $expesnse->expense_category_id = 3;
+        $expesnse->save();
     }
 
     public function getLotDetails($date)
