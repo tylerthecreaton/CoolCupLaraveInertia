@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\ConsumablesController as AdminConsumablesControll
 use App\Http\Controllers\Admin\ConsumableLotController as AdminConsumableLotController;
 use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
 use App\Http\Controllers\Admin\ExpenseCategoryController as AdminExpenseCategoryController;
+use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\Admin\ExpiredController as AdminExpiredController;
 use App\Http\Controllers\HomeController;
@@ -134,6 +135,11 @@ Route::middleware('auth')->group(function () {
         Route::put('/expenses/{id}', [AdminExpenseController::class, 'update'])->name('expenses.update');
         Route::delete('/expenses/{id}', [AdminExpenseController::class, 'destroy'])->name('expenses.destroy');
 
+        // ---------------------------Withdrawals---------------------------
+        Route::get('/withdraw', [AdminWithdrawController::class, 'index'])->name('withdraw.index');
+        Route::get('/withdraw/create', [AdminWithdrawController::class, 'create'])->name('withdraw.create');
+        Route::post('/withdraw', [AdminWithdrawController::class, 'store'])->name('withdraw.store');
+        Route::get('/withdraw/{id}/rollback', [AdminWithdrawController::class, 'rollback'])->name('withdraw.rollback');
 
         // ---------------------------Products---------------------------
         Route::get('/products', [AdminProductsController::class, 'index'])->name('products.index');

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link, router } from "@inertiajs/react";
-import { Breadcrumb, Table, Button, Modal, Badge } from "flowbite-react";
+import { Breadcrumb, Table, Button, Modal, Badge, Pagination } from "flowbite-react";
 import { HiHome, HiCalendar, HiEye } from "react-icons/hi2";
 import { FaPlus } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -26,6 +26,10 @@ export default function ConsumableLotHistory({ lots }) {
         }
     };
 
+    const onPageChange = (page) => {
+        router.get(route('admin.consumables.lots.index', { page }));
+    };
+
     const formatDate = (date) => {
         return new Date(date).toLocaleDateString("th-TH", {
             year: "numeric",
@@ -35,6 +39,7 @@ export default function ConsumableLotHistory({ lots }) {
             minute: "2-digit",
         });
     };
+
 
     return (
         <AuthenticatedLayout
@@ -138,6 +143,13 @@ export default function ConsumableLotHistory({ lots }) {
                                             ))}
                                         </Table.Body>
                                     </Table>
+                                    <div className="flex items-center justify-center text-center">
+                                        <Pagination
+                                            currentPage={lots.current_page}
+                                            totalPages={lots.last_page}
+                                            onPageChange={onPageChange}
+                                        />
+                                    </div>
                                 </div>
 
                                 <Modal

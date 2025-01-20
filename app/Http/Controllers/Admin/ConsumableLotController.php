@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Consumable;
 use App\Models\ConsumableLot;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -73,46 +74,47 @@ class ConsumableLotController extends Controller
             ]);
         }
 
-        $this->updateExpenses();
+        $this->updateExpenses(ConsumableLot::where('created_at', ConsumableLot::max('created_at'))->get());
 
         return redirect()->route('admin.consumables.lots.index')
             ->with('success', 'บันทึกข้อมูล Lot สำเร็จ');
     }
 
-    private function updateExpenses()
+    private function updateExpenses($latestLots)
     {
-
-        $latestLots = ConsumableLot::where('created_at', ConsumableLot::max('created_at'))
-            ->with('consumable')
-            ->get();
-
-
-        $totalAmount = $latestLots->sum('price');
-
-        // Create expense record
-        $expense = new Expense();
-        $expense->name = sprintf(
-            '[ค่าเข้าคลัง] รับวัตถุดิบ %d รายการ มูลค่ารวม %s บาท',
-            $latestLots->count(),
-            number_format($totalAmount, 2)
-        );
-        $expense->user_id = Auth::user()->id;
-        $expense->amount = $totalAmount;
-        $expense->expense_category_id = 3;
+        if ($latestLots->isEmpty()) {
+            return;
+        }
 
         $descriptions = $latestLots->map(function ($lot) {
             return sprintf(
-                "- %s: %d %s (ราคารวม %s บาท) จาก %s",
+                " %s: %d %s (ราคารวม %s บาท) จาก %s",
                 $lot->consumable->name,
                 $lot->quantity,
                 $lot->consumable->unit,
                 number_format($lot->price, 2),
                 $lot->supplier
             );
-        });
+        })->join("\n");
 
-        $expense->description = $descriptions->join("\n");
-        $expense->save();
+        $totalAmount = $latestLots->sum('price');
+
+
+        $category = ExpenseCategory::firstOrCreate(
+            ['name' => 'วัตถุดิบสิ้นเปลือง'],
+            ['description' => 'รายจ่ายจากการซื้อวัตถุดิบสิ้นเปลือง']
+        );
+
+
+        Expense::create([
+            'name' => sprintf('ซื้อวัตถุดิบสิ้นเปลือง (%d รายการ)', $latestLots->count()),
+            'amount' => $totalAmount,
+            'description' => $descriptions,
+            'expense_category_id' => $category->id,
+            'user_id' => Auth::user()->id,
+            'source_type' => 'consumable_lot',
+            'source_date' => now(),
+        ]);
     }
 
     public function getLotDetails($date)
