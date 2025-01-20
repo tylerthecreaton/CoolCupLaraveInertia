@@ -63,31 +63,56 @@ class ConsumableLotController extends Controller
             // เพิ่มการรับ ConsumableLot ไปยัง Consumable
             $consumable = Consumable::find($lotData['consumable_id']);
             $oldQuantity = $consumable->quantity;
-            $consumable->increment('quantity', $lotData['quantity']);
+            $newQuantity = $lotData['quantity'] * $lotData['per_pack'];
+            $consumable->increment('quantity', $newQuantity);
             Log::info('Updating Consumable quantity', [
                 'consumable_id' => $lotData['consumable_id'],
                 'old_quantity' => $oldQuantity,
-                'added_quantity' => $lotData['quantity'],
+                'added_quantity' => $newQuantity,
                 'new_quantity' => $consumable->fresh()->quantity
             ]);
         }
 
-        // TODO: Please implement the logic to update the Consumable quantity
         $this->updateExpenses();
 
         return redirect()->route('admin.consumables.lots.index')
             ->with('success', 'บันทึกข้อมูล Lot สำเร็จ');
     }
 
-    // TODO: Please implement the logic to update the Consumable quantity
     private function updateExpenses()
     {
-        $expesnse = new Expense();
-        $expesnse->name = '[ค่าเข้าคลัง] รับ ConsumableLot จาก Supplier';
-        $expesnse->user_id = Auth::user()->id;
-        $expesnse->amount = 0;
-        $expesnse->expense_category_id = 3;
-        $expesnse->save();
+
+        $latestLots = ConsumableLot::where('created_at', ConsumableLot::max('created_at'))
+            ->with('consumable')
+            ->get();
+
+
+        $totalAmount = $latestLots->sum('price');
+
+        // Create expense record
+        $expense = new Expense();
+        $expense->name = sprintf(
+            '[ค่าเข้าคลัง] รับวัตถุดิบ %d รายการ มูลค่ารวม %s บาท',
+            $latestLots->count(),
+            number_format($totalAmount, 2)
+        );
+        $expense->user_id = Auth::user()->id;
+        $expense->amount = $totalAmount;
+        $expense->expense_category_id = 3;
+
+        $descriptions = $latestLots->map(function ($lot) {
+            return sprintf(
+                "- %s: %d %s (ราคารวม %s บาท) จาก %s",
+                $lot->consumable->name,
+                $lot->quantity,
+                $lot->consumable->unit,
+                number_format($lot->price, 2),
+                $lot->supplier
+            );
+        });
+
+        $expense->description = $descriptions->join("\n");
+        $expense->save();
     }
 
     public function getLotDetails($date)
