@@ -5,25 +5,16 @@ import { Breadcrumb, Table, Button, Modal, Badge, Pagination } from "flowbite-re
 import { HiHome, HiCalendar, HiEye } from "react-icons/hi2";
 import { FaPlus } from "react-icons/fa";
 import Swal from "sweetalert2";
-import axios from "axios";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import ConsumableLotDetail from "@/Components/ConsumableLotDetail";
 
 export default function ConsumableLotHistory({ lots }) {
     const [showModal, setShowModal] = useState(false);
-    const [selectedLotDetails, setSelectedLotDetails] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedLot, setSelectedLot] = useState(null);
 
-    const handleShowDetails = async (date) => {
-        try {
-            const response = await axios.get(
-                route("admin.consumables.lots.details", date)
-            );
-            setSelectedLotDetails(response.data);
-            setSelectedDate(date);
-            setShowModal(true);
-        } catch (error) {
-            console.error("Error fetching lot details:", error);
-        }
+    const handleShowDetails = (lot) => {
+        setSelectedLot(lot);
+        setShowModal(true);
     };
 
     const onPageChange = (page) => {
@@ -39,7 +30,6 @@ export default function ConsumableLotHistory({ lots }) {
             minute: "2-digit",
         });
     };
-
 
     return (
         <AuthenticatedLayout
@@ -89,10 +79,16 @@ export default function ConsumableLotHistory({ lots }) {
                                     <Table hoverable>
                                         <Table.Head>
                                             <Table.HeadCell className="bg-gray-50">
+                                                Lot Number
+                                            </Table.HeadCell>
+                                            <Table.HeadCell className="bg-gray-50">
                                                 วันที่บันทึก
                                             </Table.HeadCell>
                                             <Table.HeadCell className="bg-gray-50">
                                                 จำนวนรายการ
+                                            </Table.HeadCell>
+                                            <Table.HeadCell className="bg-gray-50">
+                                                ผู้บันทึก
                                             </Table.HeadCell>
                                             <Table.HeadCell className="bg-gray-50">
                                                 การจัดการ
@@ -101,39 +97,37 @@ export default function ConsumableLotHistory({ lots }) {
                                         <Table.Body className="divide-y">
                                             {lots.data.map((lot) => (
                                                 <Table.Row
-                                                    key={lot.created_at}
+                                                    key={lot.id}
                                                     className="bg-white transition-colors duration-150 hover:bg-gray-50"
                                                 >
                                                     <Table.Cell className="whitespace-nowrap">
-                                                        <button
-                                                            onClick={() =>
-                                                                handleShowDetails(
-                                                                    lot.created_at.split("T")[0]
-                                                                )
-                                                            }
-                                                            className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
-                                                        >
-                                                            {formatDate(lot.created_at)}
-                                                        </button>
-                                                    </Table.Cell>
-                                                    <Table.Cell>
                                                         <Badge
                                                             color="info"
                                                             className="px-3 py-1"
                                                         >
-                                                            {lot.total_items}{" "}
+                                                            #{lot.lot_number}
+                                                        </Badge>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {formatDate(lot.created_at)}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <Badge
+                                                            color="success"
+                                                            className="px-3 py-1"
+                                                        >
+                                                            {lot.details.length}{" "}
                                                             รายการ
                                                         </Badge>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {lot.user.name}
                                                     </Table.Cell>
                                                     <Table.Cell>
                                                         <Button
                                                             size="sm"
                                                             gradientDuoTone="purpleToBlue"
-                                                            onClick={() =>
-                                                                handleShowDetails(
-                                                                    lot.created_at.split("T")[0]
-                                                                )
-                                                            }
+                                                            onClick={() => handleShowDetails(lot)}
                                                         >
                                                             <HiEye className="mr-2 w-4 h-4" />
                                                             ดูรายละเอียด
@@ -160,87 +154,14 @@ export default function ConsumableLotHistory({ lots }) {
                                     <Modal.Header className="bg-gray-50">
                                         <div className="flex items-center">
                                             <HiCalendar className="mr-2 w-5 h-5 text-gray-600" />
-                                            รายละเอียด Lot วันที่{" "}
+                                            รายละเอียด Lot #{selectedLot?.lot_number} วันที่{" "}
                                             <span className="ml-1 font-medium">
-                                                {selectedDate && formatDate(selectedDate)}
+                                                {selectedLot && formatDate(selectedLot.created_at)}
                                             </span>
                                         </div>
                                     </Modal.Header>
                                     <Modal.Body>
-                                        <div className="overflow-x-auto">
-                                            <Table hoverable>
-                                                <Table.Head>
-                                                    <Table.HeadCell className="bg-gray-50">
-                                                        วัตถุดิบ
-                                                    </Table.HeadCell>
-                                                    <Table.HeadCell className="bg-gray-50">
-                                                        จำนวน
-                                                    </Table.HeadCell>
-                                                    <Table.HeadCell className="bg-gray-50">
-                                                        ราคาต่อหน่วย
-                                                    </Table.HeadCell>
-                                                    <Table.HeadCell className="bg-gray-50">
-                                                        จำนวนต่อแพ็ค
-                                                    </Table.HeadCell>
-                                                    <Table.HeadCell className="bg-gray-50">
-                                                        ราคา
-                                                    </Table.HeadCell>
-                                                    <Table.HeadCell className="bg-gray-50">
-                                                        ผู้จำหน่าย
-                                                    </Table.HeadCell>
-                                                    <Table.HeadCell className="bg-gray-50">
-                                                        หมายเหตุ
-                                                    </Table.HeadCell>
-                                                    <Table.HeadCell className="bg-gray-50">
-                                                        ผู้บันทึก
-                                                    </Table.HeadCell>
-                                                </Table.Head>
-                                                <Table.Body className="divide-y">
-                                                    {selectedLotDetails.map((detail) => (
-                                                        <Table.Row
-                                                            key={detail.id}
-                                                            className="bg-white hover:bg-gray-50"
-                                                        >
-                                                            <Table.Cell>
-                                                                <div className="font-medium text-gray-900">
-                                                                    {detail.consumable.name}
-                                                                </div>
-                                                            </Table.Cell>
-                                                            <Table.Cell>
-                                                                <span className="font-medium">
-                                                                    {detail.quantity}{" "}
-                                                                    {detail.consumable.unit}
-                                                                </span>
-                                                            </Table.Cell>
-                                                            <Table.Cell>
-                                                                <span className="font-medium">
-                                                                    ฿{detail.cost_per_unit.toLocaleString()}
-                                                                </span>
-                                                            </Table.Cell>
-                                                            <Table.Cell>
-                                                                <span className="font-medium">
-                                                                    {detail.per_pack}
-                                                                </span>
-                                                            </Table.Cell>
-                                                            <Table.Cell>
-                                                                <span className="font-medium">
-                                                                    ฿{detail.price.toLocaleString()}
-                                                                </span>
-                                                            </Table.Cell>
-                                                            <Table.Cell>
-                                                                {detail.supplier}
-                                                            </Table.Cell>
-                                                            <Table.Cell>
-                                                                {detail.note}
-                                                            </Table.Cell>
-                                                            <Table.Cell>
-                                                                {detail.user.name}
-                                                            </Table.Cell>
-                                                        </Table.Row>
-                                                    ))}
-                                                </Table.Body>
-                                            </Table>
-                                        </div>
+                                        <ConsumableLotDetail lot={selectedLot} />
                                     </Modal.Body>
                                 </Modal>
                             </div>

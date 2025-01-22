@@ -17,11 +17,34 @@ class ConsumableLotController extends Controller
 {
     public function index()
     {
-        $lots = ConsumableLot::with(['consumable', 'user'])
-            ->select('created_at', DB::raw('COUNT(*) as total_items'))
-            ->groupBy('created_at')
+        $lots = ConsumableLot::with(['details.consumable', 'user'])
+            ->select('consumable_lots.*')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        // Transform data for frontend
+        $lots->through(function ($lot) {
+            return [
+                'id' => $lot->id,
+                'lot_number' => $lot->lot_number,
+                'created_at' => $lot->created_at,
+                'note' => $lot->note,
+                'user' => $lot->user,
+                'details' => $lot->details->map(function ($detail) {
+                    return [
+                        'id' => $detail->id,
+                        'consumable' => $detail->consumable,
+                        'quantity' => $detail->quantity,
+                        'price' => $detail->price,
+                        'cost_per_unit' => $detail->cost_per_unit,
+                        'per_pack' => $detail->per_pack,
+                        'supplier' => $detail->supplier,
+                        'note' => $detail->note,
+                        'type' => $detail->type
+                    ];
+                })
+            ];
+        });
 
         return Inertia::render('Admin/consumables/lots/index', [
             'lots' => $lots
@@ -48,66 +71,99 @@ class ConsumableLotController extends Controller
             '*.note' => 'nullable|string',
         ]);
 
-        foreach ($request->all() as $lotData) {
-
-            ConsumableLot::create([
-                'consumable_id' => $lotData['consumable_id'],
-                'cost_per_unit' => $lotData['cost_per_unit'],
-                'quantity' => $lotData['quantity'],
-                'per_pack' => $lotData['per_pack'],
-                'price' => $lotData['price'],
-                'supplier' => $lotData['supplier'],
-                'note' => $lotData['note'] ?? null,
-                'user_id' => Auth::user()->id
+        DB::transaction(function () use ($request) {
+            // สร้าง ConsumableLot
+            $lot = ConsumableLot::create([
+                'user_id' => Auth::user()->id,
+                'lot_number' => $this->generateLotNumber(),
+                'note' => collect($request->all())->pluck('note')->filter()->join(', ')
             ]);
 
-            // เพิ่มการรับ ConsumableLot ไปยัง Consumable
-            $consumable = Consumable::find($lotData['consumable_id']);
-            $oldQuantity = $consumable->quantity;
-            $newQuantity = $lotData['quantity'] * $lotData['per_pack'];
-            $consumable->increment('quantity', $newQuantity);
-            Log::info('Updating Consumable quantity', [
-                'consumable_id' => $lotData['consumable_id'],
-                'old_quantity' => $oldQuantity,
-                'added_quantity' => $newQuantity,
-                'new_quantity' => $consumable->fresh()->quantity
+            Log::info('Created ConsumableLot', [
+                'lot_id' => $lot->id,
+                'lot_number' => $lot->lot_number
             ]);
-        }
 
-        $this->updateExpenses(ConsumableLot::where('created_at', ConsumableLot::max('created_at'))->get());
+            // สร้าง ConsumableLotDetail สำหรับแต่ละรายการ
+            foreach ($request->all() as $lotData) {
+                $detail = $lot->details()->create([
+                    'consumable_id' => $lotData['consumable_id'],
+                    'quantity' => $lotData['quantity'],
+                    'type' => 'in',
+                    'price' => $lotData['price'],
+                    'per_pack' => $lotData['per_pack'],
+                    'cost_per_unit' => $lotData['cost_per_unit'],
+                    'supplier' => $lotData['supplier'],
+                    'note' => $lotData['note'] ?? null,
+                ]);
+
+                Log::info('Created ConsumableLotDetail', [
+                    'detail_id' => $detail->id,
+                    'lot_id' => $lot->id,
+                    'consumable_id' => $lotData['consumable_id']
+                ]);
+
+                // อัพเดทจำนวน Consumable
+                $consumable = Consumable::find($lotData['consumable_id']);
+                $oldQuantity = $consumable->quantity;
+                $newQuantity = $lotData['quantity'] * $lotData['per_pack'];
+                $consumable->increment('quantity', $newQuantity);
+                
+                Log::info('Updating Consumable quantity', [
+                    'consumable_id' => $lotData['consumable_id'],
+                    'old_quantity' => $oldQuantity,
+                    'added_quantity' => $newQuantity,
+                    'new_quantity' => $consumable->fresh()->quantity
+                ]);
+            }
+
+            $this->updateExpenses([$lot]);
+        });
 
         return redirect()->route('admin.consumables.lots.index')
             ->with('success', 'บันทึกข้อมูล Lot สำเร็จ');
     }
 
-    private function updateExpenses($latestLots)
+    private function generateLotNumber()
     {
-        if ($latestLots->isEmpty()) {
+        $latestLot = ConsumableLot::latest()->first();
+        return $latestLot ? $latestLot->lot_number + 1 : 1;
+    }
+
+    private function updateExpenses($lots)
+    {
+        if (empty($lots)) {
             return;
         }
 
-        $descriptions = $latestLots->map(function ($lot) {
-            return sprintf(
-                " %s: %d %s (ราคารวม %s บาท) จาก %s",
-                $lot->consumable->name,
-                $lot->quantity,
-                $lot->consumable->unit,
-                number_format($lot->price, 2),
-                $lot->supplier
-            );
+        $descriptions = collect($lots)->flatMap(function ($lot) {
+            return $lot->details->map(function ($detail) {
+                return sprintf(
+                    " %s: %d %s (ราคารวม %s บาท) จาก %s",
+                    $detail->consumable->name,
+                    $detail->quantity * $detail->per_pack,
+                    $detail->consumable->unit,
+                    number_format($detail->price, 2),
+                    $detail->supplier
+                );
+            });
         })->join("\n");
 
-        $totalAmount = $latestLots->sum('price');
-
+        $totalAmount = collect($lots)->sum(function ($lot) {
+            return $lot->details->sum('price');
+        });
 
         $category = ExpenseCategory::firstOrCreate(
             ['name' => 'วัตถุดิบสิ้นเปลือง'],
             ['description' => 'รายจ่ายจากการซื้อวัตถุดิบสิ้นเปลือง']
         );
 
-
         Expense::create([
-            'name' => sprintf('ซื้อวัตถุดิบสิ้นเปลือง (%d รายการ)', $latestLots->count()),
+            'name' => sprintf('ซื้อวัตถุดิบสิ้นเปลือง (%d รายการ)', 
+                collect($lots)->sum(function ($lot) {
+                    return $lot->details->count();
+                })
+            ),
             'amount' => $totalAmount,
             'description' => $descriptions,
             'expense_category_id' => $category->id,
@@ -119,7 +175,7 @@ class ConsumableLotController extends Controller
 
     public function getLotDetails($date)
     {
-        $lots = ConsumableLot::with(['consumable', 'user'])
+        $lots = ConsumableLot::with(['details.consumable', 'user'])
             ->whereDate('created_at', $date)
             ->get();
 
@@ -128,15 +184,19 @@ class ConsumableLotController extends Controller
 
     public function destroy($consumableId, $id)
     {
-        $lot = ConsumableLot::findOrFail($id);
-        $lot->delete();
+        DB::transaction(function () use ($consumableId, $id) {
+            $lot = ConsumableLot::findOrFail($id);
+            
+            // ลดจำนวน Consumable ตาม details ที่จะลบ
+            foreach ($lot->details as $detail) {
+                $quantity = $detail->quantity * $detail->per_pack;
+                $detail->consumable->decrement('quantity', $quantity);
+            }
+            
+            $lot->delete();
+        });
 
-        $totalQuantity = ConsumableLot::where('consumable_id', $consumableId)
-            ->sum('remaining_quantity');
-        Consumable::where('id', $consumableId)
-            ->update(['quantity' => $totalQuantity]);
-
-        return redirect()->route('admin.consumables.lots.index', $consumableId)
+        return redirect()->route('admin.consumables.lots.index')
             ->with('success', 'ลบข้อมูล Lot เรียบร้อย');
     }
 }

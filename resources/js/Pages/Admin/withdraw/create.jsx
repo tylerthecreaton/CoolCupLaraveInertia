@@ -37,7 +37,7 @@ export default function CreateWithdraw({ ingredients, consumables }) {
             (lot) => lot.id === parseInt(lotId)
         );
         if (selectedLotItem) {
-            setAvailableItems([selectedLotItem]);
+            setAvailableItems(selectedLotItem.items);
             setSelectedItem("");
             setQuantity(1);
         }
@@ -155,12 +155,21 @@ export default function CreateWithdraw({ ingredients, consumables }) {
                                     required
                                 >
                                     <option value="">เลือก Lot</option>
-                                    {availableLots?.map((lot) => (
-                                        <option key={lot.id} value={lot.id}>
-                                            {lot.name} (ID: {lot.id}, คงเหลือ:{" "}
-                                            {lot.quantity})
-                                        </option>
-                                    ))}
+                                    {availableLots?.map((lot) => {
+                                        const date = new Date(lot.created_at);
+                                        const formattedDate = date.toLocaleDateString('th-TH', {
+                                            day: 'numeric',
+                                            month: 'long',
+                                            year: 'numeric',
+                                            era: 'short'
+                                        });
+                                        return (
+                                            <option key={lot.id} value={lot.id}>
+                                                (#
+                                                {lot.id} - {formattedDate} - {lot.items_count} รายการ)
+                                            </option>
+                                        );
+                                    })}
                                 </Select>
                             </div>
 
@@ -179,8 +188,7 @@ export default function CreateWithdraw({ ingredients, consumables }) {
                                     <option value="">เลือกสินค้า</option>
                                     {availableItems?.map((item) => (
                                         <option key={item.id} value={item.id}>
-                                            {item.name} (ID: {item.id}, คงเหลือ:{" "}
-                                            {item.quantity})
+                                            {item.name} (คงเหลือ: {Number(item.quantity).toFixed(1)})
                                         </option>
                                     ))}
                                 </Select>

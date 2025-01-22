@@ -19,33 +19,59 @@ class WithdrawController extends Controller
 
     public function create()
     {
-        $ingredients = IngredientLot::with('ingredient')
+        // ดึง lots พร้อมข้อมูล ingredient
+        $ingredientLots = IngredientLot::with('ingredient')
             ->where('quantity', '>', 0)
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function ($lot) {
+            ->groupBy(function ($lot) {
+                return $lot->created_at->format('Y-m-d');
+            })
+            ->map(function ($lots) {
+                $firstLot = $lots->first();
                 return [
-                    'id' => $lot->id,
-                    'name' => $lot->ingredient->name,
-                    'quantity' => $lot->quantity,
-                    'created_at' => $lot->created_at
+                    'id' => $firstLot->id,
+                    'created_at' => $firstLot->created_at,
+                    'items_count' => $lots->count(),
+                    'items' => $lots->map(function ($lot) {
+                        return [
+                            'id' => $lot->id,
+                            'name' => $lot->ingredient->name,
+                            'quantity' => $lot->quantity,
+                        ];
+                    }),
                 ];
-            });
+            })
+            ->values();
 
-        $consumables = ConsumableLot::with('consumable')
+        $consumableLots = ConsumableLot::with('consumable')
             ->where('quantity', '>', 0)
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function ($lot) {
+            ->groupBy(function ($lot) {
+                return $lot->created_at->format('Y-m-d');
+            })
+            ->map(function ($lots) {
+                $firstLot = $lots->first();
                 return [
-                    'id' => $lot->id,
-                    'name' => $lot->consumable->name,
-                    'quantity' => $lot->quantity,
-                    'created_at' => $lot->created_at
+                    'id' => $firstLot->id,
+                    'created_at' => $firstLot->created_at,
+                    'items_count' => $lots->count(),
+                    'items' => $lots->map(function ($lot) {
+                        return [
+                            'id' => $lot->id,
+                            'name' => $lot->consumable->name,
+                            'quantity' => $lot->quantity,
+                        ];
+                    }),
                 ];
-            });
+            })
+            ->values();
 
-        return Inertia::render('Admin/withdraw/create', compact('ingredients', 'consumables'));
+        return Inertia::render('Admin/withdraw/create', [
+            'ingredients' => $ingredientLots,
+            'consumables' => $consumableLots,
+        ]);
     }
 
     public function show($id)
