@@ -4,6 +4,7 @@ import { HiHome, HiPlus, HiTrash } from "react-icons/hi";
 import { Head, useForm } from "@inertiajs/react";
 import { Breadcrumb, Button, Label, Select, TextInput } from "flowbite-react";
 import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 export default function CreateWithdraw({ ingredients, consumables }) {
     const [withdrawItems, setWithdrawItems] = useState([]);
@@ -26,7 +27,7 @@ export default function CreateWithdraw({ ingredients, consumables }) {
         setSelectedItem("");
         setQuantity(1);
         setAvailableLots([]);
-        
+
         if (!type) {
             setAvailableItems([]);
             return;
@@ -41,45 +42,48 @@ export default function CreateWithdraw({ ingredients, consumables }) {
         // Group items by their name and collect all lots
         const groupedItems = items.reduce((acc, lot) => {
             if (!lot || !Array.isArray(lot.items)) return acc;
-            
-            lot.items.forEach(item => {
+
+            lot.items.forEach((item) => {
                 if (!item) return;
-                
-                const existingGroup = acc.find(g => g.name === item.name);
+
+                const existingGroup = acc.find((g) => g.name === item.name);
                 if (!existingGroup) {
                     acc.push({
                         id: item.id,
                         name: item.name,
-                        items: [{
-                            ...item,
-                            lotId: lot.id,
-                            lotDate: lot.created_at,
-                            quantity: item.quantity || 0
-                        }]
+                        items: [
+                            {
+                                ...item,
+                                lotId: lot.id,
+                                lotDate: lot.created_at,
+                                quantity: item.quantity || 0,
+                            },
+                        ],
                     });
                 } else {
                     existingGroup.items.push({
                         ...item,
                         lotId: lot.id,
                         lotDate: lot.created_at,
-                        quantity: item.quantity || 0
+                        quantity: item.quantity || 0,
                     });
                 }
             });
             return acc;
         }, []);
-        
+
         setAvailableItems(groupedItems);
     };
 
     // เมื่อเลือกสินค้า
     const handleItemChange = (itemId) => {
         setSelectedItem(itemId);
-        setSelectedLot("");
         setQuantity(1);
-        
+
         if (!itemId) {
             setAvailableLots([]);
+            setSelectedLot("");
+            setMaxQuantity(0);
             return;
         }
 
@@ -88,6 +92,9 @@ export default function CreateWithdraw({ ingredients, consumables }) {
         if (group) {
             const selectedItem = group.items.find(item => item.id.toString() === itemId2);
             if (selectedItem) {
+                // Auto select the lot and set its quantity
+                setSelectedLot(selectedItem.lotId.toString());
+                setMaxQuantity(selectedItem.quantity);
                 setAvailableLots([{
                     id: selectedItem.lotId,
                     created_at: selectedItem.lotDate,
@@ -95,36 +102,76 @@ export default function CreateWithdraw({ ingredients, consumables }) {
                 }]);
             } else {
                 setAvailableLots([]);
+                setSelectedLot("");
+                setMaxQuantity(0);
             }
         } else {
             setAvailableLots([]);
+            setSelectedLot("");
+            setMaxQuantity(0);
         }
     };
 
     // เมื่อเลือก Lot
     const handleLotChange = (lotId) => {
         setSelectedLot(lotId);
-        
+
         if (!lotId || !selectedItem) {
             setMaxQuantity(0);
             setQuantity(1);
             return;
         }
 
-        const selectedItemObj = availableItems.find(g => g.id.toString() === selectedItem.split('-')[0]);
+        const selectedItemObj = availableItems.find(
+            (g) => g.id.toString() === selectedItem.split("-")[0]
+        );
         if (!selectedItemObj || !Array.isArray(selectedItemObj.items)) {
             setMaxQuantity(0);
             setQuantity(1);
             return;
         }
 
-        const selectedLot = selectedItemObj.items.find(item => item.lotId === parseInt(lotId));
+        const selectedLot = selectedItemObj.items.find(
+            (item) => item.lotId === parseInt(lotId)
+        );
         setMaxQuantity(selectedLot?.quantity || 0);
         setQuantity(1);
     };
 
+    // เมื่อเปลี่ยนแปลงจำนวน
+    const handleQuantityChange = (value) => {
+        const newQuantity = parseFloat(value);
+        if (isNaN(newQuantity) || newQuantity < 0) {
+            setQuantity(0);
+            return;
+        }
+
+        if (newQuantity > maxQuantity) {
+            Swal.fire({
+                title: 'ข้อผิดพลาด',
+                text: `ไม่สามารถเบิกได้มากกว่า ${maxQuantity}`,
+                icon: 'error',
+                confirmButtonText: 'ตกลง'
+            });
+            setQuantity(maxQuantity);
+            return;
+        }
+
+        setQuantity(newQuantity);
+    };
+
     // เพิ่มรายการเบิก
     const addWithdrawItem = () => {
+        if (!selectedType || !selectedItem || !quantity) {
+            Swal.fire({
+                title: "ข้อผิดพลาด",
+                text: "กรุณากรอกข้อมูลให้ครบถ้วน",
+                icon: "error",
+                confirmButtonText: "ตกลง",
+            });
+            return;
+        }
+
         // ตรวจสอบว่ามีการเลือกสินค้าซ้ำใน lot เดียวกันหรือไม่
         const isDuplicate = withdrawItems.some(
             (item) =>
@@ -132,7 +179,23 @@ export default function CreateWithdraw({ ingredients, consumables }) {
         );
 
         if (isDuplicate) {
-            alert("ไม่สามารถเลือกสินค้าซ้ำใน lot เดียวกันได้");
+            Swal.fire({
+                title: "ข้อผิดพลาด",
+                text: "ไม่สามารถเลือกสินค้าซ้ำใน lot เดียวกันได้",
+                icon: "error",
+                confirmButtonText: "ตกลง",
+            });
+            return;
+        }
+
+        // ตรวจสอบจำนวนที่เบิก
+        if (quantity > maxQuantity) {
+            Swal.fire({
+                title: "ข้อผิดพลาด",
+                text: `ไม่สามารถเบิกได้มากกว่า ${maxQuantity}`,
+                icon: "error",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
@@ -141,7 +204,9 @@ export default function CreateWithdraw({ ingredients, consumables }) {
             lot_id: selectedLot,
             item_id: selectedItem,
             quantity: quantity,
-            item_name: availableItems.find(g => g.id.toString() === selectedItem.split('-')[0])?.name,
+            item_name: availableItems.find(
+                (g) => g.id.toString() === selectedItem.split("-")[0]
+            )?.name,
         };
 
         setWithdrawItems([...withdrawItems, newItem]);
@@ -152,19 +217,73 @@ export default function CreateWithdraw({ ingredients, consumables }) {
         setSelectedLot("");
         setSelectedItem("");
         setQuantity(1);
+
+        // แสดง success message
+        Swal.fire({
+            title: "สำเร็จ",
+            text: "เพิ่มรายการเบิกเรียบร้อยแล้ว",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false,
+        });
     };
 
     // ลบรายการเบิก
     const removeWithdrawItem = (index) => {
-        const updatedItems = withdrawItems.filter((_, i) => i !== index);
-        setWithdrawItems(updatedItems);
-        setData("items", updatedItems);
+        Swal.fire({
+            title: "ยืนยันการลบ",
+            text: "คุณต้องการลบรายการนี้ใช่หรือไม่?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "ใช่, ลบเลย",
+            cancelButtonText: "ยกเลิก",
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const updatedItems = withdrawItems.filter(
+                    (_, i) => i !== index
+                );
+                setWithdrawItems(updatedItems);
+                setData("items", updatedItems);
+
+                Swal.fire({
+                    title: "ลบแล้ว!",
+                    text: "ลบรายการเรียบร้อยแล้ว",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+            }
+        });
     };
 
     // ส่งฟอร์ม
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route("admin.withdraws.store"));
+
+        if (withdrawItems.length === 0) {
+            Swal.fire({
+                title: "ข้อผิดพลาด",
+                text: "กรุณาเพิ่มรายการเบิกอย่างน้อย 1 รายการ",
+                icon: "error",
+                confirmButtonText: "ตกลง",
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: "ยืนยันการเบิก",
+            text: "คุณต้องการบันทึกรายการเบิกใช่หรือไม่?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "ใช่, บันทึกเลย",
+            cancelButtonText: "ยกเลิก",
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                post(route("admin.withdraws.store"));
+            }
+        });
     };
 
     return (
@@ -229,20 +348,35 @@ export default function CreateWithdraw({ ingredients, consumables }) {
                                 >
                                     <option value="">เลือกสินค้า</option>
                                     {availableItems?.map((group) => (
-                                        <optgroup key={group.id} label={group.name}>
+                                        <optgroup
+                                            key={group.id}
+                                            label={group.name}
+                                        >
                                             {group.items.map((item) => {
-                                                const date = new Date(item.lotDate);
-                                                const formattedDate = date.toLocaleDateString('th-TH', {
-                                                    day: 'numeric',
-                                                    month: 'short',
-                                                    year: 'numeric',
-                                                });
+                                                const date = new Date(
+                                                    item.lotDate
+                                                );
+                                                const formattedDate =
+                                                    date.toLocaleDateString(
+                                                        "th-TH",
+                                                        {
+                                                            day: "numeric",
+                                                            month: "short",
+                                                            year: "numeric",
+                                                        }
+                                                    );
                                                 return (
-                                                    <option 
-                                                        key={`${group.id}-${item.id}`} 
+                                                    <option
+                                                        key={`${group.id}-${item.id}`}
                                                         value={`${group.id}-${item.id}`}
                                                     >
-                                                        Lot #{item.lotId} - {formattedDate} (คงเหลือ: {Number(item.quantity).toFixed(1)})
+                                                        Lot #{item.lotId} -{" "}
+                                                        {formattedDate}{" "}
+                                                        (คงเหลือ:{" "}
+                                                        {Number(
+                                                            item.quantity
+                                                        ).toFixed(1)}
+                                                        )
                                                     </option>
                                                 );
                                             })}
@@ -266,7 +400,8 @@ export default function CreateWithdraw({ ingredients, consumables }) {
                                     <option value="">เลือก Lot</option>
                                     {availableLots?.map((lot) => (
                                         <option key={lot.id} value={lot.id}>
-                                            #{lot.id} - คงเหลือ: {Number(lot.quantity).toFixed(1)}
+                                            #{lot.id} - คงเหลือ:{" "}
+                                            {Number(lot.quantity).toFixed(1)}
                                         </option>
                                     ))}
                                 </Select>
@@ -278,13 +413,14 @@ export default function CreateWithdraw({ ingredients, consumables }) {
                                 <TextInput
                                     id="quantity"
                                     type="number"
-                                    min="1"
-                                    max={maxQuantity}
                                     value={quantity}
                                     onChange={(e) =>
-                                        setQuantity(Number(e.target.value))
+                                        handleQuantityChange(e.target.value)
                                     }
                                     disabled={!selectedItem}
+                                    min="0"
+                                    max={maxQuantity}
+                                    step="0.1"
                                     required
                                 />
                             </div>
