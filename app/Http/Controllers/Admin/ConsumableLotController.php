@@ -104,18 +104,18 @@ class ConsumableLotController extends Controller
                     'consumable_id' => $lotData['consumable_id']
                 ]);
 
-                // อัพเดทจำนวน Consumable
-                $consumable = Consumable::find($lotData['consumable_id']);
-                $oldQuantity = $consumable->quantity;
-                $newQuantity = $lotData['quantity'] * $lotData['per_pack'];
-                $consumable->increment('quantity', $newQuantity);
-                
-                Log::info('Updating Consumable quantity', [
-                    'consumable_id' => $lotData['consumable_id'],
-                    'old_quantity' => $oldQuantity,
-                    'added_quantity' => $newQuantity,
-                    'new_quantity' => $consumable->fresh()->quantity
-                ]);
+                // // อัพเดทจำนวน Consumable
+                // $consumable = Consumable::find($lotData['consumable_id']);
+                // // $oldQuantity = $consumable->quantity;
+                // // $newQuantity = $lotData['quantity'] * $lotData['per_pack'];
+                // // $consumable->increment('quantity', $newQuantity);
+
+                // Log::info('Updating Consumable quantity', [
+                //     'consumable_id' => $lotData['consumable_id'],
+                //     // 'old_quantity' => $oldQuantity,
+                //     // 'added_quantity' => $newQuantity,
+                //     // 'new_quantity' => $consumable->fresh()->quantity
+                // ]);
             }
 
             $this->updateExpenses([$lot]);
@@ -160,7 +160,7 @@ class ConsumableLotController extends Controller
         );
 
         Expense::create([
-            'name' => sprintf('ซื้อวัตถุดิบสิ้นเปลือง (%d รายการ)', 
+            'name' => sprintf('ซื้อวัตถุดิบสิ้นเปลือง (%d รายการ)',
                 collect($lots)->sum(function ($lot) {
                     return $lot->details->count();
                 })
@@ -188,7 +188,7 @@ class ConsumableLotController extends Controller
         try {
             DB::transaction(function () use ($id) {
                 $lot = ConsumableLot::findOrFail($id);
-                
+
                 // ลดจำนวน Consumable ตาม details ที่จะลบ
                 foreach ($lot->details as $detail) {
                     $quantity = $detail->quantity * $detail->per_pack;
@@ -200,7 +200,7 @@ class ConsumableLotController extends Controller
                         'lot_id' => $lot->id
                     ]);
                 }
-                
+
                 $lot->delete();
             });
 

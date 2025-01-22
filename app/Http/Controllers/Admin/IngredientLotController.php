@@ -115,18 +115,18 @@ class IngredientLotController extends Controller
                     'ingredient_id' => $lotData['ingredient_id']
                 ]);
 
-                // อัพเดทจำนวน Ingredient
-                $ingredient = Ingredient::find($lotData['ingredient_id']);
-                $oldQuantity = $ingredient->quantity;
-                $newQuantity = $lotData['quantity'] * $lotData['per_pack'];
-                $ingredient->increment('quantity', $newQuantity);
+                // // อัพเดทจำนวน Ingredient
+                // $ingredient = Ingredient::find($lotData['ingredient_id']);
+                // $oldQuantity = $ingredient->quantity;
+                // $newQuantity = $lotData['quantity'] * $lotData['per_pack'];
+                // $ingredient->increment('quantity', $newQuantity);
 
-                Log::info('Updating Ingredient quantity', [
-                    'ingredient_id' => $lotData['ingredient_id'],
-                    'old_quantity' => $oldQuantity,
-                    'added_quantity' => $newQuantity,
-                    'new_quantity' => $ingredient->fresh()->quantity
-                ]);
+                // Log::info('Updating Ingredient quantity', [
+                //     'ingredient_id' => $lotData['ingredient_id'],
+                //     'old_quantity' => $oldQuantity,
+                //     'added_quantity' => $newQuantity,
+                //     'new_quantity' => $ingredient->fresh()->quantity
+                // ]);
             }
 
             $this->updateExpenses([$lot]);
