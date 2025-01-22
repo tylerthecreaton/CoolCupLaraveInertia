@@ -21,7 +21,7 @@ class WithdrawController extends Controller
     {
         // ดึง lots พร้อมข้อมูล ingredient
         $ingredientLots = IngredientLot::with('details.ingredient.unit')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($lots) {
                 $lotsDetails = $lots->details;
@@ -44,7 +44,7 @@ class WithdrawController extends Controller
             })
             ->values();
         $consumableLots = ConsumableLot::with('details.consumable')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($lots) {
                 $lotsDetails = $lots->details;
