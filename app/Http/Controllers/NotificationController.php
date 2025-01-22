@@ -95,26 +95,30 @@ class NotificationController extends Controller
         $notifications = [];
         $warningDays = $this->setting->where('key', 'expiration_warning_days')->first()?->value ?? 30;
 
-        foreach ($expiringIngredients as $index => $ingredient) {
-            $daysUntilExpiration = Carbon::now()->diffInDays(Carbon::parse($ingredient->expiration_date), false);
-            $isExpired = $daysUntilExpiration <= 0;
+        foreach ($expiringIngredients as $index => $ingredientLot) {
+            foreach ($ingredientLot->details as $detail) {
+                $daysUntilExpiration = Carbon::now()->diffInDays(Carbon::parse($detail->expiration_date), false);
+                $isExpired = $daysUntilExpiration <= 0;
 
-            $notifications[] = new Notification(
-                type: $isExpired ? "expired" : "expiring",
-                title: $isExpired ? 'แจ้งเตือนวัตถุดิบหมดอายุ' : 'แจ้งเตือนวัตถุดิบใกล้หมดอายุ',
-                message: $isExpired
-                    ? "วัตถุดิบ {$ingredient->name} หมดอายุแล้ว กรุณาจำหน่ายออกจากระบบ"
-                    : "วัตถุดิบ {$ingredient->name} จะหมดอายุในอีก {$daysUntilExpiration}",
-                data: array_merge($ingredient->toArray(), [
-                    'is_expired' => $isExpired,
-                    'days_until_expiration' => $daysUntilExpiration
-                ]),
-                url: $isExpired
-                    ? route('admin.ingredient-lots.expired.index', $ingredient->id)
-                    : route('admin.ingredient-lots.create', ['ingredient_id' => $ingredient->ingredient_id]),
-                color: $isExpired ? 'error' : 'danger',
-                id: count($notifications) + $index + 1
-            );
+                $notifications[] = new Notification(
+                    type: $isExpired ? "expired" : "expiring",
+                    title: $isExpired ? 'แจ้งเตือนวัตถุดิบหมดอายุ' : 'แจ้งเตือนวัตถุดิบใกล้หมดอายุ',
+                    message: $isExpired
+                        ? "วัตถุดิบ {$detail->ingredient->name} หมดอายุแล้ว กรุณาจำหน่ายออกจากระบบ"
+                        : "วัตถุดิบ {$detail->ingredient->name} จะหมดอายุในอีก {$daysUntilExpiration} วัน",
+                    data: array_merge($detail->toArray(), [
+                        'is_expired' => $isExpired,
+                        'days_until_expiration' => $daysUntilExpiration,
+                        'ingredient_name' => $detail->ingredient->name,
+                        'unit' => $detail->ingredient->unit?->abbreviation
+                    ]),
+                    url: $isExpired
+                        ? route('admin.ingredient-lots.expired.index', $detail->ingredient_id)
+                        : route('admin.ingredient-lots.create', ['ingredient_id' => $detail->ingredient_id]),
+                    color: $isExpired ? 'error' : 'danger',
+                    id: count($notifications) + $index + 1
+                );
+            }
         }
 
         return $notifications;
@@ -123,8 +127,12 @@ class NotificationController extends Controller
     private function getLessStockIngredients()
     {
         $minimumStock = $this->setting->where('key', 'minimum_ingredient_stock_alert')->first()?->value ?? 1000;
-        return Ingredient::with('unit')
-            ->where('quantity', '<', $minimumStock)
+        return IngredientLot::with('details.ingredient.unit')
+            ->join('ingredient_lot_details', 'ingredient_lots.id', '=', 'ingredient_lot_details.ingredient_lot_id')
+            ->where('quantity', '<=', $minimumStock)
+            ->orderBy('ingredient_lot_details.quantity', 'asc')
+            ->select('ingredient_lots.*')
+            ->distinct()
             ->get();
     }
 
@@ -133,9 +141,12 @@ class NotificationController extends Controller
         $expiringDays = (int) ($this->setting->where('key', 'ingredient_expired_before_date')->first()?->value ?? 7);
         $expiryDate = now()->addDays($expiringDays);
 
-        return IngredientLot::with(['ingredient.unit'])
-            ->where('expiration_date', '<=', $expiryDate)
-            ->orderBy('expiration_date')
+        return IngredientLot::with(['details.ingredient.unit'])
+            ->join('ingredient_lot_details', 'ingredient_lots.id', '=', 'ingredient_lot_details.ingredient_lot_id')
+            ->where('ingredient_lot_details.expiration_date', '<=', $expiryDate)
+            ->orderBy('ingredient_lot_details.expiration_date', 'asc')
+            ->select('ingredient_lots.*')
+            ->distinct()
             ->get();
     }
 
