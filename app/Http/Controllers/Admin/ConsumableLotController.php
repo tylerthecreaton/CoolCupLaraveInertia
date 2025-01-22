@@ -183,21 +183,60 @@ class ConsumableLotController extends Controller
         return response()->json($lots);
     }
 
-    public function destroy($consumableId, $id)
+    public function destroy($id)
     {
-        DB::transaction(function () use ($consumableId, $id) {
-            $lot = ConsumableLot::findOrFail($id);
-            
-            // ลดจำนวน Consumable ตาม details ที่จะลบ
-            foreach ($lot->details as $detail) {
-                $quantity = $detail->quantity * $detail->per_pack;
-                $detail->consumable->decrement('quantity', $quantity);
-            }
-            
-            $lot->delete();
-        });
+        try {
+            DB::transaction(function () use ($id) {
+                $lot = ConsumableLot::findOrFail($id);
+                
+                // ลดจำนวน Consumable ตาม details ที่จะลบ
+                foreach ($lot->details as $detail) {
+                    $quantity = $detail->quantity * $detail->per_pack;
+                    $detail->consumable->decrement('quantity', $quantity);
 
-        return redirect()->route('admin.consumables.lots.index')
-            ->with('success', 'ลบข้อมูล Lot เรียบร้อย');
+                    Log::info('Decremented consumable quantity on lot delete', [
+                        'consumable_id' => $detail->consumable_id,
+                        'quantity' => $quantity,
+                        'lot_id' => $lot->id
+                    ]);
+                }
+                
+                $lot->delete();
+            });
+
+            return response()->json(['message' => 'ลบ Lot เรียบร้อยแล้ว']);
+        } catch (\Exception $e) {
+            Log::error('Error deleting lot: ' . $e->getMessage());
+            return response()->json(['error' => 'ไม่สามารถลบ Lot ได้'], 500);
+        }
+    }
+
+    public function revert($id)
+    {
+        try {
+            DB::transaction(function () use ($id) {
+                $lot = ConsumableLot::findOrFail($id);
+
+                // คืนค่าจำนวน Consumable กลับไปยังค่าก่อนหน้า
+                foreach ($lot->details as $detail) {
+                    $quantity = $detail->quantity * $detail->per_pack;
+                    $detail->consumable->increment('quantity', $quantity);
+
+                    Log::info('Reverted consumable quantity', [
+                        'consumable_id' => $detail->consumable_id,
+                        'quantity' => $quantity,
+                        'lot_id' => $lot->id
+                    ]);
+                }
+
+                // ลบ Lot และ details
+                $lot->delete();
+            });
+
+            return response()->json(['message' => 'คืนค่า Lot เรียบร้อยแล้ว']);
+        } catch (\Exception $e) {
+            Log::error('Error reverting lot: ' . $e->getMessage());
+            return response()->json(['error' => 'ไม่สามารถคืนค่า Lot ได้'], 500);
+        }
     }
 }

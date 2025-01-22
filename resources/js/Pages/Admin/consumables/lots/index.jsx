@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link, router } from "@inertiajs/react";
-import { Breadcrumb, Table, Button, Modal, Badge, Pagination } from "flowbite-react";
+import { Breadcrumb, Table, Button, Modal, Badge, Pagination, Tooltip } from "flowbite-react";
 import { HiHome, HiCalendar, HiEye } from "react-icons/hi2";
 import { FaPlus } from "react-icons/fa";
+import { HiOutlineTrash, HiOutlineRefresh } from "react-icons/hi";
 import Swal from "sweetalert2";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import ConsumableLotDetail from "@/Components/ConsumableLotDetail";
@@ -15,6 +16,51 @@ export default function ConsumableLotHistory({ lots }) {
     const handleShowDetails = (lot) => {
         setSelectedLot(lot);
         setShowModal(true);
+    };
+
+    const handleRevert = (lotId) => {
+        Swal.fire({
+            title: "ยืนยันการคืนค่า Lot",
+            text: "คุณต้องการคืนค่า Lot นี้ใช่หรือไม่? การกระทำนี้จะลบ Lot และคืนค่าจำนวนวัตถุดิบกลับไปยังค่าก่อนหน้า",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ยืนยัน",
+            cancelButtonText: "ยกเลิก",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("admin.consumables.lots.revert", lotId), {
+                    preserveScroll: true,
+                    onBefore: () => {
+                        Swal.fire({
+                            title: "กำลังดำเนินการ...",
+                            text: "กรุณารอสักครู่",
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            },
+                        });
+                    },
+                    onSuccess: () => {
+                        Swal.fire({
+                            title: "สำเร็จ!",
+                            text: "คืนค่า Lot เรียบร้อยแล้ว",
+                            icon: "success",
+                            timer: 1500,
+                        });
+                    },
+                    onError: (errors) => {
+                        Swal.fire({
+                            title: "เกิดข้อผิดพลาด!",
+                            text: errors.message || "ไม่สามารถคืนค่า Lot ได้",
+                            icon: "error",
+                        });
+                    },
+                });
+            }
+        });
     };
 
     const onPageChange = (page) => {
@@ -29,6 +75,21 @@ export default function ConsumableLotHistory({ lots }) {
             hour: "2-digit",
             minute: "2-digit",
         });
+    };
+
+    const getConsumableListTooltip = (details) => {
+        return (
+            <div className="max-w-xs">
+                <p className="font-medium mb-2">รายการวัตถุดิบสิ้นเปลืองที่เพิ่ม:</p>
+                <ul className="list-disc list-inside space-y-1">
+                    {details.map((detail) => (
+                        <li key={detail.id} className="text-sm">
+                            {detail.consumable.name} ({detail.quantity} x {detail.per_pack} {detail.consumable.unit?.name || ""})
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        );
     };
 
     return (
@@ -112,26 +173,43 @@ export default function ConsumableLotHistory({ lots }) {
                                                         {formatDate(lot.created_at)}
                                                     </Table.Cell>
                                                     <Table.Cell>
-                                                        <Badge
-                                                            color="success"
-                                                            className="px-3 py-1"
+                                                        <Tooltip
+                                                            content={getConsumableListTooltip(lot.details)}
+                                                            style="auto"
+                                                            placement="right"
+                                                            animation="duration-300"
                                                         >
-                                                            {lot.details.length}{" "}
-                                                            รายการ
-                                                        </Badge>
+                                                            <Badge
+                                                                color="success"
+                                                                className="px-3 py-1 cursor-help"
+                                                            >
+                                                                {lot.details.length}{" "}
+                                                                รายการ
+                                                            </Badge>
+                                                        </Tooltip>
                                                     </Table.Cell>
                                                     <Table.Cell>
                                                         {lot.user.name}
                                                     </Table.Cell>
                                                     <Table.Cell>
-                                                        <Button
-                                                            size="sm"
-                                                            gradientDuoTone="purpleToBlue"
-                                                            onClick={() => handleShowDetails(lot)}
-                                                        >
-                                                            <HiEye className="mr-2 w-4 h-4" />
-                                                            ดูรายละเอียด
-                                                        </Button>
+                                                        <div className="flex gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                gradientDuoTone="purpleToBlue"
+                                                                onClick={() => handleShowDetails(lot)}
+                                                            >
+                                                                <HiEye className="mr-2 w-4 h-4" />
+                                                                ดูรายละเอียด
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                gradientDuoTone="pinkToOrange"
+                                                                onClick={() => handleRevert(lot.id)}
+                                                            >
+                                                                <HiOutlineRefresh className="mr-2 w-4 h-4" />
+                                                                คืนค่า
+                                                            </Button>
+                                                        </div>
                                                     </Table.Cell>
                                                 </Table.Row>
                                             ))}

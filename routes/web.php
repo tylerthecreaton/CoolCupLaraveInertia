@@ -167,18 +167,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/consumables', [AdminConsumablesController::class, 'index'])->name('consumables.index');
         Route::get('/consumables/create', [AdminConsumablesController::class, 'create'])->name('consumables.create');
         Route::post('/consumables', [AdminConsumablesController::class, 'store'])->name('consumables.store');
-        // Route::get('/consumables/{id}', [AdminConsumablesController::class, 'show'])->name('consumables.show');
         Route::get('/consumables/{id}/edit', [AdminConsumablesController::class, 'edit'])->name('consumables.edit');
         Route::put('/consumables/{id}', [AdminConsumablesController::class, 'update'])->name('consumables.update');
         Route::delete('/consumables/{id}', [AdminConsumablesController::class, 'destroy'])->name('consumables.destroy');
 
-        // ---------------------------Consumable lots---------------------------
+        // ---------------------------Consumable Lots---------------------------
         Route::get('/consumables/lots', [AdminConsumableLotController::class, 'index'])->name('consumables.lots.index');
         Route::get('/consumables/lots/create', [AdminConsumableLotController::class, 'create'])->name('consumables.lots.create');
         Route::post('/consumables/lots', [AdminConsumableLotController::class, 'store'])->name('consumables.lots.store');
         Route::get('/consumables/lots/{date}/details', [AdminConsumableLotController::class, 'getLotDetails'])->name('consumables.lots.details');
-        Route::get('/consumables/lots/{consumable}/{lot}', [AdminConsumableLotController::class, 'show'])->name('consumables.lots.show');
-        Route::delete('/consumables/lots/{consumable}/{lot}', [AdminConsumableLotController::class, 'destroy'])->name('consumables.lots.destroy');
+        Route::delete('/consumables/lots/{id}', [AdminConsumableLotController::class, 'destroy'])->name('consumables.lots.destroy');
+        Route::delete('/consumables/lots/{id}/revert', [AdminConsumableLotController::class, 'revert'])->name('consumables.lots.revert');
 
         // ---------------------------Ingredients---------------------------
         Route::get('/ingredients', [AdminIngredientsController::class, 'index'])->name('ingredients.index');
@@ -192,16 +191,14 @@ Route::middleware('auth')->group(function () {
         Route::post('/ingredients/{ingredient}/increase-quantity', [AdminIngredientsController::class, 'increaseQuantity'])
             ->name('ingredients.increase-quantity');
 
-        // ---------------------------Ingredient lots---------------------------
+        // ---------------------------Ingredient Lots---------------------------
         Route::get('/ingredient-lots', [AdminIngredientLotController::class, 'index'])->name('ingredient-lots.index');
         Route::get('/ingredient-lots/create', [AdminIngredientLotController::class, 'create'])->name('ingredient-lots.create');
         Route::post('/ingredient-lots', [AdminIngredientLotController::class, 'store'])->name('ingredient-lots.store');
+        Route::get('/ingredient-lots/{id}', [AdminIngredientLotController::class, 'show'])->name('ingredient-lots.show');
+        Route::delete('/ingredient-lots/{id}', [AdminIngredientLotController::class, 'destroy'])->name('ingredient-lots.destroy');
         Route::delete('/ingredient-lots/{id}/revert', [AdminIngredientLotController::class, 'revert'])->name('ingredient-lots.revert');
-        Route::get('/ingredient-lots/{date}/details', [AdminIngredientLotController::class, 'getLotDetails'])->name('ingredient-lots.details');
-
-        // ---------------------------Ingredient lots dispose---------------------------
-        // Expired Ingredients Routes
-        Route::get('/ingredient-lots/expired', [AdminExpiredController::class, 'index'])->name('ingredient-lots.expired.index');
+        Route::get('/ingredient-lots/expired', [AdminIngredientLotController::class, 'expired'])->name('ingredient-lots.expired.index');
         Route::delete('/ingredient-lots/expired/{ingredientLot}', [AdminExpiredController::class, 'dispose'])->name('ingredient-lots.expired.dispose');
 
         // ---------------------------Units---------------------------

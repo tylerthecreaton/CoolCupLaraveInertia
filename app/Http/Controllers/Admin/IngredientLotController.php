@@ -132,7 +132,7 @@ class IngredientLotController extends Controller
             $this->updateExpenses([$lot]);
         });
 
-        return redirect()->route('admin.ingredients.lots.index')
+        return redirect()->route('admin.ingredient-lots.index')
             ->with('success', 'บันทึกข้อมูล Lot สำเร็จ');
     }
 
@@ -187,49 +187,87 @@ class IngredientLotController extends Controller
 
     public function destroy($id)
     {
-        DB::transaction(function () use ($id) {
-            $lot = IngredientLot::findOrFail($id);
+        try {
+            DB::transaction(function () use ($id) {
+                $lot = IngredientLot::findOrFail($id);
 
-            // ลดจำนวน Ingredient ตาม details ที่จะลบ
-            foreach ($lot->details as $detail) {
-                $quantity = $detail->quantity * $detail->per_pack;
-                $detail->ingredient->decrement('quantity', $quantity);
-            }
+                // ลดจำนวน Ingredient ตาม details ที่จะลบ
+                foreach ($lot->details as $detail) {
+                    $quantity = $detail->quantity * $detail->per_pack;
+                    $detail->ingredient->decrement('quantity', $quantity);
 
-            $lot->delete();
-        });
+                    Log::info('Decremented ingredient quantity on lot delete', [
+                        'ingredient_id' => $detail->ingredient_id,
+                        'quantity' => $quantity,
+                        'lot_id' => $lot->id
+                    ]);
+                }
 
-        return redirect()->route('admin.ingredients.lots.index')
-            ->with('success', 'ลบข้อมูล Lot เรียบร้อย');
+                $lot->delete();
+            });
+
+            return response()->json(['message' => 'ลบ Lot เรียบร้อยแล้ว']);
+        } catch (\Exception $e) {
+            Log::error('Error deleting lot: ' . $e->getMessage());
+            return response()->json(['error' => 'ไม่สามารถลบ Lot ได้'], 500);
+        }
     }
 
     public function revert($id)
     {
-        DB::transaction(function () use ($id) {
-            $lot = IngredientLot::with('details.ingredient')->findOrFail($id);
+        try {
+            DB::transaction(function () use ($id) {
+                $lot = IngredientLot::findOrFail($id);
 
-            // คืนค่าจำนวนวัตถุดิบ
-            foreach ($lot->details as $detail) {
-                $quantity = $detail->quantity * $detail->per_pack;
-                $detail->ingredient->decrement('quantity', $quantity);
+                // คืนค่าจำนวน Ingredient กลับไปยังค่าก่อนหน้า
+                foreach ($lot->details as $detail) {
+                    $quantity = $detail->quantity * $detail->per_pack;
+                    $detail->ingredient->decrement('quantity', $quantity);
 
-                Log::info('Reverting Ingredient quantity', [
-                    'ingredient_id' => $detail->ingredient_id,
-                    'old_quantity' => $detail->ingredient->quantity + $quantity,
-                    'reverted_quantity' => $quantity,
-                    'new_quantity' => $detail->ingredient->quantity
-                ]);
-            }
+                    Log::info('Reverted ingredient quantity', [
+                        'ingredient_id' => $detail->ingredient_id,
+                        'quantity' => $quantity,
+                        'lot_id' => $lot->id
+                    ]);
+                }
 
-            // ลบ Lot
-            $lot->delete();
+                // ลบ Lot และ details
+                $lot->delete();
+            });
 
-            Log::info('Reverted IngredientLot', [
-                'lot_id' => $lot->id,
-                'lot_number' => $lot->lot_number
-            ]);
-        });
+            return response()->json(['message' => 'คืนค่า Lot เรียบร้อยแล้ว']);
+        } catch (\Exception $e) {
+            Log::error('Error reverting lot: ' . $e->getMessage());
+            return response()->json(['error' => 'ไม่สามารถคืนค่า Lot ได้'], 500);
+        }
+    }
 
-        return redirect()->back()->with('success', 'คืนค่าข้อมูล Lot สำเร็จ');
+    public function show($id)
+    {
+        try {
+            $lot = IngredientLot::with(['details.ingredient.unit', 'user'])
+                ->findOrFail($id);
+
+            return response()->json($lot);
+        } catch (\Exception $e) {
+            Log::error('Error showing lot: ' . $e->getMessage());
+            return response()->json(['error' => 'ไม่พบข้อมูล Lot'], 404);
+        }
+    }
+
+    public function expired()
+    {
+        $expiryDate = now();
+
+        $expiredLots = IngredientLot::with(['details.ingredient.unit'])
+            ->whereHas('details', function ($query) use ($expiryDate) {
+                $query->where('expiration_date', '<=', $expiryDate);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return Inertia::render('Admin/ingredients/lots/expired', [
+            'expiredLots' => $expiredLots
+        ]);
     }
 }
