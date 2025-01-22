@@ -127,12 +127,9 @@ class NotificationController extends Controller
     private function getLessStockIngredients()
     {
         $minimumStock = $this->setting->where('key', 'minimum_ingredient_stock_alert')->first()?->value ?? 1000;
-        return IngredientLot::with('details.ingredient.unit')
-            ->join('ingredient_lot_details', 'ingredient_lots.id', '=', 'ingredient_lot_details.ingredient_lot_id')
+        return Ingredient::with('unit')
             ->where('quantity', '<=', $minimumStock)
-            ->orderBy('ingredient_lot_details.quantity', 'asc')
-            ->select('ingredient_lots.*')
-            ->distinct()
+            ->orderBy('quantity', 'asc')
             ->get();
     }
 
