@@ -20,7 +20,7 @@ class WithdrawController extends Controller
     public function create()
     {
         // ดึง lots พร้อมข้อมูล ingredient
-        $ingredientLots = IngredientLot::with('details.ingredient.unit')
+        $ingredientLots = IngredientLot::with(['details.ingredient.unit', 'details.ingredient.transformers'])
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($lots) {
@@ -38,12 +38,20 @@ class WithdrawController extends Controller
                             'name' => $detail->ingredient->name,
                             'quantity' => $detail->quantity,
                             'unit' => $detail->ingredient->unit ? $detail->ingredient->unit->name : null,
+                            'transformers' => $detail->ingredient->transformers->map(function ($transformer) {
+                                return [
+                                    'id' => $transformer->id,
+                                    'name' => $transformer->name,
+                                    'description' => $transformer->description,
+                                    'multiplier' => $transformer->multiplier,
+                                ];
+                            }),
                         ];
                     }),
                 ];
             })
             ->values();
-        $consumableLots = ConsumableLot::with('details.consumable')
+        $consumableLots = ConsumableLot::with(['details.consumable'])
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($lots) {

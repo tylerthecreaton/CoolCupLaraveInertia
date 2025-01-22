@@ -32,4 +32,9 @@ class Ingredient extends Model
     {
         return $this->hasMany(IngredientLot::class);
     }
+
+    public function transformers()
+    {
+        return $this->hasMany(Transformer::class);
+    }
 }
