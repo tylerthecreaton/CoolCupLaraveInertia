@@ -5,120 +5,231 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Ingredient;
 use App\Models\IngredientLot;
-use Carbon\Carbon;
+use App\Models\IngredientLotDetail;
+use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Validator;
 
 class IngredientLotController extends Controller
 {
     public function index()
     {
-        $lots = IngredientLot::with(['ingredient.unit', 'user'])
-            ->select('created_at', DB::raw('COUNT(*) as total_items'))
-            ->groupBy('created_at')
+        $lots = IngredientLot::with(['details.ingredient.unit', 'user'])
+            ->select('ingredient_lots.*')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return Inertia::render('Admin/ingredientLot/index', [
+        // Transform data for frontend
+        $lots->through(function ($lot) {
+            return [
+                'id' => $lot->id,
+                'lot_number' => $lot->lot_number,
+                'created_at' => $lot->created_at,
+                'notes' => $lot->notes,
+                'user' => $lot->user,
+                'details' => $lot->details->map(function ($detail) {
+                    return [
+                        'id' => $detail->id,
+                        'lot_number' => $detail->lot_number,
+                        'ingredient' => [
+                            'id' => $detail->ingredient->id,
+                            'name' => $detail->ingredient->name,
+                            'unit' => $detail->ingredient->unit ? [
+                                'name' => $detail->ingredient->unit->name
+                            ] : null
+                        ],
+                        'quantity' => $detail->quantity,
+                        'price' => $detail->price,
+                        'cost_per_unit' => $detail->cost_per_unit,
+                        'per_pack' => $detail->per_pack,
+                        'supplier' => $detail->supplier,
+                        'notes' => $detail->notes,
+                        'type' => $detail->type,
+                        'expiration_date' => $detail->expiration_date
+                    ];
+                })
+            ];
+        });
+
+        return Inertia::render('Admin/ingredients/lots/index', [
             'lots' => $lots
         ]);
     }
 
-    public function getLotDetails($date)
-    {
-        $lots = IngredientLot::with(['ingredient.unit', 'user'])
-            ->whereDate('created_at', $date)
-            ->get();
-
-        return response()->json($lots);
-    }
-
     public function create()
     {
-        $ingredients = Ingredient::with('unit')->get();
-        return Inertia::render('Admin/ingredientLot/create', [
-            'ingredients' => $ingredients,
+        $ingredients = Ingredient::with('unit')->select(['id', 'name', 'unit_id'])->get();
+        return Inertia::render('Admin/ingredients/lots/create', [
+            'ingredients' => $ingredients
         ]);
     }
 
     public function store(Request $request)
     {
-        // Validate each item in the array
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             '*.ingredient_id' => 'required|exists:ingredients,id',
+            '*.cost_per_unit' => 'required|numeric|min:0',
             '*.quantity' => 'required|numeric|min:0',
-            '*.expire_date' => 'required|date|after:today',
-            '*.notes' => 'nullable|string|max:255',
-        ], [
-            '*.ingredient_id.required' => 'กรุณาเลือกวัตถุดิบ',
-            '*.ingredient_id.exists' => 'วัตถุดิบที่เลือกไม่มีในระบบ',
-            '*.quantity.required' => 'กรุณาระบุจำนวน',
-            '*.quantity.numeric' => 'จำนวนต้องเป็นตัวเลข',
-            '*.quantity.min' => 'จำนวนต้องมากกว่า 0',
-            '*.expire_date.required' => 'กรุณาระบุวันหมดอายุ',
-            '*.expire_date.date' => 'รูปแบบวันที่ไม่ถูกต้อง',
-            '*.expire_date.after' => 'วันหมดอายุต้องเป็นวันในอนาคต',
-            '*.notes.max' => 'หมายเหตุต้องไม่เกิน 255 ตัวอักษร',
+            '*.per_pack' => 'required|numeric|min:0',
+            '*.price' => 'required|numeric|min:0',
+            '*.supplier' => 'required|string',
+            '*.expiration_date' => 'required|date',
+            '*.notes' => 'nullable|string',
         ]);
 
-        if ($validator->fails()) {
-            return back()->withErrors($validator->errors());
-        }
+        DB::transaction(function () use ($request) {
+            // สร้าง IngredientLot
+            $lot = IngredientLot::create([
+                'user_id' => Auth::user()->id,
+                'lot_number' => $this->generateLotNumber(),
+                'notes' => collect($request->all())->pluck('notes')->filter()->join(', ')
+            ]);
 
-        try {
-            DB::beginTransaction();
+            Log::info('Created IngredientLot', [
+                'lot_id' => $lot->id,
+                'lot_number' => $lot->lot_number
+            ]);
 
-            // Create ingredient lots
-            foreach ($request->all() as $item) {
-                IngredientLot::create([
-                    'ingredient_id' => $item['ingredient_id'],
-                    'quantity' => $item['quantity'],
-                    'expiration_date' => $item['expire_date'],
-                    'notes' => $item['notes'] ?? null,
-                    'user_id' => Auth::id(),
+            // สร้าง IngredientLotDetail สำหรับแต่ละรายการ
+            foreach ($request->all() as $lotData) {
+                $detail = $lot->details()->create([
+                    'ingredient_id' => $lotData['ingredient_id'],
+                    'lot_number' => $lot->lot_number,
+                    'quantity' => $lotData['quantity'],
+                    'type' => 'in',
+                    'price' => $lotData['price'],
+                    'per_pack' => $lotData['per_pack'],
+                    'cost_per_unit' => $lotData['cost_per_unit'],
+                    'supplier' => $lotData['supplier'],
+                    'expiration_date' => $lotData['expiration_date'],
+                    'notes' => $lotData['notes'] ?? null,
                 ]);
 
-                // Update ingredient quantity
-                $ingredient = Ingredient::find($item['ingredient_id']);
-                $ingredient->quantity += $item['quantity'];
-                $ingredient->save();
+                Log::info('Created IngredientLotDetail', [
+                    'detail_id' => $detail->id,
+                    'lot_id' => $lot->id,
+                    'ingredient_id' => $lotData['ingredient_id']
+                ]);
+
+                // อัพเดทจำนวน Ingredient
+                $ingredient = Ingredient::find($lotData['ingredient_id']);
+                $oldQuantity = $ingredient->quantity;
+                $newQuantity = $lotData['quantity'] * $lotData['per_pack'];
+                $ingredient->increment('quantity', $newQuantity);
+
+                Log::info('Updating Ingredient quantity', [
+                    'ingredient_id' => $lotData['ingredient_id'],
+                    'old_quantity' => $oldQuantity,
+                    'added_quantity' => $newQuantity,
+                    'new_quantity' => $ingredient->fresh()->quantity
+                ]);
             }
 
-            DB::commit();
-            return redirect()->route('admin.ingredient-lots.index')->with('success', 'บันทึกข้อมูล Lot วัตถุดิบเรียบร้อยแล้ว');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' . $e->getMessage());
+            $this->updateExpenses([$lot]);
+        });
+
+        return redirect()->route('admin.ingredients.lots.index')
+            ->with('success', 'บันทึกข้อมูล Lot สำเร็จ');
+    }
+
+    private function generateLotNumber()
+    {
+        $latestLot = IngredientLot::latest()->first();
+        return $latestLot ? $latestLot->lot_number + 1 : 1;
+    }
+
+    private function updateExpenses($lots)
+    {
+        if (empty($lots)) {
+            return;
         }
+
+        $descriptions = collect($lots)->flatMap(function ($lot) {
+            return $lot->details->map(function ($detail) {
+                return sprintf(
+                    " %s: %d %s (ราคารวม %s บาท) จาก %s",
+                    $detail->ingredient->name,
+                    $detail->quantity * $detail->per_pack,
+                    $detail->ingredient->unit ? $detail->ingredient->unit->name : 'ไม่มีหน่วย',
+                    number_format($detail->price, 2),
+                    $detail->supplier
+                );
+            });
+        })->join("\n");
+
+        $totalAmount = collect($lots)->sum(function ($lot) {
+            return $lot->details->sum('price');
+        });
+
+        $category = ExpenseCategory::firstOrCreate(
+            ['name' => 'วัตถุดิบ'],
+            ['description' => 'รายจ่ายจากการซื้อวัตถุดิบ']
+        );
+
+        Expense::create([
+            'name' => sprintf('ซื้อวัตถุดิบ (%d รายการ)',
+                collect($lots)->sum(function ($lot) {
+                    return $lot->details->count();
+                })
+            ),
+            'amount' => $totalAmount,
+            'description' => $descriptions,
+            'expense_category_id' => $category->id,
+            'user_id' => Auth::user()->id,
+            'source_type' => 'ingredient_lot',
+            'source_date' => now(),
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        DB::transaction(function () use ($id) {
+            $lot = IngredientLot::findOrFail($id);
+
+            // ลดจำนวน Ingredient ตาม details ที่จะลบ
+            foreach ($lot->details as $detail) {
+                $quantity = $detail->quantity * $detail->per_pack;
+                $detail->ingredient->decrement('quantity', $quantity);
+            }
+
+            $lot->delete();
+        });
+
+        return redirect()->route('admin.ingredients.lots.index')
+            ->with('success', 'ลบข้อมูล Lot เรียบร้อย');
     }
 
     public function revert($id)
     {
-        try {
-            DB::beginTransaction();
+        DB::transaction(function () use ($id) {
+            $lot = IngredientLot::with('details.ingredient')->findOrFail($id);
 
-            $lot = IngredientLot::findOrFail($id);
+            // คืนค่าจำนวนวัตถุดิบ
+            foreach ($lot->details as $detail) {
+                $quantity = $detail->quantity * $detail->per_pack;
+                $detail->ingredient->decrement('quantity', $quantity);
 
-            // Subtract the quantity from the ingredient
-            $ingredient = $lot->ingredient;
-            if ($ingredient->quantity < $lot->quantity) {
-                throw new \Exception('ไม่สามารถคืนค่าได้เนื่องจากจำนวนวัตถุดิบคงเหลือไม่เพียงพอ');
+                Log::info('Reverting Ingredient quantity', [
+                    'ingredient_id' => $detail->ingredient_id,
+                    'old_quantity' => $detail->ingredient->quantity + $quantity,
+                    'reverted_quantity' => $quantity,
+                    'new_quantity' => $detail->ingredient->quantity
+                ]);
             }
 
-            $ingredient->quantity -= $lot->quantity;
-            $ingredient->save();
-
-            // Delete the lot
+            // ลบ Lot
             $lot->delete();
 
-            DB::commit();
-            return redirect()->back()->with('success', 'คืนค่า Lot วัตถุดิบเรียบร้อยแล้ว');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', $e->getMessage());
-        }
+            Log::info('Reverted IngredientLot', [
+                'lot_id' => $lot->id,
+                'lot_number' => $lot->lot_number
+            ]);
+        });
+
+        return redirect()->back()->with('success', 'คืนค่าข้อมูล Lot สำเร็จ');
     }
 }

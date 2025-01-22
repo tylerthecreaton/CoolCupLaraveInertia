@@ -30,9 +30,10 @@ class ConsumableLotController extends Controller
                 'created_at' => $lot->created_at,
                 'note' => $lot->note,
                 'user' => $lot->user,
-                'details' => $lot->details->map(function ($detail) {
+                'details' => $lot->details->map(function ($detail) use ($lot) {
                     return [
                         'id' => $detail->id,
+                        'lot_number' => $lot->lot_number,
                         'consumable' => $detail->consumable,
                         'quantity' => $detail->quantity,
                         'price' => $detail->price,

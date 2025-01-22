@@ -5,25 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Ingredient;
 use App\Models\User;
+use App\Models\IngredientLotDetail;
 
 class IngredientLot extends Model
 {
     protected $fillable = [
-        'ingredient_id',
         'user_id',
-        'quantity',
-        'expiration_date',
-        'notes',
+        'lot_number',
+        'note'
     ];
 
-    protected $casts = [
-        'quantity' => 'decimal:2',
-        'expiration_date' => 'date',
-    ];
-
-    public function ingredient()
+    public function details()
     {
-        return $this->belongsTo(Ingredient::class);
+        return $this->hasMany(IngredientLotDetail::class);
     }
 
     public function user()
