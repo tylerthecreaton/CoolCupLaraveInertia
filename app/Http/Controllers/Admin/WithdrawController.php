@@ -20,48 +20,47 @@ class WithdrawController extends Controller
     public function create()
     {
         // ดึง lots พร้อมข้อมูล ingredient
-        $ingredientLots = IngredientLot::with('ingredient')
-            ->where('quantity', '>', 0)
+        $ingredientLots = IngredientLot::with('details.ingredient.unit')
             ->orderBy('created_at', 'desc')
             ->get()
-            ->groupBy(function ($lot) {
-                return $lot->created_at->format('Y-m-d');
-            })
             ->map(function ($lots) {
-                $firstLot = $lots->first();
+                $lotsDetails = $lots->details;
+                foreach ($lotsDetails as $detail) {
+                    $detail->ingredient->unit = $detail->ingredient->unit ? $detail->ingredient->unit : null;
+                }
                 return [
-                    'id' => $firstLot->id,
-                    'created_at' => $firstLot->created_at,
-                    'items_count' => $lots->count(),
-                    'items' => $lots->map(function ($lot) {
+                    'id' => $lots->id,
+                    'created_at' => $lots->created_at,
+                    'items_count' => $lotsDetails->count(),
+                    'items' => $lotsDetails->map(function ($detail) {
                         return [
-                            'id' => $lot->id,
-                            'name' => $lot->ingredient->name,
-                            'quantity' => $lot->quantity,
+                            'id' => $detail->id,
+                            'name' => $detail->ingredient->name,
+                            'quantity' => $detail->quantity,
+                            'unit' => $detail->ingredient->unit ? $detail->ingredient->unit->name : null,
                         ];
                     }),
                 ];
             })
             ->values();
-
-        $consumableLots = ConsumableLot::with('consumable')
-            ->where('quantity', '>', 0)
+        $consumableLots = ConsumableLot::with('details.consumable')
             ->orderBy('created_at', 'desc')
             ->get()
-            ->groupBy(function ($lot) {
-                return $lot->created_at->format('Y-m-d');
-            })
             ->map(function ($lots) {
-                $firstLot = $lots->first();
+                $lotsDetails = $lots->details;
+                foreach ($lotsDetails as $detail) {
+                    $detail->consumable->unit = $detail->consumable->unit ? $detail->consumable->unit : null;
+                }
+
                 return [
-                    'id' => $firstLot->id,
-                    'created_at' => $firstLot->created_at,
-                    'items_count' => $lots->count(),
-                    'items' => $lots->map(function ($lot) {
+                    'id' => $lots->id,
+                    'created_at' => $lots->created_at,
+                    'items_count' => $lotsDetails->count(),
+                    'items' => $lotsDetails->map(function ($detail) {
                         return [
-                            'id' => $lot->id,
-                            'name' => $lot->consumable->name,
-                            'quantity' => $lot->quantity,
+                            'id' => $detail->id,
+                            'name' => $detail->consumable->name,
+                            'quantity' => $detail->quantity,
                         ];
                     }),
                 ];
