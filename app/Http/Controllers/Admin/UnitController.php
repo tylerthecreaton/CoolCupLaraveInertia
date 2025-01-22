@@ -20,16 +20,20 @@ class UnitController extends Controller
         $rules = [
             'name' => 'required|unique:units',
             'abbreviation'=> 'nullable|unique:units',
+            'type' => 'required|in:ingredient,consumable',
         ];
         $message = [
             'name.required' => 'กรุณากรอกชื่อหน่วย',
             'name.unique' => 'ชื่อหน่วยนี้ถูกใช้ไปแล้ว',
             'abbreviation.unique' => 'คำย่อหน่วยนี้ถูกใช้ไปแล้ว',
+            'type.required' => 'กรุณาเลือกประเภทหน่วย',
+            'type.in' => 'ประเภทหน่วยไม่ถูกต้อง',
         ];
         $request->validate($rules, $message);
         $unit = new Unit();
         $unit->name = $request->name;
         $unit->abbreviation = $request->abbreviation;
+        $unit->type = $request->type;
         $unit->save();
 
         return redirect()->route('admin.ingredients.index')->with('success', 'บันทึกข้อมูลเรียบร้อย');
@@ -42,20 +46,27 @@ class UnitController extends Controller
         return Inertia::render('admin.ingredients.index', compact('unit'));
     }
     public function update(Request $request,String $id){
+        $unit = Unit::find($id);
+        
         $rules = [
-            'name' => 'required|unique:units',
-            'abbreviation'=> 'nullable|unique:units',
+            'name' => 'required|unique:units,name,' . $id,
+            'abbreviation'=> 'nullable|unique:units,abbreviation,' . $id,
+            'type' => 'required|in:ingredient,consumable',
         ];
         $message = [
             'name.required' => 'กรุณากรอกชื่อหน่วย',
             'name.unique' => 'ชื่อหน่วยนี้ถูกใช้ไปแล้ว',
             'abbreviation.unique' => 'คำย่อหน่วยนี้ถูกใช้ไปแล้ว',
+            'type.required' => 'กรุณาเลือกประเภทหน่วย',
+            'type.in' => 'ประเภทหน่วยไม่ถูกต้อง',
         ];
         $request->validate($rules, $message);
-        $unit = Unit::find($id);
+        
         $unit->name = $request->name;
         $unit->abbreviation = $request->abbreviation;
+        $unit->type = $request->type;
         $unit->save();
+        
         return redirect()->route('admin.ingredients.index')->with('success', 'บันทึกข้อมูลเรียบร้อย');
     }
     public function destroy($id){

@@ -1,4 +1,4 @@
-import { Modal, Button, TextInput, Label } from "flowbite-react";
+import { Modal, Button, TextInput, Label, Select } from "flowbite-react";
 import { useForm } from "@inertiajs/react";
 import { useState } from "react";
 import Swal from "sweetalert2";
@@ -8,6 +8,7 @@ export default function CreateUnitModal({ isOpen, setIsOpen }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: "",
         abbreviation: "",
+        type: "ingredient",
     });
 
     const handleSubmit = (e) => {
@@ -53,7 +54,7 @@ export default function CreateUnitModal({ isOpen, setIsOpen }) {
                         <div className="flex">
                             <div className="ml-3">
                                 <p className="text-sm text-yellow-700">
-                                    หน่วยวัดที่เพิ่มจะถูกนำไปใช้ในการกำหนดปริมาณของวัตถุดิบ
+                                    หน่วยวัดที่เพิ่มจะถูกนำไปใช้ในการกำหนดปริมาณของวัตถุดิบ และวัตถุดิบสิ้นเปลือง
                                 </p>
                             </div>
                         </div>
@@ -87,20 +88,40 @@ export default function CreateUnitModal({ isOpen, setIsOpen }) {
                             />
                         </div>
 
-                        {(errors.name || errors.abbreviation) && (
+                        <div>
+                            <Label htmlFor="type" value="ประเภท" className="text-gray-700 text-sm font-medium" />
+                            <Select
+                                id="type"
+                                value={data.type}
+                                onChange={(e) => setData("type", e.target.value)}
+                                color={errors.type ? "failure" : "gray"}
+                                className="mt-1"
+                            >
+                                <option value="ingredient">วัตถุดิบ (Ingredient)</option>
+                                <option value="consumable">วัตถุดิบสิ้นเปลือง (Consumable)</option>
+                            </Select>
+                        </div>
+
+                        {(errors.name || errors.abbreviation || errors.type) && (
                             <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
-                                {errors.name?.map((error, index) => (
-                                    <p key={index} className="flex items-center space-x-1">
+                                {errors.name && (
+                                    <p className="flex items-center space-x-1">
                                         <span>•</span>
-                                        <span>{error}</span>
+                                        <span>{errors.name}</span>
                                     </p>
-                                ))}
-                                {errors.abbreviation?.map((error, index) => (
-                                    <p key={index} className="flex items-center space-x-1">
+                                )}
+                                {errors.abbreviation && (
+                                    <p className="flex items-center space-x-1">
                                         <span>•</span>
-                                        <span>{error}</span>
+                                        <span>{errors.abbreviation}</span>
                                     </p>
-                                ))}
+                                )}
+                                {errors.type && (
+                                    <p className="flex items-center space-x-1">
+                                        <span>•</span>
+                                        <span>{errors.type}</span>
+                                    </p>
+                                )}
                             </div>
                         )}
 
