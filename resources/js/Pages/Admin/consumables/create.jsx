@@ -7,36 +7,30 @@ import { Link } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function Create({ auth }) {
+export default function Create({ auth, units }) {
     return (
         <AuthenticatedLayout user={auth.user}>
             <AdminLayout>
                 <Head title="Create Consumable" />
-                <div className="p-4 bg-white block sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5">
-                    <div className="mb-1 w-full">
-                        <div className="mb-4">
-                            <Breadcrumb aria-label="Default breadcrumb example">
-                                <Breadcrumb.Item
-                                    href={route("dashboard")}
-                                    icon={HiHome}
-                                >
-                                    Dashboard
-                                </Breadcrumb.Item>
-                                <Breadcrumb.Item
-                                    href={route("admin.consumables.index")}
-                                >
-                                    Consumables
-                                </Breadcrumb.Item>
-                                <Breadcrumb.Item>Create</Breadcrumb.Item>
-                            </Breadcrumb>
-                        </div>
-                        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                            Create Consumable
-                        </h1>
-                    </div>
+                <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+                    <Breadcrumb aria-label="Default breadcrumb example">
+                        <Breadcrumb.Item
+                            href={route("dashboard")}
+                            icon={HiHome}
+                        >
+                            หน้าแรก
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item
+                            href={route("admin.consumables.index")}
+                        >
+                            วัตถุดิบสิ้นเปลือง
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>เพิ่มวัตถุดิบสิ้นเปลือง</Breadcrumb.Item>
+                    </Breadcrumb>
                 </div>
+
                 <div className="p-4">
-                    <ConsumablesForm />
+                    <ConsumablesForm units={units} />
                 </div>
             </AdminLayout>
         </AuthenticatedLayout>

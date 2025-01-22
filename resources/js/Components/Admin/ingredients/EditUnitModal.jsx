@@ -53,7 +53,7 @@ export default function EditUnitModal({ isOpen, setIsOpen, unit }) {
     if (!unit) return null;
 
     return (
-        <Modal show={isOpen} onClose={handleClose} size="md">
+        <Modal show={isOpen} onClose={handleClose} size="lg">
             <Modal.Header className="border-b border-gray-200">
                 <div className="flex items-center space-x-2">
                     <HiOutlineScale className="w-6 h-6 text-gray-600" />

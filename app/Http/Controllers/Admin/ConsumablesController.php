@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Controllers\Controller;
 use App\Models\Consumable;
+use App\Models\Unit;
 
 class ConsumablesController extends Controller
 {
@@ -18,14 +19,15 @@ class ConsumablesController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/consumables/create');
+        $units = Unit::where('type', 'consumable')->get();
+        return Inertia::render('Admin/consumables/create', compact('units'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'unit' => ['required', 'string', 'max:255'],
+            'unit' => ['required', 'string', 'max:255', 'exists:units,abbreviation,type,consumable'],
             'quantity' => ['required', 'numeric'],
             'is_depend_on_sale' => ['required', 'boolean'],
         ]);
@@ -38,14 +40,15 @@ class ConsumablesController extends Controller
     public function edit($id)
     {
         $consumable = Consumable::find($id);
-        return Inertia::render('Admin/consumables/edit', compact('consumable'));
+        $units = Unit::where('type', 'consumable')->get();
+        return Inertia::render('Admin/consumables/edit', compact('consumable', 'units'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'unit' => ['required', 'string', 'max:255'],
+            'unit' => ['required', 'string', 'max:255', 'exists:units,abbreviation,type,consumable'],
             'quantity' => ['required', 'numeric'],
             'is_depend_on_sale' => ['required', 'boolean'],
         ]);

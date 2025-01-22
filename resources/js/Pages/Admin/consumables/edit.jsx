@@ -6,36 +6,35 @@ import ConsumablesForm from "@/Components/Admin/consumables/ConsumablesForm";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function Edit({ auth, consumable }) {
+export default function Edit({ auth, consumable, units }) {
     return (
-        <AuthenticatedLayout user={auth.user}>
+        <AuthenticatedLayout user={auth.user}
+            header={
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                    แก้ไขวัตถุดิบสิ้นเปลือง {consumable.name}
+                </h2>
+            }
+        >
             <AdminLayout>
                 <Head title="Edit Consumable" />
-                <div className="p-4 bg-white block sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5">
-                    <div className="mb-1 w-full">
-                        <div className="mb-4">
-                            <Breadcrumb aria-label="Default breadcrumb example">
-                                <Breadcrumb.Item
-                                    href={route("dashboard")}
-                                    icon={HiHome}
-                                >
-                                    Dashboard
-                                </Breadcrumb.Item>
+                <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+                    <Breadcrumb aria-label="Default breadcrumb example">
+                        <Breadcrumb.Item
+                            href={route("dashboard")}
+                            icon={HiHome}
+                        >
+                            หน้าแรก
+                        </Breadcrumb.Item>
                                 <Breadcrumb.Item
                                     href={route("admin.consumables.index")}
                                 >
-                                    Consumables
+                                    วัตถุดิบสิ้นเปลือง
                                 </Breadcrumb.Item>
-                                <Breadcrumb.Item>Edit</Breadcrumb.Item>
+                                <Breadcrumb.Item>แก้ไขวัตถุดิบสิ้นเปลือง</Breadcrumb.Item>
                             </Breadcrumb>
-                        </div>
-                        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                            Edit Consumable: {consumable.name}
-                        </h1>
-                    </div>
                 </div>
-                <div className="p-4">
-                    <ConsumablesForm consumable={consumable} />
+                <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+                    <ConsumablesForm consumable={consumable} units={units} isEditing = {true} />
                 </div>
             </AdminLayout>
         </AuthenticatedLayout>
