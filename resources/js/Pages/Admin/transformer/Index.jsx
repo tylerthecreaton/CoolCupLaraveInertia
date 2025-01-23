@@ -1,17 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import React, { useState, useEffect } from "react";
+import { Head, Link } from "@inertiajs/react";
 import { router } from "@inertiajs/react";
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Button, Table, Breadcrumb, Pagination, TextInput } from 'flowbite-react';
-import { HiHome, HiPencilAlt, HiTrash, HiSearch, HiPlus } from 'react-icons/hi';
-import AdminLayout from '@/Layouts/AdminLayout';
-import Swal from 'sweetalert2';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import {
+    Button,
+    Table,
+    Breadcrumb,
+    Pagination,
+    TextInput,
+} from "flowbite-react";
+import { HiHome, HiPencilAlt, HiTrash, HiSearch, HiPlus } from "react-icons/hi";
+import AdminLayout from "@/Layouts/AdminLayout";
+import Swal from "sweetalert2";
 
 export default function Index({ auth, transformers }) {
     const currentPage = transformers.current_page;
     const totalPages = Math.ceil(transformers.total / transformers.per_page);
     const [searchTerm, setSearchTerm] = useState("");
-    const [filteredTransformers, setFilteredTransformers] = useState(transformers.data);
+    const [filteredTransformers, setFilteredTransformers] = useState(
+        transformers.data
+    );
 
     useEffect(() => {
         const results = transformers.data.filter((transformer) =>
@@ -31,7 +39,7 @@ export default function Index({ auth, transformers }) {
     }, [searchTerm, transformers.data]);
 
     const onPageChange = (page) => {
-        router.get(route('admin.transformers.index', { page }));
+        router.get(route("admin.transformers.index", { page }));
     };
 
     const handleDelete = (id) => {
@@ -90,10 +98,12 @@ export default function Index({ auth, transformers }) {
                                     icon={HiSearch}
                                     placeholder="ค้นหาสูตรแปรรูป..."
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onChange={(e) =>
+                                        setSearchTerm(e.target.value)
+                                    }
                                 />
                             </div>
-                            <Link href={route('admin.transformers.create')}>
+                            <Link href={route("admin.transformers.create")}>
                                 <Button>
                                     <div className="flex items-center gap-x-2">
                                         <HiPlus className="w-4 h-4" />
@@ -106,33 +116,66 @@ export default function Index({ auth, transformers }) {
                         <div className="overflow-x-auto">
                             <Table hoverable>
                                 <Table.Head>
-                                    <Table.HeadCell>ชื่อสูตรแปรรูป</Table.HeadCell>
+                                    <Table.HeadCell>
+                                        ชื่อสูตรแปรรูป
+                                    </Table.HeadCell>
+                                    <Table.HeadCell>ประเภท</Table.HeadCell>
                                     <Table.HeadCell>คำอธิบาย</Table.HeadCell>
-                                    <Table.HeadCell>วัตถุดิบที่ใช้</Table.HeadCell>
-                                    <Table.HeadCell>วัตถุดิบสิ้นเปลือง</Table.HeadCell>
+                                    <Table.HeadCell>
+                                        วัตถุดิบที่ใช้
+                                    </Table.HeadCell>
+                                    <Table.HeadCell>
+                                        วัตถุดิบสิ้นเปลือง
+                                    </Table.HeadCell>
                                     <Table.HeadCell>ตัวคูณ</Table.HeadCell>
                                     <Table.HeadCell>จัดการ</Table.HeadCell>
                                 </Table.Head>
                                 <Table.Body className="divide-y">
                                     {filteredTransformers.map((transformer) => (
-                                        <Table.Row key={transformer.id} className="bg-white">
+                                        <Table.Row
+                                            key={transformer.id}
+                                            className="bg-white"
+                                        >
                                             <Table.Cell className="font-medium text-gray-900">
                                                 {transformer.name}
                                             </Table.Cell>
-                                            <Table.Cell>{transformer.description}</Table.Cell>
-                                            <Table.Cell>{transformer.ingredient?.name || '-'}</Table.Cell>
-                                            <Table.Cell>{transformer.consumable?.name || '-'}</Table.Cell>
-                                            <Table.Cell>{transformer.multiplier}</Table.Cell>
+                                            <Table.Cell>
+                                                {transformer.type ==
+                                                "ingredient"
+                                                    ? "วัตถุดิบ"
+                                                    : "วัตถุดิบสิ้นเปลือง"}
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                {transformer.description}
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                {transformer.ingredient?.name ||
+                                                    "-"}
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                {transformer.consumable?.name ||
+                                                    "-"}
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                {transformer.multiplier}
+                                            </Table.Cell>
                                             <Table.Cell>
                                                 <div className="flex items-center gap-x-3">
                                                     <Link
-                                                        href={route('admin.transformers.edit', transformer.id)}
+                                                        href={route(
+                                                            "admin.transformers.edit",
+                                                            transformer.id
+                                                        )}
                                                         className="text-blue-600 hover:underline"
                                                     >
                                                         <HiPencilAlt className="w-5 h-5" />
                                                     </Link>
                                                     <button
-                                                        onClick={() => handleDelete(transformer.id)}
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                transformer.id
+                                                            )
+                                                        }
                                                         className="text-red-600 hover:underline"
                                                     >
                                                         <HiTrash className="w-5 h-5" />

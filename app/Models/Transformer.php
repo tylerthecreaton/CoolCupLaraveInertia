@@ -13,7 +13,8 @@ class Transformer extends Model
         'description',
         'ingredient_id',
         'consumable_id',
-        'multiplier'
+        'multiplier',
+        'type',
     ];
 
     public function ingredient()

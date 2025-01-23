@@ -27,8 +27,10 @@ export default function Create({ auth, ingredients }) {
     };
 
     const getIngredientUnit = (ingredientId) => {
-        const ingredient = ingredients.find(ing => ing.id.toString() === ingredientId);
-        return ingredient?.unit?.name || '';
+        const ingredient = ingredients.find(
+            (ing) => ing.id.toString() === ingredientId
+        );
+        return ingredient?.unit?.name || "";
     };
 
     const handleAddRow = () => {
@@ -118,7 +120,9 @@ export default function Create({ auth, ingredients }) {
             if (!validatePositiveNumber(item.quantity))
                 errors.push(`รายการที่ ${index + 1}: จำนวนต้องมากกว่า 0`);
             if (!validatePositiveNumber(item.per_pack))
-                errors.push(`รายการที่ ${index + 1}: จำนวนต่อแพ็คต้องมากกว่า 0`);
+                errors.push(
+                    `รายการที่ ${index + 1}: จำนวนต่อแพ็คต้องมากกว่า 0`
+                );
             if (!validatePositiveNumber(item.price))
                 errors.push(`รายการที่ ${index + 1}: ราคาต้องมากกว่า 0`);
             if (!item.supplier)
@@ -214,7 +218,8 @@ export default function Create({ auth, ingredients }) {
                                                 <div className="flex justify-between items-center mb-4">
                                                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                                                         <span className="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded">
-                                                            รายการที่ {index + 1}
+                                                            รายการที่{" "}
+                                                            {index + 1}
                                                         </span>
                                                     </h3>
                                                     {data.length > 1 && (
@@ -261,7 +266,9 @@ export default function Create({ auth, ingredients }) {
                                                             {getAvailableIngredients(
                                                                 index
                                                             ).map(
-                                                                (ingredient) => (
+                                                                (
+                                                                    ingredient
+                                                                ) => (
                                                                     <option
                                                                         key={
                                                                             ingredient.id
@@ -270,7 +277,9 @@ export default function Create({ auth, ingredients }) {
                                                                             ingredient.id
                                                                         }
                                                                     >
-                                                                        {ingredient.name}
+                                                                        {
+                                                                            ingredient.name
+                                                                        }
                                                                     </option>
                                                                 )
                                                             )}
@@ -297,7 +306,9 @@ export default function Create({ auth, ingredients }) {
                                                             type="number"
                                                             min="0.01"
                                                             step="0.01"
-                                                            value={item.quantity}
+                                                            value={
+                                                                item.quantity
+                                                            }
                                                             className="mt-1 block w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
@@ -318,6 +329,7 @@ export default function Create({ auth, ingredients }) {
                                                             className="mt-2"
                                                         />
                                                     </div>
+
                                                     <div>
                                                         <InputLabel
                                                             htmlFor={`price-${index}`}
@@ -354,14 +366,20 @@ export default function Create({ auth, ingredients }) {
                                                         <InputLabel
                                                             htmlFor={`per_pack-${index}`}
                                                         >
-                                                            ปริมาณต่อแพ็ค ({getIngredientUnit(item.ingredient_id)}) *
+                                                            ปริมาณต่อแพ็ค (
+                                                            {getIngredientUnit(
+                                                                item.ingredient_id
+                                                            )}
+                                                            ) *
                                                         </InputLabel>
                                                         <TextInput
                                                             id={`per_pack-${index}`}
                                                             type="number"
                                                             min="1"
                                                             step="1"
-                                                            value={item.per_pack}
+                                                            value={
+                                                                item.per_pack
+                                                            }
                                                             className="mt-1 block w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
@@ -418,8 +436,6 @@ export default function Create({ auth, ingredients }) {
                                                         />
                                                     </div>
 
-
-
                                                     <div>
                                                         <InputLabel
                                                             htmlFor={`supplier-${index}`}
@@ -429,17 +445,20 @@ export default function Create({ auth, ingredients }) {
                                                         <TextInput
                                                             id={`supplier-${index}`}
                                                             type="text"
-                                                            value={item.supplier}
+                                                            value={
+                                                                item.supplier
+                                                            }
                                                             className="mt-1 block w-full"
                                                             onChange={(e) => {
-                                                                const newData = [
-                                                                    ...data,
-                                                                ];
+                                                                const newData =
+                                                                    [...data];
                                                                 newData[
                                                                     index
                                                                 ].supplier =
                                                                     e.target.value;
-                                                                setData(newData);
+                                                                setData(
+                                                                    newData
+                                                                );
                                                             }}
                                                         />
                                                         <InputError
@@ -466,14 +485,15 @@ export default function Create({ auth, ingredients }) {
                                                             }
                                                             className="mt-1 block w-full"
                                                             onChange={(e) => {
-                                                                const newData = [
-                                                                    ...data,
-                                                                ];
+                                                                const newData =
+                                                                    [...data];
                                                                 newData[
                                                                     index
                                                                 ].expiration_date =
                                                                     e.target.value;
-                                                                setData(newData);
+                                                                setData(
+                                                                    newData
+                                                                );
                                                             }}
                                                         />
                                                         <InputError
@@ -496,14 +516,15 @@ export default function Create({ auth, ingredients }) {
                                                             id={`notes-${index}`}
                                                             value={item.notes}
                                                             onChange={(e) => {
-                                                                const newData = [
-                                                                    ...data,
-                                                                ];
+                                                                const newData =
+                                                                    [...data];
                                                                 newData[
                                                                     index
                                                                 ].notes =
                                                                     e.target.value;
-                                                                setData(newData);
+                                                                setData(
+                                                                    newData
+                                                                );
                                                             }}
                                                             className="mt-1 block w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
                                                             rows="3"
@@ -540,7 +561,9 @@ export default function Create({ auth, ingredients }) {
                                                 size="lg"
                                                 disabled={processing}
                                             >
-                                                {processing ? "กำลังบันทึก..." : "บันทึก"}
+                                                {processing
+                                                    ? "กำลังบันทึก..."
+                                                    : "บันทึก"}
                                             </Button>
                                         </div>
                                     </div>

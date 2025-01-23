@@ -34,7 +34,8 @@ class TransformerController extends Controller
             'description' => 'nullable|string',
             'ingredient_id' => 'exists:ingredients,id|nullable',
             'consumable_id' => 'exists:consumables,id|nullable',
-            'multiplier' => 'required|numeric'
+            'multiplier' => 'required|numeric',
+            'type' => 'required|in:ingredient,consumable',
         ]);
 
         Transformer::create($validated);
@@ -43,8 +44,9 @@ class TransformerController extends Controller
             ->with('message', 'Transformer created successfully.');
     }
 
-    public function edit(Transformer $transformer)
+    public function edit($id)
     {
+        $transformer = Transformer::findOrFail($id);
         return Inertia::render('Admin/transformer/Edit', [
             'transformer' => $transformer->load(['ingredient', 'consumable']),
             'ingredients' => Ingredient::select('id', 'name')->get(),
@@ -59,7 +61,8 @@ class TransformerController extends Controller
             'description' => 'nullable|string',
             'ingredient_id' => 'exists:ingredients,id|nullable',
             'consumable_id' => 'exists:consumables,id|nullable',
-            'multiplier' => 'required|numeric'
+            'multiplier' => 'required|numeric',
+            'type' => 'required|in:ingredient,consumable',
         ]);
 
         $transformer->update($validated);
@@ -68,8 +71,9 @@ class TransformerController extends Controller
             ->with('message', 'Transformer updated successfully.');
     }
 
-    public function destroy(Transformer $transformer)
+    public function destroy($id)
     {
+        $transformer = Transformer::findOrFail($id);
         $transformer->delete();
 
         return redirect()->route('admin.transformers.index')
