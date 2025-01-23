@@ -13,7 +13,7 @@ class TransformerController extends Controller
 {
     public function index()
     {
-        $transformers = Transformer::with(['ingredient', 'consumable'])->latest()->get();
+        $transformers = Transformer::with(['ingredient', 'consumable'])->latest()->paginate(10);
         return Inertia::render('Admin/transformer/Index', [
             'transformers' => $transformers
         ]);
@@ -32,8 +32,8 @@ class TransformerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'ingredient_id' => 'required|exists:ingredients,id',
-            'consumable_id' => 'required|exists:consumables,id',
+            'ingredient_id' => 'exists:ingredients,id|nullable',
+            'consumable_id' => 'exists:consumables,id|nullable',
             'multiplier' => 'required|numeric'
         ]);
 
@@ -46,7 +46,7 @@ class TransformerController extends Controller
     public function edit(Transformer $transformer)
     {
         return Inertia::render('Admin/transformer/Edit', [
-            'transformer' => $transformer,
+            'transformer' => $transformer->load(['ingredient', 'consumable']),
             'ingredients' => Ingredient::select('id', 'name')->get(),
             'consumables' => Consumable::select('id', 'name')->get()
         ]);
@@ -57,8 +57,8 @@ class TransformerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'ingredient_id' => 'required|exists:ingredients,id',
-            'consumable_id' => 'required|exists:consumables,id',
+            'ingredient_id' => 'exists:ingredients,id|nullable',
+            'consumable_id' => 'exists:consumables,id|nullable',
             'multiplier' => 'required|numeric'
         ]);
 

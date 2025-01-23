@@ -1,61 +1,142 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
+import { router } from "@inertiajs/react";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Button, Table } from 'flowbite-react';
-import { HiPlus, HiPencil, HiTrash } from 'react-icons/hi';
+import { Button, Table, Breadcrumb, Pagination, TextInput } from 'flowbite-react';
+import { HiHome, HiPencilAlt, HiTrash, HiSearch, HiPlus } from 'react-icons/hi';
+import AdminLayout from '@/Layouts/AdminLayout';
+import Swal from 'sweetalert2';
 
 export default function Index({ auth, transformers }) {
+    const currentPage = transformers.current_page;
+    const totalPages = Math.ceil(transformers.total / transformers.per_page);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filteredTransformers, setFilteredTransformers] = useState(transformers.data);
+
+    useEffect(() => {
+        const results = transformers.data.filter((transformer) =>
+            Object.values({
+                name: transformer.name,
+                description: transformer.description,
+                ingredient: transformer.ingredient?.name,
+                consumable: transformer.consumable?.name,
+            }).some((value) =>
+                value
+                    ?.toString()
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+            )
+        );
+        setFilteredTransformers(results);
+    }, [searchTerm, transformers.data]);
+
+    const onPageChange = (page) => {
+        router.get(route('admin.transformers.index', { page }));
+    };
+
+    const handleDelete = (id) => {
+        Swal.fire({
+            title: "ยืนยันการลบ?",
+            text: "คุณไม่สามารถย้อนกลับการกระทำนี้ได้!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#dc2626",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "ใช่, ลบเลย!",
+            cancelButtonText: "ยกเลิก",
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("admin.transformers.destroy", id), {
+                    onSuccess: () => {
+                        Swal.fire({
+                            title: "ลบสำเร็จ!",
+                            text: "สูตรแปรรูปถูกลบเรียบร้อยแล้ว",
+                            icon: "success",
+                            timer: 1500,
+                            showConfirmButton: false,
+                        });
+                    },
+                });
+            }
+        });
+    };
+
     return (
-        <AuthenticatedLayout user={auth.user}>
-            <Head title="Transformers" />
+        <AuthenticatedLayout
+            user={auth.user}
+            header={
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                    จัดการสูตรแปรรูป
+                </h2>
+            }
+        >
+            <Head title="จัดการสูตรแปรรูป" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-semibold">Transformers</h2>
-                                <Link href={route('admin.transformers.create')}>
-                                    <Button>
-                                        <HiPlus className="mr-2 h-5 w-5" />
-                                        Add Transformer
-                                    </Button>
-                                </Link>
+            <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+                <Breadcrumb aria-label="Default breadcrumb example">
+                    <Breadcrumb.Item href="/dashboard" icon={HiHome}>
+                        หน้าแรก
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>สูตรแปรรูปทั้งหมด</Breadcrumb.Item>
+                </Breadcrumb>
+
+                <AdminLayout>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between">
+                            <div className="max-w-md">
+                                <TextInput
+                                    type="text"
+                                    icon={HiSearch}
+                                    placeholder="ค้นหาสูตรแปรรูป..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
                             </div>
+                            <Link href={route('admin.transformers.create')}>
+                                <Button>
+                                    <div className="flex items-center gap-x-2">
+                                        <HiPlus className="w-4 h-4" />
+                                        เพิ่มสูตรแปรรูป
+                                    </div>
+                                </Button>
+                            </Link>
+                        </div>
 
-                            <Table>
+                        <div className="overflow-x-auto">
+                            <Table hoverable>
                                 <Table.Head>
-                                    <Table.HeadCell>ID</Table.HeadCell>
-                                    <Table.HeadCell>Name</Table.HeadCell>
-                                    <Table.HeadCell>Description</Table.HeadCell>
-                                    <Table.HeadCell>Ingredient</Table.HeadCell>
-                                    <Table.HeadCell>Consumable</Table.HeadCell>
-                                    <Table.HeadCell>Multiplier</Table.HeadCell>
-                                    <Table.HeadCell>
-                                        <span className="sr-only">Actions</span>
-                                    </Table.HeadCell>
+                                    <Table.HeadCell>ชื่อสูตรแปรรูป</Table.HeadCell>
+                                    <Table.HeadCell>คำอธิบาย</Table.HeadCell>
+                                    <Table.HeadCell>วัตถุดิบที่ใช้</Table.HeadCell>
+                                    <Table.HeadCell>วัตถุดิบสิ้นเปลือง</Table.HeadCell>
+                                    <Table.HeadCell>ตัวคูณ</Table.HeadCell>
+                                    <Table.HeadCell>จัดการ</Table.HeadCell>
                                 </Table.Head>
                                 <Table.Body className="divide-y">
-                                    {transformers?.map((transformer) => (
+                                    {filteredTransformers.map((transformer) => (
                                         <Table.Row key={transformer.id} className="bg-white">
-                                            <Table.Cell>{transformer.id}</Table.Cell>
-                                            <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
+                                            <Table.Cell className="font-medium text-gray-900">
                                                 {transformer.name}
                                             </Table.Cell>
                                             <Table.Cell>{transformer.description}</Table.Cell>
-                                            <Table.Cell>{transformer.ingredient?.name}</Table.Cell>
-                                            <Table.Cell>{transformer.consumable?.name}</Table.Cell>
+                                            <Table.Cell>{transformer.ingredient?.name || '-'}</Table.Cell>
+                                            <Table.Cell>{transformer.consumable?.name || '-'}</Table.Cell>
                                             <Table.Cell>{transformer.multiplier}</Table.Cell>
                                             <Table.Cell>
-                                                <div className="flex justify-end gap-2">
-                                                    <Link href={route('admin.transformers.edit', transformer.id)}>
-                                                        <Button color="info" size="sm">
-                                                            <HiPencil className="h-4 w-4" />
-                                                        </Button>
+                                                <div className="flex items-center gap-x-3">
+                                                    <Link
+                                                        href={route('admin.transformers.edit', transformer.id)}
+                                                        className="text-blue-600 hover:underline"
+                                                    >
+                                                        <HiPencilAlt className="w-5 h-5" />
                                                     </Link>
-                                                    <Button color="failure" size="sm">
-                                                        <HiTrash className="h-4 w-4" />
-                                                    </Button>
+                                                    <button
+                                                        onClick={() => handleDelete(transformer.id)}
+                                                        className="text-red-600 hover:underline"
+                                                    >
+                                                        <HiTrash className="w-5 h-5" />
+                                                    </button>
                                                 </div>
                                             </Table.Cell>
                                         </Table.Row>
@@ -63,8 +144,18 @@ export default function Index({ auth, transformers }) {
                                 </Table.Body>
                             </Table>
                         </div>
+
+                        <div className="flex items-center justify-center text-center">
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                onPageChange={onPageChange}
+                                showIcons
+                                layout="pagination"
+                            />
+                        </div>
                     </div>
-                </div>
+                </AdminLayout>
             </div>
         </AuthenticatedLayout>
     );
