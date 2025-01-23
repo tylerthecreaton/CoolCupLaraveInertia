@@ -9,6 +9,7 @@ class ConsumableLotDetail extends Model
     public $fillable = [
         'consumable_lot_id',
         'consumable_id',
+        'transformer_id',
         'quantity',
         'type',
         'price',
@@ -29,4 +30,8 @@ class ConsumableLotDetail extends Model
         return $this->belongsTo(Consumable::class);
     }
 
+    public function transformer()
+    {
+        return $this->belongsTo(Transformer::class);
+    }
 }

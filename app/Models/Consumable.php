@@ -32,4 +32,9 @@ class Consumable extends Model
         'name' => 'string',
         'is_depend_on_sale' => 'boolean',
     ];
+
+    public function transformers()
+    {
+        return $this->hasMany(Transformer::class);
+    }
 }

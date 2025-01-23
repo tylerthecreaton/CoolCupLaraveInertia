@@ -8,7 +8,8 @@ import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
 
-export default function Create({ auth, consumables }) {
+export default function Create({ consumables }) {
+    console.log(consumables);
     const { data, setData, post, processing, errors } = useForm([
         {
             consumable_id: "",
@@ -18,6 +19,7 @@ export default function Create({ auth, consumables }) {
             per_pack: "",
             price: "",
             supplier: "",
+            transformer_id: 0,
         },
     ]);
 
@@ -42,6 +44,7 @@ export default function Create({ auth, consumables }) {
                 per_pack: "",
                 price: "",
                 supplier: "",
+                transformer_id: 0,
             },
         ]);
     };
@@ -75,9 +78,16 @@ export default function Create({ auth, consumables }) {
         );
         const newData = [...data];
         newData[index].consumable_id = value;
+        newData[index].transformer_id = ""; // Reset transformer when consumable changes
         newData[index].cost_per_unit = selectedConsumable
             ? selectedConsumable.cost_per_unit
             : "";
+        setData(newData);
+    };
+
+    const handleTransformerChange = (index, value) => {
+        const newData = [...data];
+        newData[index].transformer_id = value;
         setData(newData);
     };
 
@@ -110,6 +120,8 @@ export default function Create({ auth, consumables }) {
         data.forEach((item, index) => {
             if (!item.consumable_id)
                 errors.push(`รายการที่ ${index + 1}: กรุณาเลือกวัตถุดิบ`);
+            if (!item.transformer_id)
+                errors.push(`รายการที่ ${index + 1}: กรุณาเลือกยี่ห้อ/ขนาด`);
             if (!item.supplier)
                 errors.push(`รายการที่ ${index + 1}: กรุณาระบุผู้จำหน่าย`);
             if (!validatePositiveNumber(item.cost_per_unit))
@@ -213,7 +225,8 @@ export default function Create({ auth, consumables }) {
                                                 <div className="flex justify-between items-center mb-4">
                                                     <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                                                         <span className="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded">
-                                                            รายการที่ {index + 1}
+                                                            รายการที่{" "}
+                                                            {index + 1}
                                                         </span>
                                                     </h3>
                                                     {data.length > 1 && (
@@ -278,15 +291,59 @@ export default function Create({ auth, consumables }) {
                                                                 )
                                                             )}
                                                         </select>
-                                                        <InputError
-                                                            message={
-                                                                errors[
-                                                                    `${index}.consumable_id`
-                                                                ]
-                                                            }
-                                                            className="mt-2"
-                                                        />
                                                     </div>
+
+                                                    {item.consumable_id && (
+                                                        <div>
+                                                            <InputLabel
+                                                                htmlFor={`transformer-${index}`}
+                                                            >
+                                                                ยี่ห้อ/ขนาด *
+                                                            </InputLabel>
+                                                            <select
+                                                                id={`transformer-${index}`}
+                                                                value={
+                                                                    item.transformer_id
+                                                                }
+                                                                onChange={(e) =>
+                                                                    handleTransformerChange(
+                                                                        index,
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                className="mt-1 block w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
+                                                            >
+                                                                <option value="">
+                                                                    เลือกยี่ห้อ/ขนาด
+                                                                </option>
+                                                                {consumables
+                                                                    .find(
+                                                                        (c) =>
+                                                                            c.id.toString() ===
+                                                                            item.consumable_id
+                                                                    )
+                                                                    ?.transformers.map(
+                                                                        (
+                                                                            transformer
+                                                                        ) => (
+                                                                            <option
+                                                                                key={
+                                                                                    transformer.id
+                                                                                }
+                                                                                value={
+                                                                                    transformer.id
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    transformer.name
+                                                                                }
+                                                                            </option>
+                                                                        )
+                                                                    )}
+                                                            </select>
+                                                        </div>
+                                                    )}
 
                                                     <div>
                                                         <InputLabel
@@ -299,7 +356,9 @@ export default function Create({ auth, consumables }) {
                                                             type="number"
                                                             min="0.01"
                                                             step="0.01"
-                                                            value={item.quantity}
+                                                            value={
+                                                                item.quantity
+                                                            }
                                                             className="mt-1 block w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
@@ -367,7 +426,9 @@ export default function Create({ auth, consumables }) {
                                                             type="number"
                                                             min="1"
                                                             step="1"
-                                                            value={item.per_pack}
+                                                            value={
+                                                                item.per_pack
+                                                            }
                                                             className="mt-1 block w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
@@ -431,17 +492,20 @@ export default function Create({ auth, consumables }) {
                                                         <TextInput
                                                             id={`supplier-${index}`}
                                                             type="text"
-                                                            value={item.supplier}
+                                                            value={
+                                                                item.supplier
+                                                            }
                                                             className="mt-1 block w-full"
                                                             onChange={(e) => {
-                                                                const newData = [
-                                                                    ...data,
-                                                                ];
+                                                                const newData =
+                                                                    [...data];
                                                                 newData[
                                                                     index
                                                                 ].supplier =
                                                                     e.target.value;
-                                                                setData(newData);
+                                                                setData(
+                                                                    newData
+                                                                );
                                                             }}
                                                         />
                                                         <InputError
@@ -464,14 +528,15 @@ export default function Create({ auth, consumables }) {
                                                             id={`note-${index}`}
                                                             value={item.note}
                                                             onChange={(e) => {
-                                                                const newData = [
-                                                                    ...data,
-                                                                ];
+                                                                const newData =
+                                                                    [...data];
                                                                 newData[
                                                                     index
                                                                 ].note =
                                                                     e.target.value;
-                                                                setData(newData);
+                                                                setData(
+                                                                    newData
+                                                                );
                                                             }}
                                                             className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                                                             rows="2"

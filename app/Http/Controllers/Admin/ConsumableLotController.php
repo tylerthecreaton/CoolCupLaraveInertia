@@ -54,7 +54,7 @@ class ConsumableLotController extends Controller
 
     public function create()
     {
-        $consumables = Consumable::all();
+        $consumables = Consumable::with(['transformers'])->whereHas('transformers')->get();
         return Inertia::render('Admin/consumables/lots/create', [
             'consumables' => $consumables
         ]);
@@ -64,6 +64,7 @@ class ConsumableLotController extends Controller
     {
         $request->validate([
             '*.consumable_id' => 'required|exists:consumables,id',
+            '*.transformer_id' => 'required|exists:transformers,id',
             '*.cost_per_unit' => 'required|numeric|min:0',
             '*.quantity' => 'required|numeric|min:0',
             '*.per_pack' => 'required|numeric|min:0',
@@ -89,6 +90,7 @@ class ConsumableLotController extends Controller
             foreach ($request->all() as $lotData) {
                 $detail = $lot->details()->create([
                     'consumable_id' => $lotData['consumable_id'],
+                    'transformer_id' => $lotData['transformer_id'],
                     'quantity' => $lotData['quantity'],
                     'type' => 'in',
                     'price' => $lotData['price'],
@@ -160,7 +162,8 @@ class ConsumableLotController extends Controller
         );
 
         Expense::create([
-            'name' => sprintf('ซื้อวัตถุดิบสิ้นเปลือง (%d รายการ)',
+            'name' => sprintf(
+                'ซื้อวัตถุดิบสิ้นเปลือง (%d รายการ)',
                 collect($lots)->sum(function ($lot) {
                     return $lot->details->count();
                 })
