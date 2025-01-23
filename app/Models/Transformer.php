@@ -11,18 +11,18 @@ class Transformer extends Model
     protected $fillable = [
         'name',
         'description',
-        'ingredient_lot_id',
-        'consumable_lot_id',
+        'ingredient_id',
+        'consumable_id',
         'multiplier'
     ];
 
-    public function ingredientLot()
+    public function ingredient()
     {
-        return $this->belongsTo(IngredientLot::class);
+        return $this->belongsTo(Ingredient::class);
     }
 
-    public function consumableLot()
+    public function consumable()
     {
-        return $this->belongsTo(ConsumableLot::class);
+        return $this->belongsTo(Consumable::class);
     }
 }

@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\ConsumableLotController as AdminConsumableLotCont
 use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
 use App\Http\Controllers\Admin\ExpenseCategoryController as AdminExpenseCategoryController;
 use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
+use App\Http\Controllers\Admin\TransformerController as AdminTransformerController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\Admin\ExpiredController as AdminExpiredController;
 use App\Http\Controllers\HomeController;
@@ -140,6 +141,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/withdraw/create', [AdminWithdrawController::class, 'create'])->name('withdraw.create');
         Route::post('/withdraw', [AdminWithdrawController::class, 'store'])->name('withdraw.store');
         Route::get('/withdraw/{id}/rollback', [AdminWithdrawController::class, 'rollback'])->name('withdraw.rollback');
+
+        // ---------------------------Transfomer---------------------------
+        Route::get('/transformers', [AdminTransformerController::class, 'index'])->name('transformers.index');
+        Route::get('/transformers/create', [AdminTransformerController::class, 'create'])->name('transformers.create');
+        Route::post('/transformers', [AdminTransformerController::class, 'store'])->name('transformers.store');
+        Route::get('/transformers/{id}', [AdminTransformerController::class, 'show'])->name('transformers.show');
+        Route::get('/transformers/{id}/edit', [AdminTransformerController::class, 'edit'])->name('transformers.edit');
+        Route::put('/transformers/{id}', [AdminTransformerController::class, 'update'])->name('transformers.update');
+        Route::delete('/transformers/{id}', [AdminTransformerController::class, 'destroy'])->name('transformers.destroy');
 
         // ---------------------------Products---------------------------
         Route::get('/products', [AdminProductsController::class, 'index'])->name('products.index');

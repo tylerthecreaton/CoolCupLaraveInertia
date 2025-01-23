@@ -318,12 +318,43 @@ export default function Create({ auth, ingredients }) {
                                                             className="mt-2"
                                                         />
                                                     </div>
-
+                                                    <div>
+                                                        <InputLabel
+                                                            htmlFor={`price-${index}`}
+                                                        >
+                                                            ราคา *
+                                                        </InputLabel>
+                                                        <TextInput
+                                                            id={`price-${index}`}
+                                                            type="number"
+                                                            min="0.01"
+                                                            step="0.01"
+                                                            value={item.price}
+                                                            className="mt-1 block w-full"
+                                                            onChange={(e) =>
+                                                                handleNumberChange(
+                                                                    index,
+                                                                    "price",
+                                                                    e.target
+                                                                        .value,
+                                                                    validatePositiveNumber
+                                                                )
+                                                            }
+                                                        />
+                                                        <InputError
+                                                            message={
+                                                                errors[
+                                                                    `${index}.price`
+                                                                ]
+                                                            }
+                                                            className="mt-2"
+                                                        />
+                                                    </div>
                                                     <div>
                                                         <InputLabel
                                                             htmlFor={`per_pack-${index}`}
                                                         >
-                                                            จำนวนต่อแพ็ค ({getIngredientUnit(item.ingredient_id)}) *
+                                                            ปริมาณต่อแพ็ค ({getIngredientUnit(item.ingredient_id)}) *
                                                         </InputLabel>
                                                         <TextInput
                                                             id={`per_pack-${index}`}
@@ -356,7 +387,7 @@ export default function Create({ auth, ingredients }) {
                                                         <InputLabel
                                                             htmlFor={`cost_per_unit-${index}`}
                                                         >
-                                                            ราคาต่อหน่วย *
+                                                            ราคาต่อแพ็ค *
                                                         </InputLabel>
                                                         <TextInput
                                                             id={`cost_per_unit-${index}`}
@@ -387,38 +418,7 @@ export default function Create({ auth, ingredients }) {
                                                         />
                                                     </div>
 
-                                                    <div>
-                                                        <InputLabel
-                                                            htmlFor={`price-${index}`}
-                                                        >
-                                                            ราคารวม *
-                                                        </InputLabel>
-                                                        <TextInput
-                                                            id={`price-${index}`}
-                                                            type="number"
-                                                            min="0.01"
-                                                            step="0.01"
-                                                            value={item.price}
-                                                            className="mt-1 block w-full"
-                                                            onChange={(e) =>
-                                                                handleNumberChange(
-                                                                    index,
-                                                                    "price",
-                                                                    e.target
-                                                                        .value,
-                                                                    validatePositiveNumber
-                                                                )
-                                                            }
-                                                        />
-                                                        <InputError
-                                                            message={
-                                                                errors[
-                                                                    `${index}.price`
-                                                                ]
-                                                            }
-                                                            className="mt-2"
-                                                        />
-                                                    </div>
+
 
                                                     <div>
                                                         <InputLabel
