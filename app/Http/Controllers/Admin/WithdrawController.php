@@ -51,7 +51,7 @@ class WithdrawController extends Controller
                 ];
             })
             ->values();
-        $consumableLots = ConsumableLot::with(['details.consumable'])
+        $consumableLots = ConsumableLot::with(['details.consumable', 'details.consumable.transformers'])
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($lots) {
@@ -69,6 +69,14 @@ class WithdrawController extends Controller
                             'id' => $detail->id,
                             'name' => $detail->consumable->name,
                             'quantity' => $detail->quantity,
+                            'transformers' => $detail->consumable->transformers->map(function ($transformer) {
+                                return [
+                                    'id' => $transformer->id,
+                                    'name' => $transformer->name,
+                                    'description' => $transformer->description,
+                                    'multiplier' => $transformer->multiplier,
+                                ];
+                            }),
                         ];
                     }),
                 ];

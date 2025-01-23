@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 
 export default function CreateWithdraw({ ingredients, consumables }) {
+    console.log(consumables);
     const [withdrawItems, setWithdrawItems] = useState([]);
     const [selectedType, setSelectedType] = useState("");
     const [selectedLot, setSelectedLot] = useState("");
