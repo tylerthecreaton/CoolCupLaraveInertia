@@ -56,13 +56,13 @@ class WithdrawController extends Controller
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($lots) {
-                $lotsDetails = $lots->details;
                 return [
                     'id' => $lots->id,
                     'created_at' => $lots->created_at,
-                    'items_count' => $lotsDetails->count(),
-                    'items' => $lotsDetails->map(function ($detail) {
+                    'items' => $lots->details->map(function ($detail) use ($lots) {
                         return [
+                            'lot_id' => $lots->id,
+                            'lot_created_at' => $lots->created_at,
                             'id' => $detail->id,
                             'name' => $detail->consumable->name,
                             'quantity' => $detail->quantity,
@@ -77,11 +77,24 @@ class WithdrawController extends Controller
                         ];
                     }),
                 ];
-            });
+            })
+            ->reduce(function ($result, $lot) {
+                foreach ($lot['items'] as $item) {
+                    $itemName = $item['name'];
+                    if (!isset($result[$itemName])) {
+                        $result[$itemName] = [
+                            'name' => $itemName,
+                            'items' => [],
+                        ];
+                    }
+                    $result[$itemName]['items'][] = $item;
+                }
+                return $result;
+            }, []);
 
         return Inertia::render('Admin/withdraw/create', [
             'ingredientLots' => $ingredientLots,
-            'consumableLots' => $consumableLots,
+            'consumables' => collect($consumableLots)->values(),
         ]);
     }
 
