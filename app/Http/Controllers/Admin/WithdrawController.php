@@ -49,17 +49,14 @@ class WithdrawController extends Controller
                         ];
                     }),
                 ];
-            })
-            ->values();
-        $consumableLots = ConsumableLot::with(['details.consumable', 'details.consumable.transformers'])
+            });
+
+        // ดึง lots พร้อมข้อมูล consumable และ transformers
+        $consumableLots = ConsumableLot::with(['details.consumable.transformers'])
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($lots) {
                 $lotsDetails = $lots->details;
-                foreach ($lotsDetails as $detail) {
-                    $detail->consumable->unit = $detail->consumable->unit ? $detail->consumable->unit : null;
-                }
-
                 return [
                     'id' => $lots->id,
                     'created_at' => $lots->created_at,
@@ -80,12 +77,11 @@ class WithdrawController extends Controller
                         ];
                     }),
                 ];
-            })
-            ->values();
+            });
 
         return Inertia::render('Admin/withdraw/create', [
-            'ingredients' => $ingredientLots,
-            'consumables' => $consumableLots,
+            'ingredientLots' => $ingredientLots,
+            'consumableLots' => $consumableLots,
         ]);
     }
 
