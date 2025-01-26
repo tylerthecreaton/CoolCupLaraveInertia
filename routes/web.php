@@ -140,7 +140,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/withdraw', [AdminWithdrawController::class, 'index'])->name('withdraw.index');
         Route::get('/withdraw/create', [AdminWithdrawController::class, 'create'])->name('withdraw.create');
         Route::post('/withdraw', [AdminWithdrawController::class, 'store'])->name('withdraw.store');
-        Route::post('/withdraw/{id}/rollback', [AdminWithdrawController::class, 'rollback'])->name('withdraw.rollback');
+        Route::delete('/withdraw/{id}/rollback', [AdminWithdrawController::class, 'rollback'])->name('withdraw.rollback');
 
         // ---------------------------Transfomer---------------------------
         Route::get('/transformers', [AdminTransformerController::class, 'index'])->name('transformers.index');

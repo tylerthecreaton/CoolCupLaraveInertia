@@ -1,19 +1,17 @@
-import React, { useState } from "react";
+import AdminLayout from "@/Layouts/AdminLayout";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router } from "@inertiajs/react";
 import {
+    Badge,
     Breadcrumb,
-    Table,
     Button,
     Modal,
-    Badge,
     Pagination,
-    Tooltip,
+    Table,
 } from "flowbite-react";
+import { useState } from "react";
+import { FaBoxes, FaPlus } from "react-icons/fa";
 import { HiHome } from "react-icons/hi2";
-import { FaPlus, FaBoxes } from "react-icons/fa";
-import { HiOutlineTrash, HiOutlinePencilAlt, HiEye } from "react-icons/hi";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import AdminLayout from "@/Layouts/AdminLayout";
 import Swal from "sweetalert2";
 
 export default function Index({ auth, withdraws }) {
@@ -24,51 +22,6 @@ export default function Index({ auth, withdraws }) {
     const handleShowDetails = (withdraw) => {
         setSelectedWithdraw(withdraw);
         setShowModal(true);
-    };
-
-    const handleDelete = (withdrawId) => {
-        Swal.fire({
-            title: "ยืนยันการลบรายการเบิก",
-            text: "คุณต้องการลบรายการเบิกนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถเรียกคืนได้",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "ลบ",
-            cancelButtonText: "ยกเลิก",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.delete(route("admin.withdraw.destroy", withdrawId), {
-                    preserveScroll: true,
-                    onBefore: () => {
-                        Swal.fire({
-                            title: "กำลังดำเนินการ...",
-                            text: "กรุณารอสักครู่",
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            },
-                        });
-                    },
-                    onSuccess: () => {
-                        Swal.fire({
-                            title: "สำเร็จ!",
-                            text: "ลบรายการเบิกเรียบร้อยแล้ว",
-                            icon: "success",
-                            timer: 1500,
-                        });
-                    },
-                    onError: (errors) => {
-                        Swal.fire({
-                            title: "เกิดข้อผิดพลาด!",
-                            text: errors.message || "ไม่สามารถลบรายการเบิกได้",
-                            icon: "error",
-                        });
-                    },
-                });
-            }
-        });
     };
 
     const onPageChange = (page) => {
@@ -257,18 +210,40 @@ export default function Index({ auth, withdraws }) {
                                                                 "cancelled" && (
                                                                 <button
                                                                     onClick={() => {
-                                                                        if (
-                                                                            confirm(
-                                                                                "คุณต้องการยกเลิกการเบิกนี้ใช่หรือไม่?"
-                                                                            )
-                                                                        ) {
-                                                                            router.post(
-                                                                                route(
-                                                                                    "admin.withdraw.rollback",
-                                                                                    withdraw.id
-                                                                                )
-                                                                            );
-                                                                        }
+                                                                        Swal.fire(
+                                                                            {
+                                                                                title: "คุณต้องการยกเลิกการเบิกนี้ใช่หรือไม่?",
+                                                                                icon: "warning",
+                                                                                showCancelButton: true,
+                                                                                confirmButtonColor:
+                                                                                    "#3085d6",
+                                                                                cancelButtonColor:
+                                                                                    "#d33",
+                                                                                confirmButtonText:
+                                                                                    "ใช่, ยกเลิก",
+                                                                                cancelButtonText:
+                                                                                    "ไม่",
+                                                                            }
+                                                                        ).then(
+                                                                            (
+                                                                                result
+                                                                            ) => {
+                                                                                if (
+                                                                                    result.isConfirmed
+                                                                                ) {
+                                                                                    router.post(
+                                                                                        route(
+                                                                                            "admin.withdraw.rollback",
+                                                                                            withdraw.id
+                                                                                        ),
+                                                                                        {
+                                                                                            _method:
+                                                                                                "DELETE",
+                                                                                        }
+                                                                                    );
+                                                                                }
+                                                                            }
+                                                                        );
                                                                     }}
                                                                     className="font-medium text-red-600 hover:underline dark:text-red-500"
                                                                 >
