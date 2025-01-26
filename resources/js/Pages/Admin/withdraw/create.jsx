@@ -147,6 +147,7 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
             quantity: quantity,
             transformer_id: selectedTransformerData?.id || null,
             transformer_name: selectedTransformerData?.name || null,
+            transformer_multiplier: selectedTransformerData?.multiplier || null,
         };
 
         setWithdrawItems([...withdrawItems, newItem]);
@@ -336,7 +337,7 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                                                             key={transformer.id}
                                                                             value={transformer.id}
                                                                         >
-                                                                            {transformer.name}
+                                                                            {transformer.name} (x{transformer.multiplier})
                                                                         </option>
                                                                     ));
                                                                 } else {
@@ -348,7 +349,7 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                                                             key={transformer.id}
                                                                             value={transformer.id}
                                                                         >
-                                                                            {transformer.name}
+                                                                            {transformer.name} (x{transformer.multiplier})
                                                                         </option>
                                                                     )) || [];
                                                                 }
@@ -442,7 +443,7 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                                             {item.type === "ingredient"
                                                                 ? `วัตถุดิบ${item.ingredient_type ? ` • ${item.ingredient_type}` : ''}`
                                                                 : "วัสดุสิ้นเปลือง"}
-                                                            {item.transformer_name && ` • ${item.transformer_name}`}
+                                                            {item.transformer_name && ` • ${item.transformer_name} (x${item.transformer_multiplier})`}
                                                         </p>
                                                         <div className="flex items-center mt-1">
                                                             <span className="text-xs text-gray-500">
