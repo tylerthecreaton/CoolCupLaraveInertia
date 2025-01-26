@@ -146,10 +146,10 @@ export default function Index({ auth, withdraws }) {
                                                 ID
                                             </Table.HeadCell>
                                             <Table.HeadCell className="bg-gray-50">
-                                                ประเภท
+                                                ผู้เบิก
                                             </Table.HeadCell>
                                             <Table.HeadCell className="bg-gray-50">
-                                                จำนวนรายการ
+                                                รายการ
                                             </Table.HeadCell>
                                             <Table.HeadCell className="bg-gray-50">
                                                 สถานะ
@@ -165,28 +165,38 @@ export default function Index({ auth, withdraws }) {
                                             {withdraws.data.map((withdraw) => (
                                                 <Table.Row
                                                     key={withdraw.id}
-                                                    className="bg-white transition-colors duration-150 hover:bg-gray-50"
+                                                    className="bg-white dark:border-gray-700 dark:bg-gray-800"
                                                 >
-                                                    <Table.Cell className="whitespace-nowrap">
-                                                        <Badge color="info" className="px-3 py-1">
-                                                            #{withdraw.id}
-                                                        </Badge>
+                                                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                                        {withdraw.id}
                                                     </Table.Cell>
                                                     <Table.Cell>
-                                                        <Badge color={withdraw.type === 'ingredient' ? 'purple' : 'blue'} className="px-3 py-1">
-                                                            {withdraw.type === 'ingredient' ? 'วัตถุดิบ' : 'วัตถุดิบสิ้นเปลือง'}
-                                                        </Badge>
+                                                        {withdraw.user?.name}
                                                     </Table.Cell>
                                                     <Table.Cell>
-                                                        <Badge color="success" className="px-3 py-1">
-                                                            {withdraw.items?.length || 0} รายการ
-                                                        </Badge>
+                                                        <div className="space-y-2">
+                                                            {withdraw.items.map((item, index) => (
+                                                                <div key={index} className="text-sm">
+                                                                    {item.type === 'ingredient' ? (
+                                                                        <>
+                                                                            {item.ingredient_lot?.details?.[0]?.ingredient?.name} - 
+                                                                            {item.quantity} {item.unit}
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            {item.consumable_lot?.details?.[0]?.consumable?.name} - 
+                                                                            {item.quantity} {item.unit}
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </Table.Cell>
                                                     <Table.Cell>
-                                                        {getStatusBadge(withdraw.status)}
+                                                        {withdraw.status}
                                                     </Table.Cell>
                                                     <Table.Cell>
-                                                        {formatDate(withdraw.created_at)}
+                                                        {withdraw.created_at}
                                                     </Table.Cell>
                                                     <Table.Cell>
                                                         <div className="flex gap-2">
@@ -250,24 +260,12 @@ export default function Index({ auth, withdraws }) {
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <p className="text-sm text-gray-600">ประเภท</p>
-                                        <Badge color={selectedWithdraw.type === 'ingredient' ? 'purple' : 'blue'} className="px-3 py-1">
-                                            {selectedWithdraw.type === 'ingredient' ? 'วัตถุดิบ' : 'วัตถุดิบสิ้นเปลือง'}
-                                        </Badge>
+                                        <p className="text-sm text-gray-600">ผู้เบิก</p>
+                                        <p>{selectedWithdraw.user?.name || '-'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600">สถานะ</p>
                                         <div>{getStatusBadge(selectedWithdraw.status)}</div>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-600">จำนวนรายการ</p>
-                                        <Badge color="success" className="px-3 py-1">
-                                            {selectedWithdraw.items?.length || 0} รายการ
-                                        </Badge>
-                                    </div>
-                                    <div>
-                                        <p className="text-sm text-gray-600">ผู้เบิก</p>
-                                        <p>{selectedWithdraw.user?.name || '-'}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-600">วันที่ทำรายการ</p>
@@ -291,7 +289,13 @@ export default function Index({ auth, withdraws }) {
                                             <Table.Body>
                                                 {selectedWithdraw.items.map((item, index) => (
                                                     <Table.Row key={index}>
-                                                        <Table.Cell>{item.name}</Table.Cell>
+                                                        <Table.Cell>
+                                                            {item.type === 'ingredient' ? (
+                                                                item.ingredient_lot?.details?.[0]?.ingredient?.name
+                                                            ) : (
+                                                                item.consumable_lot?.details?.[0]?.consumable?.name
+                                                            )}
+                                                        </Table.Cell>
                                                         <Table.Cell>{item.quantity}</Table.Cell>
                                                         <Table.Cell>{item.unit}</Table.Cell>
                                                     </Table.Row>

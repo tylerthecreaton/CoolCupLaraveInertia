@@ -16,8 +16,13 @@ class WithdrawController extends Controller
 {
     public function index()
     {
-        $withdraw = Withdraw::with(['items', 'user'])->paginate(10);
-        return Inertia::render('Admin/withdraw/index', compact('withdraw'));
+        $withdraws = Withdraw::with(['items.ingredientLot.details.ingredient', 
+                                   'items.consumableLot.details.consumable', 
+                                   'items.transformer', 
+                                   'user'])
+                            ->latest()
+                            ->paginate(10);
+        return Inertia::render('Admin/withdraw/index', compact('withdraws'));
     }
 
     public function create()
