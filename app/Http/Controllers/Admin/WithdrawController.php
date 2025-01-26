@@ -241,7 +241,8 @@ class WithdrawController extends Controller
                         $ingredientDetail = $item->ingredientLot->details->first();
                         if ($ingredientDetail) {
                             $ingredient = $ingredientDetail->ingredient;
-                            $subtractAmount = $item->quantity;
+                            $returnAmount = $item->quantity;
+                            $subtractAmount = $returnAmount;
 
                             if ($item->transformer_id) {
                                 $transformer = $ingredient->transformers()->find($item->transformer_id);
@@ -250,13 +251,23 @@ class WithdrawController extends Controller
                                 }
                             }
 
+                            // Check if ingredient has enough quantity to return
+                            if ($ingredient->quantity < $subtractAmount) {
+                                throw new \Exception('ไม่สามารถยกเลิกการเบิกได้ เนื่องจากจำนวนวัตถุดิบคงเหลือไม่เพียงพอ');
+                            }
+
+                            // Return to lot
+                            $ingredientDetail->increment('quantity', $returnAmount);
+                            
+                            // Subtract from ingredient total
                             $ingredient->decrement('quantity', $subtractAmount);
                         }
                     } else {
                         $consumableDetail = $item->consumableLot->details->first();
                         if ($consumableDetail) {
                             $consumable = $consumableDetail->consumable;
-                            $subtractAmount = $item->quantity;
+                            $returnAmount = $item->quantity;
+                            $subtractAmount = $returnAmount;
 
                             if ($item->transformer_id) {
                                 $transformer = $consumable->transformers()->find($item->transformer_id);
@@ -265,6 +276,15 @@ class WithdrawController extends Controller
                                 }
                             }
 
+                            // Check if consumable has enough quantity to return
+                            if ($consumable->quantity < $subtractAmount) {
+                                throw new \Exception('ไม่สามารถยกเลิกการเบิกได้ เนื่องจากจำนวนวัสดุสิ้นเปลืองคงเหลือไม่เพียงพอ');
+                            }
+
+                            // Return to lot
+                            $consumableDetail->increment('quantity', $returnAmount);
+                            
+                            // Subtract from consumable total
                             $consumable->decrement('quantity', $subtractAmount);
                         }
                     }
