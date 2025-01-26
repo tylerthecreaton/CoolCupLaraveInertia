@@ -146,16 +146,16 @@ class WithdrawController extends Controller
                         $ingredientDetail = $lot->details->first();
                         if ($ingredientDetail) {
                             $ingredient = $ingredientDetail->ingredient;
-                            $decreaseAmount = $item['quantity'];
+                            $addAmount = $item['quantity'];
 
                             if (isset($item['transformer_id'])) {
                                 $transformer = $ingredient->transformers()->find($item['transformer_id']);
                                 if ($transformer) {
-                                    $decreaseAmount *= $transformer->multiplier;
+                                    $addAmount *= $transformer->multiplier;
                                 }
                             }
 
-                            $ingredient->decrement('quantity', $decreaseAmount);
+                            $ingredient->increment('quantity', $addAmount);
                             $withdrawItem->unit = $ingredient->unit ? $ingredient->unit->name : null;
                         }
                     } else {
@@ -165,16 +165,16 @@ class WithdrawController extends Controller
                         $consumableDetail = $lot->details->first();
                         if ($consumableDetail) {
                             $consumable = $consumableDetail->consumable;
-                            $decreaseAmount = $item['quantity'];
+                            $addAmount = $item['quantity'];
 
                             if (isset($item['transformer_id'])) {
                                 $transformer = $consumable->transformers()->find($item['transformer_id']);
                                 if ($transformer) {
-                                    $decreaseAmount *= $transformer->multiplier;
+                                    $addAmount *= $transformer->multiplier;
                                 }
                             }
 
-                            $consumable->decrement('quantity', $decreaseAmount);
+                            $consumable->increment('quantity', $addAmount);
                             $withdrawItem->unit = $consumable->unit ? $consumable->unit->name : null;
                         }
                     }
@@ -215,31 +215,31 @@ class WithdrawController extends Controller
                         $ingredientDetail = $item->ingredientLot->details->first();
                         if ($ingredientDetail) {
                             $ingredient = $ingredientDetail->ingredient;
-                            $returnAmount = $item->quantity;
+                            $subtractAmount = $item->quantity;
 
                             if ($item->transformer_id) {
                                 $transformer = $ingredient->transformers()->find($item->transformer_id);
                                 if ($transformer) {
-                                    $returnAmount *= $transformer->multiplier;
+                                    $subtractAmount *= $transformer->multiplier;
                                 }
                             }
 
-                            $ingredient->increment('quantity', $returnAmount);
+                            $ingredient->decrement('quantity', $subtractAmount);
                         }
                     } else {
                         $consumableDetail = $item->consumableLot->details->first();
                         if ($consumableDetail) {
                             $consumable = $consumableDetail->consumable;
-                            $returnAmount = $item->quantity;
+                            $subtractAmount = $item->quantity;
 
                             if ($item->transformer_id) {
                                 $transformer = $consumable->transformers()->find($item->transformer_id);
                                 if ($transformer) {
-                                    $returnAmount *= $transformer->multiplier;
+                                    $subtractAmount *= $transformer->multiplier;
                                 }
                             }
 
-                            $consumable->increment('quantity', $returnAmount);
+                            $consumable->decrement('quantity', $subtractAmount);
                         }
                     }
                 }
