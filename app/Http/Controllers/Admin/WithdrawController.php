@@ -5,16 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ConsumableLot;
 use App\Models\IngredientLot;
-use App\Models\Withdraws;
+use App\Models\Withdraw;
+use App\Models\WithdrawItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class WithdrawController extends Controller
 {
     public function index()
     {
-        $withdraws = Withdraws::with(['consumableLot', 'ingredientLot', 'user'])->paginate(10);
-        return Inertia::render('Admin/withdraw/index', compact('withdraws'));
+        $withdraw = Withdraw::with(['items', 'user'])->paginate(10);
+        return Inertia::render('Admin/withdraw/index', compact('withdraw'));
     }
 
     public function create()
@@ -100,7 +103,7 @@ class WithdrawController extends Controller
 
     public function show($id)
     {
-        $withdraw = Withdraws::findOrFail($id);
+        $withdraw = Withdraw::findOrFail($id);
         return Inertia::render('Admin/withdraw/show', compact('withdraw'));
     }
 
@@ -108,33 +111,36 @@ class WithdrawController extends Controller
     {
         $request->validate([
             'items' => 'required|array',
-            'items.*.type' => 'required|in:ingredient,consumable',
             'items.*.lot_id' => 'required|integer',
+            'items.*.type' => 'required|in:ingredient,consumable',
             'items.*.quantity' => 'required|numeric|min:0.01',
-            'items.*.transformer_id' => 'nullable|exists:transformers,id',
+            'items.*.transformer_id' => 'nullable|integer'
         ]);
 
         try {
-            \DB::transaction(function () use ($request) {
+            DB::transaction(function () use ($request) {
+                $withdraw = Withdraw::create([
+                    'user_id' => Auth::id(),
+                    'status' => 'completed',
+                    'note' => $request->note
+                ]);
+
                 foreach ($request->items as $item) {
-                    $withdraw = new Withdraws([
-                        'user_id' => auth()->id(),
+                    $withdrawItem = new WithdrawItem([
+                        'type' => $item['type'],
                         'quantity' => $item['quantity'],
-                        'status' => 'completed'
+                        'transformer_id' => $item['transformer_id'] ?? null
                     ]);
 
                     if ($item['type'] === 'ingredient') {
                         $lot = IngredientLot::with('details.ingredient')->findOrFail($item['lot_id']);
-                        $withdraw->ingredient_lot_id = $lot->id;
+                        $withdrawItem->ingredient_lot_id = $lot->id;
 
-                        // Find the ingredient detail in the lot
                         $ingredientDetail = $lot->details->first();
                         if ($ingredientDetail) {
-                            // Get the ingredient
                             $ingredient = $ingredientDetail->ingredient;
-
-                            // Calculate the quantity to decrease
                             $decreaseAmount = $item['quantity'];
+
                             if (isset($item['transformer_id'])) {
                                 $transformer = $ingredient->transformers()->find($item['transformer_id']);
                                 if ($transformer) {
@@ -142,24 +148,18 @@ class WithdrawController extends Controller
                                 }
                             }
 
-                            // Update the ingredient quantity
                             $ingredient->decrement('quantity', $decreaseAmount);
-
-                            // Add unit information to the withdraw record
-                            $withdraw->unit = $ingredient->unit ? $ingredient->unit->name : null;
+                            $withdrawItem->unit = $ingredient->unit ? $ingredient->unit->name : null;
                         }
                     } else {
                         $lot = ConsumableLot::with('details.consumable')->findOrFail($item['lot_id']);
-                        $withdraw->consumable_lot_id = $lot->id;
+                        $withdrawItem->consumable_lot_id = $lot->id;
 
-                        // Find the consumable detail in the lot
                         $consumableDetail = $lot->details->first();
                         if ($consumableDetail) {
-                            // Get the consumable
                             $consumable = $consumableDetail->consumable;
-
-                            // Calculate the quantity to decrease
                             $decreaseAmount = $item['quantity'];
+
                             if (isset($item['transformer_id'])) {
                                 $transformer = $consumable->transformers()->find($item['transformer_id']);
                                 if ($transformer) {
@@ -167,15 +167,12 @@ class WithdrawController extends Controller
                                 }
                             }
 
-                            // Update the consumable quantity
                             $consumable->decrement('quantity', $decreaseAmount);
-
-                            // Add unit information to the withdraw record
-                            $withdraw->unit = $consumable->unit ? $consumable->unit->name : null;
+                            $withdrawItem->unit = $consumable->unit ? $consumable->unit->name : null;
                         }
                     }
 
-                    $withdraw->save();
+                    $withdraw->items()->save($withdrawItem);
                 }
             });
 
@@ -187,9 +184,14 @@ class WithdrawController extends Controller
         }
     }
 
+    private function updateLot($withdraw, $type = 'ingredient')
+    {
+        // อัปเดต lot ตาม items ที่เบิก
+    }
+
     public function rollback($id)
     {
-        $withdraw = Withdraws::findOrFail($id);
+        $withdraw = Withdraw::findOrFail($id);
         return Inertia::render('Admin/withdraw/rollback', compact('withdraw'));
     }
 }
