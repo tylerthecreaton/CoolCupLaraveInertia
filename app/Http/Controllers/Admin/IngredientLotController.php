@@ -62,7 +62,10 @@ class IngredientLotController extends Controller
 
     public function create()
     {
-        $ingredients = Ingredient::with('unit')->select(['id', 'name', 'unit_id'])->get();
+        $ingredients = Ingredient::with(['unit', 'transformers'])
+            ->select(['id', 'name', 'unit_id'])
+            ->whereHas('transformers')
+            ->get();
         return Inertia::render('Admin/ingredients/lots/create', [
             'ingredients' => $ingredients
         ]);
@@ -72,6 +75,7 @@ class IngredientLotController extends Controller
     {
         $request->validate([
             '*.ingredient_id' => 'required|exists:ingredients,id',
+            '*.transformer_id' => 'required|exists:transformers,id',
             '*.cost_per_unit' => 'required|numeric|min:0',
             '*.quantity' => 'required|numeric|min:0',
             '*.per_pack' => 'required|numeric|min:0',
@@ -98,6 +102,7 @@ class IngredientLotController extends Controller
             foreach ($request->all() as $lotData) {
                 $detail = $lot->details()->create([
                     'ingredient_id' => $lotData['ingredient_id'],
+                    'transformer_id' => $lotData['transformer_id'],
                     'lot_number' => $lot->lot_number,
                     'quantity' => $lotData['quantity'],
                     'type' => 'in',

@@ -1,70 +1,308 @@
+import React, { useState } from "react";
+import { Head, Link, router } from "@inertiajs/react";
+import {
+    Breadcrumb,
+    Table,
+    Button,
+    Modal,
+    Badge,
+    Pagination,
+    Tooltip,
+} from "flowbite-react";
+import { HiHome } from "react-icons/hi2";
+import { FaPlus, FaBoxes } from "react-icons/fa";
+import { HiOutlineTrash, HiOutlinePencilAlt, HiEye } from "react-icons/hi";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Head, Link } from "@inertiajs/react";
-import { Breadcrumb, Table, Button, Pagination } from "flowbite-react";
-import { HiHome, HiPlus, HiPencil, HiTrash } from "react-icons/hi";
-import { useState } from "react";
+import Swal from "sweetalert2";
 
-export default function Index({ withdraws }) {
+export default function Index({ auth, withdraws }) {
     const [currentPage, setCurrentPage] = useState(1);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedWithdraw, setSelectedWithdraw] = useState(null);
+
+    const handleShowDetails = (withdraw) => {
+        setSelectedWithdraw(withdraw);
+        setShowModal(true);
+    };
+
+    const handleDelete = (withdrawId) => {
+        Swal.fire({
+            title: "ยืนยันการลบรายการเบิก",
+            text: "คุณต้องการลบรายการเบิกนี้ใช่หรือไม่? การกระทำนี้ไม่สามารถเรียกคืนได้",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "ลบ",
+            cancelButtonText: "ยกเลิก",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("admin.withdraws.destroy", withdrawId), {
+                    preserveScroll: true,
+                    onBefore: () => {
+                        Swal.fire({
+                            title: "กำลังดำเนินการ...",
+                            text: "กรุณารอสักครู่",
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            },
+                        });
+                    },
+                    onSuccess: () => {
+                        Swal.fire({
+                            title: "สำเร็จ!",
+                            text: "ลบรายการเบิกเรียบร้อยแล้ว",
+                            icon: "success",
+                            timer: 1500,
+                        });
+                    },
+                    onError: (errors) => {
+                        Swal.fire({
+                            title: "เกิดข้อผิดพลาด!",
+                            text: errors.message || "ไม่สามารถลบรายการเบิกได้",
+                            icon: "error",
+                        });
+                    },
+                });
+            }
+        });
+    };
+
+    const onPageChange = (page) => {
+        router.get(route("admin.withdraws.index", { page }));
+    };
+
+    const formatDate = (date) => {
+        return new Date(date).toLocaleDateString("th-TH", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
+
+    const getStatusBadge = (status) => {
+        const statusColors = {
+            pending: "warning",
+            approved: "success",
+            rejected: "failure",
+            processing: "info"
+        };
+        return (
+            <Badge color={statusColors[status.toLowerCase()] || "default"} className="px-3 py-1">
+                {status}
+            </Badge>
+        );
+    };
 
     return (
         <AdminLayout>
-            <Head title="Withdraw List" />
-            <AuthenticatedLayout>
+            <Head title="รายการเบิกวัตถุดิบ/วัตถุดิบสิ้นเปลือง" />
+            <AuthenticatedLayout
+                user={auth.user}
+                header={
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        รายการเบิกวัตถุดิบ/วัตถุดิบสิ้นเปลือง
+                    </h2>
+                }
+            >
                 <div className="py-12">
-                    <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                         <Breadcrumb className="mb-4">
-                            <Breadcrumb.Item href="/admin/dashboard" icon={HiHome}>Dashboard</Breadcrumb.Item>
-                            <Breadcrumb.Item>Withdraws</Breadcrumb.Item>
+                            <Breadcrumb.Item
+                                href={route("dashboard")}
+                                icon={HiHome}
+                            >
+                                หน้าแรก
+                            </Breadcrumb.Item>
+                            <Breadcrumb.Item>จัดการการเบิกวัตถุดิบ</Breadcrumb.Item>
                         </Breadcrumb>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">Withdraw List</h2>
-                            <Link href={route('admin.withdraw.create')}>
-                                <Button size="sm"><HiPlus className="mr-2 h-5 w-5" />Create Withdraw</Button>
-                            </Link>
-                        </div>
-                        <Table striped>
-                            <Table.Head>
-                                <Table.HeadCell>ID</Table.HeadCell>
-                                <Table.HeadCell>Amount</Table.HeadCell>
-                                <Table.HeadCell>Status</Table.HeadCell>
-                                <Table.HeadCell>Date</Table.HeadCell>
-                                <Table.HeadCell>Actions</Table.HeadCell>
-                            </Table.Head>
-                            <Table.Body className="divide-y">
-                                {withdraws.data.map((withdraw) => (
-                                    <Table.Row key={withdraw.id} className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                                        <Table.Cell>{withdraw.id}</Table.Cell>
-                                        <Table.Cell>${withdraw.amount}</Table.Cell>
-                                        <Table.Cell>{withdraw.status}</Table.Cell>
-                                        <Table.Cell>{new Date(withdraw.created_at).toLocaleDateString()}</Table.Cell>
-                                        <Table.Cell>
-                                            <div className="flex space-x-2">
-                                                <Link href={route('admin.withdraws.edit', withdraw.id)}>
-                                                    <Button size="sm" color="warning"><HiPencil className="mr-2 h-4 w-4" />Edit</Button>
-                                                </Link>
-                                                <Button size="sm" color="failure" onClick={() => handleDelete(withdraw.id)}>
-                                                    <HiTrash className="mr-2 h-4 w-4" />Delete
-                                                </Button>
-                                            </div>
-                                        </Table.Cell>
-                                    </Table.Row>
-                                ))}
-                            </Table.Body>
-                        </Table>
-                        <div className="flex items-center justify-center text-center mt-4">
-                            <Pagination
-                                currentPage={currentPage}
-                                onPageChange={page => {setCurrentPage(page)}}
-                                showIcons={true}
-                                totalPages={withdraws.last_page}
-                            />
+
+                        <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                            <div className="p-6">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="flex items-center text-xl font-semibold text-gray-800">
+                                        <FaBoxes className="mr-2 w-6 h-6 text-gray-600" />
+                                        รายการเบิกวัตถุดิบ/วัตถุดิบสิ้นเปลือง
+                                    </h2>
+                                    <Link href={route("admin.withdraw.create")}>
+                                        <Button gradientDuoTone="greenToBlue">
+                                            <FaPlus className="mr-2 w-4 h-4" />
+                                            สร้างรายการเบิก
+                                        </Button>
+                                    </Link>
+                                </div>
+
+                                <div className="overflow-x-auto">
+                                    <Table hoverable>
+                                        <Table.Head>
+                                            <Table.HeadCell className="bg-gray-50">
+                                                ID
+                                            </Table.HeadCell>
+                                            <Table.HeadCell className="bg-gray-50">
+                                                ประเภท
+                                            </Table.HeadCell>
+                                            <Table.HeadCell className="bg-gray-50">
+                                                จำนวนรายการ
+                                            </Table.HeadCell>
+                                            <Table.HeadCell className="bg-gray-50">
+                                                สถานะ
+                                            </Table.HeadCell>
+                                            <Table.HeadCell className="bg-gray-50">
+                                                วันที่ทำรายการ
+                                            </Table.HeadCell>
+                                            <Table.HeadCell className="bg-gray-50">
+                                                การจัดการ
+                                            </Table.HeadCell>
+                                        </Table.Head>
+                                        <Table.Body className="divide-y">
+                                            {withdraws.data.map((withdraw) => (
+                                                <Table.Row
+                                                    key={withdraw.id}
+                                                    className="bg-white transition-colors duration-150 hover:bg-gray-50"
+                                                >
+                                                    <Table.Cell className="whitespace-nowrap">
+                                                        <Badge color="info" className="px-3 py-1">
+                                                            #{withdraw.id}
+                                                        </Badge>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <Badge color={withdraw.type === 'ingredient' ? 'purple' : 'blue'} className="px-3 py-1">
+                                                            {withdraw.type === 'ingredient' ? 'วัตถุดิบ' : 'วัตถุดิบสิ้นเปลือง'}
+                                                        </Badge>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <Badge color="success" className="px-3 py-1">
+                                                            {withdraw.items?.length || 0} รายการ
+                                                        </Badge>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {getStatusBadge(withdraw.status)}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {formatDate(withdraw.created_at)}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <div className="flex gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                gradientDuoTone="purpleToBlue"
+                                                                onClick={() => handleShowDetails(withdraw)}
+                                                            >
+                                                                <HiEye className="mr-2 w-4 h-4" />
+                                                                ดูรายละเอียด
+                                                            </Button>
+                                                            <Link href={route('admin.withdraws.edit', withdraw.id)}>
+                                                                <Button
+                                                                    size="sm"
+                                                                    gradientDuoTone="cyanToBlue"
+                                                                >
+                                                                    <HiOutlinePencilAlt className="mr-2 w-4 h-4" />
+                                                                    แก้ไข
+                                                                </Button>
+                                                            </Link>
+                                                            <Button
+                                                                size="sm"
+                                                                gradientDuoTone="pinkToOrange"
+                                                                onClick={() => handleDelete(withdraw.id)}
+                                                            >
+                                                                <HiOutlineTrash className="mr-2 w-4 h-4" />
+                                                                ลบ
+                                                            </Button>
+                                                        </div>
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            ))}
+                                        </Table.Body>
+                                    </Table>
+                                </div>
+
+                                {withdraws.links && withdraws.links.length > 3 && (
+                                    <div className="flex items-center justify-center mt-4">
+                                        <Pagination
+                                            currentPage={withdraws.current_page}
+                                            totalPages={withdraws.last_page}
+                                            onPageChange={onPageChange}
+                                            showIcons={true}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <Modal show={showModal} onClose={() => setShowModal(false)} size="xl">
+                    <Modal.Header>
+                        <div className="flex items-center">
+                            <FaBoxes className="mr-2 w-5 h-5 text-gray-600" />
+                            รายละเอียดการเบิก #{selectedWithdraw?.id}
+                        </div>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {selectedWithdraw && (
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm text-gray-600">ประเภท</p>
+                                        <Badge color={selectedWithdraw.type === 'ingredient' ? 'purple' : 'blue'} className="px-3 py-1">
+                                            {selectedWithdraw.type === 'ingredient' ? 'วัตถุดิบ' : 'วัตถุดิบสิ้นเปลือง'}
+                                        </Badge>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">สถานะ</p>
+                                        <div>{getStatusBadge(selectedWithdraw.status)}</div>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">จำนวนรายการ</p>
+                                        <Badge color="success" className="px-3 py-1">
+                                            {selectedWithdraw.items?.length || 0} รายการ
+                                        </Badge>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">ผู้เบิก</p>
+                                        <p>{selectedWithdraw.user?.name || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">วันที่ทำรายการ</p>
+                                        <p>{formatDate(selectedWithdraw.created_at)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600">อัพเดทล่าสุด</p>
+                                        <p>{formatDate(selectedWithdraw.updated_at)}</p>
+                                    </div>
+                                </div>
+
+                                {selectedWithdraw.items && selectedWithdraw.items.length > 0 && (
+                                    <div className="mt-6">
+                                        <p className="font-medium mb-3">รายการที่เบิก:</p>
+                                        <Table>
+                                            <Table.Head>
+                                                <Table.HeadCell>รายการ</Table.HeadCell>
+                                                <Table.HeadCell>จำนวน</Table.HeadCell>
+                                                <Table.HeadCell>หน่วย</Table.HeadCell>
+                                            </Table.Head>
+                                            <Table.Body>
+                                                {selectedWithdraw.items.map((item, index) => (
+                                                    <Table.Row key={index}>
+                                                        <Table.Cell>{item.name}</Table.Cell>
+                                                        <Table.Cell>{item.quantity}</Table.Cell>
+                                                        <Table.Cell>{item.unit}</Table.Cell>
+                                                    </Table.Row>
+                                                ))}
+                                            </Table.Body>
+                                        </Table>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </Modal.Body>
+                </Modal>
             </AuthenticatedLayout>
         </AdminLayout>
     );
 }
-

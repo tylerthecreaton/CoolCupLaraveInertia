@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Ingredient;
 use App\Models\IngredientLot;
+use App\Models\Transformer;
 
 class IngredientLotDetail extends Model
 {
@@ -12,6 +13,7 @@ class IngredientLotDetail extends Model
         'ingredient_lot_id',
         'lot_number',
         'ingredient_id',
+        'transformer_id',
         'type',
         'quantity',
         'expiration_date',
@@ -23,11 +25,11 @@ class IngredientLotDetail extends Model
     ];
 
     protected $casts = [
-        'quantity' => 'integer',
-        'price' => 'decimal:2',
-        'cost_per_unit' => 'decimal:2',
-        'per_pack' => 'integer',
-        'expiration_date' => 'date'
+        'expiration_date' => 'date',
+        'price' => 'float',
+        'cost_per_unit' => 'float',
+        'quantity' => 'float',
+        'per_pack' => 'float',
     ];
 
     public function lot()
@@ -38,5 +40,10 @@ class IngredientLotDetail extends Model
     public function ingredient()
     {
         return $this->belongsTo(Ingredient::class);
+    }
+
+    public function transformer()
+    {
+        return $this->belongsTo(Transformer::class);
     }
 }

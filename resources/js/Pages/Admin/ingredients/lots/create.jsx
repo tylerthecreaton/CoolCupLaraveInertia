@@ -12,6 +12,7 @@ export default function Create({ auth, ingredients }) {
     const { data, setData, post, processing, errors } = useForm([
         {
             ingredient_id: "",
+            transformer_id: "",
             cost_per_unit: "",
             quantity: "",
             per_pack: "",
@@ -38,6 +39,7 @@ export default function Create({ auth, ingredients }) {
             ...data,
             {
                 ingredient_id: "",
+                transformer_id: "",
                 cost_per_unit: "",
                 quantity: "",
                 per_pack: "",
@@ -68,6 +70,7 @@ export default function Create({ auth, ingredients }) {
                 alert("วัตถุดิบนี้ถูกเลือกไปแล้ว");
                 const newData = [...data];
                 newData[index].ingredient_id = "";
+                newData[index].transformer_id = "";
                 setData(newData);
                 return;
             }
@@ -78,9 +81,16 @@ export default function Create({ auth, ingredients }) {
         );
         const newData = [...data];
         newData[index].ingredient_id = value;
+        newData[index].transformer_id = "";
         newData[index].cost_per_unit = selectedIngredient
             ? selectedIngredient.cost_per_unit
             : "";
+        setData(newData);
+    };
+
+    const handleTransformerChange = (index, value) => {
+        const newData = [...data];
+        newData[index].transformer_id = value;
         setData(newData);
     };
 
@@ -113,6 +123,8 @@ export default function Create({ auth, ingredients }) {
         data.forEach((item, index) => {
             if (!item.ingredient_id)
                 errors.push(`รายการที่ ${index + 1}: กรุณาเลือกวัตถุดิบ`);
+            if (!item.transformer_id)
+                errors.push(`รายการที่ ${index + 1}: กรุณาเลือกยี่ห้อ/ขนาด`);
             if (!validatePositiveNumber(item.cost_per_unit))
                 errors.push(
                     `รายการที่ ${index + 1}: ราคาต่อหน่วยต้องมากกว่า 0`
@@ -164,6 +176,7 @@ export default function Create({ auth, ingredients }) {
                 setData([
                     {
                         ingredient_id: "",
+                        transformer_id: "",
                         cost_per_unit: "",
                         quantity: "",
                         per_pack: "",
@@ -293,6 +306,58 @@ export default function Create({ auth, ingredients }) {
                                                             className="mt-2"
                                                         />
                                                     </div>
+
+                                                    {item.ingredient_id && (
+                                                        <div>
+                                                            <InputLabel
+                                                                htmlFor={`transformer-${index}`}
+                                                            >
+                                                                ยี่ห้อ/ขนาด *
+                                                            </InputLabel>
+                                                            <select
+                                                                id={`transformer-${index}`}
+                                                                value={
+                                                                    item.transformer_id
+                                                                }
+                                                                onChange={(e) =>
+                                                                    handleTransformerChange(
+                                                                        index,
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                className="mt-1 block w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
+                                                            >
+                                                                <option value="">
+                                                                    เลือกยี่ห้อ/ขนาด
+                                                                </option>
+                                                                {ingredients
+                                                                    .find(
+                                                                        (ing) =>
+                                                                            ing.id.toString() ===
+                                                                            item.ingredient_id
+                                                                    )
+                                                                    ?.transformers.map(
+                                                                        (transformer) => (
+                                                                            <option
+                                                                                key={transformer.id}
+                                                                                value={transformer.id}
+                                                                            >
+                                                                                {transformer.name}
+                                                                            </option>
+                                                                        )
+                                                                    )}
+                                                            </select>
+                                                            <InputError
+                                                                message={
+                                                                    errors[
+                                                                        `${index}.transformer_id`
+                                                                    ]
+                                                                }
+                                                                className="mt-2"
+                                                            />
+                                                        </div>
+                                                    )}
 
                                                     <div>
                                                         <InputLabel

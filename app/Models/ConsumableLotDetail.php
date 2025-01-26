@@ -29,4 +29,9 @@ class ConsumableLotDetail extends Model
     {
         return $this->belongsTo(Consumable::class);
     }
+
+    public function transformer()
+    {
+        return $this->belongsTo(Transformer::class);
+    }
 }
