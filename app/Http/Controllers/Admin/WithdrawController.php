@@ -10,7 +10,6 @@ use App\Models\WithdrawItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class WithdrawController extends Controller
@@ -32,6 +31,9 @@ class WithdrawController extends Controller
     {
         // ดึง lots พร้อมข้อมูล ingredient
         $ingredientLots = IngredientLot::with(['details.ingredient.unit', 'details.ingredient.transformers'])
+            ->whereHas('details', function($query) {
+                $query->where('quantity', '>', 0);
+            })
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($lots) {
@@ -64,6 +66,9 @@ class WithdrawController extends Controller
 
         // ดึง lots พร้อมข้อมูล consumable และ transformers
         $consumableLots = ConsumableLot::with(['details.consumable.transformers'])
+            ->whereHas('details', function($query) {
+                $query->where('quantity', '>', 0);
+            })
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($lots) {
@@ -164,7 +169,7 @@ class WithdrawController extends Controller
 
                             // Deduct from lot
                             $ingredientDetail->decrement('quantity', $withdrawAmount);
-                            
+
                             // Add to ingredient total
                             $ingredient->increment('quantity', $addAmount);
                             $withdrawItem->unit = optional($ingredient->unit)->name;
@@ -193,7 +198,7 @@ class WithdrawController extends Controller
 
                             // Deduct from lot
                             $consumableDetail->decrement('quantity', $withdrawAmount);
-                            
+
                             // Add to consumable total
                             $consumable->increment('quantity', $addAmount);
                             $withdrawItem->unit = $consumable->unit;
