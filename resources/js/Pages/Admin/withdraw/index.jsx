@@ -38,7 +38,7 @@ export default function Index({ auth, withdraws }) {
             cancelButtonText: "ยกเลิก",
         }).then((result) => {
             if (result.isConfirmed) {
-                router.delete(route("admin.withdraws.destroy", withdrawId), {
+                router.delete(route("admin.withdraw.destroy", withdrawId), {
                     preserveScroll: true,
                     onBefore: () => {
                         Swal.fire({
@@ -72,7 +72,7 @@ export default function Index({ auth, withdraws }) {
     };
 
     const onPageChange = (page) => {
-        router.get(route("admin.withdraws.index", { page }));
+        router.get(route("admin.withdraw.index", { page }));
     };
 
     const formatDate = (date) => {
@@ -131,8 +131,10 @@ export default function Index({ auth, withdraws }) {
                                     </h2>
                                     <Link href={route("admin.withdraw.create")}>
                                         <Button gradientDuoTone="greenToBlue">
-                                            <FaPlus className="mr-2 w-4 h-4" />
-                                            สร้างรายการเบิก
+                                            <div className="flex items-center gap-x-2">
+                                                <FaPlus className="w-4 h-4" />
+                                                สร้างรายการเบิก
+                                            </div>
                                         </Button>
                                     </Link>
                                 </div>
@@ -196,7 +198,7 @@ export default function Index({ auth, withdraws }) {
                                                                 <HiEye className="mr-2 w-4 h-4" />
                                                                 ดูรายละเอียด
                                                             </Button>
-                                                            <Link href={route('admin.withdraws.edit', withdraw.id)}>
+                                                            <Link href={route('admin.withdraw.edit', withdraw.id)}>
                                                                 <Button
                                                                     size="sm"
                                                                     gradientDuoTone="cyanToBlue"

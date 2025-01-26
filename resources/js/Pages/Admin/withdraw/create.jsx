@@ -78,7 +78,7 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                 }
             }
         }
-        
+
         setMaxQuantity(newMaxQuantity);
         // Reset quantity to 1 or max if 1 is too high
         setQuantity(Math.min(1, newMaxQuantity));
@@ -439,7 +439,7 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                                             {item.item_name}
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            {item.type === "ingredient" 
+                                                            {item.type === "ingredient"
                                                                 ? `วัตถุดิบ${item.ingredient_type ? ` • ${item.ingredient_type}` : ''}`
                                                                 : "วัสดุสิ้นเปลือง"}
                                                             {item.transformer_name && ` • ${item.transformer_name}`}
@@ -475,7 +475,26 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                             <Button
                                                 type="button"
                                                 onClick={() => {
-                                                    post(route("admin.withdraws.store"));
+                                                    post(route("admin.withdraw.store"), {
+                                                        onSuccess: () => {
+                                                            Swal.fire({
+                                                                title: "สำเร็จ!",
+                                                                text: "บันทึกการเบิกเรียบร้อยแล้ว",
+                                                                icon: "success",
+                                                                confirmButtonText: "ตกลง",
+                                                            }).then(() => {
+                                                                window.location.href = route("admin.withdraw.index");
+                                                            });
+                                                        },
+                                                        onError: () => {
+                                                            Swal.fire({
+                                                                title: "เกิดข้อผิดพลาด!",
+                                                                text: "ไม่สามารถบันทึกการเบิกได้",
+                                                                icon: "error",
+                                                                confirmButtonText: "ตกลง",
+                                                            });
+                                                        },
+                                                    });
                                                 }}
                                                 gradientDuoTone="purpleToBlue"
                                                 size="lg"

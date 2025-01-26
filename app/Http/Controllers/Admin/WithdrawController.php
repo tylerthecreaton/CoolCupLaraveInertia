@@ -104,7 +104,88 @@ class WithdrawController extends Controller
         return Inertia::render('Admin/withdraw/show', compact('withdraw'));
     }
 
-    public function store(Request $request) {}
+    public function store(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.type' => 'required|in:ingredient,consumable',
+            'items.*.lot_id' => 'required|integer',
+            'items.*.quantity' => 'required|numeric|min:0.01',
+            'items.*.transformer_id' => 'nullable|exists:transformers,id',
+        ]);
+
+        try {
+            \DB::transaction(function () use ($request) {
+                foreach ($request->items as $item) {
+                    $withdraw = new Withdraws([
+                        'user_id' => auth()->id(),
+                        'quantity' => $item['quantity'],
+                        'status' => 'completed'
+                    ]);
+
+                    if ($item['type'] === 'ingredient') {
+                        $lot = IngredientLot::with('details.ingredient')->findOrFail($item['lot_id']);
+                        $withdraw->ingredient_lot_id = $lot->id;
+
+                        // Find the ingredient detail in the lot
+                        $ingredientDetail = $lot->details->first();
+                        if ($ingredientDetail) {
+                            // Get the ingredient
+                            $ingredient = $ingredientDetail->ingredient;
+
+                            // Calculate the quantity to decrease
+                            $decreaseAmount = $item['quantity'];
+                            if (isset($item['transformer_id'])) {
+                                $transformer = $ingredient->transformers()->find($item['transformer_id']);
+                                if ($transformer) {
+                                    $decreaseAmount *= $transformer->multiplier;
+                                }
+                            }
+
+                            // Update the ingredient quantity
+                            $ingredient->decrement('quantity', $decreaseAmount);
+
+                            // Add unit information to the withdraw record
+                            $withdraw->unit = $ingredient->unit ? $ingredient->unit->name : null;
+                        }
+                    } else {
+                        $lot = ConsumableLot::with('details.consumable')->findOrFail($item['lot_id']);
+                        $withdraw->consumable_lot_id = $lot->id;
+
+                        // Find the consumable detail in the lot
+                        $consumableDetail = $lot->details->first();
+                        if ($consumableDetail) {
+                            // Get the consumable
+                            $consumable = $consumableDetail->consumable;
+
+                            // Calculate the quantity to decrease
+                            $decreaseAmount = $item['quantity'];
+                            if (isset($item['transformer_id'])) {
+                                $transformer = $consumable->transformers()->find($item['transformer_id']);
+                                if ($transformer) {
+                                    $decreaseAmount *= $transformer->multiplier;
+                                }
+                            }
+
+                            // Update the consumable quantity
+                            $consumable->decrement('quantity', $decreaseAmount);
+
+                            // Add unit information to the withdraw record
+                            $withdraw->unit = $consumable->unit ? $consumable->unit->name : null;
+                        }
+                    }
+
+                    $withdraw->save();
+                }
+            });
+
+            return redirect()->route('admin.withdraw.index')
+                ->with('success', 'บันทึกการเบิกสำเร็จ');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+        }
+    }
 
     public function rollback($id)
     {
