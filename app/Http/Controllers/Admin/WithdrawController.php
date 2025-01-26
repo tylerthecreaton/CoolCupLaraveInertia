@@ -16,12 +16,14 @@ class WithdrawController extends Controller
 {
     public function index()
     {
-        $withdraws = Withdraw::with(['items.ingredientLot.details.ingredient', 
-                                   'items.consumableLot.details.consumable', 
-                                   'items.transformer', 
-                                   'user'])
-                            ->latest()
-                            ->paginate(10);
+        $withdraws = Withdraw::with([
+            'items.ingredientLot.details.ingredient',
+            'items.consumableLot.details.consumable',
+            'items.transformer',
+            'user'
+        ])
+            ->latest()
+            ->paginate(10);
         return Inertia::render('Admin/withdraw/index', compact('withdraws'));
     }
 
@@ -196,7 +198,61 @@ class WithdrawController extends Controller
 
     public function rollback($id)
     {
-        $withdraw = Withdraw::findOrFail($id);
-        return Inertia::render('Admin/withdraw/rollback', compact('withdraw'));
+        try {
+            DB::transaction(function () use ($id) {
+                $withdraw = Withdraw::with([
+                    'items.ingredientLot.details.ingredient',
+                    'items.consumableLot.details.consumable'
+                ])
+                    ->findOrFail($id);
+
+                if ($withdraw->status === 'cancelled') {
+                    throw new \Exception('การเบิกถูกยกเลิกไปแล้ว');
+                }
+
+                foreach ($withdraw->items as $item) {
+                    if ($item->type === 'ingredient') {
+                        $ingredientDetail = $item->ingredientLot->details->first();
+                        if ($ingredientDetail) {
+                            $ingredient = $ingredientDetail->ingredient;
+                            $returnAmount = $item->quantity;
+
+                            if ($item->transformer_id) {
+                                $transformer = $ingredient->transformers()->find($item->transformer_id);
+                                if ($transformer) {
+                                    $returnAmount *= $transformer->multiplier;
+                                }
+                            }
+
+                            $ingredient->increment('quantity', $returnAmount);
+                        }
+                    } else {
+                        $consumableDetail = $item->consumableLot->details->first();
+                        if ($consumableDetail) {
+                            $consumable = $consumableDetail->consumable;
+                            $returnAmount = $item->quantity;
+
+                            if ($item->transformer_id) {
+                                $transformer = $consumable->transformers()->find($item->transformer_id);
+                                if ($transformer) {
+                                    $returnAmount *= $transformer->multiplier;
+                                }
+                            }
+
+                            $consumable->increment('quantity', $returnAmount);
+                        }
+                    }
+                }
+
+                $withdraw->status = 'cancelled';
+                $withdraw->save();
+            });
+
+            return redirect()->route('admin.withdraw.index')
+                ->with('success', 'ยกเลิกการเบิกสำเร็จ');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+        }
     }
 }

@@ -100,7 +100,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
     Route::get('/api/admin/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.get');
 
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
         // ---------------------------Users---------------------------
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
@@ -140,7 +140,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/withdraw', [AdminWithdrawController::class, 'index'])->name('withdraw.index');
         Route::get('/withdraw/create', [AdminWithdrawController::class, 'create'])->name('withdraw.create');
         Route::post('/withdraw', [AdminWithdrawController::class, 'store'])->name('withdraw.store');
-        Route::get('/withdraw/{id}/rollback', [AdminWithdrawController::class, 'rollback'])->name('withdraw.rollback');
+        Route::post('/withdraw/{id}/rollback', [AdminWithdrawController::class, 'rollback'])->name('withdraw.rollback');
 
         // ---------------------------Transfomer---------------------------
         Route::get('/transformers', [AdminTransformerController::class, 'index'])->name('transformers.index');

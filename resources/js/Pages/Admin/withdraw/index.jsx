@@ -90,10 +90,13 @@ export default function Index({ auth, withdraws }) {
             pending: "warning",
             approved: "success",
             rejected: "failure",
-            processing: "info"
+            processing: "info",
         };
         return (
-            <Badge color={statusColors[status.toLowerCase()] || "default"} className="px-3 py-1">
+            <Badge
+                color={statusColors[status.toLowerCase()] || "default"}
+                className="px-3 py-1"
+            >
                 {status}
             </Badge>
         );
@@ -119,7 +122,9 @@ export default function Index({ auth, withdraws }) {
                             >
                                 หน้าแรก
                             </Breadcrumb.Item>
-                            <Breadcrumb.Item>จัดการการเบิกวัตถุดิบ</Breadcrumb.Item>
+                            <Breadcrumb.Item>
+                                จัดการการเบิกวัตถุดิบ
+                            </Breadcrumb.Item>
                         </Breadcrumb>
 
                         <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
@@ -175,21 +180,56 @@ export default function Index({ auth, withdraws }) {
                                                     </Table.Cell>
                                                     <Table.Cell>
                                                         <div className="space-y-2">
-                                                            {withdraw.items.map((item, index) => (
-                                                                <div key={index} className="text-sm">
-                                                                    {item.type === 'ingredient' ? (
-                                                                        <>
-                                                                            {item.ingredient_lot?.details?.[0]?.ingredient?.name} - 
-                                                                            {item.quantity} {item.unit}
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            {item.consumable_lot?.details?.[0]?.consumable?.name} - 
-                                                                            {item.quantity} {item.unit}
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                            ))}
+                                                            {withdraw.items.map(
+                                                                (
+                                                                    item,
+                                                                    index
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                        className="text-sm"
+                                                                    >
+                                                                        {item.type ===
+                                                                        "ingredient" ? (
+                                                                            <>
+                                                                                {
+                                                                                    item
+                                                                                        .ingredient_lot
+                                                                                        ?.details?.[0]
+                                                                                        ?.ingredient
+                                                                                        ?.name
+                                                                                }{" "}
+                                                                                -
+                                                                                {
+                                                                                    item.quantity
+                                                                                }{" "}
+                                                                                {
+                                                                                    item.unit
+                                                                                }
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                {
+                                                                                    item
+                                                                                        .consumable_lot
+                                                                                        ?.details?.[0]
+                                                                                        ?.consumable
+                                                                                        ?.name
+                                                                                }{" "}
+                                                                                -
+                                                                                {
+                                                                                    item.quantity
+                                                                                }{" "}
+                                                                                {
+                                                                                    item.unit
+                                                                                }
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                )
+                                                            )}
                                                         </div>
                                                     </Table.Cell>
                                                     <Table.Cell>
@@ -200,15 +240,42 @@ export default function Index({ auth, withdraws }) {
                                                     </Table.Cell>
                                                     <Table.Cell>
                                                         <div className="flex gap-2">
-                                                            <Button
-                                                                size="sm"
-                                                                gradientDuoTone="purpleToBlue"
-                                                                onClick={() => handleShowDetails(withdraw)}
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSelectedWithdraw(
+                                                                        withdraw
+                                                                    );
+                                                                    setShowModal(
+                                                                        true
+                                                                    );
+                                                                }}
+                                                                className="font-medium text-blue-600 hover:underline dark:text-blue-500"
                                                             >
-                                                                <HiEye className="mr-2 w-4 h-4" />
                                                                 ดูรายละเอียด
-                                                            </Button>
-                                                            <Link href={route('admin.withdraw.edit', withdraw.id)}>
+                                                            </button>
+                                                            {withdraw.status !==
+                                                                "cancelled" && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        if (
+                                                                            confirm(
+                                                                                "คุณต้องการยกเลิกการเบิกนี้ใช่หรือไม่?"
+                                                                            )
+                                                                        ) {
+                                                                            router.post(
+                                                                                route(
+                                                                                    "admin.withdraw.rollback",
+                                                                                    withdraw.id
+                                                                                )
+                                                                            );
+                                                                        }
+                                                                    }}
+                                                                    className="font-medium text-red-600 hover:underline dark:text-red-500"
+                                                                >
+                                                                    ยกเลิก
+                                                                </button>
+                                                            )}
+                                                            {/* <Link href={route('admin.withdraw.edit', withdraw.id)}>
                                                                 <Button
                                                                     size="sm"
                                                                     gradientDuoTone="cyanToBlue"
@@ -216,15 +283,15 @@ export default function Index({ auth, withdraws }) {
                                                                     <HiOutlinePencilAlt className="mr-2 w-4 h-4" />
                                                                     แก้ไข
                                                                 </Button>
-                                                            </Link>
-                                                            <Button
+                                                            </Link> */}
+                                                            {/* <Button
                                                                 size="sm"
                                                                 gradientDuoTone="pinkToOrange"
                                                                 onClick={() => handleDelete(withdraw.id)}
                                                             >
                                                                 <HiOutlineTrash className="mr-2 w-4 h-4" />
                                                                 ลบ
-                                                            </Button>
+                                                            </Button> */}
                                                         </div>
                                                     </Table.Cell>
                                                 </Table.Row>
@@ -233,22 +300,29 @@ export default function Index({ auth, withdraws }) {
                                     </Table>
                                 </div>
 
-                                {withdraws.links && withdraws.links.length > 3 && (
-                                    <div className="flex items-center justify-center mt-4">
-                                        <Pagination
-                                            currentPage={withdraws.current_page}
-                                            totalPages={withdraws.last_page}
-                                            onPageChange={onPageChange}
-                                            showIcons={true}
-                                        />
-                                    </div>
-                                )}
+                                {withdraws.links &&
+                                    withdraws.links.length > 3 && (
+                                        <div className="flex items-center justify-center mt-4">
+                                            <Pagination
+                                                currentPage={
+                                                    withdraws.current_page
+                                                }
+                                                totalPages={withdraws.last_page}
+                                                onPageChange={onPageChange}
+                                                showIcons={true}
+                                            />
+                                        </div>
+                                    )}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <Modal show={showModal} onClose={() => setShowModal(false)} size="xl">
+                <Modal
+                    show={showModal}
+                    onClose={() => setShowModal(false)}
+                    size="xl"
+                >
                     <Modal.Header>
                         <div className="flex items-center">
                             <FaBoxes className="mr-2 w-5 h-5 text-gray-600" />
@@ -260,50 +334,98 @@ export default function Index({ auth, withdraws }) {
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <p className="text-sm text-gray-600">ผู้เบิก</p>
-                                        <p>{selectedWithdraw.user?.name || '-'}</p>
+                                        <p className="text-sm text-gray-600">
+                                            ผู้เบิก
+                                        </p>
+                                        <p>
+                                            {selectedWithdraw.user?.name || "-"}
+                                        </p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-600">สถานะ</p>
-                                        <div>{getStatusBadge(selectedWithdraw.status)}</div>
+                                        <p className="text-sm text-gray-600">
+                                            สถานะ
+                                        </p>
+                                        <div>
+                                            {getStatusBadge(
+                                                selectedWithdraw.status
+                                            )}
+                                        </div>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-600">วันที่ทำรายการ</p>
-                                        <p>{formatDate(selectedWithdraw.created_at)}</p>
+                                        <p className="text-sm text-gray-600">
+                                            วันที่ทำรายการ
+                                        </p>
+                                        <p>
+                                            {formatDate(
+                                                selectedWithdraw.created_at
+                                            )}
+                                        </p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-600">อัพเดทล่าสุด</p>
-                                        <p>{formatDate(selectedWithdraw.updated_at)}</p>
+                                        <p className="text-sm text-gray-600">
+                                            อัพเดทล่าสุด
+                                        </p>
+                                        <p>
+                                            {formatDate(
+                                                selectedWithdraw.updated_at
+                                            )}
+                                        </p>
                                     </div>
                                 </div>
 
-                                {selectedWithdraw.items && selectedWithdraw.items.length > 0 && (
-                                    <div className="mt-6">
-                                        <p className="font-medium mb-3">รายการที่เบิก:</p>
-                                        <Table>
-                                            <Table.Head>
-                                                <Table.HeadCell>รายการ</Table.HeadCell>
-                                                <Table.HeadCell>จำนวน</Table.HeadCell>
-                                                <Table.HeadCell>หน่วย</Table.HeadCell>
-                                            </Table.Head>
-                                            <Table.Body>
-                                                {selectedWithdraw.items.map((item, index) => (
-                                                    <Table.Row key={index}>
-                                                        <Table.Cell>
-                                                            {item.type === 'ingredient' ? (
-                                                                item.ingredient_lot?.details?.[0]?.ingredient?.name
-                                                            ) : (
-                                                                item.consumable_lot?.details?.[0]?.consumable?.name
-                                                            )}
-                                                        </Table.Cell>
-                                                        <Table.Cell>{item.quantity}</Table.Cell>
-                                                        <Table.Cell>{item.unit}</Table.Cell>
-                                                    </Table.Row>
-                                                ))}
-                                            </Table.Body>
-                                        </Table>
-                                    </div>
-                                )}
+                                {selectedWithdraw.items &&
+                                    selectedWithdraw.items.length > 0 && (
+                                        <div className="mt-6">
+                                            <p className="font-medium mb-3">
+                                                รายการที่เบิก:
+                                            </p>
+                                            <Table>
+                                                <Table.Head>
+                                                    <Table.HeadCell>
+                                                        รายการ
+                                                    </Table.HeadCell>
+                                                    <Table.HeadCell>
+                                                        จำนวน
+                                                    </Table.HeadCell>
+                                                    <Table.HeadCell>
+                                                        หน่วย
+                                                    </Table.HeadCell>
+                                                </Table.Head>
+                                                <Table.Body>
+                                                    {selectedWithdraw.items.map(
+                                                        (item, index) => (
+                                                            <Table.Row
+                                                                key={index}
+                                                            >
+                                                                <Table.Cell>
+                                                                    {item.type ===
+                                                                    "ingredient"
+                                                                        ? item
+                                                                              .ingredient_lot
+                                                                              ?.details?.[0]
+                                                                              ?.ingredient
+                                                                              ?.name
+                                                                        : item
+                                                                              .consumable_lot
+                                                                              ?.details?.[0]
+                                                                              ?.consumable
+                                                                              ?.name}
+                                                                </Table.Cell>
+                                                                <Table.Cell>
+                                                                    {
+                                                                        item.quantity
+                                                                    }
+                                                                </Table.Cell>
+                                                                <Table.Cell>
+                                                                    {item.unit}
+                                                                </Table.Cell>
+                                                            </Table.Row>
+                                                        )
+                                                    )}
+                                                </Table.Body>
+                                            </Table>
+                                        </div>
+                                    )}
                             </div>
                         )}
                     </Modal.Body>
