@@ -18,7 +18,6 @@ export default function ReceiptHistory({ orders }) {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [showCancelModal, setShowCancelModal] = useState(false);
-    const [cancelOrderId, setCancelOrderId] = useState(null);
 
     const handleViewReceipt = (receiptPath) => {
         fetch(`/images/receipt/${receiptPath}`)
@@ -43,6 +42,11 @@ export default function ReceiptHistory({ orders }) {
         setShowOrderModal(true);
     };
 
+    const handleCancelOrder = (order) => {
+        setSelectedOrder(order);
+        setShowCancelModal(true);
+    };
+
     // กรองรายการตามคำค้นหา
     const filteredOrders = orders.data.filter(order => {
         const searchString = searchTerm.toLowerCase();
@@ -53,24 +57,7 @@ export default function ReceiptHistory({ orders }) {
         );
     });
 
-    const handleCancelOrder = (orderId) => {
-        Swal.fire({
-            title: 'คุณแน่ใจหรือไม่',
-            text: "คุณต้องการยกเลิกคําสั่งซื้อนี้หรือไม่",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'ยืนยัน'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                setCancelOrderId(orderId);
-                setShowCancelModal(true);
-            }
-            return;
-        })
 
-    }
 
     return (
         <AuthenticatedLayout
@@ -110,7 +97,7 @@ export default function ReceiptHistory({ orders }) {
                             orders={filteredOrders}
                             onViewReceipt={handleViewReceipt}
                             onViewOrder={handleViewOrder}
-                            handleCancelOrder={handleCancelOrder}
+                            onCancelOrder={handleCancelOrder}
                         />
 
                         {/* Pagination */}
@@ -157,12 +144,16 @@ export default function ReceiptHistory({ orders }) {
                 onClose={() => setShowOrderModal(false)}
                 order={selectedOrder}
             />
-            {/* Cancel Order Modal */}
-            <CancelOrderModal
-                isOpen={showCancelModal}
-                onClose={() => setShowCancelModal(false)}
-                orderId={cancelOrderId}
-            />
+            {showCancelModal && (
+                <CancelOrderModal
+                    isOpen={showCancelModal}
+                    onClose={() => {
+                        setShowCancelModal(false);
+                        setSelectedOrder(null);
+                    }}
+                    order={selectedOrder}
+                />
+            )}
         </AuthenticatedLayout>
     );
 }

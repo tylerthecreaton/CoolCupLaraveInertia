@@ -2,7 +2,7 @@ import { Table } from 'flowbite-react';
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
-export default function ReceiptTable({ orders, onViewReceipt, onViewOrder, handleCancelOrder }) {
+export default function ReceiptTable({ orders, onViewReceipt, onViewOrder, onCancelOrder }) {
     return (
         <div className="overflow-x-auto">
             <Table hoverable className="w-full">
@@ -95,7 +95,7 @@ export default function ReceiptTable({ orders, onViewReceipt, onViewOrder, handl
                                 <Table.Cell className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex flex-col">
                                         <button
-                                            onClick={() => handleCancelOrder(order.id)}
+                                            onClick={() => onCancelOrder(order)}
                                             className="text-xs text-red-600 hover:text-red-800 font-medium"
                                         >
                                             ยกเลิก Order
