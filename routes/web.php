@@ -76,6 +76,7 @@ Route::get('/member/search', [MemberController::class, 'search'])->name('member.
 // ---------------------------ReceiptHistory---------------------------
 Route::middleware('auth')->group(function () {
     Route::get('/receipt-history', [OrderController::class, 'receiptHistory'])->name('receipt.history');
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');
 
     // ---------------------------Sale Dashboard---------------------------
     Route::get('/sale-dashboard', [SaleDashboardController::class, 'index'])->name('sale.dashboard');

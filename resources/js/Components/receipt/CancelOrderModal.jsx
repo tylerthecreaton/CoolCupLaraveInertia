@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Button, TextInput, Checkbox, Textarea, Table } from 'flowbite-react';
 import { useForm } from '@inertiajs/react';
-import { HiOutlineExclamationCircle, HiOutlineRefresh, HiOutlineCash, HiOutlineTag, HiOutlineStar } from 'react-icons/hi';
+import { HiOutlineExclamationCircle } from 'react-icons/hi';
+import { toast } from 'react-hot-toast';
 
 const CancelOrderModal = ({ isOpen, onClose, order }) => {
-    const { data, setData, post, processing, errors } = useForm({
-        order_id: order?.id,
+    const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         cancellation_reason: '',
         is_restock_possible: false,
-        // restocked_items: '',
         refunded_amount: order?.final_amount || 0,
         refunded_discount: order?.discount_amount > 0,
         refunded_points: order?.received_points || 0,
@@ -18,7 +17,6 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
         if (order) {
             setData(prevData => ({
                 ...prevData,
-                order_id: order.id,
                 refunded_amount: order.final_amount,
                 refunded_discount: order.discount_amount > 0,
                 refunded_points: order.received_points,
@@ -28,16 +26,41 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('order.cancel'), {
+        clearErrors();
+
+        // ตรวจสอบข้อมูลก่อนส่ง
+        if (!data.cancellation_reason.trim()) {
+            toast.error('กรุณาระบุเหตุผลในการยกเลิก');
+            return;
+        }
+
+        post(route('order.cancel', { order: order.id }), {
             preserveScroll: true,
-            onSuccess: () => onClose(),
+            onSuccess: () => {
+                toast.success('ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว');
+                reset();
+                onClose();
+            },
+            onError: (errors) => {
+                if (errors.cancellation_reason) {
+                    toast.error(errors.cancellation_reason);
+                } else {
+                    toast.error('เกิดข้อผิดพลาดในการยกเลิกคำสั่งซื้อ');
+                }
+            },
         });
+    };
+
+    const handleClose = () => {
+        reset();
+        clearErrors();
+        onClose();
     };
 
     if (!order) return null;
 
     return (
-        <Modal show={isOpen} onClose={onClose} size="xl">
+        <Modal show={isOpen} onClose={handleClose} size="xl">
             <Modal.Header className="bg-red-50 text-red-900">
                 <div className="flex items-center">
                     <HiOutlineExclamationCircle className="w-6 h-6 mr-2 text-red-600" />
@@ -62,7 +85,7 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
                                         <Table.Cell>{item.product_name}</Table.Cell>
                                         <Table.Cell>{item.size}</Table.Cell>
                                         <Table.Cell>{item.quantity}</Table.Cell>
-                                        <Table.Cell>{item.subtotal}</Table.Cell>
+                                        <Table.Cell>฿{Number(item.subtotal).toLocaleString()}</Table.Cell>
                                     </Table.Row>
                                 ))}
                             </Table.Body>
@@ -73,17 +96,17 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
                     <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                         <div className="flex justify-between">
                             <span>ยอดรวม:</span>
-                            <span>฿{order.total_amount}</span>
+                            <span>฿{Number(order.total_amount).toLocaleString()}</span>
                         </div>
                         {order.discount_amount > 0 && (
                             <div className="flex justify-between text-red-600">
                                 <span>ส่วนลด:</span>
-                                <span>-฿{order.discount_amount}</span>
+                                <span>-฿{Number(order.discount_amount).toLocaleString()}</span>
                             </div>
                         )}
                         <div className="flex justify-between font-semibold">
                             <span>ยอดสุทธิ:</span>
-                            <span>฿{order.final_amount}</span>
+                            <span>฿{Number(order.final_amount).toLocaleString()}</span>
                         </div>
                         {order.received_points > 0 && (
                             <div className="flex justify-between text-green-600">
@@ -95,12 +118,14 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
 
                     <div className="space-y-4">
                         <div>
-                            <label htmlFor="cancellation_reason" className="block mb-2 text-sm font-medium text-gray-700">เหตุผลในการยกเลิก</label>
+                            <label htmlFor="cancellation_reason" className="block mb-2 text-sm font-medium text-gray-700">
+                                เหตุผลในการยกเลิก <span className="text-red-500">*</span>
+                            </label>
                             <Textarea
                                 id="cancellation_reason"
                                 value={data.cancellation_reason}
                                 onChange={(e) => setData('cancellation_reason', e.target.value)}
-                                className="w-full"
+                                className={`w-full ${errors.cancellation_reason ? 'border-red-500' : ''}`}
                                 rows={3}
                                 placeholder="กรุณาระบุเหตุผลในการยกเลิกคำสั่งซื้อ"
                             />
@@ -120,34 +145,23 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
                             </label>
                         </div>
 
-                        {/* {data.is_restock_possible && (
-                            <div>
-                                <label htmlFor="restocked_items" className="block mb-2 text-sm font-medium text-gray-700">
-                                    รายการสินค้าที่นำกลับเข้าสต็อก
-                                </label>
-                                <Textarea
-                                    id="restocked_items"
-                                    value={data.restocked_items}
-                                    onChange={(e) => setData('restocked_items', e.target.value)}
-                                    className="w-full"
-                                    rows={2}
-                                    placeholder="ระบุรายการสินค้าที่สามารถนำกลับเข้าสต็อกได้"
-                                />
-                            </div>
-                        )} */}
-
                         <div className="space-y-4 pt-4 border-t">
                             <div>
                                 <label htmlFor="refunded_amount" className="block mb-2 text-sm font-medium text-gray-700">
-                                    จำนวนเงินที่คืน
+                                    จำนวนเงินที่คืน <span className="text-red-500">*</span>
                                 </label>
                                 <TextInput
                                     id="refunded_amount"
                                     type="number"
+                                    step="0.01"
+                                    min="0"
                                     value={data.refunded_amount}
                                     onChange={(e) => setData('refunded_amount', e.target.value)}
-                                    className="w-full"
+                                    className={`w-full ${errors.refunded_amount ? 'border-red-500' : ''}`}
                                 />
+                                {errors.refunded_amount && (
+                                    <p className="text-red-500 text-sm mt-1">{errors.refunded_amount}</p>
+                                )}
                             </div>
 
                             {order.discount_amount > 0 && (
@@ -158,7 +172,7 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
                                         onChange={(e) => setData('refunded_discount', e.target.checked)}
                                     />
                                     <label htmlFor="refunded_discount" className="text-sm text-gray-700">
-                                        คืนส่วนลด ฿{order.discount_amount}
+                                        คืนส่วนลด ฿{Number(order.discount_amount).toLocaleString()}
                                     </label>
                                 </div>
                             )}
@@ -179,7 +193,7 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
                     </div>
 
                     <div className="flex justify-end space-x-2">
-                        <Button color="gray" onClick={onClose}>
+                        <Button color="gray" onClick={handleClose} disabled={processing}>
                             ยกเลิก
                         </Button>
                         <Button type="submit" color="red" disabled={processing}>

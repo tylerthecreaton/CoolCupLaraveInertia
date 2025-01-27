@@ -1,116 +1,134 @@
-import { Table } from 'flowbite-react';
+import React from "react";
+import { Table } from "flowbite-react";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
+
+const OrderStatusBadge = ({ status }) => {
+    const statusConfig = {
+        completed: {
+            color: 'bg-green-100 text-green-800',
+            text: 'เสร็จสมบูรณ์'
+        },
+        cancelled: {
+            color: 'bg-red-100 text-red-800',
+            text: 'ยกเลิกแล้ว'
+        },
+        // เพิ่มสถานะอื่นๆ ตามต้องการ
+    };
+
+    const config = statusConfig[status] || statusConfig.completed;
+
+    return (
+        <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+            {config.text}
+        </span>
+    );
+};
 
 export default function ReceiptTable({ orders, onViewReceipt, onViewOrder, onCancelOrder }) {
     return (
         <div className="overflow-x-auto">
             <Table hoverable className="w-full">
-                <Table.Head className="text-xs uppercase bg-gray-100">
-                    <Table.HeadCell className="px-6 py-4">เลขที่ใบเสร็จ</Table.HeadCell>
-                    <Table.HeadCell className="px-6 py-4">วันที่</Table.HeadCell>
-                    <Table.HeadCell className="px-6 py-4">ลูกค้า</Table.HeadCell>
-                    <Table.HeadCell className="px-6 py-4">รายการสินค้า</Table.HeadCell>
-                    <Table.HeadCell className="px-6 py-4">การชำระเงิน</Table.HeadCell>
-                    <Table.HeadCell className="px-6 py-4">ใบเสร็จ</Table.HeadCell>
-                    <Table.HeadCell className="px-6 py-4">ยอดรวม</Table.HeadCell>
-                    <Table.HeadCell className="px-6 py-4">จัดการ</Table.HeadCell>
+                <Table.Head>
+                    <Table.HeadCell>เลขที่</Table.HeadCell>
+                    <Table.HeadCell>วันที่</Table.HeadCell>
+                    <Table.HeadCell>ลูกค้า</Table.HeadCell>
+                    <Table.HeadCell>ยอดรวม</Table.HeadCell>
+                    <Table.HeadCell>ส่วนลด</Table.HeadCell>
+                    <Table.HeadCell>ยอดสุทธิ</Table.HeadCell>
+                    <Table.HeadCell>สถานะ</Table.HeadCell>
+                    <Table.HeadCell>การชำระเงิน</Table.HeadCell>
+                    <Table.HeadCell>
+                        <span className="sr-only">Actions</span>
+                    </Table.HeadCell>
                 </Table.Head>
-                <Table.Body className="divide-y divide-gray-200">
-                    {orders.length > 0 ? (
-                        orders.map((order) => (
-                            <Table.Row key={order.id} className="bg-white hover:bg-gray-50 transition-colors">
-                                <Table.Cell className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                                    #{order.order_number}
-                                </Table.Cell>
-                                <Table.Cell className="px-6 py-4 whitespace-nowrap">
-                                    {format(
-                                        new Date(order.created_at),
-                                        "dd MMMM yyyy HH:mm",
-                                        { locale: th }
-                                    )}
-                                </Table.Cell>
-                                <Table.Cell className="px-6 py-4 whitespace-nowrap">
-                                    {order.customer ? (
-                                        <div className="flex items-center">
-                                            <div className="flex-shrink-0 h-8 w-8">
-                                                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500 text-white">
-                                                    {order.customer.name.charAt(0)}
-                                                </span>
-                                            </div>
-                                            <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {order.customer.name}
-                                                </div>
-                                            </div>
+                <Table.Body className="divide-y">
+                    {orders.map((order) => (
+                        <Table.Row key={order.id} className="bg-white">
+                            <Table.Cell className="px-6 py-4 whitespace-nowrap">
+                                #{order.order_number}
+                            </Table.Cell>
+                            <Table.Cell className="px-6 py-4 whitespace-nowrap">
+                                {format(new Date(order.created_at), "d MMM yyyy HH:mm", {
+                                    locale: th,
+                                })}
+                            </Table.Cell>
+                            <Table.Cell className="px-6 py-4 whitespace-nowrap">
+                                {order.customer ? (
+                                    <div>
+                                        <div className="font-medium text-gray-900">
+                                            {order.customer.name}
                                         </div>
-                                    ) : (
-                                        <span className="text-gray-500">ลูกค้าทั่วไป</span>
+                                        <div className="text-gray-500">
+                                            {order.customer.phone_number}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <span className="text-gray-500">ลูกค้าทั่วไป</span>
+                                )}
+                            </Table.Cell>
+                            <Table.Cell className="px-6 py-4 whitespace-nowrap">
+                                ฿{Number(order.total_amount).toLocaleString()}
+                            </Table.Cell>
+                            <Table.Cell className="px-6 py-4 whitespace-nowrap">
+                                {order.discount_amount > 0 ? (
+                                    <span className="text-red-600">
+                                        -฿{Number(order.discount_amount).toLocaleString()}
+                                    </span>
+                                ) : (
+                                    "-"
+                                )}
+                            </Table.Cell>
+                            <Table.Cell className="px-6 py-4 whitespace-nowrap font-medium">
+                                ฿{Number(order.final_amount).toLocaleString()}
+                            </Table.Cell>
+                            <Table.Cell className="px-6 py-4 whitespace-nowrap">
+                                <OrderStatusBadge status={order.status} />
+                            </Table.Cell>
+                            <Table.Cell className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex flex-col">
+                                    <span className="font-medium">
+                                        {order.payment_method === "cash"
+                                            ? "เงินสด"
+                                            : order.payment_method === "qr_code"
+                                                ? "QR Code"
+                                                : order.payment_method}
+                                    </span>
+                                    {order.cash && (
+                                        <span className="text-sm text-gray-500">
+                                            รับเงิน: ฿{Number(order.cash).toLocaleString()}
+                                        </span>
                                     )}
-                                </Table.Cell>
-                                <Table.Cell className="px-6 py-4">
+                                </div>
+                            </Table.Cell>
+                            <Table.Cell className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex flex-col space-y-1">
                                     <button
                                         onClick={() => onViewOrder(order)}
-                                        className="text-blue-600 hover:text-blue-800 font-medium"
+                                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                                     >
-                                        ดูรายการสินค้า ({order.order_details.length} รายการ)
+                                        ดูรายละเอียด
                                     </button>
-                                </Table.Cell>
-                                <Table.Cell className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium text-gray-900 capitalize">
-                                            {order.payment_method}
-                                        </span>
-                                        {order.payment_slip && (
-                                            <span className="text-xs text-blue-600 hover:text-blue-800 cursor-pointer">
-                                                ดูสลิป
-                                            </span>
-                                        )}
-                                    </div>
-                                </Table.Cell>
-                                <Table.Cell className="px-6 py-4 whitespace-nowrap">
-                                    {order.receipt_path ? (
+                                    {order.receipt_path && (
                                         <button
                                             onClick={() => onViewReceipt(order.receipt_path)}
-                                            className="text-blue-600 hover:text-blue-800 font-medium"
+                                            className="text-xs text-gray-600 hover:text-gray-800 font-medium"
                                         >
                                             ดูใบเสร็จ
                                         </button>
-                                    ) : (
-                                        <span className="text-gray-500">ไม่มีใบเสร็จ</span>
                                     )}
-                                </Table.Cell>
-                                <Table.Cell className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium text-gray-900">
-                                            ฿{order.total_amount.toLocaleString()}
-                                        </span>
-                                        {order.discount > 0 && (
-                                            <span className="text-xs font-medium text-green-600">
-                                                (-{order.discount}%)
-                                            </span>
-                                        )}
-                                    </div>
-                                </Table.Cell>
-                                <Table.Cell className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex flex-col">
+                                    {order.status === 'completed' && (
                                         <button
                                             onClick={() => onCancelOrder(order)}
                                             className="text-xs text-red-600 hover:text-red-800 font-medium"
                                         >
                                             ยกเลิก Order
                                         </button>
-                                    </div>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))
-                    ) : (
-                        <Table.Row>
-                            <Table.Cell colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                                ไม่พบข้อมูล
+                                    )}
+                                </div>
                             </Table.Cell>
                         </Table.Row>
-                    )}
+                    ))}
                 </Table.Body>
             </Table>
         </div>

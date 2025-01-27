@@ -12,6 +12,8 @@ use App\Models\ProductIngredients;
 use App\Models\ProductIngredientUsage;
 use App\Models\PromotionUsage;
 use App\Models\Setting;
+use App\Services\OrderCancellationService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -244,5 +246,25 @@ class OrderController extends Controller
             $totalItems += $item['quantity'];
         }
         return $totalItems;
+    }
+
+    public function cancel(Request $request, Order $order)
+    {
+        $request->validate([
+            'cancellation_reason' => 'required|string|min:3',
+            'is_restock_possible' => 'required|boolean',
+            'refunded_amount' => 'required|numeric|min:0',
+            'refunded_discount' => 'boolean',
+            'refunded_points' => 'numeric|min:0',
+        ]);
+
+        try {
+            $cancellationService = new OrderCancellationService();
+            $cancellation = $cancellationService->cancelOrder($order, $request->all());
+
+            return redirect()->back()->with('success', 'ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว');
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 }

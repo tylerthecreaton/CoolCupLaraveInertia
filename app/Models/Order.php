@@ -15,8 +15,16 @@ class Order extends Model
         'discount',
         'grand_total',
         'status',
+        'discount_amount',
+        'discount_type',
+        'manual_discount_amount',
+        'final_amount',
+        'received_points',
+        'point_discount_amount',
+        'used_points',
     ];
 
+    protected $with = ['orderDetails', 'customer'];
 
     public static function generateOrderNumber()
     {
@@ -37,5 +45,15 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function cancellation()
+    {
+        return $this->hasOne(OrderCancellation::class);
+    }
+
+    public function getCanBeCancelledAttribute()
+    {
+        return $this->status === 'completed';
     }
 }
