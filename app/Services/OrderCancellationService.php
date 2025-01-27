@@ -40,7 +40,7 @@ class OrderCancellationService
 
             // 5. จัดการคะแนนสะสม (ถ้ามี)
             if ($order->customer_id && $order->received_points > 0) {
-                $this->handlePointRefund($order, $data['refunded_points']);
+                $this->refundPoints($order);
             }
 
             // 6. บันทึกค่าใช้จ่าย (ถ้าจำเป็น)
@@ -103,8 +103,25 @@ class OrderCancellationService
         ];
     }
 
-    private function handlePointRefund(Order $order, float $pointsToRefund)
+    private function refundPoints(Order $order)
     {
+        // Load point usages relationship if not loaded
+        if (!$order->relationLoaded('pointUsages')) {
+            $order->load('pointUsages');
+        }
+
+        // คำนวณคะแนนที่ต้องคืน
+        $pointsToRefund = 0;
+        
+        // ตรวจสอบว่ามี pointUsages หรือไม่
+        if ($order->pointUsages) {
+            foreach ($order->pointUsages as $usage) {
+                if ($usage->type === 'earn') {
+                    $pointsToRefund += $usage->point_amount;
+                }
+            }
+        }
+
         if ($pointsToRefund <= 0) {
             return;
         }
@@ -114,13 +131,14 @@ class OrderCancellationService
         // หักคะแนนที่ได้รับจากการซื้อ
         $customer->decrement('loyalty_points', $pointsToRefund);
 
-        // บันทึกประวัติการใช้คะแนน
+        // สร้างประวัติการคืนคะแนน
         PointUsage::create([
-            'customer_id' => $customer->id,
             'order_id' => $order->id,
-            'points' => -$pointsToRefund,
-            'type' => 'cancellation',
-            'description' => 'คืนคะแนนจากการยกเลิกคำสั่งซื้อ #' . $order->order_number,
+            'customer_id' => $customer->id,
+            'user_id' => Auth::user()->id,
+            'point_amount' => $pointsToRefund,
+            'point_discount_amount' => 0,
+            'type' => 'cancellation'
         ]);
     }
 

@@ -52,6 +52,11 @@ class Order extends Model
         return $this->hasOne(OrderCancellation::class);
     }
 
+    public function pointUsages()
+    {
+        return $this->hasMany(PointUsage::class);
+    }
+
     public function getCanBeCancelledAttribute()
     {
         return $this->status === 'completed';
