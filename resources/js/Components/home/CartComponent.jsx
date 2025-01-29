@@ -405,7 +405,7 @@ const CartComponent = () => {
                 className="flex flex-col h-full"
             >
                 {/* Cart Header */}
-                <div className="flex justify-between items-center p-4 bg-gradient-to-r from-blue-500 to-blue-600">
+                <div className="flex justify-between items-center p-4 bg-gradient-to-r from-green-300 to-blue-300">
                     <div className="flex items-center space-x-3">
                         <div className="p-2 bg-white rounded-lg">
                             <ShoppingCart className="w-6 h-6 text-blue-600" />
@@ -430,9 +430,9 @@ const CartComponent = () => {
                         color="white"
                         size="sm"
                         onClick={() => dispatch(appActions.setCartOpen(false))}
-                        className="flex justify-center items-center w-8 h-8 hover:bg-blue-50"
+                        className="flex justify-center items-center w-8 h-8 hover:bg-blue-50 bg-white  hover:text-blue-600"
                     >
-                        <X className="w-4 h-4 text-blue-600" />
+                        <X className="w-4 h-4 text-black-600" />
                     </Button>
                 </div>
 
