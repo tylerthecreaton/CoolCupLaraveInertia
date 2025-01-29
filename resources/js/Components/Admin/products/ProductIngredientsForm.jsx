@@ -3,6 +3,10 @@ import { useForm } from "@inertiajs/react";
 import { Button, Label, Select, TextInput, Table, Card } from "flowbite-react";
 import { HiPlus, HiTrash, HiPencil, HiCheck, HiX } from "react-icons/hi";
 import { router } from "@inertiajs/react";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 export default function ProductIngredientsForm({
     product,
@@ -25,17 +29,32 @@ export default function ProductIngredientsForm({
         
         const selectedIngredient = ingredients.find(ing => ing.id === parseInt(data.ingredient_id));
         if (!selectedIngredient) {
-            alert("กรุณาเลือกวัตถุดิบ");
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "กรุณาเลือกวัตถุดิบ",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
         if (!data.quantity_used || parseFloat(data.quantity_used) <= 0) {
-            alert("กรุณาระบุปริมาณที่ถูกต้อง");
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "กรุณาระบุปริมาณที่ถูกต้อง",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
         if (localIngredients.some(item => item.ingredient_id === parseInt(data.ingredient_id))) {
-            alert("วัตถุดิบนี้ถูกเพิ่มในสูตรแล้ว");
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "วัตถุดิบนี้ถูกเพิ่มในสูตรแล้ว",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
@@ -60,7 +79,12 @@ export default function ProductIngredientsForm({
         if (isSubmitting) return;
 
         if (localIngredients.length === 0) {
-            alert("กรุณาเพิ่มวัตถุดิบอย่างน้อย 1 รายการ");
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "กรุณาเพิ่มวัตถุดิบอย่างน้อย 1 รายการ",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
@@ -74,9 +98,21 @@ export default function ProductIngredientsForm({
                     quantity_used: parseFloat(item.quantity_used)
                 }))
             });
+
+            MySwal.fire({
+                title: "สำเร็จ",
+                text: "บันทึกข้อมูลสำเร็จ",
+                icon: "success",
+                confirmButtonText: "ตกลง",
+            });
         } catch (error) {
             console.error("Error saving ingredients:", error);
-            alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+            MySwal.fire({
+                title: "ผิดพลาด",
+                text: "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+                icon: "error",
+                confirmButtonText: "ตกลง",
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -84,7 +120,12 @@ export default function ProductIngredientsForm({
 
     const handleUpdate = (productIngredient) => {
         if (!editQuantity || parseFloat(editQuantity) <= 0) {
-            alert("กรุณาระบุปริมาณที่ถูกต้อง");
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "กรุณาระบุปริมาณที่ถูกต้อง",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
@@ -100,11 +141,27 @@ export default function ProductIngredientsForm({
     };
 
     const handleDelete = (productIngredient) => {
-        if (!confirm("คุณต้องการลบวัตถุดิบนี้ออกจากสูตรใช่หรือไม่?")) return;
-
-        setLocalIngredients(prev =>
-            prev.filter(item => item.id !== productIngredient.id)
-        );
+        MySwal.fire({
+            title: "ยืนยันการลบ",
+            text: "คุณต้องการลบวัตถุดิบนี้ออกจากสูตรใช่หรือไม่?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "ใช่, ลบเลย",
+            cancelButtonText: "ยกเลิก",
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                setLocalIngredients(prev =>
+                    prev.filter(item => item.id !== productIngredient.id)
+                );
+                MySwal.fire({
+                    title: "สำเร็จ",
+                    text: "ลบวัตถุดิบเรียบร้อยแล้ว",
+                    icon: "success",
+                    confirmButtonText: "ตกลง",
+                });
+            }
+        });
     };
 
     const startEditing = (item) => {

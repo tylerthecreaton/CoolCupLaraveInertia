@@ -3,6 +3,10 @@ import { useForm } from "@inertiajs/react";
 import { Button, Label, Select, TextInput, Table, Card } from "flowbite-react";
 import { HiPlus, HiTrash, HiPencil, HiCheck, HiX } from "react-icons/hi";
 import { router } from "@inertiajs/react";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+
+const MySwal = withReactContent(Swal);
 
 export default function ProductConsumablesForm({
     product,
@@ -25,17 +29,32 @@ export default function ProductConsumablesForm({
         
         const selectedConsumable = consumables.find(cons => cons.id === parseInt(data.consumable_id));
         if (!selectedConsumable) {
-            alert("กรุณาเลือกวัตถุดิบสิ้นเปลือง");
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "กรุณาเลือกวัตถุดิบสิ้นเปลือง",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
         if (!data.quantity_used || parseFloat(data.quantity_used) <= 0) {
-            alert("กรุณาระบุปริมาณที่ถูกต้อง");
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "กรุณาระบุปริมาณที่ถูกต้อง",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
         if (localConsumables.some(item => item.consumable_id === parseInt(data.consumable_id))) {
-            alert("วัตถุดิบสิ้นเปลืองนี้ถูกเพิ่มในสูตรแล้ว");
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "วัตถุดิบสิ้นเปลืองนี้ถูกเพิ่มในสูตรแล้ว",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
@@ -60,7 +79,12 @@ export default function ProductConsumablesForm({
         if (isSubmitting) return;
 
         if (localConsumables.length === 0) {
-            alert("กรุณาเพิ่มวัตถุดิบสิ้นเปลืองอย่างน้อย 1 รายการ");
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "กรุณาเพิ่มวัตถุดิบสิ้นเปลืองอย่างน้อย 1 รายการ",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
@@ -72,11 +96,24 @@ export default function ProductConsumablesForm({
                     id: item.isNew ? null : item.id,
                     consumable_id: item.consumable_id,
                     quantity_used: parseFloat(item.quantity_used)
-                }))
+                })),
+                preserveScroll: true
+            });
+
+            MySwal.fire({
+                title: "สำเร็จ",
+                text: "บันทึกข้อมูลสำเร็จ",
+                icon: "success",
+                confirmButtonText: "ตกลง",
             });
         } catch (error) {
             console.error("Error saving consumables:", error);
-            alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+            MySwal.fire({
+                title: "ผิดพลาด",
+                text: "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+                icon: "error",
+                confirmButtonText: "ตกลง",
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -84,7 +121,12 @@ export default function ProductConsumablesForm({
 
     const handleUpdate = (productConsumable) => {
         if (!editQuantity || parseFloat(editQuantity) <= 0) {
-            alert("กรุณาระบุปริมาณที่ถูกต้อง");
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "กรุณาระบุปริมาณที่ถูกต้อง",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
             return;
         }
 
@@ -100,11 +142,27 @@ export default function ProductConsumablesForm({
     };
 
     const handleDelete = (productConsumable) => {
-        if (!confirm("คุณต้องการลบวัตถุดิบสิ้นเปลืองนี้ออกจากสูตรใช่หรือไม่?")) return;
-
-        setLocalConsumables(prev =>
-            prev.filter(item => item.id !== productConsumable.id)
-        );
+        MySwal.fire({
+            title: "ยืนยันการลบ",
+            text: "คุณต้องการลบวัตถุดิบสิ้นเปลืองนี้ออกจากสูตรใช่หรือไม่?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "ใช่, ลบเลย",
+            cancelButtonText: "ยกเลิก",
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                setLocalConsumables(prev =>
+                    prev.filter(item => item.id !== productConsumable.id)
+                );
+                MySwal.fire({
+                    title: "สำเร็จ",
+                    text: "ลบวัตถุดิบสิ้นเปลืองเรียบร้อยแล้ว",
+                    icon: "success",
+                    confirmButtonText: "ตกลง",
+                });
+            }
+        });
     };
 
     const startEditing = (item) => {

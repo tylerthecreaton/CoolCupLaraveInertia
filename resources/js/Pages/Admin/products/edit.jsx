@@ -4,7 +4,14 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function EditProduct({ product, categories, ingredients, productIngredients }) {
+export default function EditProduct({ 
+    product, 
+    categories, 
+    ingredients, 
+    consumables,
+    productIngredients,
+    productConsumables 
+}) {
     return (
         <AuthenticatedLayout
             header={
@@ -28,7 +35,9 @@ export default function EditProduct({ product, categories, ingredients, productI
                 isEditing={true} 
                 categories={categories}
                 ingredients={ingredients}
+                consumables={consumables}
                 productIngredients={productIngredients}
+                productConsumables={productConsumables}
             />
         </AuthenticatedLayout>
     );

@@ -255,7 +255,7 @@ export default function Index({ productsPaginate }) {
                                                         strokeLinecap="round"
                                                         strokeLinejoin="round"
                                                         strokeWidth={2}
-                                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                                     />
                                                 </svg>
                                                 <p className="text-lg font-medium">
@@ -307,35 +307,83 @@ export default function Index({ productsPaginate }) {
                     <Modal
                         show={showIngredientsModal}
                         onClose={() => setShowIngredientsModal(false)}
+                        size="xl"
                     >
                         <Modal.Header>
-                            วัตถุดิบที่ใช้ใน {selectedProduct?.name}
+                            รายละเอียดสูตร {selectedProduct?.name}
                         </Modal.Header>
                         <Modal.Body>
-                            {selectedProduct?.ingredients?.length > 0 ? (
-                                <div className="space-y-4">
-                                    {selectedProduct.ingredients.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className="flex items-center justify-between p-4 border rounded-lg"
-                                        >
-                                            <div>
-                                                <p className="font-medium">
-                                                    {item?.ingredient?.name || 'ไม่ระบุชื่อวัตถุดิบ'}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    จำนวนที่ใช้: {item?.quantity_used || 0}{" "}
-                                                    {item?.ingredient?.unit?.name || 'หน่วย'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
+                            <div className="space-y-6">
+                                {/* Ingredients Section */}
+                                <div>
+                                    <h3 className="mb-4 text-lg font-semibold">วัตถุดิบที่ใช้</h3>
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <Table.Head>
+                                                <Table.HeadCell>ชื่อวัตถุดิบ</Table.HeadCell>
+                                                <Table.HeadCell>ปริมาณที่ใช้</Table.HeadCell>
+                                                <Table.HeadCell>หน่วย</Table.HeadCell>
+                                            </Table.Head>
+                                            <Table.Body>
+                                                {selectedProduct?.ingredients?.map((item) => (
+                                                    <Table.Row key={item.id}>
+                                                        <Table.Cell>{item.ingredient?.name || 'ไม่ระบุชื่อ'}</Table.Cell>
+                                                        <Table.Cell>{item.quantity_used}</Table.Cell>
+                                                        <Table.Cell>{item.ingredient?.unit?.name || 'ไม่ระบุหน่วย'}</Table.Cell>
+                                                    </Table.Row>
+                                                ))}
+                                                {(!selectedProduct?.ingredients || selectedProduct.ingredients.length === 0) && (
+                                                    <Table.Row>
+                                                        <Table.Cell colSpan={3}>
+                                                            <div className="flex items-center justify-center py-4 text-gray-500">
+                                                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                                ไม่มีวัตถุดิบที่ใช้ในสินค้านี้
+                                                            </div>
+                                                        </Table.Cell>
+                                                    </Table.Row>
+                                                )}
+                                            </Table.Body>
+                                        </Table>
+                                    </div>
                                 </div>
-                            ) : (
-                                <p className="text-center text-gray-500">
-                                    ไม่มีวัตถุดิบที่ใช้ในสินค้านี้
-                                </p>
-                            )}
+
+                                {/* Consumables Section */}
+                                <div>
+                                    <h3 className="mb-4 text-lg font-semibold">วัตถุดิบสิ้นเปลืองที่ใช้</h3>
+                                    <div className="overflow-x-auto">
+                                        <Table>
+                                            <Table.Head>
+                                                <Table.HeadCell>ชื่อวัตถุดิบสิ้นเปลือง</Table.HeadCell>
+                                                <Table.HeadCell>ปริมาณที่ใช้</Table.HeadCell>
+                                                <Table.HeadCell>หน่วย</Table.HeadCell>
+                                            </Table.Head>
+                                            <Table.Body>
+                                                {selectedProduct?.consumables?.map((item) => (
+                                                    <Table.Row key={item.id}>
+                                                        <Table.Cell>{item.consumable?.name || 'ไม่ระบุชื่อ'}</Table.Cell>
+                                                        <Table.Cell>{item.quantity_used}</Table.Cell>
+                                                        <Table.Cell>{item.consumable?.unit?.name || 'ไม่ระบุหน่วย'}</Table.Cell>
+                                                    </Table.Row>
+                                                ))}
+                                                {(!selectedProduct?.consumables || selectedProduct.consumables.length === 0) && (
+                                                    <Table.Row>
+                                                        <Table.Cell colSpan={3}>
+                                                            <div className="flex items-center justify-center py-4 text-gray-500">
+                                                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                                ไม่มีวัตถุดิบสิ้นเปลืองที่ใช้ในสินค้านี้
+                                                            </div>
+                                                        </Table.Cell>
+                                                    </Table.Row>
+                                                )}
+                                            </Table.Body>
+                                        </Table>
+                                    </div>
+                                </div>
+                            </div>
                         </Modal.Body>
                     </Modal>
                 </div>

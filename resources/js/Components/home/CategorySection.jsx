@@ -49,13 +49,13 @@ export default function CategorySection({
                             </Tabs.Item>
                         ))}
                     </Tabs>
-                    <Button
+                    {/* <Button
                         type="button"
                         className="absolute top-2 right-0"
                         onClick={() => setShowAddMenuModal(true)}
                     >
                         เพิ่มเมนู
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
             <AddMenuModal

@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Consumable;
 use App\Models\Customer;
 use App\Models\Ingredient;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\PointUsage;
 use App\Models\Product;
+use App\Models\ProductConsumables;
+use App\Models\ProductConsumableUsage;
 use App\Models\ProductIngredients;
 use App\Models\ProductIngredientUsage;
 use App\Models\PromotionUsage;
@@ -140,7 +143,7 @@ class OrderController extends Controller
                     }
                 }
             } catch (\Exception $e) {
-                dd($e);
+                throw new \Exception("Error calculating ingredients: " . $e->getMessage());
             }
         }
     }
@@ -186,6 +189,38 @@ class OrderController extends Controller
             $orderDetail->save();
 
             $this->calculateIngredients($item,  $orderDetail->id, $item['sweetness']);
+            $this->calculateConsumable($item, $orderDetail->id);
+        }
+    }
+
+    private function calculateConsumable(array $item, int $orderDetailId)
+    {
+        $product = Product::find($item['productId']);
+        if ($product) {
+            try {
+                $consumables = ProductConsumables::where('product_id', $product->id)->get();
+
+                foreach ($consumables as $consumable) {
+                    
+                    $consumableUsage = new ProductConsumableUsage();
+                    $consumableUsage->order_detail_id = $orderDetailId;
+                    $consumableUsage->consumable_id = $consumable->consumable_id;
+                    $consumableUsage->quantity_used = $item['quantity'] * $consumable->quantity_used;
+                    $consumableUsage->usage_type = 'USE';
+                    $consumableUsage->created_by = Auth::user()->id;
+                    $consumableUsage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId;
+                    $consumableUsage->save();
+
+                    // อัพเดทจำนวนวัตถุดิบ
+                    $consumableModel = Consumable::find($consumable->consumable_id);
+                    if ($consumableModel) {
+                        $consumableModel->quantity = max(0, $consumableModel->quantity - $consumableUsage->quantity_used);
+                        $consumableModel->save();
+                    }
+                }
+            } catch (\Exception $e) {
+                throw new \Exception("Error calculating ingredients: " . $e->getMessage());
+            }
         }
     }
 

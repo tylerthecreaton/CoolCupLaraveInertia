@@ -31,19 +31,18 @@ class ProductConsumablesController extends Controller
         $product = Product::findOrFail($request->product_id);
         
         // ลบข้อมูลวัตถุดิบสิ้นเปลืองเดิมทั้งหมด
-        ProductConsumables::where('product_id', $product->id)->delete();
+        $product->consumables()->delete();
         
         // เพิ่มข้อมูลวัตถุดิบสิ้นเปลืองใหม่
         foreach ($request->consumables as $consumable) {
             if (!isset($consumable['id'])) {
-                ProductConsumables::create([
-                    'product_id' => $product->id,
+                $product->consumables()->create([
                     'consumable_id' => $consumable['consumable_id'],
                     'quantity_used' => $consumable['quantity_used'],
                 ]);
             }
         }
 
-        return response()->json(['message' => 'บันทึกข้อมูลสำเร็จ']);
+        return back();
     }
 }

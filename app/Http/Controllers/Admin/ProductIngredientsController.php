@@ -23,7 +23,7 @@ class ProductIngredientsController extends Controller
             DB::beginTransaction();
 
             // Get the product
-            $product = Product::findOrFail($request->product_id);
+        $product = Product::findOrFail($request->product_id);
 
             // Delete existing ingredients not in the new list
             $newIngredientIds = collect($request->ingredients)
@@ -35,17 +35,17 @@ class ProductIngredientsController extends Controller
                 ->delete();
 
             // Update or create ingredients
-            foreach ($request->ingredients as $ingredient) {
+        foreach ($request->ingredients as $ingredient) {
                 ProductIngredient::updateOrCreate(
                     [
                         'product_id' => $product->id,
-                        'ingredient_id' => $ingredient['ingredient_id'],
+                'ingredient_id' => $ingredient['ingredient_id'],
                     ],
                     [
-                        'quantity_used' => $ingredient['quantity_used'],
+                'quantity_used' => $ingredient['quantity_used'],
                     ]
                 );
-            }
+        }
 
             DB::commit();
 

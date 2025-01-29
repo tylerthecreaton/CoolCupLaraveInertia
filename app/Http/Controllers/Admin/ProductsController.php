@@ -14,8 +14,15 @@ class ProductsController extends Controller
 {
     public function index()
     {
-        $productsPaginate = Product::with(['category', 'ingredients.ingredient.unit'])->paginate(10);
-        return Inertia::render('Admin/products/index', compact('productsPaginate'));
+        $productsPaginate = Product::with([
+            'category',
+            'ingredients.ingredient.unit',
+            'consumables.consumable.unit'
+        ])->paginate(10);
+
+        return Inertia::render('Admin/products/index', [
+            'productsPaginate' => $productsPaginate
+        ]);
     }
 
     public function create()
@@ -84,14 +91,21 @@ class ProductsController extends Controller
 
     public function edit($id)
     {
-        $product = Product::with(['category', 'getIngredients.unit'])->findOrFail($id);
+        $product = Product::with(['category', 'ingredients.ingredient.unit', 'consumables.consumable.unit'])->findOrFail($id);
         $categories = Category::all();
         $ingredients = Ingredient::with('unit')->get();
         $consumables = Consumable::with('unit')->get();
-        $productIngredients = $product->ingredients()->with('ingredient')->get();
-        $productConsumables = $product->consumables()->with('consumable')->get();
+        $productIngredients = $product->ingredients()->with('ingredient.unit')->get();
+        $productConsumables = $product->consumables()->with('consumable.unit')->get();
 
-        return Inertia::render('Admin/products/Edit', compact('product', 'categories', 'ingredients', 'consumables', 'productIngredients', 'productConsumables'));
+        return Inertia::render('Admin/products/Edit', compact(
+            'product',
+            'categories',
+            'ingredients',
+            'consumables',
+            'productIngredients',
+            'productConsumables'
+        ));
     }
 
     public function update(Request $request, string $id)

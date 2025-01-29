@@ -53,14 +53,14 @@ export default function CategorySection({ promotions, types, onTypeChange }) {
                             );
                         })}
                     </Tabs>
-                    <Button
+                    {/* <Button
                         type="button"
                         className="absolute top-2 right-4"
                         onClick={() => setShowAddModal(true)}
                     >
                         <HiPlus className="mr-2 h-4 w-4" />
                         เพิ่มโปรโมชั่น
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
         </>
