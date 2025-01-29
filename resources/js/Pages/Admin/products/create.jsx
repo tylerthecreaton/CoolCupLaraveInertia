@@ -4,7 +4,7 @@ import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 import ProductsForm from "@/Components/Admin/products/ProductsForm";
 
-export default function CreateProduct({ categories, ingredients }) {
+export default function CreateProduct({ categories, ingredients, consumables }) {
     return (
         <AuthenticatedLayout
             header={
@@ -28,7 +28,9 @@ export default function CreateProduct({ categories, ingredients }) {
             <ProductsForm 
                 categories={categories} 
                 ingredients={ingredients}
+                consumables={consumables}
                 productIngredients={[]}
+                productConsumables={[]}
             />
         </AuthenticatedLayout>
     );

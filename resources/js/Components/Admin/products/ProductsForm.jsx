@@ -3,11 +3,14 @@ import { useForm } from "@inertiajs/react";
 import { Button, FileInput, Label, Select, TextInput } from "flowbite-react";
 import { isAbsoluteUrl } from "@/helpers";
 import ProductIngredientsForm from "./ProductIngredientsForm";
+import ProductConsumablesForm from "./ProductConsumablesForm";
 
 export default function ProductsForm({
     categories,
     ingredients = [],
+    consumables = [],
     productIngredients = [],
+    productConsumables = [],
     isEditing = false,
     product = null,
 }) {
@@ -163,6 +166,11 @@ export default function ProductsForm({
                     product={product}
                     ingredients={ingredients}
                     productIngredients={productIngredients}
+                />
+                <ProductConsumablesForm
+                    product={product}
+                    consumables={consumables}
+                    productConsumables={productConsumables}
                 />
             </form>
         </div>

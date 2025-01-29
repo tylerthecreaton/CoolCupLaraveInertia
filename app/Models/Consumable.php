@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Unit;
 
 class Consumable extends Model
 {
@@ -36,5 +37,10 @@ class Consumable extends Model
     public function transformers()
     {
         return $this->hasMany(Transformer::class);
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class);
     }
 }

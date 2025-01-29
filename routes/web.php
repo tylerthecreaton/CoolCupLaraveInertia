@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\IngredientsController as AdminIngredientsControll
 use App\Http\Controllers\Admin\IngredientLotController as AdminIngredientLotController;
 use App\Http\Controllers\Admin\InventoryTransactionsController as AdminInventoryTransactionsController;
 use App\Http\Controllers\Admin\ProductIngredientsController as AdminProductIngredientsController;
+use App\Http\Controllers\Admin\ProductConsumablesController as AdminProductConsumablesController;
 use App\Http\Controllers\Admin\ProductsController as AdminProductsController;
 use App\Http\Controllers\Admin\PromotionController as AdminPromotionController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
@@ -161,9 +162,11 @@ Route::middleware('auth')->group(function () {
         Route::put('/products/{id}', [AdminProductsController::class, 'update'])->name('products.update');
         Route::delete('/products/{id}', [AdminProductsController::class, 'destroy'])->name('products.destroy');
 
-        // ---------------------------Product Ingredients---------------------------
-        Route::post('/product-ingredients/batch-update', [AdminProductIngredientsController::class, 'batchUpdate'])
-            ->name('product-ingredients.batch-update');
+        // Product Ingredients
+        Route::post('/product-ingredients/batch-update', [AdminProductIngredientsController::class, 'batchUpdate'])->name('product-ingredients.batch-update');
+
+        // Product Consumables
+        Route::post('/product-consumables/batch-update', [AdminProductConsumablesController::class, 'batchUpdate'])->name('product-consumables.batch-update');
 
         // ---------------------------Customers---------------------------
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');

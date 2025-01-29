@@ -33,4 +33,16 @@ class Product extends Model
             ->withPivot('quantity_used')
             ->withTimestamps();
     }
+
+    public function consumables()
+    {
+        return $this->hasMany(ProductConsumables::class);
+    }
+
+    public function getConsumables()
+    {
+        return $this->belongsToMany(Consumable::class, 'product_consumables')
+            ->withPivot('quantity_used')
+            ->withTimestamps();
+    }
 }
