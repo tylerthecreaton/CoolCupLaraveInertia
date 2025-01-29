@@ -198,17 +198,23 @@ class OrderController extends Controller
         $product = Product::find($item['productId']);
         if ($product) {
             try {
-                $consumables = ProductConsumables::where('product_id', $product->id)->get();
+                // Get consumables based on product size
+                $consumables = ProductConsumables::where('product_id', $product->id)
+                    ->where('size', $item['size'])
+                    ->get();
+
+                if (!$consumables->count()) {
+                    return;
+                }
 
                 foreach ($consumables as $consumable) {
-                    
                     $consumableUsage = new ProductConsumableUsage();
                     $consumableUsage->order_detail_id = $orderDetailId;
                     $consumableUsage->consumable_id = $consumable->consumable_id;
                     $consumableUsage->quantity_used = $item['quantity'] * $consumable->quantity_used;
                     $consumableUsage->usage_type = 'USE';
                     $consumableUsage->created_by = Auth::user()->id;
-                    $consumableUsage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId;
+                    $consumableUsage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId . " (ขนาด " . strtoupper($item['size']) . ")";
                     $consumableUsage->save();
 
                     // อัพเดทจำนวนวัตถุดิบ

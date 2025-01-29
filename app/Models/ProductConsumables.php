@@ -12,6 +12,7 @@ class ProductConsumables extends Model
         'product_id',
         'consumable_id',
         'quantity_used',
+        'size',
     ];
 
     public function product()
