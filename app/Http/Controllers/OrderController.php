@@ -76,14 +76,46 @@ class OrderController extends Controller
         ]);
     }
 
-    public function receiptHistory()
+    public function receiptHistory(Request $request)
     {
-        $orders = Order::with(['orderDetails', 'customer'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = Order::with(['orderDetails', 'customer'])
+            ->orderBy('created_at', 'desc');
+
+        // Apply date filters
+        $filterType = $request->get('filterType', 'today');
+        switch ($filterType) {
+            case 'all':
+                break;
+            case 'today':
+                $query->whereDate('created_at', now());
+                break;
+            case 'week':
+                $query->whereBetween('created_at', [
+                    now()->startOfWeek(),
+                    now()->endOfWeek()
+                ]);
+                break;
+            case 'custom':
+                $startDate = $request->get('startDate');
+                $endDate = $request->get('endDate');
+                if ($startDate && $endDate) {
+                    $query->whereBetween('created_at', [
+                        $startDate . ' 00:00:00',
+                        $endDate . ' 23:59:59'
+                    ]);
+                }
+                break;
+        }
+
+        $orders = $query->paginate(10);
 
         return Inertia::render('ReceiptHistory', [
-            'orders' => $orders
+            'orders' => $orders,
+            'filters' => [
+                'type' => $filterType,
+                'startDate' => $request->get('startDate'),
+                'endDate' => $request->get('endDate'),
+            ]
         ]);
     }
 

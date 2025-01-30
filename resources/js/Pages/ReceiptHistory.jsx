@@ -1,23 +1,28 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import { Link } from "@inertiajs/react";
 import Swal from 'sweetalert2';
 import { Receipt, Home } from "lucide-react";
 import ViewReceiptModal from "@/Components/home/ViewReceiptModal";
 import { useState } from "react";
-import { Breadcrumb, Card } from 'flowbite-react';
+import { Breadcrumb, Card, Select } from 'flowbite-react';
 import SearchBar from "@/Components/receipt/SearchBar";
 import ReceiptTable from "@/Components/receipt/ReceiptTable";
 import OrderDetailsModal from "@/Components/receipt/OrderDetailsModal";
 import CancelOrderModal from "@/Components/receipt/CancelOrderModal";
+import { format, subDays, startOfWeek, endOfWeek } from 'date-fns';
+import { th } from 'date-fns/locale';
 
-export default function ReceiptHistory({ orders }) {
+export default function ReceiptHistory({ orders, filters }) {
     const [selectedReceipt, setSelectedReceipt] = useState(null);
     const [showReceiptModal, setShowReceiptModal] = useState(false);
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [showCancelModal, setShowCancelModal] = useState(false);
+    const [filterType, setFilterType] = useState(filters?.type || "today");
+    const [customStartDate, setCustomStartDate] = useState(filters?.startDate || "");
+    const [customEndDate, setCustomEndDate] = useState(filters?.endDate || "");
 
     const handleViewReceipt = (receiptPath) => {
         fetch(`/images/receipt/${receiptPath}`)
@@ -47,17 +52,32 @@ export default function ReceiptHistory({ orders }) {
         setShowCancelModal(true);
     };
 
+    // ฟังก์ชันสำหรับ submit ตัวกรอง
+    const handleFilterSubmit = () => {
+        router.get(
+            route('receipt.history'),
+            {
+                filterType: filterType,
+                startDate: filterType === 'custom' ? customStartDate : null,
+                endDate: filterType === 'custom' ? customEndDate : null,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            }
+        );
+    };
+
     // กรองรายการตามคำค้นหา
     const filteredOrders = orders.data.filter(order => {
         const searchString = searchTerm.toLowerCase();
-        return (
+        const matchesSearch = (
             (order.order_number?.toString() || '').toLowerCase().includes(searchString) ||
             (order.customer?.name || "ลูกค้าทั่วไป").toLowerCase().includes(searchString) ||
             (order.payment_method || '').toLowerCase().includes(searchString)
         );
+        return matchesSearch;
     });
-
-
 
     return (
         <AuthenticatedLayout
@@ -87,10 +107,46 @@ export default function ReceiptHistory({ orders }) {
 
                     <Card>
                         <div className="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 mb-4">
-                            <SearchBar
-                                searchTerm={searchTerm}
-                                onSearchChange={setSearchTerm}
-                            />
+                            <div className="w-full md:w-1/2">
+                                <SearchBar
+                                    searchTerm={searchTerm}
+                                    onSearchChange={setSearchTerm}
+                                />
+                            </div>
+                            <div className="w-full md:w-1/2 flex flex-col md:flex-row gap-2">
+                                <Select
+                                    className="w-full md:w-1/3"
+                                    value={filterType}
+                                    onChange={(e) => setFilterType(e.target.value)}
+                                >
+                                    <option value="today">วันนี้</option>
+                                    <option value="week">สัปดาห์นี้</option>
+                                    <option value="custom">กำหนดเอง</option>
+                                    <option value="all">ทั้งหมด</option>
+                                </Select>
+                                {filterType === "custom" && (
+                                    <>
+                                        <input
+                                            type="date"
+                                            className="w-full md:w-1/3 rounded-lg border-gray-300"
+                                            value={customStartDate}
+                                            onChange={(e) => setCustomStartDate(e.target.value)}
+                                        />
+                                        <input
+                                            type="date"
+                                            className="w-full md:w-1/3 rounded-lg border-gray-300"
+                                            value={customEndDate}
+                                            onChange={(e) => setCustomEndDate(e.target.value)}
+                                        />
+                                    </>
+                                )}
+                                <button
+                                    onClick={handleFilterSubmit}
+                                    className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    ค้นหา
+                                </button>
+                            </div>
                         </div>
 
                         <ReceiptTable
