@@ -114,9 +114,6 @@ class OrderController extends Controller
 
     private function calculateIngredients(array $item, $orderDetailId, string $sweetness)
     {
-        if (isset($item['isDiscount']) && $item['isDiscount']) {
-            return;
-        }
         $product = Product::find($item['id']);
         if ($product) {
             try {
@@ -171,9 +168,6 @@ class OrderController extends Controller
     {
 
         foreach ($items as $item) {
-            if (isset($item['isDiscount']) && $item['isDiscount']) {
-                continue;
-            }
             $orderDetail = new OrderDetail();
             $orderDetail->order_id = $orderId;
             $orderDetail->product_id = $item['id'];
@@ -190,6 +184,7 @@ class OrderController extends Controller
 
             $this->calculateIngredients($item,  $orderDetail->id, $item['sweetness']);
             $this->calculateConsumable($item, $orderDetail->id);
+            $this->calculateToppings($item, $orderDetail->id);
         }
     }
 
@@ -227,6 +222,45 @@ class OrderController extends Controller
             } catch (\Exception $e) {
                 throw new \Exception("Error calculating ingredients: " . $e->getMessage());
             }
+        }
+    }
+
+    private function calculateToppings(array $item, int $orderDetailId)
+    {
+        if (empty($item['toppings'])) {
+            return;
+        }
+
+        // ถ้า toppings เป็น string (json) ให้แปลงเป็น array
+        $toppings = is_string($item['toppings']) 
+            ? json_decode($item['toppings'], true) 
+            : $item['toppings'];
+
+        if (!is_array($toppings)) {
+            return;
+        }
+
+        foreach ($toppings as $topping) {
+            // คำนวณ ingredients สำหรับ topping
+            $this->calculateIngredients(
+                [
+                    'id' => $topping['id'],
+                    'quantity' => $item['quantity'],
+                    'sweetness' => '100%' // topping ใช้ความหวานปกติ
+                ],
+                $orderDetailId,
+                '100%'
+            );
+
+            // คำนวณ consumables สำหรับ topping
+            $this->calculateConsumable(
+                [
+                    'id' => $topping['id'],
+                    'quantity' => $item['quantity'],
+                    'size' => 'S' // topping มักจะมีขนาดเดียว
+                ],
+                $orderDetailId
+            );
         }
     }
 
