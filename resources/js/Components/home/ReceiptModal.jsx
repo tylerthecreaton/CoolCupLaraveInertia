@@ -217,7 +217,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                                                     {[
                                                         item.size && `ขนาด: ${item.size}`,
                                                         item.sweetness && `หวาน: ${item.sweetness}`,
-                                                        item.toppings && item.toppings !== "[]" && `ท็อปปิ้ง: ${JSON.parse(item.toppings).join(", ")}`
+                                                        item.toppings && item.toppings !== "[]" && `ท็อปปิ้ง: ${JSON.parse(item.toppings).map(topping => `${topping.name} (฿${topping.price})`).join(', ')}`,
                                                     ].filter(Boolean).join(" • ")}
                                                 </div>
                                             )}

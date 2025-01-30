@@ -117,7 +117,7 @@ class OrderController extends Controller
         if (isset($item['isDiscount']) && $item['isDiscount']) {
             return;
         }
-        $product = Product::find($item['productId']);
+        $product = Product::find($item['id']);
         if ($product) {
             try {
                 $productIngredients = ProductIngredients::where('product_id', $product->id)->get();
@@ -176,7 +176,7 @@ class OrderController extends Controller
             }
             $orderDetail = new OrderDetail();
             $orderDetail->order_id = $orderId;
-            $orderDetail->product_id = $item['productId'];
+            $orderDetail->product_id = $item['id'];
             $orderDetail->line_item_id = $item['id'];
             $orderDetail->product_name = $item['name'];
             $orderDetail->product_image = $item['image'];
@@ -195,7 +195,7 @@ class OrderController extends Controller
 
     private function calculateConsumable(array $item, int $orderDetailId)
     {
-        $product = Product::find($item['productId']);
+        $product = Product::find($item['id']);
         if ($product) {
             try {
                 // Get consumables based on product size

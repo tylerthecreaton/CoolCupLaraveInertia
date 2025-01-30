@@ -123,7 +123,7 @@ export default function SidebarMenu() {
                             className="text-blue-500 hover:text-blue-700"
                         >
                             {isOpen ? (
-                                <MenuText>Dashboard</MenuText>
+                                <MenuText>แดชบอร์ด</MenuText>
                             ) : (
                                 <MdDashboard className="text-2xl" />
                             )}

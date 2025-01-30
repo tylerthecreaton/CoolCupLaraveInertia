@@ -5,6 +5,7 @@ import PaymethodModal from "./PaymethodModal";
 import { useGlobalState } from "@/Store/state";
 import { cartActions } from "@/Store/state/cartState";
 import { useForm } from "@inertiajs/react";
+import { isAbsoluteUrl } from "@/helpers";
 
 const ConfirmOrderModal = ({ show, onClose }) => {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -63,7 +64,11 @@ const ConfirmOrderModal = ({ show, onClose }) => {
                                             <div className="flex items-center space-x-4">
                                                 <div className="relative">
                                                     <img
-                                                        src={item.image}
+                                                        src={
+                                                            isAbsoluteUrl(item.image)
+                                                                ? item.image
+                                                                : `/images/products/${item.image}`
+                                                        }
                                                         alt={item.name}
                                                         className="object-cover w-16 h-16 rounded-lg shadow-sm"
                                                     />
@@ -85,13 +90,11 @@ const ConfirmOrderModal = ({ show, onClose }) => {
                                                     )}
                                                     {item.toppings?.length >
                                                         0 && (
-                                                        <p className="text-sm text-gray-500">
-                                                            ท็อปปิ้ง:{" "}
-                                                            {item.toppings.join(
-                                                                ", "
-                                                            )}
-                                                        </p>
-                                                    )}
+                                                            <p className="text-sm text-gray-500">
+                                                                ท็อปปิ้ง:{" "}
+                                                                {item.toppings.map(topping => `${topping.name} (฿${topping.price})`).join(', ')}
+                                                            </p>
+                                                        )}
                                                     {item.sweetness && (
                                                         <p className="text-sm text-gray-500">
                                                             ความหวาน:{" "}

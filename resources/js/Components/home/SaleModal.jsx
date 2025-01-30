@@ -5,6 +5,7 @@ import { useGlobalState } from "@/Store/state";
 import { cartActions } from "@/Store/state/cartState";
 import { appActions } from "@/Store/state/appState";
 import { isAbsoluteUrl } from "@/helpers";
+import axios from "axios";
 
 const ProductModal = ({ show, onClose, product }) => {
     const { state, dispatch } = useGlobalState();
@@ -13,6 +14,7 @@ const ProductModal = ({ show, onClose, product }) => {
     const [sweetness, setSweetness] = useState("100%");
     const [selectedToppings, setSelectedToppings] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
+    const [toppings, setToppings] = useState([]);
 
     const sizes = [
         { label: "S", price: 0, ml: "300ml" },
@@ -22,49 +24,51 @@ const ProductModal = ({ show, onClose, product }) => {
 
     const sweetnessLevels = ["0%", "25%", "50%", "75%", "100%"];
 
-    const toppings = [
-        { name: "ไข่มุก", price: 10 },
-        { name: "ฟองนม", price: 15 },
-        { name: "วิปครีม", price: 15 },
-        { name: "พุดดิ้ง", price: 10 },
-    ];
-
     useEffect(() => {
         if (show) {
             setQuantity(1);
             setSize("S");
             setSweetness("100%");
             setSelectedToppings([]);
+            fetchToppings();
         }
     }, [show]);
+
+    const fetchToppings = async () => {
+        try {
+            const response = await axios.get('/toppings');
+            setToppings(response.data);
+        } catch (error) {
+            console.error('Error fetching toppings:', error);
+        }
+    };
 
     useEffect(() => {
         if (product) {
             const basePrice = parseFloat(product.sale_price || 0);
-            const sizePrice = sizes.find((s) => s.label === size)?.price || 0;
+            const sizePrice = parseFloat(sizes.find((s) => s.label === size)?.price || 0);
             const toppingsPrice = selectedToppings.reduce((total, topping) => {
-                const toppingPrice =
-                    toppings.find((t) => t.name === topping)?.price || 0;
-                return total + toppingPrice;
+                const toppingItem = toppings.find((t) => t.id === topping);
+                return total + parseFloat(toppingItem?.price || 0);
             }, 0);
             const pricePerItem = basePrice + sizePrice + toppingsPrice;
-            setTotalPrice(pricePerItem * quantity);
+            setTotalPrice(pricePerItem * parseInt(quantity));
         }
-    }, [size, selectedToppings, quantity, product]);
+    }, [product, quantity, size, selectedToppings, toppings]);
 
     const handleQuantityChange = (delta) => {
-        const newQuantity = quantity + delta;
-        if (newQuantity >= 1 && newQuantity <= 99) {
+        const newQuantity = parseInt(quantity) + delta;
+        if (newQuantity > 0) {
             setQuantity(newQuantity);
         }
     };
 
-    const handleToppingToggle = (toppingName) => {
+    const handleToppingToggle = (toppingId) => {
         setSelectedToppings((prev) => {
-            if (prev.includes(toppingName)) {
-                return prev.filter((t) => t !== toppingName);
+            if (prev.includes(toppingId)) {
+                return prev.filter((t) => t !== toppingId);
             } else {
-                return [...prev, toppingName];
+                return [...prev, toppingId];
             }
         });
     };
@@ -79,31 +83,30 @@ const ProductModal = ({ show, onClose, product }) => {
     };
 
     const handleAddToCart = () => {
-        const basePrice = parseFloat(product.sale_price || 0);
-        const sizePrice = sizes.find((s) => s.label === size)?.price || 0;
-        const toppingsPrice = selectedToppings.reduce((total, topping) => {
-            const toppingPrice = toppings.find((t) => t.name === topping)?.price || 0;
-            return total + toppingPrice;
-        }, 0);
-        const pricePerItem = basePrice + sizePrice + toppingsPrice;
+        const selectedToppingItems = selectedToppings.map(toppingId => {
+            const topping = toppings.find(t => t.id === toppingId);
+            return {
+                id: parseInt(topping.id),
+                name: topping.name,
+                price: parseFloat(topping.price)
+            };
+        });
 
-        const cartItem = {
-            id: new Date().getTime(),
-            productId: product.id,
-            categoryId: product.category_id,
+        const item = {
+            id: parseInt(product.id),
             name: product.name,
-            image: isAbsoluteUrl(product.image)
-                ? product.image
-                : `/images/products/${product.image}`,
-            price: pricePerItem,
-            quantity: quantity,
+            quantity: parseInt(quantity),
             size: size,
             sweetness: sweetness,
-            toppings: selectedToppings,
+            toppings: selectedToppingItems,
+            price: parseFloat(totalPrice / parseInt(quantity)),
+            total: parseFloat(totalPrice),
+            image: product.image
         };
-        dispatch(cartActions.addToCart(cartItem));
+
+        dispatch(cartActions.addToCart(item));
         dispatch(appActions.setCartOpen(true));
-        handleClose();
+        onClose();
     };
 
     if (!show || !product) return null;
@@ -211,16 +214,16 @@ const ProductModal = ({ show, onClose, product }) => {
                         <div className="grid grid-cols-2 gap-2">
                             {toppings.map((toppingOption) => (
                                 <label
-                                    key={toppingOption.name}
+                                    key={toppingOption.id}
                                     className="flex items-center p-2 space-x-2 rounded border cursor-pointer hover:bg-gray-50"
                                 >
                                     <Checkbox
                                         checked={selectedToppings.includes(
-                                            toppingOption.name
+                                            toppingOption.id
                                         )}
                                         onChange={() =>
                                             handleToppingToggle(
-                                                toppingOption.name
+                                                toppingOption.id
                                             )
                                         }
                                     />

@@ -9,6 +9,7 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import ConfirmOrderModal from "./ConfirmOrderModal";
 import { calculateTotalDiscount } from "@/helpers/promotion-calculator";
+import { isAbsoluteUrl } from "@/helpers";
 
 const CartComponent = () => {
     const user = usePage().props.auth.user;
@@ -304,9 +305,8 @@ const CartComponent = () => {
 
         const discountItem = {
             id: `manual-discount-${Date.now()}`,
-            name: `ส่วนลด (${
-                user ? `${user.name} #${user.id}` : "ผู้ใช้ทั่วไป"
-            })`,
+            name: `ส่วนลด (${user ? `${user.name} #${user.id}` : "ผู้ใช้ทั่วไป"
+                })`,
             price: -amount,
             quantity: 1,
             isDiscount: true,
@@ -454,7 +454,11 @@ const CartComponent = () => {
                                         {!item.isDiscount ? (
                                             <>
                                                 <img
-                                                    src={item.image}
+                                                    src={
+                                                        isAbsoluteUrl(item.image)
+                                                            ? item.image
+                                                            : `/images/products/${item.image}`
+                                                    }
                                                     alt={item.name}
                                                     className="object-cover w-16 h-16 rounded-lg"
                                                 />
@@ -483,14 +487,12 @@ const CartComponent = () => {
                                                     )}
                                                     {item.toppings &&
                                                         item.toppings.length >
-                                                            0 && (
+                                                        0 && (
                                                             <p className="text-sm text-gray-500">
                                                                 <span className="font-medium">
                                                                     ท็อปปิ้ง:
                                                                 </span>{" "}
-                                                                {item.toppings.join(
-                                                                    ", "
-                                                                )}
+                                                                {item.toppings.map(topping => `${topping.name} (฿${topping.price})`).join(', ')}
                                                             </p>
                                                         )}
                                                 </div>

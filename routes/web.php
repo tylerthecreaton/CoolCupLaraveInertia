@@ -78,6 +78,7 @@ Route::get('/member/search', [MemberController::class, 'search'])->name('member.
 Route::middleware('auth')->group(function () {
     Route::get('/receipt-history', [OrderController::class, 'receiptHistory'])->name('receipt.history');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');
+    Route::get('/toppings', [AdminProductsController::class, 'getToppings'])->name('products.toppings');
 
     // ---------------------------Sale Dashboard---------------------------
     Route::get('/sale-dashboard', [SaleDashboardController::class, 'index'])->name('sale.dashboard');

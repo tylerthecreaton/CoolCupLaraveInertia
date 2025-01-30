@@ -173,4 +173,13 @@ class ProductsController extends Controller
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', 'ลบสินค้าเรียบร้อย');
     }
+
+    public function getToppings()
+    {
+        $toppings = Product::where('category_id', 3)
+            ->select('id', 'name', 'sale_price as price')
+            ->get();
+
+        return response()->json($toppings);
+    }
 }
