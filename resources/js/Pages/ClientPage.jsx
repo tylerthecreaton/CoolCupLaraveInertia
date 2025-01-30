@@ -5,6 +5,7 @@ import { Head } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import ReactQrCode from "react-qr-code";
 import "@/../../resources/css/client-page.css";
+import { isAbsoluteUrl } from "@/helpers";
 
 const ShowThankYouModal = ({ localState, isShowing = false }) => {
     return (
@@ -251,15 +252,19 @@ export default function ClientPage() {
                                         key={item.id}
                                         className="flex items-start p-4 space-x-4 bg-gray-50 rounded-lg transition-colors duration-200 hover:bg-gray-100"
                                         style={{
-                                            animationDelay: `${
-                                                index * 100
-                                            }ms`,
+                                            animationDelay: `${index * 100
+                                                }ms`,
                                         }}
                                     >
                                         <img
-                                            src={item.image}
+                                            src={
+                                                isAbsoluteUrl(item.image)
+                                                    ? item.image
+                                                    : `/images/products/${item.image}`
+                                            }
                                             alt={item.name}
                                             className="object-cover w-20 h-20 rounded-lg shadow-sm"
+
                                         />
                                         <div className="flex-1">
                                             <div className="text-lg font-semibold text-gray-800">
@@ -274,31 +279,16 @@ export default function ClientPage() {
                                                     {item.sweetness}
                                                 </span>
                                             </div>
-                                            {item.toppings?.length >
-                                                0 && (
-                                                <div className="mt-2 text-sm text-gray-600">
+                                            {item.toppings && item.toppings.map((topping, idx) => (
+                                                <div className="mt-2 text-sm text-gray-600" key={idx}>
                                                     <span className="font-medium">
                                                         ท็อปปิ้ง:{" "}
                                                     </span>
-                                                    {item.toppings.map(
-                                                        (
-                                                            topping,
-                                                            idx
-                                                        ) => (
-                                                            <span
-                                                                key={
-                                                                    idx
-                                                                }
-                                                                className="inline-block px-2 py-1 mr-1 mb-1 text-xs text-yellow-800 bg-yellow-100 rounded-full"
-                                                            >
-                                                                {
-                                                                    topping
-                                                                }
-                                                            </span>
-                                                        )
-                                                    )}
+                                                    <span className="inline-block px-2 py-1 mr-1 mb-1 text-xs text-yellow-800 bg-yellow-100 rounded-full">
+                                                        {topping.name} (฿{topping.price})
+                                                    </span>
                                                 </div>
-                                            )}
+                                            ))}
                                             <div className="flex justify-between mt-3">
                                                 <span className="text-gray-600">
                                                     จำนวน:{" "}
@@ -341,16 +331,16 @@ export default function ClientPage() {
                                 )}
                                 {localState.cart.pointDiscountAmount >
                                     0 && (
-                                    <div className="flex justify-between text-blue-600">
-                                        <span>ส่วนลดจากคะแนน</span>
-                                        <span className="font-medium">
-                                            -฿
-                                            {localState.cart.pointDiscountAmount?.toFixed(
-                                                2
-                                            )}
-                                        </span>
-                                    </div>
-                                )}
+                                        <div className="flex justify-between text-blue-600">
+                                            <span>ส่วนลดจากคะแนน</span>
+                                            <span className="font-medium">
+                                                -฿
+                                                {localState.cart.pointDiscountAmount?.toFixed(
+                                                    2
+                                                )}
+                                            </span>
+                                        </div>
+                                    )}
                                 <div className="flex justify-between pt-4 text-xl font-semibold text-blue-600 border-t">
                                     <span>ยอดสุทธิ</span>
                                     <span>
@@ -366,19 +356,17 @@ export default function ClientPage() {
                 {/* QR Code Display */}
                 {localState.clientScreen.qrCode && (
                     <div
-                        className={`transition-all duration-300 ${
-                            localState.clientScreen.qrCode.showAsModal
-                                ? "fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-                                : ""
-                        }`}
+                        className={`transition-all duration-300 ${localState.clientScreen.qrCode.showAsModal
+                            ? "fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+                            : ""
+                            }`}
                     >
                         <div
-                            className={`bg-white rounded-xl shadow-2xl p-8 ${
-                                localState.clientScreen.qrCode
-                                    .showAsModal
-                                    ? "max-w-md w-full mx-4 transform transition-all duration-300 scale-100"
-                                    : ""
-                            }`}
+                            className={`bg-white rounded-xl shadow-2xl p-8 ${localState.clientScreen.qrCode
+                                .showAsModal
+                                ? "max-w-md w-full mx-4 transform transition-all duration-300 scale-100"
+                                : ""
+                                }`}
                         >
                             <div className="text-center">
                                 <h3 className="mb-6 text-2xl font-semibold text-gray-800">
@@ -408,32 +396,32 @@ export default function ClientPage() {
                                     </div>
                                     {localState.cart.totalDiscount >
                                         0 && (
-                                        <div className="flex justify-between items-center px-4">
-                                            <span className="text-green-600">
-                                                ส่วนลด:
-                                            </span>
-                                            <span className="text-lg font-semibold text-green-600">
-                                                ฿
-                                                {localState.cart.totalDiscount.toFixed(
-                                                    2
-                                                )}
-                                            </span>
-                                        </div>
-                                    )}
+                                            <div className="flex justify-between items-center px-4">
+                                                <span className="text-green-600">
+                                                    ส่วนลด:
+                                                </span>
+                                                <span className="text-lg font-semibold text-green-600">
+                                                    ฿
+                                                    {localState.cart.totalDiscount.toFixed(
+                                                        2
+                                                    )}
+                                                </span>
+                                            </div>
+                                        )}
                                     {localState.cart
                                         .pointDiscountAmount > 0 && (
-                                        <div className="flex justify-between items-center px-4">
-                                            <span className="text-blue-600">
-                                                ส่วนลดจากคะแนน:
-                                            </span>
-                                            <span className="text-lg font-semibold text-blue-600">
-                                                ฿
-                                                {localState.cart.pointDiscountAmount.toFixed(
-                                                    2
-                                                )}
-                                            </span>
-                                        </div>
-                                    )}
+                                            <div className="flex justify-between items-center px-4">
+                                                <span className="text-blue-600">
+                                                    ส่วนลดจากคะแนน:
+                                                </span>
+                                                <span className="text-lg font-semibold text-blue-600">
+                                                    ฿
+                                                    {localState.cart.pointDiscountAmount.toFixed(
+                                                        2
+                                                    )}
+                                                </span>
+                                            </div>
+                                        )}
                                     <div className="flex justify-between items-center px-4 pt-3 border-t">
                                         <span className="font-medium text-gray-800">
                                             ยอดชำระ:
@@ -452,7 +440,7 @@ export default function ClientPage() {
                 {/* Payment Info Modal */}
                 {localState.clientScreen.paymentInfo?.showAsModal &&
                     !localState.clientScreen.paymentInfo?.status ==
-                        "confirmed" && (
+                    "confirmed" && (
                         <div className="flex fixed inset-0 z-50 justify-center items-center bg-black bg-opacity-50">
                             <div className="p-8 mx-4 w-full max-w-3xl text-center bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-2xl transition-all duration-300 transform">
                                 <div className="space-y-8">
