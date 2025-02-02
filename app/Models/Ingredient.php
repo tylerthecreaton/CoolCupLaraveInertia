@@ -30,7 +30,7 @@ class Ingredient extends Model
 
     public function lots()
     {
-        return $this->hasMany(IngredientLot::class);
+        return $this->hasMany(IngredientLotDetail::class);
     }
 
     public function transformers()

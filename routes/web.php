@@ -19,8 +19,9 @@ use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
 use App\Http\Controllers\Admin\ExpenseCategoryController as AdminExpenseCategoryController;
 use App\Http\Controllers\Admin\WithdrawController as AdminWithdrawController;
 use App\Http\Controllers\Admin\TransformerController as AdminTransformerController;
-use App\Http\Controllers\ClientController;
 use App\Http\Controllers\Admin\ExpiredController as AdminExpiredController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NotificationController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\RegisterMemberController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SaleDashboardController;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -76,6 +78,7 @@ Route::get('/member/search', [MemberController::class, 'search'])->name('member.
 
 // ---------------------------ReceiptHistory---------------------------
 Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/receipt-history', [OrderController::class, 'receiptHistory'])->name('receipt.history');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');
     Route::get('/toppings', [AdminProductsController::class, 'getToppings'])->name('products.toppings');
