@@ -14,36 +14,84 @@ class MemberController extends Controller
     public function index()
     {
         if (request()->has('id')) {
-            $customer = Customer::findOrFail(request()->id);
-            return Inertia::render('Member', ['customer' => $customer]);
+            $customer = Customer::with([
+                'orders' => function ($query) {
+                    $query->latest()->limit(10);
+                },
+                'orders.orderDetails',
+                'pointUsages' => function ($query) {
+                    $query->latest()->limit(10);
+                }
+            ])->findOrFail(request()->id);           
+
+            return Inertia::render('Member', [
+                'customer' => [
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'phone_number' => $customer->phone_number,
+                    'birthdate' => $customer->birthdate,
+                    'loyalty_points' => $customer->loyalty_points,
+                    'created_at' => $customer->created_at,
+                    'updated_at' => $customer->updated_at,
+                    'orders' => $customer->orders->map(function ($order) {
+                        return [
+                            'id' => $order->id,
+                            'total' => $order->orderDetails->sum('subtotal'),
+                            'status' => $order->status,
+                            'created_at' => $order->created_at,
+                            'items' => $order->orderDetails->map(function ($detail) {
+                                return [
+                                    'product_name' => $detail->product_name,
+                                    'quantity' => $detail->quantity,
+                                    'price' => $detail->price,
+                                    'subtotal' => $detail->subtotal
+                                ];
+                            })
+                        ];
+                    }),
+                    'point_usages' => $customer->pointUsages->map(function ($usage) {
+                        $description = $usage->type === 'plus' 
+                            ? 'รับคะแนนจากการสั่งซื้อ #' . $usage->order_id
+                            : 'ใช้คะแนนส่วนลด #' . $usage->order_id;
+
+                        return [
+                            'id' => $usage->id,
+                            'points' => $usage->type === 'plus' ? $usage->point_amount : $usage->point_discount_amount,
+                            'type' => $usage->type,
+                            'description' => $description,
+                            'created_at' => $usage->created_at
+                        ];
+                    })
+                ]
+            ]);
         }
         return Inertia::render('Member');
     }
 
     public function search(Request $request)
     {
-        if ($request->has('phone_number')) {
-            $customer = Customer::where('phone_number', $request->phone_number)->first();
-
-            if ($customer) {
-                // แปลงวันที่เป็นรูปแบบที่ต้องการ
-                $birthdate = $customer->birthdate ? Carbon::parse($customer->birthdate)->format('Y-m-d') : null;
-                $created_at = $customer->created_at ? Carbon::parse($customer->created_at)->format('Y-m-d') : null;
-
-                return response()->json([
-                    'customer' => [
+        if ($request->has('query')) {
+            $query = $request->query('query');
+            $customers = Customer::where('name', 'LIKE', "%{$query}%")
+                ->orWhere('phone_number', 'LIKE', "%{$query}%")
+                ->limit(10)
+                ->get()
+                ->map(function ($customer) {
+                    return [
+                        'id' => $customer->id,
                         'name' => $customer->name,
-                        'birthdate' => $birthdate,
-                        'created_at' => $created_at,
                         'phone_number' => $customer->phone_number,
+                        'birthdate' => $customer->birthdate ? Carbon::parse($customer->birthdate)->format('Y-m-d') : null,
+                        'created_at' => $customer->created_at ? Carbon::parse($customer->created_at)->format('Y-m-d') : null,
                         'points' => $customer->loyalty_points ?? 0,
                         'status' => $customer->status ?? 'active'
-                    ]
-                ]);
-            }
+                    ];
+                });
+
+            return response()->json(['suggestions' => $customers]);
         }
 
-        return response()->json(['customer' => null]);
+        return response()->json(['suggestions' => []]);
     }
 
     public function register()

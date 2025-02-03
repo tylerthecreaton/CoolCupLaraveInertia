@@ -1,25 +1,65 @@
-import React, { useState, useCallback } from "react";
-import { Button, Datepicker, Label, TextInput } from "flowbite-react";
-import { Table } from "flowbite-react";
+import React, { useState, useCallback, useEffect } from "react";
+import { Button, Datepicker, Label, TextInput, Card, Badge, Table } from "flowbite-react";
 import { router } from '@inertiajs/react';
+import axios from 'axios';
 import debounce from 'lodash/debounce';
+import dayjs from 'dayjs';
+import 'dayjs/locale/th';
 
-export default function MainContent({member}) {
+dayjs.locale('th');
+
+export default function MainContent({ member }) {
+    console.log(member);
     const [formData, setFormData] = useState({
-        name: '',
-        phone_number: '',
-        birthdate: '',
-        created_at: ''
+        name: member?.name || '',
+        phone_number: member?.phone_number || '',
+        birthdate: member?.birthdate ? new Date(member.birthdate) : '',
+        created_at: member?.created_at || '',
+        search: ''
     });
 
-    // Create a debounced search function
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    const formatDate = (date) => {
+        return dayjs(date).format('DD/MM/YYYY HH:mm');
+    };
+
+    const formatNumber = (number) => {
+        return new Intl.NumberFormat('th-TH').format(number);
+    };
+
+    const getPointTypeColor = (type) => {
+        return type === 'plus' ? 'success' : 'failure';
+    };
+
+    const getPointTypeText = (type) => {
+        return type === 'plus' ? 'รับคะแนน' : 'ใช้คะแนน';
+    };
+
+    const formatPoints = (points) => {
+        return points ? formatNumber(parseFloat(points).toFixed(2)) : '0.00';
+    };
+
+    // Create a debounced search function for auto-suggestion
     const debouncedSearch = useCallback(
-        debounce((searchData) => {
-            router.get('/member', searchData, {
-                preserveState: true,
-                preserveScroll: true,
-                only: ['members']
-            });
+        debounce(async (query) => {
+            if (query.length >= 2) {
+                try {
+                    const response = await axios.get('/member/search', {
+                        params: { query }
+                    });
+                    setSuggestions(response.data.suggestions);
+                    setShowSuggestions(true);
+                } catch (error) {
+                    console.error('Search error:', error);
+                    setSuggestions([]);
+                    setShowSuggestions(false);
+                }
+            } else {
+                setSuggestions([]);
+                setShowSuggestions(false);
+            }
         }, 300),
         []
     );
@@ -28,217 +68,215 @@ export default function MainContent({member}) {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
         
-        if (name === 'phone_number' && value.length === 10) {
-            // When phone number is complete (10 digits), fetch customer details
-            router.get('/member/search', { phone_number: value }, {
-                preserveState: true,
-                preserveScroll: true,
-                onSuccess: ({ customer }) => {
-                    if (customer) {
-                        const formattedDate = customer.birthdate ? new Date(customer.birthdate) : null;
-                        setFormData(prev => ({
-                            ...prev,
-                            name: customer.name,
-                            birthdate: formattedDate,
-                            created_at: customer.created_at
-                        }));
-                    }
-                }
-            });
-        } else if (name === 'name' || name === 'phone_number') {
-            // Regular search functionality
-            const searchData = {
-                ...formData,
-                [name]: value
-            };
-            debouncedSearch(searchData);
+        if (name === 'search') {
+            debouncedSearch(value);
         }
+    };
+
+    const handleSuggestionClick = (suggestion) => {
+        setFormData({
+            name: suggestion.name,
+            phone_number: suggestion.phone_number,
+            birthdate: suggestion.birthdate ? new Date(suggestion.birthdate) : '',
+            created_at: suggestion.created_at,
+            search: ''
+        });
+        setSuggestions([]);
+        setShowSuggestions(false);
+        router.get(`/member?id=${suggestion.id}`);
+    };
+
+    // Close suggestions when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!event.target.closest('.search-container')) {
+                setShowSuggestions(false);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
+    const getStatusColor = (status) => {
+        const colors = {
+            'completed': 'success',
+            'pending': 'warning',
+            'cancelled': 'failure'
+        };
+        return colors[status] || 'info';
     };
 
     return (
         <main className="flex-1 relative py-6 px-4 bg-gray-50">
             <div className="space-y-6 max-w-screen-2xl mx-auto">
-                <div className="bg-white rounded-lg shadow-sm">
-                    <div className="p-6 border-b border-gray-200 bg-gray-300 rounded-t-lg">
-                        <h2 className="text-xl font-semibold text-gray-800">ข้อมูลสมาชิก</h2>
-                        <p className="mt-1 text-sm text-gray-500">ค้นหาสมาชิก</p>
-                    </div>
-                    <div className="p-6 space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <Label
-                                    htmlFor="name"
-                                    value="ชื่อ-นามสกุล"
-                                    className="text-sm font-medium text-gray-700"
-                                />
-                                <TextInput
-                                    id="name"
-                                    type="text"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleInputChange}
-                                    placeholder="กรุณากรอกชื่อ-นามสกุล"
-                                    className="mt-1"
-                                />
-                            </div>
-                            <div>
-                                <Label
-                                    htmlFor="phone_number"
-                                    value="เบอร์โทรศัพท์"
-                                    className="text-sm font-medium text-gray-700"
-                                />
-                                <TextInput
-                                    id="phone_number"
-                                    type="number"
-                                    name="phone_number"
-                                    value={formData.phone_number}
-                                    onChange={handleInputChange}
-                                    placeholder="กรุณากรอกเบอร์โทรศัพท์"
-                                    className="mt-1"
-                                />
-                            </div>
-                            <div>
-                                <Label
-                                    htmlFor="birthdate"
-                                    value="วัน/เดือน/ปีเกิด"
-                                    className="text-sm font-medium text-gray-700"
-                                />
-                                <Datepicker
-                                    language="th-Th"
-                                    labelTodayButton="วันนี้"
-                                    labelClearButton="ล้าง"
-                                    id="birthdate"
-                                    name="birthdate"
-                                    value={formData.birthdate}
-                                    onChange={date => handleInputChange({ target: { name: 'birthdate', value: date }})}
-                                    placeholder="กรุณากรอกวัน/เดือน/ปีเกิด"
-                                    className="mt-1"
-                                />
-                            </div>
-                            <div>
-                                <Label
-                                    htmlFor="created_at"
-                                    value="วันที่เริ่มเป็นสมาชิก"
-                                    className="text-sm font-medium text-gray-700"
-                                />
-                                <TextInput
-                                    id="created_at"
-                                    type="text"
-                                    name="created_at"
-                                    value={formData.created_at}
-                                    onChange={handleInputChange}
-                                    placeholder="วันที่เริ่มเป็นสมาชิก"
-                                    className="mt-1"
-                                />
-                            </div>
+                {!member && (
+                    <div className="p-4 bg-white rounded-lg shadow">
+                        <div className="relative mb-6 search-container">
+                            <Label htmlFor="search" className="mb-2 block">ค้นหาสมาชิก</Label>
+                            <TextInput
+                                id="search"
+                                type="text"
+                                name="search"
+                                placeholder="ค้นหาด้วยชื่อหรือเบอร์โทรศัพท์"
+                                value={formData.search}
+                                onChange={handleInputChange}
+                                className="w-full"
+                                autoComplete="off"
+                            />
+                            {showSuggestions && suggestions.length > 0 && (
+                                <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1">
+                                    {suggestions.map((suggestion) => (
+                                        <div
+                                            key={suggestion.id}
+                                            className="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
+                                            onClick={() => handleSuggestionClick(suggestion)}
+                                        >
+                                            <div className="font-medium">{suggestion.name}</div>
+                                            <div className="text-sm text-gray-600">{suggestion.phone_number}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
-                </div>
+                )}
 
-                <div className="bg-gray-300 rounded-lg shadow-sm p-6">
-                    <div className="flex items-center justify-between ">
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-800">คะแนนสะสม</h2>
-                            <p className="mt-1 text-sm text-gray-500">คะแนนทั้งหมดของคุณ</p>
+                {member && (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* ข้อมูลสมาชิก */}
+                            <Card className="col-span-2">
+                                <h2 className="text-xl font-semibold mb-4">ข้อมูลสมาชิก</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="name">ชื่อ</Label>
+                                        <TextInput
+                                            id="name"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleInputChange}
+                                            disabled
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="phone_number">เบอร์โทรศัพท์</Label>
+                                        <TextInput
+                                            id="phone_number"
+                                            name="phone_number"
+                                            value={formData.phone_number}
+                                            onChange={handleInputChange}
+                                            disabled
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="birthdate">วันเกิด</Label>
+                                        <TextInput
+                                            id="birthdate"
+                                            name="birthdate"
+                                            value={dayjs(formData.birthdate).format('DD/MM/YYYY')}
+                                            onChange={handleInputChange}
+                                            disabled
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="created_at">วันที่สมัครสมาชิก</Label>
+                                        <TextInput
+                                            id="created_at"
+                                            name="created_at"
+                                            value={formatDate(formData.created_at)}
+                                            onChange={handleInputChange}
+                                            disabled
+                                        />
+                                    </div>
+                                </div>
+                            </Card>
+
+                            {/* คะแนนสะสม */}
+                            <Card>
+                                <div className="text-center">
+                                    <h3 className="text-lg font-medium text-gray-900">คะแนนสะสม</h3>
+                                    <div className="mt-4">
+                                        <p className="text-4xl font-bold text-blue-600">
+                                            {formatPoints(member.loyalty_points)}
+                                        </p>
+                                        <p className="text-sm text-gray-500 mt-1">คะแนน</p>
+                                    </div>
+                                </div>
+                            </Card>
                         </div>
-                        <div className="text-right">
-                            <p className="text-3xl font-bold text-blue-600">100</p>
-                            <p className="text-sm text-gray-500">คะแนน</p>
-                        </div>
-                    </div>
-                </div>
 
-                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                    <div className="p-6 border-b border-gray-200 bg-gray-300 rounded-t-lg">
-                        <h2 className="text-xl font-semibold text-gray-800">ประวัติการใช้คะแนน</h2>
-                        <p className="mt-1 text-sm text-gray-500">รายการใช้คะแนนสะสมทั้งหมดของคุณ</p>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <Table hoverable>
-                            <Table.Head>
-                                <Table.HeadCell className="bg-gray-50">วันที่</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">รายการ</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">ประเภท</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">คะแนนที่ใช้</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">คะแนนคงเหลือ</Table.HeadCell>
-                            </Table.Head>
-                            <Table.Body className="divide-y">
-                                <Table.Row className="bg-white hover:bg-gray-50">
-                                    <Table.Cell className="whitespace-nowrap">
-                                        19/12/2023
-                                    </Table.Cell>
-                                    <Table.Cell>แลกซื้อเครื่องดื่ม</Table.Cell>
-                                    <Table.Cell>
-                                        <span className="px-2 py-1 text-xs font-medium text-red-700 bg-red-100 rounded-full">
-                                            ใช้คะแนน
-                                        </span>
-                                    </Table.Cell>
-                                    <Table.Cell className="text-red-600">-50</Table.Cell>
-                                    <Table.Cell>150</Table.Cell>
-                                </Table.Row>
-                                <Table.Row className="bg-white hover:bg-gray-50">
-                                    <Table.Cell className="whitespace-nowrap">
-                                        18/12/2023
-                                    </Table.Cell>
-                                    <Table.Cell>ซื้อเครื่องดื่ม</Table.Cell>
-                                    <Table.Cell>
-                                        <span className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
-                                            รับคะแนน
-                                        </span>
-                                    </Table.Cell>
-                                    <Table.Cell className="text-green-600">+10</Table.Cell>
-                                    <Table.Cell>200</Table.Cell>
-                                </Table.Row>
-                            </Table.Body>
-                        </Table>
-                    </div>
-                </div>
+                        {/* ประวัติการใช้คะแนน */}
+                        <Card>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-medium">ประวัติการใช้คะแนน</h3>
+                            </div>
+                            <Table hoverable>
+                                <Table.Head>
+                                    <Table.HeadCell>วันที่</Table.HeadCell>
+                                    <Table.HeadCell>รายการ</Table.HeadCell>
+                                    <Table.HeadCell>ประเภท</Table.HeadCell>
+                                    <Table.HeadCell className="text-right">คะแนน</Table.HeadCell>
+                                </Table.Head>
+                                <Table.Body>
+                                    {member.point_usages?.map((usage) => (
+                                        <Table.Row key={usage.id} className="hover:bg-gray-50">
+                                            <Table.Cell>{formatDate(usage.created_at)}</Table.Cell>
+                                            <Table.Cell>{usage.description}</Table.Cell>
+                                            <Table.Cell>
+                                                <Badge color={getPointTypeColor(usage.type)}>
+                                                    {getPointTypeText(usage.type)}
+                                                </Badge>
+                                            </Table.Cell>
+                                            <Table.Cell className={`text-right ${usage.type === 'plus' ? 'text-green-600' : 'text-red-600'}`}>
+                                                {usage.type === 'plus' ? '+' : '-'}{formatPoints(usage.points)}
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    ))}
+                                </Table.Body>
+                            </Table>
+                        </Card>
 
-                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                    <div className="p-6 border-b border-gray-200 bg-gray-300 rounded-t-lg">
-                        <h2 className="text-xl font-semibold text-gray-800">ประวัติการซื้อ</h2>
-                        <p className="mt-1 text-sm text-gray-500">รายการสั่งซื้อทั้งหมดของคุณ</p>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <Table hoverable>
-                            <Table.Head>
-                                <Table.HeadCell className="bg-gray-50">สินค้า</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">รายละเอียด</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">ประเภท</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">ราคา</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">การจัดการ</Table.HeadCell>
-                            </Table.Head>
-                            <Table.Body className="divide-y">
-                                <Table.Row className="bg-white hover:bg-gray-50">
-                                    <Table.Cell className="font-medium text-gray-900">
-                                        Apple MacBook Pro 17
-                                    </Table.Cell>
-                                    <Table.Cell>Sliver</Table.Cell>
-                                    <Table.Cell>Laptop</Table.Cell>
-                                    <Table.Cell>฿99,900</Table.Cell>
-                                    <Table.Cell>
-                                        <a href="#" className="text-blue-600 hover:text-blue-800 font-medium">
-                                            ดูรายละเอียด
-                                        </a>
-                                    </Table.Cell>
-                                </Table.Row>
-                                <Table.Row className="bg-white hover:bg-gray-50">
-                                    <Table.Cell className="font-medium text-gray-900">
-                                        Microsoft Surface Pro
-                                    </Table.Cell>
-                                    <Table.Cell>White</Table.Cell>
-                                    <Table.Cell>Laptop PC</Table.Cell>
-                                    <Table.Cell>฿59,900</Table.Cell>
-                                    <Table.Cell>
-                                        <a href="#" className="text-blue-600 hover:text-blue-800 font-medium">
-                                            ดูรายละเอียด
-                                        </a>
-                                    </Table.Cell>
-                                </Table.Row>
-                            </Table.Body>
-                        </Table>
-                    </div>
-                </div>
+                        {/* ประวัติการสั่งซื้อ */}
+                        <Card>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-medium">ประวัติการสั่งซื้อ</h3>
+                            </div>
+                            <Table hoverable>
+                                <Table.Head>
+                                    <Table.HeadCell>วันที่</Table.HeadCell>
+                                    <Table.HeadCell>รายการ</Table.HeadCell>
+                                    <Table.HeadCell>สถานะ</Table.HeadCell>
+                                    <Table.HeadCell className="text-right">ยอดรวม</Table.HeadCell>
+                                </Table.Head>
+                                <Table.Body>
+                                    {member.orders?.map((order) => (
+                                        <Table.Row key={order.id} className="hover:bg-gray-50">
+                                            <Table.Cell>{formatDate(order.created_at)}</Table.Cell>
+                                            <Table.Cell>
+                                                <div className="space-y-1">
+                                                    {order.items.map((item, index) => (
+                                                        <div key={index} className="text-sm">
+                                                            {item.product_name} x {item.quantity}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                <Badge color={getStatusColor(order.status)}>
+                                                    {order.status}
+                                                </Badge>
+                                            </Table.Cell>
+                                            <Table.Cell className="text-right">฿{formatNumber(order.total)}</Table.Cell>
+                                        </Table.Row>
+                                    ))}
+                                </Table.Body>
+                            </Table>
+                        </Card>
+                    </>
+                )}
             </div>
         </main>
     );

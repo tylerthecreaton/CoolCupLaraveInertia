@@ -4,7 +4,7 @@ import SidebarMenu from "@/Components/home/SidebarMenu";
 import StorefrontLayout from "@/Layouts/StorefrontLayout";
 import { Head } from "@inertiajs/react";
 
-export default function Member({ member = null }) {
+export default function Member({ customer }) {
     return (
         <StorefrontLayout>
             <main className="flex">
@@ -12,7 +12,7 @@ export default function Member({ member = null }) {
                 <div className="flex-1 relative">
                     <HeaderPanel />
                     <Head title="Member" />
-                    <MainContent member={member} />
+                    <MainContent member={customer} />
                 </div>
             </main>
         </StorefrontLayout>

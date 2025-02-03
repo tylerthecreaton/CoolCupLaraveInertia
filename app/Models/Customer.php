@@ -13,4 +13,14 @@ class Customer extends Model
         'phone_number',
         'birthdate',
     ];
+
+    public function pointUsages()
+    {
+        return $this->hasMany(PointUsage::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }
