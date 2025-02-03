@@ -39,13 +39,13 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
             user={auth.user}
             header={
                 <div>
-                        <h2 className="text-2xl font-bold text-gray-800">
-                            สวัสดี, {auth.user.name}! 👋
-                        </h2>
-                        <p className="mt-1 text-gray-600">
-                            ยินดีต้อนรับสู่ระบบจัดการร้าน CoolCupPOS
-                        </p>
-                    </div>
+                    <h2 className="text-2xl font-bold text-gray-800">
+                        สวัสดี, {auth.user.name}! 👋
+                    </h2>
+                    <p className="mt-1 text-gray-600">
+                        ยินดีต้อนรับสู่ระบบจัดการร้าน CoolCupPOS
+                    </p>
+                </div>
             }
         >
             <Head title="Dashboard" />

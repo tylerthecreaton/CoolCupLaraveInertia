@@ -68,13 +68,15 @@ Route::get('/dashboard', function () {
 // ---------------------------ClientPage---------------------------
 Route::get('/client', [ClientController::class, 'showClientPage'])->name('client');
 
-// ---------------------------RegisterMember---------------------------
-Route::get('/registermember', [RegisterMemberController::class, 'index'])->name('registermember');
-
-
 // ---------------------------Member---------------------------
-Route::get('/member', [MemberController::class, 'index'])->name('member');
+Route::get('/registermember', [MemberController::class, 'register'])->name('registermember');
+Route::post('/checkPhoneNumber', [MemberController::class, 'checkPhoneNumber'])->name("member.checkPhoneNumber");
+Route::get('/member', [MemberController::class, 'index'])->name('member.index');
 Route::get('/member/search', [MemberController::class, 'search'])->name('member.search');
+Route::post('/member', [MemberController::class, 'store'])->name('member.store');
+Route::get('/member/edit/{id}', [MemberController::class, 'edit'])->name('member.edit');
+Route::put('/member/{id}', [MemberController::class, 'update'])->name('member.update');
+Route::delete('/member/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
 
 // ---------------------------ReceiptHistory---------------------------
 Route::middleware('auth')->group(function () {

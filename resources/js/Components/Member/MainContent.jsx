@@ -4,7 +4,7 @@ import { Table } from "flowbite-react";
 import { router } from '@inertiajs/react';
 import debounce from 'lodash/debounce';
 
-export default function MainContent() {
+export default function MainContent({member}) {
     const [formData, setFormData] = useState({
         name: '',
         phone_number: '',

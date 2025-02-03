@@ -1,10 +1,15 @@
 import React, { useEffect } from "react";
 import { Button, Datepicker, Label, TextInput } from "flowbite-react";
 import Swal from "sweetalert2";
-import { router, usePage } from "@inertiajs/react";
+import { useForm, usePage } from "@inertiajs/react";
 
 export default function MainContent() {
     const { flash } = usePage().props;
+    const { data, setData, post, processing, errors } = useForm({
+        name: '',
+        phone_number: '',
+        birthdate: null,
+    });
 
     useEffect(() => {
         if (flash.phoneCheck) {
@@ -13,52 +18,50 @@ export default function MainContent() {
     }, [flash.phoneCheck]);
 
     const handlePhoneCheckResult = (exists) => {
-        const statusSpan = document.querySelector(`#phone_number + span`);
-        const phoneInput = document.getElementById("phone_number");
-
         if (exists) {
             Swal.fire({
-                title: '<span class="text-red-500">เบอร์โทรถูกใช้งานแล้ว</span>',
-                html: '<div class="text-gray-600">กรุณาใช้เบอร์โทรอื่นในการสมัครสมาชิก</div>',
-                icon: "error",
-                confirmButtonColor: "#10B981",
-                confirmButtonText: "ตกลง",
-                customClass: {
-                    popup: 'rounded-xl shadow-xl',
-                    title: 'text-xl font-semibold',
-                    htmlContainer: 'text-base'
-                }
+                icon: 'error',
+                title: 'เบอร์นี้มีผู้ใช้งานแล้ว',
+                text: 'กรุณาใช้เบอร์อื่น',
             });
-            statusSpan.innerHTML = `
-                <div class="flex items-center gap-2 text-red-600 animate-fade-in">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="font-medium">เบอร์โทรนี้ถูกใช้งานแล้ว</span>
-                </div>`;
-            phoneInput.className = "w-full focus:ring-2 focus:ring-red-500 border-red-500 transition-all duration-300";
+            return;
         } else {
             Swal.fire({
-                title: '<span class="text-green-500">เบอร์โทรสามารถใช้งานได้</span>',
-                html: '<div class="text-gray-600">คุณสามารถใช้เบอร์โทรนี้ในการสมัครสมาชิก</div>',
-                icon: "success",
-                confirmButtonColor: "#10B981",
-                confirmButtonText: "ตกลง",
-                customClass: {
-                    popup: 'rounded-xl shadow-xl',
-                    title: 'text-xl font-semibold',
-                    htmlContainer: 'text-base'
-                }
+                icon: 'success',
+                title: 'สามารถใช้เบอร์นี้ได้',
+                text: 'คุณสามารถใช้เบอร์นี้ได้',
             });
-            statusSpan.innerHTML = `
-                <div class="flex items-center gap-2 text-green-600 animate-fade-in">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="font-medium">เบอร์โทรนี้สามารถใช้งานได้</span>
-                </div>`;
-            phoneInput.className = "w-full focus:ring-2 focus:ring-green-500 border-green-500 transition-all duration-300";
         }
+    };
+
+    const handleCheckPhoneNumber = async () => {
+        const response = await axios.post(route("member.checkPhoneNumber"), { phone_number: data.phone_number });
+        handlePhoneCheckResult(response.data.exists);
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        post(route("member.store"), {
+            forceFormData: true,
+            onSuccess: () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'สมัครสมาชิกสําเร็จ',
+                    text: 'คุณสามารถเข้าสู่ระบบได้',
+                });
+            },
+            onError: (errors) => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'สมัครสมาชิกไม่สําเร็จ',
+                    text: 'กรุณาลองใหม่อีกครั้ง',
+                });
+            },
+        });
+    };
+
+    const handleDateChange = (date) => {
+        setData('birthdate', date);
     };
 
     return (
@@ -73,7 +76,7 @@ export default function MainContent() {
                     </p>
                 </div>
 
-                <form className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+                <form onSubmit={handleSubmit} className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
                     <div className="space-y-8">
                         <div className="relative">
                             <Label
@@ -84,12 +87,14 @@ export default function MainContent() {
                             <TextInput
                                 id="name"
                                 type="text"
-                                name="name"
+                                value={data.name}
+                                onChange={(e) => setData('name', e.target.value)}
                                 placeholder="กรุณากรอกชื่อ-นามสกุล"
                                 required
                                 className="w-full transition-all duration-300"
                                 sizing="lg"
                             />
+                            {errors.name && <span className="text-red-500">{errors.name}</span>}
                         </div>
 
                         <div className="relative">
@@ -103,7 +108,8 @@ export default function MainContent() {
                                     <TextInput
                                         id="phone_number"
                                         type="number"
-                                        name="phone_number"
+                                        value={data.phone_number}
+                                        onChange={(e) => setData('phone_number', e.target.value)}
                                         placeholder="กรุณากรอกเบอร์โทรศัพท์"
                                         required
                                         className="w-full transition-all duration-300"
@@ -116,114 +122,12 @@ export default function MainContent() {
                                     color="success"
                                     size="lg"
                                     className="whitespace-nowrap px-8 hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg"
-                                    onClick={() => {
-                                        const phoneNumber =
-                                            document.getElementById(
-                                                "phone_number"
-                                            ).value;
-                                        if (phoneNumber.length !== 10) {
-                                            Swal.fire({
-                                                title: '<span class="text-red-500">เบอร์โทรไม่ถูกต้อง</span>',
-                                                html: '<div class="text-gray-600">เบอร์โทรต้องมี 10 หลัก</div>',
-                                                icon: "error",
-                                                confirmButtonColor: "#10B981",
-                                                confirmButtonText: "ตกลง",
-                                                customClass: {
-                                                    popup: 'rounded-xl shadow-xl',
-                                                    title: 'text-xl font-semibold',
-                                                    htmlContainer: 'text-base'
-                                                }
-                                            });
-                                        } else {
-                                            Swal.fire({
-                                                title: '<span class="text-gray-700 font-semibold">ตรวจสอบเบอร์โทร</span>',
-                                                html: `<div class="text-gray-600">เบอร์โทร <span class="font-medium text-gray-800">${phoneNumber}</span> ถูกใช้งานแล้วหรือไม่</div>`,
-                                                icon: "question",
-                                                showCancelButton: true,
-                                                confirmButtonText: 'ตรวจสอบ',
-                                                cancelButtonText: 'ยกเลิก',
-                                                confirmButtonColor: '#10B981',
-                                                cancelButtonColor: '#EF4444',
-                                                customClass: {
-                                                    popup: 'rounded-xl shadow-xl',
-                                                    title: 'text-xl',
-                                                    htmlContainer: 'text-base my-4',
-                                                    confirmButton: 'px-6 py-2.5',
-                                                    cancelButton: 'px-6 py-2.5',
-                                                    actions: 'gap-3'
-                                                }
-                                            }).then((result) => {
-                                                if (result.isConfirmed) {
-                                                    Swal.fire({
-                                                        title: '<span class="text-gray-700">กำลังตรวจสอบ...</span>',
-                                                        html: `<div class="text-gray-600">กำลังตรวจสอบเบอร์โทร <span class="font-medium text-gray-800">${phoneNumber}</span></div>`,
-                                                        allowOutsideClick: false,
-                                                        allowEscapeKey: false,
-                                                        showConfirmButton: false,
-                                                        customClass: {
-                                                            popup: 'rounded-xl shadow-xl',
-                                                            title: 'text-xl font-semibold',
-                                                            htmlContainer: 'text-base my-4'
-                                                        },
-                                                        didOpen: () => {
-                                                            Swal.showLoading();
-                                                        }
-                                                    });
-
-                                                    router.post(
-                                                        "/api/check-phone",
-                                                        {
-                                                            phone_number: phoneNumber,
-                                                        },
-                                                        {
-                                                            preserveScroll: true,
-                                                            onSuccess: () => {},
-                                                            onError: (errors) => {
-                                                                Swal.close();
-
-                                                                Swal.fire({
-                                                                    title: '<span class="text-red-500">เกิดข้อผิดพลาด</span>',
-                                                                    html: '<div class="text-gray-600">ไม่สามารถตรวจสอบเบอร์โทรได้ กรุณาลองใหม่อีกครั้ง</div>',
-                                                                    icon: "error",
-                                                                    confirmButtonColor: "#10B981",
-                                                                    confirmButtonText: "ตกลง",
-                                                                    customClass: {
-                                                                        popup: 'rounded-xl shadow-xl',
-                                                                        title: 'text-xl font-semibold',
-                                                                        htmlContainer: 'text-base my-4',
-                                                                        confirmButton: 'px-6 py-2.5'
-                                                                    }
-                                                                });
-                                                                const statusSpan = document.querySelector(`#phone_number + span`);
-                                                                const phoneInput = document.getElementById("phone_number");
-                                                                statusSpan.innerHTML = `
-                                                                    <div class="flex items-center gap-2 text-red-600 animate-fade-in">
-                                                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                                                                        </svg>
-                                                                        <span class="font-medium">ไม่สามารถตรวจสอบเบอร์โทรได้</span>
-                                                                    </div>`;
-                                                                phoneInput.className = "w-full focus:ring-2 focus:ring-red-500 border-red-500 transition-all duration-300";
-                                                            },
-                                                            onFinish: () => {
-                                                                // Ensure loading state is cleared if something unexpected happens
-                                                                if (
-                                                                    Swal.isVisible() &&
-                                                                    Swal.getTitle()?.textContent === "กำลังตรวจสอบ..."
-                                                                ) {
-                                                                    Swal.close();
-                                                                }
-                                                            },
-                                                        }
-                                                    );
-                                                }
-                                            });
-                                        }
-                                    }}
+                                    onClick={handleCheckPhoneNumber}
                                 >
                                     ตรวจสอบ
                                 </Button>
                             </div>
+                            {errors.phone_number && <span className="text-red-500">{errors.phone_number}</span>}
                         </div>
 
                         <div className="relative">
@@ -233,13 +137,20 @@ export default function MainContent() {
                                 value="วัน/เดือน/ปีเกิด"
                             />
                             <Datepicker
-                                language="th-Th"
                                 labelTodayButton="วันนี้"
                                 labelClearButton="ล้าง"
                                 id="birthdate"
                                 name="birthdate"
+                                value={data.birthdate}
+                                onChange={handleDateChange}
                                 className="w-full focus:ring-2 focus:ring-green-500"
                                 sizing="lg"
+                                maxDate={new Date()}
+                                showmonthdropdown="true"
+                                showyeardropdown="true"
+                                dropdownmode="select"
+                                dateformat="dd/MM/yyyy"
+                                locale="th"
                                 theme={{
                                     root: {
                                         base: "relative",
@@ -252,6 +163,7 @@ export default function MainContent() {
                                     },
                                 }}
                             />
+                            {errors.birthdate && <span className="text-red-500">{errors.birthdate}</span>}
                         </div>
 
                         <div className="pt-4">
@@ -260,8 +172,9 @@ export default function MainContent() {
                                 color="success"
                                 size="lg"
                                 className="w-full text-base font-medium hover:scale-[1.02] transform transition-transform duration-200 hover:shadow-lg"
+                                disabled={processing}
                             >
-                                สมัครสมาชิก
+                                {processing ? 'กำลังสมัคร...' : 'สมัครสมาชิก'}
                             </Button>
                         </div>
                     </div>
