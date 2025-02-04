@@ -22,7 +22,7 @@ class MemberController extends Controller
                 'pointUsages' => function ($query) {
                     $query->latest()->limit(10);
                 }
-            ])->findOrFail(request()->id);           
+            ])->findOrFail(request()->id);
 
             return Inertia::render('Member', [
                 'customer' => [
@@ -50,7 +50,7 @@ class MemberController extends Controller
                         ];
                     }),
                     'point_usages' => $customer->pointUsages->map(function ($usage) {
-                        $description = $usage->type === 'plus' 
+                        $description = $usage->type === 'plus'
                             ? 'รับคะแนนจากการสั่งซื้อ #' . $usage->order_id
                             : 'ใช้คะแนนส่วนลด #' . $usage->order_id;
 

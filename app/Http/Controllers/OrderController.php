@@ -16,13 +16,23 @@ use App\Models\ProductIngredientUsage;
 use App\Models\PromotionUsage;
 use App\Models\Setting;
 use App\Services\OrderCancellationService;
+use Doctrine\DBAL\Logging\Middleware;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
 use Inertia\Inertia;
 
-class OrderController extends Controller
+class OrderController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            'role_or_permission:manager|view dashboard',
+        ];
+    }
     public function store(Request $request)
     {
 
@@ -264,8 +274,8 @@ class OrderController extends Controller
         }
 
         // ถ้า toppings เป็น string (json) ให้แปลงเป็น array
-        $toppings = is_string($item['toppings']) 
-            ? json_decode($item['toppings'], true) 
+        $toppings = is_string($item['toppings'])
+            ? json_decode($item['toppings'], true)
             : $item['toppings'];
 
         if (!is_array($toppings)) {

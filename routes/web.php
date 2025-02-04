@@ -32,38 +32,11 @@ use App\Http\Controllers\RegisterMemberController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SaleDashboardController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index']);
-
-Route::get('/dashboard', function () {
-    $customers = \App\Models\Customer::count();
-    $products = \App\Models\Product::count();
-    $popularProducts = \App\Models\Product::with('category')
-        ->select('products.*')
-        ->limit(5)
-        ->get()
-        ->map(function ($product) {
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'category' => $product->category->name,
-                'total_sales' => rand(50, 100), // Mock sales data
-                'image_url' => $product->image_url
-            ];
-        });
-
-    return Inertia::render('Dashboard', [
-        'stats' => [
-            'customers' => $customers,
-            'products' => $products,
-            'orders' => 289, // Mock data
-            'revenue' => 158900, // Mock data
-            'popularProducts' => $popularProducts
-        ]
-    ]);
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 // ---------------------------ClientPage---------------------------
 Route::get('/client', [ClientController::class, 'showClientPage'])->name('client');
@@ -79,7 +52,7 @@ Route::put('/member/{id}', [MemberController::class, 'update'])->name('member.up
 Route::delete('/member/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
 
 // ---------------------------ReceiptHistory---------------------------
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'can:view dashboard')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/receipt-history', [OrderController::class, 'receiptHistory'])->name('receipt.history');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');
@@ -264,3 +237,7 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+Route::get('/playground', function () {
+    return Auth::user()->roles;
+});
