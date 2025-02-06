@@ -39,12 +39,12 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
         memberPhone: "",
     });
 
-    const settings = state.app.settings;
+    const settings = state.app.settings || [];
     const { total, subtotal, discount } = state.cart;
 
-    const pointPerThb = settings.find(
+    const pointPerThb = Array.isArray(settings) ? settings.find(
         (setting) => setting.key === "point_per_thb"
-    );
+    ) : null;
 
     const [showReceipt, setShowReceipt] = useState(false);
     const [receipt, setReceipt] = useState(null);

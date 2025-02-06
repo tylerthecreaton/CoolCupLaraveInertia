@@ -12,8 +12,8 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
     const [error, setError] = React.useState(null);
     const [isSaving, setIsSaving] = React.useState(false);
     const { state } = useGlobalState();
-    const settings = state.app.settings;
-    const vatRate = settings.find(setting => setting.key === 'vat_rate')?.value || 7;
+    const settings = state.app.settings || [];
+    const vatRate = Array.isArray(settings) ? settings.find(setting => setting.key === 'vat_rate')?.value || 7 : 7;
 
     // แสดงใบเสร็จตอนกด Button พิมพ์ใบเสร็จ
     useEffect(() => {
