@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->comment('ชื่อวัตถุดิบ');
             $table->decimal('quantity', 10, 2)->comment('จำนวน');
-            $table->string('unit')->comment('หน่วย');
+            $table->foreignId('unit_id')->constrained('units')->comment('หน่วย');
             $table->boolean('is_depend_on_sale')->default(false)->comment('ใช้ในการขาย');
             $table->timestamps();
         });

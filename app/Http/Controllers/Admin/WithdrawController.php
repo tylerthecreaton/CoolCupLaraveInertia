@@ -172,6 +172,12 @@ class WithdrawController extends Controller
 
                             // Add to ingredient total
                             $ingredient->increment('quantity', $addAmount);
+                            
+                            // Update expiration date from lot detail
+                            $ingredient->update([
+                                'expiration_date' => $ingredientDetail->expiration_date
+                            ]);
+                            
                             $withdrawItem->unit = optional($ingredient->unit)->name;
                         }
                     } else {

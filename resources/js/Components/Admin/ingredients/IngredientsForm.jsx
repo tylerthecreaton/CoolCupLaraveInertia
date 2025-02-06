@@ -24,9 +24,9 @@ export default function IngredientsForm({
         name: isEditing ? ingredient.name : "",
         unit_id: isEditing ? ingredient.unit_id : "",
         quantity: isEditing ? ingredient.quantity : "",
-        expiration_date: isEditing ? ingredient.expiration_date : "",
         image: null,
         is_sweetness: isEditing ? ingredient.is_sweetness : false,
+        expiration_date: isEditing ? ingredient.expiration_date : "",
     });
 
     const handleFileChange = (e) => {
@@ -215,10 +215,7 @@ export default function IngredientsForm({
                                 onChange={(e) =>
                                     setData("expiration_date", e.target.value)
                                 }
-                                required
-                                color={
-                                    errors.expiration_date ? "failure" : "gray"
-                                }
+                                color={errors.expiration_date ? "failure" : "gray"}
                                 helperText={errors.expiration_date}
                             />
                         </div>

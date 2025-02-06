@@ -118,9 +118,7 @@ export default function Index({ consumables }) {
                                 <Table.HeadCell className="font-semibold text-gray-700 w-28 px-6 text-center">
                                     จำนวน
                                 </Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700 w-28 px-6 text-center">
-                                    หน่วย
-                                </Table.HeadCell>
+
                                 <Table.HeadCell className="font-semibold text-gray-700 w-36 px-6 text-center">
                                     ใช้ในการขาย
                                 </Table.HeadCell>
@@ -193,11 +191,6 @@ export default function Index({ consumables }) {
                                             <Table.Cell className="px-6 text-center">
                                                 <Badge color="purple" className="w-fit mx-auto">
                                                     {consumable.quantity}
-                                                </Badge>
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 text-center">
-                                                <Badge color="info" className="w-fit mx-auto">
-                                                    {consumable.unit}
                                                 </Badge>
                                             </Table.Cell>
                                             <Table.Cell className="px-6 text-center">
