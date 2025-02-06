@@ -1,6 +1,7 @@
+import { can, hasPermissions, hasRole, hasRoles } from "@/helpers";
 import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import {
     Breadcrumb,
     Pagination,
@@ -13,6 +14,7 @@ import { HiHome, HiSearch, HiPlus, HiPencil, HiTrash } from "react-icons/hi";
 import Swal from "sweetalert2";
 
 export default function index({ usersPaginate }) {
+    const { roles, permissions } = usePage().props.auth;
     const { current_page, next_page_url, prev_page_url } = usersPaginate;
     const [users, setUsers] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -185,20 +187,19 @@ export default function index({ usersPaginate }) {
                                         <Table.Cell className="px-6 py-4">
                                             <span
                                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                                ${
-                                                    user.role === "admin"
+                                                ${user.role === "admin"
                                                         ? "bg-purple-100 text-purple-800"
                                                         : user.role ===
-                                                          "manager"
-                                                        ? "bg-blue-100 text-blue-800"
-                                                        : "bg-gray-100 text-gray-800"
-                                                }`}
+                                                            "manager"
+                                                            ? "bg-blue-100 text-blue-800"
+                                                            : "bg-gray-100 text-gray-800"
+                                                    }`}
                                             >
                                                 {user.role === "admin"
                                                     ? "ผู้ดูแลระบบ"
                                                     : user.role === "manager"
-                                                    ? "ผู้จัดการ"
-                                                    : "พนักงาน"}
+                                                        ? "ผู้จัดการ"
+                                                        : "พนักงาน"}
                                             </span>
                                         </Table.Cell>
                                         <Table.Cell className="px-6 py-4">
@@ -213,15 +214,18 @@ export default function index({ usersPaginate }) {
                                                     <HiPencil className="w-4 h-4 mr-1.5" />
                                                     แก้ไข
                                                 </Link>
-                                                <button
-                                                    onClick={() =>
-                                                        handleDelete(user.id)
-                                                    }
-                                                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-md hover:bg-red-100 transition-colors duration-150"
-                                                >
-                                                    <HiTrash className="w-4 h-4 mr-1.5" />
-                                                    ลบ
-                                                </button>
+                                                {hasRoles(['admin'], roles) &&
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDelete(user.id)
+                                                        }
+                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-md hover:bg-red-100 transition-colors duration-150"
+                                                    >
+                                                        <HiTrash className="w-4 h-4 mr-1.5" />
+                                                        ลบ
+                                                    </button>
+
+                                                }
                                             </div>
                                         </Table.Cell>
                                     </Table.Row>

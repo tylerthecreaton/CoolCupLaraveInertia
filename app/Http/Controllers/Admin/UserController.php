@@ -56,6 +56,7 @@ class UserController extends Controller
         $user = new User();
         $user->name = $request->name;
         $user->role = $request->role;
+        $user->assignRole($request->role);
         $user->email = $request->email;
         $user->username = $request->username;
         $user->password = bcrypt($request->password);
@@ -111,6 +112,7 @@ class UserController extends Controller
         $request->validate($rules, $message);
 
         $user = User::find($id);
+        $user->assignRole($request->role);
         $user->name = $request->name;
         $user->role = $request->role;
         $user->email = $request->email;

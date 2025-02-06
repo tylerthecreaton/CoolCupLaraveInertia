@@ -90,3 +90,29 @@ CREATE TABLE refunds (
 -   **รายงาน**: สร้างรายงานประจำวันเพื่อตรวจสอบการคืนเงินและวัตถุดิบเสียหาย
 
 ระบบนี้ช่วยให้ร้านกาแฟจัดการการคืนเงินได้อย่างโปร่งใส และลดข้อผิดพลาดจากมนุษย์ 👍☕
+
+
+tinker command:
+
+```bash
+$permission = \Spatie\Permission\Models\Permission::create(['name' => 'manage settings']);
+
+$admin = \Spatie\Permission\Models\Role::findByName('admin');
+= Spatie\Permission\Models\Role {#5493
+    id: 1,
+    name: "admin",
+    guard_name: "web",
+    created_at: "2025-02-06 19:06:50",
+    updated_at: "2025-02-06 19:06:50",
+  }
+
+> $admin->givePermissionTo(['manage settings']);
+= Spatie\Permission\Models\Role {#5493
+    id: 1,
+    name: "admin",
+    guard_name: "web",
+    created_at: "2025-02-06 19:06:50",
+    updated_at: "2025-02-06 19:06:50",
+  }
+
+```

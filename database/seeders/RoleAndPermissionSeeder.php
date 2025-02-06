@@ -20,10 +20,13 @@ class RoleAndPermissionSeeder extends Seeder
         // Create permissions
         Permission::create(['name' => 'view dashboard']);
         Permission::create(['name' => 'manage users']);
+        Permission::create(['name' => 'manage users:no-delete']);
+        Permission::create(['name' => 'manage categories']);
         Permission::create(['name' => 'manage products']);
         Permission::create(['name' => 'manage orders']);
         Permission::create(['name' => 'view reports']);
         Permission::create(['name' => 'manage inventory']);
+        Permission::create(['name' => 'manage settings']);
 
         // Create roles and assign permissions
         $adminRole = Role::create(['name' => 'admin']);
@@ -34,12 +37,14 @@ class RoleAndPermissionSeeder extends Seeder
             'manage orders',
             'view reports',
             'manage inventory',
+            'manage settings'
         ]);
 
         // Create manager role with most permissions except user management
         $managerRole = Role::create(['name' => 'manager']);
         $managerRole->givePermissionTo([
             'view dashboard',
+            'manage users',
             'manage products',
             'manage orders',
             'view reports',
