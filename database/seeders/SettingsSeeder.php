@@ -59,7 +59,7 @@ class SettingsSeeder extends Seeder
                 'key'=> 'taxpayer_number',
                 'value'=> 'xxx-xxx-xxx',
                 'description' => 'เลขประจำตัวผู้เสียภาษี',
-                'type' => '',
+                'type' => 'system',
                 'comment' => 'เลขประจำตัวผู้เสียภาษี'
             ],
         ];
