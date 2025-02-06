@@ -39,6 +39,11 @@ class AuthenticatedSessionController extends Controller
             $user->assignRole($user->role);
         }
 
+        // Redirect based on user role
+        if ($user && $user->hasRole('employee')) {
+            return redirect()->intended('/');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

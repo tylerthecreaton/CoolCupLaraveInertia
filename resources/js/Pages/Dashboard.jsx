@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DateRangePicker from '../Components/Dashboard/DateRangePicker';
 import SummaryCards from '../Components/Dashboard/SummaryCards';
@@ -16,9 +16,9 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
     const handleDateRangeChange = (newRange) => {
         setDateRange(newRange);
         // Refresh data via Inertia
-        Inertia.get(
+        router.get(
             route('dashboard'),
-            { dateRange: newRange, startDate: startDate, endDate: endDate },
+            { dateRange: newRange },
             { preserveState: true }
         );
     };
@@ -27,9 +27,13 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
         setStartDate(start);
         setEndDate(end);
         // Refresh data via Inertia
-        Inertia.get(
+        router.get(
             route('dashboard'),
-            { dateRange: 'custom', startDate: start, endDate: end },
+            { 
+                dateRange: 'custom', 
+                startDate: start,
+                endDate: end
+            },
             { preserveState: true }
         );
     };
