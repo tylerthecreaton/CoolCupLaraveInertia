@@ -1,6 +1,8 @@
 import { useForm } from "@inertiajs/react";
 import { Label, TextInput, Button, FileInput } from "flowbite-react";
 import { Link } from "@inertiajs/react";
+import { useState } from "react";
+import Swal from "sweetalert2";
 import {
     HiOutlinePhotograph,
     HiCalendar,
@@ -14,6 +16,10 @@ export default function IngredientsForm({
     units = [],
     isEditing = false,
 }) {
+    const [previewImage, setPreviewImage] = useState(
+        isEditing && ingredient.image_url ? ingredient.image_url : null
+    );
+
     const { data, setData, post, put, processing, errors } = useForm({
         name: isEditing ? ingredient.name : "",
         unit_id: isEditing ? ingredient.unit_id : "",
@@ -24,7 +30,17 @@ export default function IngredientsForm({
     });
 
     const handleFileChange = (e) => {
-        setData("image", e.target.files[0]);
+        const file = e.target.files[0];
+        setData("image", file);
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setPreviewImage(null);
+        }
     };
 
     const handleSubmit = (e) => {
@@ -32,10 +48,42 @@ export default function IngredientsForm({
         if (isEditing) {
             put(route("admin.ingredients.update", ingredient.id), data, {
                 forceFormData: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: "สำเร็จ!",
+                        text: "แก้ไขวัตถุดิบเรียบร้อยแล้ว",
+                        icon: "success",
+                        confirmButtonText: "ตกลง",
+                    });
+                },
+                onError: (errors) => {
+                    Swal.fire({
+                        title: "เกิดข้อผิดพลาด!",
+                        text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                        icon: "error",
+                        confirmButtonText: "ตกลง",
+                    });
+                },
             });
         } else {
             post(route("admin.ingredients.store"), data, {
                 forceFormData: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: "สำเร็จ!",
+                        text: "เพิ่มวัตถุดิบใหม่เรียบร้อยแล้ว",
+                        icon: "success",
+                        confirmButtonText: "ตกลง",
+                    });
+                },
+                onError: (errors) => {
+                    Swal.fire({
+                        title: "เกิดข้อผิดพลาด!",
+                        text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                        icon: "error",
+                        confirmButtonText: "ตกลง",
+                    });
+                },
             });
         }
     };
@@ -130,14 +178,16 @@ export default function IngredientsForm({
                                     } bg-white shadow-sm`}
                                 >
                                     <option value="">เลือกหน่วยวัด</option>
-                                    {units.map((unit) => (
-                                        <option key={unit.id} value={unit.id}>
-                                            {unit.name}{" "}
-                                            {unit.abbreviation
-                                                ? `(${unit.abbreviation})`
-                                                : ""}
-                                        </option>
-                                    ))}
+                                    {units
+                                        .filter((unit) => unit.type === "ingredient")
+                                        .map((unit) => (
+                                            <option key={unit.id} value={unit.id}>
+                                                {unit.name}{" "}
+                                                {unit.abbreviation
+                                                    ? `(${unit.abbreviation})`
+                                                    : ""}
+                                            </option>
+                                        ))}
                                 </select>
                                 {errors.unit_id && (
                                     <p className="mt-1 text-sm text-red-600">
@@ -196,47 +246,37 @@ export default function IngredientsForm({
                         <div>
                             <Label
                                 htmlFor="image"
-                                value="รูปภาพวัตถุดิบ"
+                                value="รูปภาพ"
                                 className="inline-flex items-center mb-2"
                             >
                                 <HiOutlinePhotograph className="mr-2 w-5 h-5 text-gray-500" />
-                                <span>รูปภาพวัตถุดิบ</span>
+                                <span>รูปภาพ</span>
                             </Label>
-                            <div className="flex justify-center items-center w-full">
-                                <label
-                                    htmlFor="image"
-                                    className="flex flex-col justify-center items-center w-full h-40 bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer hover:bg-gray-100"
-                                >
-                                    <div className="flex flex-col justify-center items-center pt-5 pb-6">
-                                        <HiOutlinePhotograph className="mb-3 w-8 h-8 text-gray-400" />
-                                        <p className="mb-2 text-sm text-gray-500">
-                                            <span className="font-semibold">
-                                                คลิกเพื่ออัพโหลดรูปภาพ
-                                            </span>
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            PNG, JPG หรือ GIF (สูงสุด 2MB)
-                                        </p>
-                                    </div>
-                                    <input
-                                        id="image"
-                                        type="file"
-                                        className="hidden"
-                                        onChange={handleFileChange}
-                                        accept="image/*"
+                            <FileInput
+                                id="image"
+                                name="image"
+                                onChange={handleFileChange}
+                                color={errors.image ? "failure" : "gray"}
+                                helperText={errors.image}
+                            />
+                            {previewImage && (
+                                <div className="mt-4">
+                                    <img
+                                        src={previewImage}
+                                        alt="Preview"
+                                        className="max-w-xs rounded-lg shadow-md"
                                     />
-                                </label>
-                            </div>
-
-                            {errors.image && (
-                                <p className="mt-1 text-sm text-red-600">
-                                    {errors.image}
-                                </p>
+                                </div>
                             )}
-                            {data.image && (
-                                <p className="mt-2 text-sm text-gray-500">
-                                    ไฟล์ที่เลือก: {data.image.name}
-                                </p>
+                            {isEditing && ingredient.image_url && !previewImage && (
+                                <div className="mt-4">
+                                    <p className="text-sm text-gray-600 mb-2">รูปภาพปัจจุบัน:</p>
+                                    <img
+                                        src={ingredient.image_url}
+                                        alt="Current"
+                                        className="max-w-xs rounded-lg shadow-md"
+                                    />
+                                </div>
                             )}
                         </div>
 

@@ -4,7 +4,7 @@ import axios from "axios";
 import { HiPencil, HiTrash, HiOutlineScale, HiFilter } from "react-icons/hi";
 import Swal from "sweetalert2";
 
-export default function UnitModal({ isOpen, setIsOpen, onEdit }) {
+export default function UnitModal({ show, onClose, onEdit }) {
     const [units, setUnits] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedType, setSelectedType] = useState("all");
@@ -14,10 +14,10 @@ export default function UnitModal({ isOpen, setIsOpen, onEdit }) {
     );
 
     useEffect(() => {
-        if (isOpen) {
+        if (show) {
             fetchUnits();
         }
-    }, [isOpen]);
+    }, [show]);
 
     const fetchUnits = async () => {
         try {
@@ -35,13 +35,9 @@ export default function UnitModal({ isOpen, setIsOpen, onEdit }) {
         }
     };
 
-    const handleClose = () => {
-        setIsOpen(false);
-    };
-
     const handleEdit = (unit) => {
         onEdit(unit);
-        handleClose();
+        onClose();
     };
 
     const handleDelete = (id) => {
@@ -77,7 +73,7 @@ export default function UnitModal({ isOpen, setIsOpen, onEdit }) {
     };
 
     return (
-        <Modal show={isOpen} onClose={handleClose} size="2xl">
+        <Modal show={show} onClose={onClose} size="2xl">
             <Modal.Header className="border-b border-gray-200">
                 <div className="flex items-center space-x-2">
                     <HiOutlineScale className="w-6 h-6 text-gray-600" />
@@ -99,7 +95,7 @@ export default function UnitModal({ isOpen, setIsOpen, onEdit }) {
                                 <HiOutlineScale className="w-8 h-8 text-gray-400" />
                             </div>
                             <h3 className="text-lg font-medium text-gray-900">ไม่พบข้อมูลหน่วยวัด</h3>
-                            <p className="text-gray-500 text-sm">เริ่มต้นโดยการเพิ่มหน่วยวัดใหม่</p>
+                            <p className="text-gray-500">กรุณาเพิ่มหน่วยวัดใหม่</p>
                         </div>
                     </div>
                 ) : (
@@ -183,7 +179,7 @@ export default function UnitModal({ isOpen, setIsOpen, onEdit }) {
                     <div className="text-sm text-gray-600">
                         แสดง {filteredUnits.length} จาก {units.length} รายการ
                     </div>
-                    <Button color="gray" onClick={handleClose}>
+                    <Button color="gray" onClick={onClose}>
                         ปิด
                     </Button>
                 </div>

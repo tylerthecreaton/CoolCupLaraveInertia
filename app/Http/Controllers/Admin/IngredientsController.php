@@ -15,7 +15,7 @@ class IngredientsController extends Controller
 {
     public function index()
     {
-        $ingredientsPaginate = Ingredient::paginate(10);
+        $ingredientsPaginate = Ingredient::with('unit')->paginate(10);
         return Inertia::render("Admin/ingredients/index", compact("ingredientsPaginate"));
     }
     public function create()

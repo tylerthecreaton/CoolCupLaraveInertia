@@ -10,6 +10,9 @@ import {
     Button,
     Modal,
     Label,
+    Card,
+    Badge,
+    Tooltip,
 } from "flowbite-react";
 import {
     HiHome,
@@ -19,6 +22,7 @@ import {
     HiTrash,
     HiPlus as HiPlusCircle,
 } from "react-icons/hi";
+import { FaList, FaBox, FaCalendarAlt, FaBalanceScale, FaInfoCircle } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import { router } from "@inertiajs/react";
@@ -28,7 +32,7 @@ import UnitModal from "@/Components/Admin/ingredients/UnitModal";
 import EditUnitModal from "@/Components/Admin/ingredients/EditUnitModal";
 
 export default function index({ ingredientsPaginate }) {
-    const { current_page, next_page_url, prev_page_url } = ingredientsPaginate;
+    const { current_page, next_page_url, prev_page_url, data, from, to, total, last_page } = ingredientsPaginate;
     const [ingredients, setIngredients] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredIngredients, setFilteredIngredients] = useState([]);
@@ -36,9 +40,6 @@ export default function index({ ingredientsPaginate }) {
     const [showUnitModal, setShowUnitModal] = useState(false);
     const [showEditUnitModal, setShowEditUnitModal] = useState(false);
     const [selectedUnit, setSelectedUnit] = useState(null);
-    const [showIncreaseModal, setShowIncreaseModal] = useState(false);
-    const [selectedIngredient, setSelectedIngredient] = useState(null);
-    const [increaseQuantity, setIncreaseQuantity] = useState("");
 
     const onPageChange = (page) => {
         page > current_page
@@ -99,27 +100,6 @@ export default function index({ ingredientsPaginate }) {
         setShowEditUnitModal(true);
     };
 
-    const handleIncreaseQuantity = () => {
-        router.post(
-            route("admin.ingredients.increase-quantity", selectedIngredient.id),
-            {
-                quantity: parseFloat(increaseQuantity),
-            },
-            {
-                onSuccess: () => {
-                    setShowIncreaseModal(false);
-                    setIncreaseQuantity("");
-                    setSelectedIngredient(null);
-                },
-            }
-        );
-    };
-
-    const openIncreaseModal = (ingredient) => {
-        setSelectedIngredient(ingredient);
-        setShowIncreaseModal(true);
-    };
-
     return (
         <AuthenticatedLayout
             header={
@@ -129,317 +109,254 @@ export default function index({ ingredientsPaginate }) {
             }
         >
             <Head title="จัดการวัตถุดิบ" />
-            <AdminLayout className="container p-8 mx-auto mt-5 bg-white rounded-lg shadow-sm">
-                <div className="space-y-6">
-                    {/* Breadcrumb */}
-                    <div className="flex items-center justify-between">
-                        <Breadcrumb
-                            aria-label="Breadcrumb navigation"
-                            className="py-2"
-                        >
-                            <Breadcrumb.Item
-                                href={route("dashboard")}
-                                icon={HiHome}
-                            >
-                                หน้าแรก
-                            </Breadcrumb.Item>
-                            <Breadcrumb.Item>วัตถุดิบทั้งหมด</Breadcrumb.Item>
-                        </Breadcrumb>
+            <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+                <div className="mb-6">
+                    <Breadcrumb aria-label="Default breadcrumb example">
+                        <Breadcrumb.Item href={route("dashboard")} icon={HiHome}>
+                            <p className="text-gray-700 hover:text-blue-600 transition-colors">หน้าแรก</p>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>
+                            <p className="text-gray-700">วัตถุดิบ</p>
+                        </Breadcrumb.Item>
+                    </Breadcrumb>
+                </div>
+
+                <Card className="shadow-lg">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg shadow-md">
+                                <FaBox className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900">รายการวัตถุดิบ</h2>
+                                <p className="text-sm text-gray-500">จัดการข้อมูลวัตถุดิบทั้งหมด</p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                            <div className="relative flex-1 lg:w-64">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <HiSearch className="w-4 h-4 text-gray-400" />
+                                </div>
+                                <TextInput
+                                    type="text"
+                                    className="pl-10"
+                                    placeholder="ค้นหาวัตถุดิบ..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex gap-2">
+                                <Dropdown
+                                    label="จัดการหน่วยวัด"
+                                    className="w-full sm:w-auto"
+                                    dismissOnClick={true}
+                                >
+                                    <Dropdown.Item onClick={() => setShowUnitModal(true)}>
+                                        หน่วยวัด
+                                    </Dropdown.Item>
+                                    <Dropdown.Item onClick={() => setShowCreateUnitModal(true)}>
+                                        เพิ่มหน่วยวัด
+                                    </Dropdown.Item>
+                                </Dropdown>
+                                <Link href={route("admin.ingredients.create")}>
+                                    <Button gradientDuoTone="cyanToBlue" size="sm" className="w-full sm:w-auto shadow-sm hover:shadow-md transition-all duration-200">
+                                        <HiPlus className="mr-2 w-4 h-4" />
+                                        เพิ่มวัตถุดิบ
+                                    </Button>
+                                </Link>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="w-full sm:w-72">
-                            <TextInput
-                                icon={HiSearch}
-                                placeholder="ค้นหาวัตถุดิบ..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="transition-all duration-200 focus:ring-2 focus:ring-primary-500"
-                            />
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <Dropdown
-                                label="จัดการหน่วยวัด"
-                                className=""
-                                dismissOnClick={true}
-                            >
-                                <Dropdown.Item
-                                    onClick={() => setShowUnitModal(true)}
-                                >
-                                    หน่วยวัด
-                                </Dropdown.Item>
-                                <Dropdown.Item
-                                    onClick={() => setShowCreateUnitModal(true)}
-                                >
-                                    เพิ่มหน่วยวัด
-                                </Dropdown.Item>
-                            </Dropdown>
-                            <Link
-                                href={route("admin.ingredients.create")}
-                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-cyan-600 rounded-lg hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 hover:scale-105"
-                            >
-                                <HiPlus className="w-5 h-5 mr-2" />
-                                เพิ่มวัตถุดิบ
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
-                        <Table hoverable>
-                            <Table.Head>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    ลําดับ
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    รูปภาพ
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    เป็นสารให้ความหวาน
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    ชื่อวัตถุดิบ
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    ปริมาณคงเหลือ
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    วันหมดอายุ
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    <span className="sr-only">Actions</span>
-                                </Table.HeadCell>
+                    <div className="overflow-x-auto">
+                        <Table hoverable className="shadow-sm">
+                            <Table.Head className="bg-gradient-to-r from-gray-50 to-gray-100">
+                                <Table.HeadCell className="font-semibold text-gray-700">ลําดับ</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700">รูปภาพ</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700">เป็นสารให้ความหวาน</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700">ชื่อวัตถุดิบ</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700">ปริมาณคงเหลือ</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700">วันหมดอายุ</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700 text-right">จัดการ</Table.HeadCell>
                             </Table.Head>
-                            <Table.Body className="divide-y divide-gray-200">
-                                {filteredIngredients.map(
-                                    (ingredient, index) => (
-                                        <Table.Row
-                                            key={ingredient.id}
-                                            className="bg-white transition-colors duration-150 hover:bg-gray-50/60"
-                                        >
-                                            <Table.Cell className="px-6 py-4 font-medium text-gray-900">
-                                                {(current_page - 1) *
-                                                    ingredientsPaginate.per_page +
-                                                    index +
-                                                    1}
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <div className="relative w-20 h-20 overflow-hidden rounded-lg group">
-                                                    <img
-                                                        src={
-                                                            isAbsoluteUrl(
-                                                                ingredient.image
-                                                            )
-                                                                ? ingredient.image
-                                                                : `/images/ingredients/${ingredient.image}`
-                                                        }
-                                                        alt={ingredient.name}
-                                                        className="object-cover w-full h-full transition-transform duration-200 group-hover:scale-110"
-                                                    />
-                                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-200" />
-                                                </div>
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">
-                                                    {ingredient.is_sweetness
-                                                        ? "ใช่"
-                                                        : "ไม่ใช่"}
-                                                </div>
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">
+                            <Table.Body className="divide-y">
+                                {filteredIngredients.map((ingredient, index) => (
+                                    <Table.Row
+                                        key={ingredient.id}
+                                        className="bg-white hover:bg-gray-50 transition-colors"
+                                    >
+                                        <Table.Cell className="font-medium text-gray-900">
+                                            {(current_page - 1) * ingredientsPaginate.per_page + index + 1}
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <div className="relative w-16 h-16 overflow-hidden rounded-lg group">
+                                                <img
+                                                    src={
+                                                        isAbsoluteUrl(ingredient.image)
+                                                            ? ingredient.image
+                                                            : `/images/ingredients/${ingredient.image}`
+                                                    }
+                                                    alt={ingredient.name}
+                                                    className="object-cover w-full h-full transition-transform duration-200 group-hover:scale-110"
+                                                />
+                                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-200" />
+                                            </div>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <div className="font-medium text-gray-900">
+                                                {ingredient.is_sweetness ? (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        ใช่
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                        ไม่ใช่
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <Tooltip
+                                                content={
+                                                    <div className="p-2 max-w-xs">
+                                                        <div className="space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <FaBox className="w-4 h-4 text-cyan-400" />
+                                                                <span className="font-medium">{ingredient.name}</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                                                <div>
+                                                                    <p className="text-gray-500">ปริมาณ:</p>
+                                                                    <p className="font-medium">
+                                                                        {ingredient.quantity} {ingredient.unit?.name}
+                                                                    </p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-gray-500">วันหมดอายุ:</p>
+                                                                    <p className="font-medium">
+                                                                        {new Date(ingredient.expiration_date).toLocaleDateString("th-TH", {
+                                                                            year: "numeric",
+                                                                            month: "long",
+                                                                            day: "numeric",
+                                                                        })}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            >
+                                                <div className="font-medium text-gray-900 cursor-help">
                                                     {ingredient.name}
                                                 </div>
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">
-                                                    {ingredient.quantity}{" "}
-                                                    {ingredient.unit}
-                                                </div>
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">
-                                                    {new Date(
-                                                        ingredient.expiration_date
-                                                    ).toLocaleDateString(
-                                                        "th-TH",
-                                                        {
-                                                            year: "numeric",
-                                                            month: "long",
-                                                            day: "numeric",
-                                                        }
-                                                    )}
-                                                </div>
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4 max-w-xs">
-                                                <p className="text-gray-600 truncate">
-                                                    {ingredient.description}
-                                                </p>
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() =>
-                                                            openIncreaseModal(
-                                                                ingredient
-                                                            )
-                                                        }
-                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 rounded-md hover:bg-green-100 transition-colors duration-150"
-                                                    >
-                                                        <HiPlusCircle className="w-4 h-4 mr-1.5" />
-                                                        เพิ่มจำนวน
-                                                    </button>
-                                                    <Link
-                                                        href={route(
-                                                            "admin.ingredients.edit",
-                                                            ingredient.id
-                                                        )}
-                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-700 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors duration-150"
-                                                    >
-                                                        <HiPencil className="w-4 h-4 mr-1.5" />
-                                                        แก้ไข
-                                                    </Link>
-                                                    <button
-                                                        onClick={() =>
-                                                            handleDelete(
-                                                                ingredient.id
-                                                            )
-                                                        }
-                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-md hover:bg-red-100 transition-colors duration-150"
-                                                    >
-                                                        <HiTrash className="w-4 h-4 mr-1.5" />
-                                                        ลบ
-                                                    </button>
-                                                </div>
-                                            </Table.Cell>
-                                        </Table.Row>
-                                    )
-                                )}
-                                {filteredIngredients.length === 0 && (
-                                    <Table.Row>
-                                        <Table.Cell
-                                            colSpan={5}
-                                            className="px-6 py-8 text-center"
-                                        >
-                                            <div className="flex flex-col items-center justify-center text-gray-500">
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    className="w-12 h-12 mb-4 text-gray-400"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
+                                            </Tooltip>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <div className="font-medium text-gray-900">
+                                                {ingredient.quantity}{" "}
+                                                {ingredient.unit?.name}
+                                            </div>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <div className="font-medium text-gray-900">
+                                                {new Date(ingredient.expiration_date).toLocaleDateString("th-TH", {
+                                                    year: "numeric",
+                                                    month: "long",
+                                                    day: "numeric",
+                                                })}
+                                            </div>
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Link
+                                                    href={route("admin.ingredients.edit", ingredient.id)}
+                                                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-cyan-700 bg-cyan-50 rounded-md hover:bg-cyan-100 transition-colors duration-150"
                                                 >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                                                    />
-                                                </svg>
-                                                <p className="text-lg font-medium">
-                                                    ไม่พบข้อมูลหมวดหมู่
-                                                </p>
-                                                <p className="mt-1 text-sm">
-                                                    ลองค้นหาด้วยคำค้นอื่น
-                                                    หรือล้างตัวกรอง
-                                                </p>
+                                                    <HiPencil className="w-4 h-4 mr-1.5" />
+                                                    แก้ไข
+                                                </Link>
+                                                <button
+                                                    onClick={() => handleDelete(ingredient.id)}
+                                                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-md hover:bg-red-100 transition-colors duration-150"
+                                                >
+                                                    <HiTrash className="w-4 h-4 mr-1.5" />
+                                                    ลบ
+                                                </button>
                                             </div>
                                         </Table.Cell>
                                     </Table.Row>
-                                )}
+                                ))}
                             </Table.Body>
                         </Table>
                     </div>
-
-                    {/* Pagination */}
-                    <div className="flex flex-col items-center justify-between gap-4 px-4 py-3 sm:flex-row bg-gray-50 rounded-lg">
-                        <div className="text-sm text-gray-700">
-                            แสดง{" "}
-                            <span className="font-medium text-gray-900">
-                                {ingredientsPaginate.from}
-                            </span>{" "}
-                            ถึง{" "}
-                            <span className="font-medium text-gray-900">
-                                {ingredientsPaginate.to}
-                            </span>{" "}
-                            จาก{" "}
-                            <span className="font-medium text-gray-900">
-                                {ingredientsPaginate.total}
-                            </span>{" "}
-                            รายการ
-                        </div>
-                        <div className="flex justify-center">
+                    {data.length > 0 && (
+                        <div className="flex items-center justify-between px-4 py-6">
+                            <div className="text-sm text-gray-600">
+                                แสดง {from} ถึง {to} จากทั้งหมด{" "}
+                                {total} รายการ
+                            </div>
                             <Pagination
                                 currentPage={current_page}
-                                onPageChange={onPageChange}
-                                showIcons={true}
-                                totalPages={Math.ceil(
-                                    ingredientsPaginate.total /
-                                        ingredientsPaginate.per_page
-                                )}
+                                totalPages={last_page}
+                                onPageChange={(page) => {
+                                    router.get(
+                                        route("admin.ingredients.index"),
+                                        { page: page },
+                                        { preserveState: true, preserveScroll: true }
+                                    );
+                                }}
+                                showIcons
+                                layout="pagination"
+                                theme={{
+                                    pages: {
+                                        base: "xs:mt-0 mt-2 inline-flex items-center -space-x-px",
+                                        showIcon: "inline-flex",
+                                        previous: {
+                                            base: "ml-0 rounded-l-lg border border-gray-300 bg-white py-2 px-3 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700",
+                                            icon: "h-5 w-5"
+                                        },
+                                        next: {
+                                            base: "rounded-r-lg border border-gray-300 bg-white py-2 px-3 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700",
+                                            icon: "h-5 w-5"
+                                        },
+                                        selector: {
+                                            base: "w-12 border border-gray-300 bg-white py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700",
+                                            active: "bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700",
+                                            disabled: "opacity-50 cursor-normal"
+                                        }
+                                    }
+                                }}
                             />
                         </div>
-                    </div>
-                </div>
+                    )}
+                </Card>
+            </div>
+
+            {/* Modals */}
+            {showCreateUnitModal && (
                 <CreateUnitModal
-                    isOpen={showCreateUnitModal}
-                    setIsOpen={setShowCreateUnitModal}
+                    show={showCreateUnitModal}
+                    onClose={() => setShowCreateUnitModal(false)}
                 />
+            )}
+            {showUnitModal && (
                 <UnitModal
-                    isOpen={showUnitModal}
-                    setIsOpen={setShowUnitModal}
+                    show={showUnitModal}
+                    onClose={() => setShowUnitModal(false)}
                     onEdit={handleEditUnit}
                 />
+            )}
+            {showEditUnitModal && selectedUnit && (
                 <EditUnitModal
-                    isOpen={showEditUnitModal}
-                    setIsOpen={setShowEditUnitModal}
+                    show={showEditUnitModal}
+                    onClose={() => {
+                        setShowEditUnitModal(false);
+                        setSelectedUnit(null);
+                    }}
                     unit={selectedUnit}
                 />
-                <Modal
-                    show={showIncreaseModal}
-                    onClose={() => setShowIncreaseModal(false)}
-                >
-                    <Modal.Header>
-                        เพิ่มจำนวนวัตถุดิบ {selectedIngredient?.name}
-                    </Modal.Header>
-                    <Modal.Body>
-                        <div className="space-y-4">
-                            <div>
-                                <Label
-                                    htmlFor="quantity"
-                                    value="จำนวนที่ต้องการเพิ่ม"
-                                />
-                                <div className="flex items-center gap-2">
-                                    <TextInput
-                                        id="quantity"
-                                        type="number"
-                                        step="0.01"
-                                        min="0.01"
-                                        value={increaseQuantity}
-                                        onChange={(e) =>
-                                            setIncreaseQuantity(e.target.value)
-                                        }
-                                        placeholder="ระบุจำนวน"
-                                    />
-                                    <span className="text-gray-500">
-                                        {selectedIngredient?.unit}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button
-                            color="gray"
-                            onClick={() => setShowIncreaseModal(false)}
-                        >
-                            ยกเลิก
-                        </Button>
-                        <Button onClick={handleIncreaseQuantity}>
-                            เพิ่มจำนวน
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
-            </AdminLayout>
+            )}
         </AuthenticatedLayout>
     );
 }

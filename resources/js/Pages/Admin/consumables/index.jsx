@@ -1,39 +1,26 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link } from "@inertiajs/react";
-import {
-    Breadcrumb,
-    Dropdown,
-    Pagination,
-    Table,
-    TextInput,
-    Button,
-    Badge,
-} from "flowbite-react";
-import { HiHome, HiSearch, HiPlus, HiPencil, HiTrash, HiOutlineExclamationCircle, HiPlusCircle } from "react-icons/hi";
-import Swal from "sweetalert2";
-import { useEffect, useState } from "react";
+import { Breadcrumb, Button, Table, Card, Badge, Tooltip, Pagination } from "flowbite-react";
+import { FaList, FaPlus, FaEdit, FaTrash, FaBoxOpen, FaCalendarAlt, FaUser, FaInfoCircle, FaSearch, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { HiHome } from "react-icons/hi";
+import { useState } from "react";
 import { router } from "@inertiajs/react";
-import { isAbsoluteUrl } from "@/helpers";
+import Swal from "sweetalert2";
 
-export default function Index({ auth, consumables }) {
+export default function Index({ consumables }) {
     const [search, setSearch] = useState("");
-    const [filteredConsumables, setFilteredConsumables] = useState(consumables.data);
 
-    useEffect(() => {
-        const results = consumables.data.filter((consumable) =>
-            Object.values({
-                name: consumable.name,
-                unit: consumable.unit,
-            }).some((value) =>
-                value
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(search.toLowerCase())
-            )
+    const handleSearch = (e) => {
+        setSearch(e.target.value);
+        router.get(
+            route("admin.consumables.index"),
+            { search: e.target.value },
+            {
+                preserveState: true,
+                replace: true,
+            }
         );
-        setFilteredConsumables(results);
-    }, [search, consumables.data]);
+    };
 
     const handleDelete = (id, name) => {
         Swal.fire({
@@ -72,75 +59,87 @@ export default function Index({ auth, consumables }) {
                 </h2>
             }
         >
-            <Head title="จัดการวัตถุดิบสิ้นเปลือง | Cool Cup" />
-            <AdminLayout className="container p-8 mx-auto mt-5 bg-white rounded-lg shadow-sm">
-                <div className="space-y-6">
-                    {/* Breadcrumb */}
-                    <div className="flex items-center justify-between">
-                        <Breadcrumb aria-label="Breadcrumb navigation" className="py-2">
-                            <Breadcrumb.Item href={route("dashboard")} icon={HiHome}>
-                                หน้าแรก
-                            </Breadcrumb.Item>
-                            <Breadcrumb.Item>วัตถุดิบสิ้นเปลืองทั้งหมด</Breadcrumb.Item>
-                        </Breadcrumb>
-                    </div>
+            <Head title="จัดการวัตถุดิบสิ้นเปลือง" />
+            <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+                <div className="mb-6">
+                    <Breadcrumb aria-label="Default breadcrumb example">
+                        <Breadcrumb.Item href="/dashboard" icon={HiHome}>
+                            <p className="text-gray-700 hover:text-blue-600 transition-colors">หน้าแรก</p>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item href={route("admin.consumables.index")}>
+                            <p className="text-gray-700 hover:text-blue-600 transition-colors">วัตถุดิบสิ้นเปลือง</p>
+                        </Breadcrumb.Item>
+                    </Breadcrumb>
+                </div>
 
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="w-full sm:w-72">
-                            <TextInput
-                                icon={HiSearch}
-                                placeholder="ค้นหาวัตถุดิบสิ้นเปลือง..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="transition-all duration-200 focus:ring-2 focus:ring-primary-500"
-                            />
+                <Card className="shadow-lg">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md">
+                                <FaBoxOpen className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900">รายการวัตถุดิบสิ้นเปลือง</h2>
+                                <p className="text-sm text-gray-500">จัดการข้อมูลวัตถุดิบสิ้นเปลืองทั้งหมด</p>
+                            </div>
                         </div>
-                        <Link
-                            href={route("admin.consumables.create")}
-                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-cyan-600 rounded-lg hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 hover:scale-105"
-                        >
-                            <HiPlus className="w-5 h-5 mr-2" />
-                            เพิ่มวัตถุดิบสิ้นเปลือง
-                        </Link>
+
+                        <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                            <div className="relative flex-1 lg:w-64">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <FaSearch className="w-4 h-4 text-gray-400" />
+                                </div>
+                                <input
+                                    type="text"
+                                    className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-100 focus:border-purple-500 text-sm"
+                                    placeholder="ค้นหาวัตถุดิบสิ้นเปลือง..."
+                                    value={search}
+                                    onChange={handleSearch}
+                                />
+                            </div>
+                            <Link href={route("admin.consumables.create")}>
+                                <Button gradientDuoTone="purpleToBlue" size="sm" className="w-full sm:w-auto shadow-sm hover:shadow-md transition-all duration-200">
+                                    <FaPlus className="mr-2 w-4 h-4" />
+                                    เพิ่มวัตถุดิบสิ้นเปลือง
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
 
-                    <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
-                        <Table hoverable>
-                            <Table.Head>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    ลําดับ
+                    <div className="overflow-x-auto">
+                        <Table hoverable className="shadow-sm">
+                            <Table.Head className="bg-gradient-to-r from-gray-50 to-gray-100">
+                                <Table.HeadCell className="font-semibold text-gray-700 w-20 px-6">
+                                    รหัส
                                 </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    ชื่อวัตถุดิบสิ้นเปลือง
+                                <Table.HeadCell className="font-semibold text-gray-700 px-6">
+                                    ชื่อ
                                 </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
+                                <Table.HeadCell className="font-semibold text-gray-700 w-28 px-6 text-center">
                                     จำนวน
                                 </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
+                                <Table.HeadCell className="font-semibold text-gray-700 w-28 px-6 text-center">
                                     หน่วย
                                 </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
+                                <Table.HeadCell className="font-semibold text-gray-700 w-36 px-6 text-center">
                                     ใช้ในการขาย
                                 </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    วันที่เพิ่มรายการ
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    <span className="sr-only">Actions</span>
+                                <Table.HeadCell className="font-semibold text-gray-700 w-44 px-6 text-right">
+                                    จัดการ
                                 </Table.HeadCell>
                             </Table.Head>
-                            <Table.Body className="divide-y divide-gray-200">
-                                {filteredConsumables.length === 0 ? (
+                            <Table.Body className="divide-y">
+                                {consumables.data.length === 0 ? (
                                     <Table.Row>
-                                        <Table.Cell colSpan={7} className="px-6 py-8 text-center">
+                                        <Table.Cell colSpan={6} className="text-center py-12">
                                             <div className="flex flex-col items-center justify-center text-gray-500">
-                                                <HiOutlineExclamationCircle className="w-12 h-12 mb-4 text-gray-400" />
+                                                <FaBoxOpen className="w-12 h-12 mb-4 text-gray-400" />
                                                 <h3 className="mb-2 text-base font-medium text-gray-900">ไม่พบข้อมูล</h3>
                                                 <p className="text-sm text-gray-500">เริ่มต้นโดยการเพิ่มวัตถุดิบสิ้นเปลือง</p>
                                                 <div className="mt-6">
                                                     <Link href={route("admin.consumables.create")}>
                                                         <Button gradientDuoTone="purpleToBlue" size="sm">
-                                                            <HiPlus className="w-5 h-5 mr-2" />
+                                                            <FaPlus className="w-4 h-4 mr-2" />
                                                             เพิ่มวัตถุดิบสิ้นเปลือง
                                                         </Button>
                                                     </Link>
@@ -149,59 +148,85 @@ export default function Index({ auth, consumables }) {
                                         </Table.Cell>
                                     </Table.Row>
                                 ) : (
-                                    filteredConsumables.map((consumable, index) => (
+                                    consumables.data.map((consumable) => (
                                         <Table.Row
                                             key={consumable.id}
-                                            className="bg-white transition-colors duration-150 hover:bg-gray-50/60"
+                                            className="bg-white hover:bg-gray-50 transition-colors"
                                         >
-                                            <Table.Cell className="px-6 py-4 font-medium text-gray-900">
-                                                {(consumables.current_page - 1) * consumables.per_page + index + 1}
+                                            <Table.Cell className="font-medium text-gray-900 whitespace-nowrap px-6">
+                                                #{consumable.id}
                                             </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">
-                                                    {consumable.name}
-                                                </div>
+                                            <Table.Cell className="px-6">
+                                                <Tooltip
+                                                    content={
+                                                        <div className="p-2 max-w-xs">
+                                                            <div className="space-y-2">
+                                                                <div className="flex items-center gap-2">
+                                                                    <FaBoxOpen className="w-4 h-4 text-purple-400" />
+                                                                    <span className="font-medium">{consumable.name}</span>
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                                                    <div>
+                                                                        <p className="text-gray-500">จำนวน:</p>
+                                                                        <p className="font-medium">{consumable.quantity} {consumable.unit}</p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-gray-500">ใช้ในการขาย:</p>
+                                                                        <p className="font-medium">
+                                                                            {consumable.is_depend_on_sale ? (
+                                                                                <span className="text-green-600">ใช่</span>
+                                                                            ) : (
+                                                                                <span className="text-red-600">ไม่</span>
+                                                                            )}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                >
+                                                    <span className="cursor-help border-b border-dashed border-gray-400">
+                                                        {consumable.name}
+                                                    </span>
+                                                </Tooltip>
                                             </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">
+                                            <Table.Cell className="px-6 text-center">
+                                                <Badge color="purple" className="w-fit mx-auto">
                                                     {consumable.quantity}
-                                                </div>
+                                                </Badge>
                                             </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <Badge color="gray" size="sm">
+                                            <Table.Cell className="px-6 text-center">
+                                                <Badge color="info" className="w-fit mx-auto">
                                                     {consumable.unit}
                                                 </Badge>
                                             </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
+                                            <Table.Cell className="px-6 text-center">
                                                 {consumable.is_depend_on_sale ? (
-                                                    <Badge color="success">ใช่</Badge>
+                                                    <Badge color="success" className="w-fit mx-auto">
+                                                        <FaCheckCircle className="w-3 h-3 mr-1" />
+                                                        ใช้งาน
+                                                    </Badge>
                                                 ) : (
-                                                    <Badge color="gray">ไม่</Badge>
+                                                    <Badge color="failure" className="w-fit mx-auto">
+                                                        <FaTimesCircle className="w-3 h-3 mr-1" />
+                                                        ไม่ใช้งาน
+                                                    </Badge>
                                                 )}
                                             </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">
-                                                    {new Date(consumable.updated_at).toLocaleDateString("th-TH", {
-                                                        year: "numeric",
-                                                        month: "long",
-                                                        day: "numeric",
-                                                    })}
-                                                </div>
-                                            </Table.Cell>
-                                            <Table.Cell className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
+                                            <Table.Cell className="px-6">
+                                                <div className="flex items-center justify-end gap-2">
                                                     <Link
                                                         href={route("admin.consumables.edit", consumable.id)}
-                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-700 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors duration-150"
+                                                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-cyan-700 bg-cyan-50 rounded-md hover:bg-cyan-100 transition-colors duration-150"
                                                     >
-                                                        <HiPencil className="w-4 h-4 mr-1.5" />
+                                                        <FaEdit className="w-4 h-4 mr-1.5" />
                                                         แก้ไข
                                                     </Link>
                                                     <button
                                                         onClick={() => handleDelete(consumable.id, consumable.name)}
                                                         className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-md hover:bg-red-100 transition-colors duration-150"
                                                     >
-                                                        <HiTrash className="w-4 h-4 mr-1.5" />
+                                                        <FaTrash className="w-4 h-4 mr-1.5" />
                                                         ลบ
                                                     </button>
                                                 </div>
@@ -212,24 +237,48 @@ export default function Index({ auth, consumables }) {
                             </Table.Body>
                         </Table>
                     </div>
-                    <Pagination
-                        currentPage={consumables.current_page}
-                        totalPages={consumables.last_page}
-                        onPageChange={(page) => {
-                            router.get(
-                                route("admin.consumables.index", {
-                                    page: page,
-                                    search: search,
-                                }),
-                                {},
-                                { preserveState: true }
-                            );
-                        }}
-                        showIcons={true}
-                        className="flex justify-center my-4"
-                    />
-                </div>
-            </AdminLayout>
+                    {consumables.data.length > 0 && (
+                        <div className="flex items-center justify-between px-4 py-6">
+                            <div className="text-sm text-gray-600">
+                                แสดง {consumables.from} ถึง {consumables.to} จากทั้งหมด{" "}
+                                {consumables.total} รายการ
+                            </div>
+                            <Pagination
+                                currentPage={consumables.current_page}
+                                totalPages={consumables.last_page}
+                                onPageChange={(page) => {
+                                    router.get(
+                                        route("admin.consumables.index"),
+                                        { page: page },
+                                        { preserveState: true, preserveScroll: true }
+                                    );
+                                }}
+                                showIcons
+                                layout="pagination"
+                                theme={{
+                                    pages: {
+                                        base: "xs:mt-0 mt-2 inline-flex items-center -space-x-px",
+                                        showIcon: "inline-flex",
+                                        previous: {
+                                            base: "ml-0 rounded-l-lg border border-gray-300 bg-white py-2 px-3 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700",
+                                            icon: "h-5 w-5"
+                                        },
+                                        next: {
+                                            base: "rounded-r-lg border border-gray-300 bg-white py-2 px-3 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700",
+                                            icon: "h-5 w-5"
+                                        },
+                                        selector: {
+                                            base: "w-12 border border-gray-300 bg-white py-2 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700",
+                                            active: "bg-purple-50 text-purple-600 hover:bg-purple-100 hover:text-purple-700",
+                                            disabled: "opacity-50 cursor-normal"
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+                    )}
+                </Card>
+            </div>
         </AuthenticatedLayout>
     );
 }

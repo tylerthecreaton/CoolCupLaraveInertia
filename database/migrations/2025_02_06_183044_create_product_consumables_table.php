@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('product_consumables', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->foreignId('consumable_id')->constrained()->onDelete('cascade');
+            $table->decimal('quantity_used', 10, 2);
+            $table->enum('size', ['s', 'l', 'm'])->nullable();
             $table->timestamps();
         });
     }
