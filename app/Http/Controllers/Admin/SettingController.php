@@ -13,7 +13,7 @@ class SettingController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            'role:admin',
+            'role:admin' => ['index', 'store', 'update', 'destroy'],
         ];
     }
     public function index()

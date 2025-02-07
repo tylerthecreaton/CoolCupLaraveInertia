@@ -39,7 +39,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
         memberPhone: "",
     });
 
-    const settings = state.app.settings || [];
+    const settings = state.app?.settings || [];
     const { total, subtotal, discount } = state.cart;
 
     const pointPerThb = Array.isArray(settings) ? settings.find(
@@ -88,7 +88,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
 
         if (method === "qr") {
             const promptpayNumber =
-                settings.find((s) => s.key === "promptpay_number")?.value || "";
+                (Array.isArray(settings) ? settings.find((s) => s.key === "promptpay_number")?.value : "") || "";
             const qrCodeValue = generatePayload(promptpayNumber, {
                 amount: total,
             });
@@ -690,7 +690,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     member.loyalty_points < 100
                                                 }
                                             >
-                                                100 P = ฿
+                                                100 แต้ม = ฿
                                                 {(
                                                     100 /
                                                     (pointPerThb
@@ -710,7 +710,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     member.loyalty_points < 200
                                                 }
                                             >
-                                                200 P = ฿
+                                                200 แต้ม = ฿
                                                 {(
                                                     200 /
                                                     (pointPerThb
@@ -730,7 +730,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     member.loyalty_points < 300
                                                 }
                                             >
-                                                300 P = ฿
+                                                300 แต้ม = ฿
                                                 {(
                                                     300 /
                                                     (pointPerThb
@@ -750,7 +750,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     member.loyalty_points < 400
                                                 }
                                             >
-                                                400 P = ฿
+                                                400 แต้ม = ฿
                                                 {(
                                                     400 /
                                                     (pointPerThb
@@ -770,7 +770,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     member.loyalty_points < 500
                                                 }
                                             >
-                                                500 P = ฿
+                                                500 แต้ม = ฿
                                                 {(
                                                     500 /
                                                     (pointPerThb
@@ -790,7 +790,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     member.loyalty_points < 1000
                                                 }
                                             >
-                                                1000 P = ฿
+                                                1000 แต้ม = ฿
                                                 {(
                                                     1000 /
                                                     (pointPerThb
@@ -880,10 +880,10 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                 <div className="flex flex-col items-center p-4 space-y-4 bg-blue-50 rounded-lg">
                                     <ReactQrCode
                                         value={generatePayload(
-                                            settings.find(
+                                            (Array.isArray(settings) ? settings.find(
                                                 (s) =>
                                                     s.key === "promptpay_number"
-                                            )?.value || "",
+                                            )?.value : "") || "",
                                             {
                                                 amount: parseFloat(total),
                                             }
@@ -896,10 +896,10 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                         </p>
                                         <p className="font-medium text-gray-800">
                                             PromptPay:{" "}
-                                            {settings.find(
+                                            {(Array.isArray(settings) ? settings.find(
                                                 (s) =>
                                                     s.key === "promptpay_number"
-                                            )?.value || ""}
+                                            )?.value : "") || ""}
                                         </p>
                                         <p className="text-lg font-bold text-blue-600">
                                             ยอดชำระ: ฿{total}

@@ -19,5 +19,10 @@ Route::get('/admin/notifications', [NotificationController::class, 'index'])->na
 
 # Settings
 Route::get('/settings', [SettingController::class, 'settings'])->name('api.settings');
+Route::group(['middleware' => ['role:admin']], function () {
+    Route::post('/settings', [SettingController::class, 'store'])->name('api.settings.store');
+    Route::put('/settings/{setting}', [SettingController::class, 'update'])->name('api.settings.update');
+    Route::delete('/settings/{setting}', [SettingController::class, 'destroy'])->name('api.settings.destroy');
+});
 
 Route::post('/check-phone', [PhoneValidationController::class, 'checkPhone']);

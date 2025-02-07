@@ -198,8 +198,8 @@ export default function Index({ auth, lots }) {
     const getIngredientListTooltip = (details) => {
         return (
             <div className="max-w-xs">
-                <p className="font-medium mb-2">รายการวัตถุดิบที่เพิ่ม:</p>
-                <ul className="list-disc list-inside space-y-1">
+                <p className="mb-2 font-medium">รายการวัตถุดิบที่เพิ่ม:</p>
+                <ul className="space-y-1 list-disc list-inside">
                     {details.map((detail) => (
                         <li key={detail.id} className="text-sm">
                             {detail.ingredient?.name} ({detail.quantity} x {detail.per_pack} {detail.ingredient?.unit?.name || ""})
@@ -338,7 +338,7 @@ export default function Index({ auth, lots }) {
                             </div>
 
                             {lots.links && lots.links.length > 3 && (
-                                <div className="flex items-center justify-center mt-4">
+                                <div className="flex justify-center items-center mt-4">
                                     <Pagination
                                         currentPage={lots.current_page}
                                         totalPages={lots.last_page}
@@ -408,12 +408,11 @@ export default function Index({ auth, lots }) {
                                                 key={detail.id}
                                                 className="bg-white"
                                             >
-                                                <Table.Cell className="whitespace-nowrap font-medium text-gray-900">
+                                                <Table.Cell className="font-medium text-gray-900 whitespace-nowrap">
                                                     {detail.ingredient?.name}
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     {detail.quantity}{" "}
-                                                    {detail.ingredient?.unit?.name}
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     {detail.per_pack}{" "}
