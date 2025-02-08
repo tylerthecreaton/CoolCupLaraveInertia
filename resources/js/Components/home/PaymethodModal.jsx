@@ -151,7 +151,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
         // ถ้าเป็นการชำระด้วย QR และเงินที่รับมาน้อยกว่ายอดที่ต้องชำระ ให้ยังแสดง QR code
         if (data.selectedMethod === "qr" && amount < (usePoints ? 0 : total)) {
             const promptpayNumber =
-                settings.find((s) => s.key === "promptpay_number")?.value || "";
+                (Array.isArray(settings) ? settings.find((s) => s.key === "promptpay_number")?.value : "") || "";
             const qrCodeValue = generatePayload(promptpayNumber, {
                 amount: total,
             });
