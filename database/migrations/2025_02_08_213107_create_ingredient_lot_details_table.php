@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ingredient_lot_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ingredient_lot_id')->constrained('ingredients_lots')->cascadeOnDelete();
+            $table->foreignId('ingredient_lot_id')->constrained('ingredient_lots')->cascadeOnDelete();
             $table->foreignId('transformer_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('ingredient_id')->constrained()->cascadeOnDelete();
             $table->integer('lot_number')->default(0);

@@ -20,7 +20,7 @@ class RoleAndPermissionSeeder extends Seeder
         // Create permissions
         Permission::create(['name' => 'view dashboard']);
         Permission::create(['name' => 'manage users']);
-        Permission::create(['name' => 'manage users:no-delete']);
+        Permission::create(attributes: ['name' => 'manage users:no-delete']);
         Permission::create(['name' => 'manage categories']);
         Permission::create(['name' => 'manage products']);
         Permission::create(['name' => 'manage orders']);

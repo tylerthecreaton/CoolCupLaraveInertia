@@ -10,10 +10,11 @@ use Inertia\Inertia;
 
 class SettingController extends Controller implements HasMiddleware
 {
-    public static function middleware(): array
+    public static function middleware()
     {
         return [
-            'role:admin' => ['index', 'store', 'update', 'destroy'],
+            'role:admin',
+            'permission:manage settings'
         ];
     }
     public function index()
