@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('unit_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->decimal('quantity', 10, 2)->default(0.00);
-            $table->date('expiration_date');
+            $table->date('expiration_date')->default(now());
             $table->string('image')->nullable();
             $table->boolean('is_sweetness')->default(0);
             $table->timestamps();

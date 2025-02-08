@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('product_consumable_usages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId(column: 'consumable_id')->constrained()->onDelete('cascade');
-            $table->foreignId(column: 'order_detail_id')->constrained()->onDelete('cascade');
+            $table->foreignId(column: 'consumable_id')->constrained(table: 'consumables')->onDelete('cascade');
+            $table->foreignId(column: 'order_detail_id')->constrained(table: 'order_details')->onDelete('cascade');
             $table->decimal('quantity_used', 10, 2)->default(0.00);
             $table->enum('usage_type', allowed: ['ADD', 'USE'])->default('ADD');
             $table->string('reference_no')->nullable();

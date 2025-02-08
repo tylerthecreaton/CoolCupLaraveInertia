@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('consumables', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('is_depend_on_sale')->default(0);
             $table->integer('quantity')->default(0);
-            $table->string('unit')->nullable();
+            $table->foreignId('unit_id')->nullable()->constrained(table: 'units')->nullOnDelete();
+            $table->boolean('is_depend_on_sale')->default(0);
             $table->timestamps();
         });
     }

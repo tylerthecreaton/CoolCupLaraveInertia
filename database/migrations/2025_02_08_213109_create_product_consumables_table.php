@@ -16,8 +16,6 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('consumable_id')->constrained()->cascadeOnDelete();
             $table->decimal('quantity_used', 10, 2)->notNullable();
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
             $table->enum('size', ['s', 'm', 'l', 'na'])->default('na');
             $table->timestamps();
         });

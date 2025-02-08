@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('order_details', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->bigInteger('product_id')->unsigned()->notNull();
             $table->string('line_item_id')->default('');
