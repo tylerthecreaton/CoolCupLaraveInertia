@@ -1,41 +1,28 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link } from "@inertiajs/react";
-import { Breadcrumb, Pagination, Table, TextInput } from "flowbite-react";
-import { HiHome, HiSearch, HiPlus, HiPencil, HiTrash } from "react-icons/hi";
-import Swal from "sweetalert2";
-import { useEffect, useState } from "react";
+import { Breadcrumb, Button, Pagination, Table, Card, Tooltip } from "flowbite-react";
+import { FaList, FaPlus, FaEdit, FaTrash, FaFolder, FaInfoCircle, FaSearch } from "react-icons/fa";
+import { HiHome } from "react-icons/hi";
+import { useState } from "react";
 import { router } from "@inertiajs/react";
-import { isAbsoluteUrl } from "@/helpers";
+import Swal from "sweetalert2";
 
 export default function index({ categoriesPaginate }) {
-    const { current_page, next_page_url, prev_page_url } = categoriesPaginate;
-    const [categories, setCategories] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [filteredCategories, setFilteredCategories] = useState([]);
+    const [search, setSearch] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
-    const onPageChange = (page) => {
-        page > current_page
-            ? router.get(next_page_url)
-            : router.get(prev_page_url);
-    };
-
-    useEffect(() => {
-        setCategories(categoriesPaginate.data);
-        setFilteredCategories(categoriesPaginate.data);
-    }, [categoriesPaginate]);
-
-    useEffect(() => {
-        const results = categories.filter(category =>
-            Object.values({
-                name: category.name,
-                description: category.description
-            }).some(value =>
-                value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-            )
+    const handleSearch = (e) => {
+        setSearch(e.target.value);
+        router.get(
+            route("admin.categories.index"),
+            { search: e.target.value, page: currentPage },
+            {
+                preserveState: true,
+                replace: true,
+            }
         );
-        setFilteredCategories(results);
-    }, [searchTerm, categories]);
+    };
 
     const handleDelete = (id) => {
         Swal.fire({
@@ -47,22 +34,36 @@ export default function index({ categoriesPaginate }) {
             cancelButtonColor: "#6b7280",
             confirmButtonText: "ใช่, ลบเลย!",
             cancelButtonText: "ยกเลิก",
-            reverseButtons: true
+            reverseButtons: true,
         }).then((result) => {
             if (result.isConfirmed) {
                 router.delete(route("admin.categories.destroy", id), {
+                    preserveState: true,
                     onSuccess: () => {
                         Swal.fire({
                             title: "ลบสำเร็จ!",
                             text: "หมวดหมู่ถูกลบเรียบร้อยแล้ว",
                             icon: "success",
                             timer: 1500,
-                            showConfirmButton: false
+                            showConfirmButton: false,
                         });
                     },
                 });
             }
         });
+    };
+
+    const { current_page, next_page_url, prev_page_url } = categoriesPaginate;
+
+    const onPageChange = (page) => {
+        setCurrentPage(page);
+        router.get(
+            route("admin.categories.index"),
+            { search, page },
+            {
+                preserveState: true,
+            }
+        );
     };
 
     return (
@@ -74,116 +75,125 @@ export default function index({ categoriesPaginate }) {
             }
         >
             <Head title="จัดการหมวดหมู่" />
-            <AdminLayout className="container p-8 mx-auto mt-5 bg-white rounded-lg shadow-sm">
-                <div className="space-y-6">
-                    {/* Breadcrumb */}
-                    <div className="flex items-center justify-between">
-                        <Breadcrumb aria-label="Breadcrumb navigation" className="py-2">
-                            <Breadcrumb.Item href={route('dashboard')} icon={HiHome}>
-                                หน้าแรก
-                            </Breadcrumb.Item>
-                            <Breadcrumb.Item>หมวดหมู่ทั้งหมด</Breadcrumb.Item>
-                        </Breadcrumb>
-                    </div>
+            <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+                <div className="mb-6">
+                    <Breadcrumb aria-label="Default breadcrumb example">
+                        <Breadcrumb.Item href="/dashboard" icon={HiHome}>
+                            <p className="text-gray-700 hover:text-blue-600 transition-colors">หน้าแรก</p>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item href={route("admin.categories.index")}>
+                            <p className="text-gray-700 hover:text-blue-600 transition-colors">หมวดหมู่</p>
+                        </Breadcrumb.Item>
+                    </Breadcrumb>
+                </div>
 
-                    {/* Search and Add Category */}
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="w-full sm:w-72">
-                            <TextInput
-                                icon={HiSearch}
-                                placeholder="ค้นหาหมวดหมู่..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="transition-all duration-200 focus:ring-2 focus:ring-primary-500"
-                            />
+                <Card className="shadow-lg">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md">
+                                <FaList className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900">รายการหมวดหมู่</h2>
+                                <p className="text-sm text-gray-500">จัดการข้อมูลหมวดหมู่ทั้งหมด</p>
+                            </div>
                         </div>
-                        <Link
-                            href={route("admin.categories.create")}
-                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-cyan-600 rounded-lg hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 hover:scale-105"
-                        >
-                            <HiPlus className="w-5 h-5 mr-2" />
-                            เพิ่มหมวดหมู่
-                        </Link>
+
+                        <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                            <div className="relative flex-1 lg:w-64">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <FaSearch className="w-4 h-4 text-gray-400" />
+                                </div>
+                                <input
+                                    type="text"
+                                    className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm"
+                                    placeholder="ค้นหาหมวดหมู่..."
+                                    value={search}
+                                    onChange={handleSearch}
+                                />
+                            </div>
+                            <Link href={route("admin.categories.create")}>
+                                <Button gradientDuoTone="greenToBlue" size="sm" className="w-full sm:w-auto shadow-sm hover:shadow-md transition-all duration-200">
+                                    <FaPlus className="mr-2 w-4 h-4" />
+                                    เพิ่มหมวดหมู่
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
 
-                    {/* Categories Table */}
-                    <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
+                    <div className="border border-gray-200 rounded-lg shadow-sm">
                         <Table hoverable>
-                            <Table.Head>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    ลําดับ
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    รูปภาพ
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    ชื่อหมวดหมู่
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    คำอธิบาย
-                                </Table.HeadCell>
-                                <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    <span className="sr-only">Actions</span>
-                                </Table.HeadCell>
+                            <Table.Head className="bg-gradient-to-r from-gray-50 to-gray-100">
+                                <Table.HeadCell className="font-semibold text-gray-900">ลำดับ</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-900">ชื่อหมวดหมู่</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-900">คำอธิบาย</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-900 w-32 text-right">จัดการ</Table.HeadCell>
                             </Table.Head>
-                            <Table.Body className="divide-y divide-gray-200">
-                                {filteredCategories.map((category, index) => (
+                            <Table.Body className="divide-y">
+                                {categoriesPaginate.data.map((category, index) => (
                                     <Table.Row
                                         key={category.id}
-                                        className="bg-white transition-colors duration-150 hover:bg-gray-50/60"
+                                        className="bg-white hover:bg-gray-50 transition-colors"
                                     >
-                                        <Table.Cell className="px-6 py-4 font-medium text-gray-900">
+                                        <Table.Cell className="font-medium text-gray-900">
                                             {(current_page - 1) * categoriesPaginate.per_page + index + 1}
                                         </Table.Cell>
-                                        <Table.Cell className="px-6 py-4">
-                                            <div className="relative w-20 h-20 overflow-hidden rounded-lg group">
-                                                <img
-                                                    src={
-                                                        isAbsoluteUrl(category.image)
-                                                            ? category.image
-                                                            : `/images/categories/${category.image}`
-                                                    }
-                                                    alt={category.name}
-                                                    className="object-cover w-full h-full transition-transform duration-200 group-hover:scale-110"
-                                                />
-                                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-200" />
-                                            </div>
+                                        <Table.Cell>
+                                            <Tooltip
+                                                content={
+                                                    <div className="p-2 max-w-xs">
+                                                        <div className="space-y-2">
+                                                            <div className="flex items-center gap-2">
+                                                                <FaFolder className="w-4 h-4 text-blue-400" />
+                                                                <span className="font-medium">{category.name}</span>
+                                                            </div>
+                                                            <div className="text-sm">
+                                                                <p className="text-gray-500">คำอธิบาย:</p>
+                                                                <p className="font-medium">{category.description || 'ไม่มีคำอธิบาย'}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            >
+                                                <div className="flex items-center gap-2 cursor-pointer">
+                                                    <FaFolder className="w-4 h-4 text-blue-500" />
+                                                    <span className="font-medium text-gray-900">{category.name}</span>
+                                                </div>
+                                            </Tooltip>
                                         </Table.Cell>
-                                        <Table.Cell className="px-6 py-4">
-                                            <div className="font-medium text-gray-900">{category.name}</div>
+                                        <Table.Cell>
+                                            <div className="text-gray-600 line-clamp-2">{category.description || '-'}</div>
                                         </Table.Cell>
-                                        <Table.Cell className="px-6 py-4 max-w-xs">
-                                            <p className="text-gray-600 truncate">{category.description}</p>
-                                        </Table.Cell>
-                                        <Table.Cell className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <Link
-                                                    href={route("admin.categories.edit", category.id)}
-                                                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-700 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors duration-150"
-                                                >
-                                                    <HiPencil className="w-4 h-4 mr-1.5" />
-                                                    แก้ไข
+                                        <Table.Cell>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <Link href={route("admin.categories.edit", category.id)}>
+                                                    <Button size="xs" color="info" className="gap-1">
+                                                        <FaEdit className="w-4 h-4" />
+                                                        แก้ไข
+                                                    </Button>
                                                 </Link>
-                                                <button
+                                                <Button
+                                                    size="xs"
+                                                    color="failure"
                                                     onClick={() => handleDelete(category.id)}
-                                                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-md hover:bg-red-100 transition-colors duration-150"
+                                                    className="gap-1"
                                                 >
-                                                    <HiTrash className="w-4 h-4 mr-1.5" />
+                                                    <FaTrash className="w-4 h-4" />
                                                     ลบ
-                                                </button>
+                                                </Button>
                                             </div>
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}
-                                {filteredCategories.length === 0 && (
+                                {categoriesPaginate.data.length === 0 && (
                                     <Table.Row>
-                                        <Table.Cell colSpan={5} className="px-6 py-8 text-center">
+                                        <Table.Cell colSpan={4} className="text-center py-10">
                                             <div className="flex flex-col items-center justify-center text-gray-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 mb-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                                </svg>
+                                                <FaInfoCircle className="w-12 h-12 mb-4 text-gray-400" />
                                                 <p className="text-lg font-medium">ไม่พบข้อมูลหมวดหมู่</p>
-                                                <p className="mt-1 text-sm">ลองค้นหาด้วยคำค้นอื่น หรือล้างตัวกรอง</p>
+                                                <p className="mt-1 text-sm">
+                                                    ลองค้นหาด้วยคำค้นอื่น หรือล้างตัวกรอง
+                                                </p>
                                             </div>
                                         </Table.Cell>
                                     </Table.Row>
@@ -193,23 +203,36 @@ export default function index({ categoriesPaginate }) {
                     </div>
 
                     {/* Pagination */}
-                    <div className="flex flex-col items-center justify-between gap-4 px-4 py-3 sm:flex-row bg-gray-50 rounded-lg">
+                    <div className="flex flex-col items-center justify-between gap-4 px-4 py-3 sm:flex-row bg-gray-0 rounded-lg mt-4">
                         <div className="text-sm text-gray-700">
-                            แสดง <span className="font-medium text-gray-900">{categoriesPaginate.from}</span> ถึง{" "}
-                            <span className="font-medium text-gray-900">{categoriesPaginate.to}</span> จาก{" "}
-                            <span className="font-medium text-gray-900">{categoriesPaginate.total}</span> รายการ
+                            แสดง{" "}
+                            <span className="font-medium">{categoriesPaginate.from || 0}</span>{" "}
+                            ถึง{" "}
+                            <span className="font-medium">{categoriesPaginate.to || 0}</span>{" "}
+                            จาก{" "}
+                            <span className="font-medium">{categoriesPaginate.total || 0}</span>{" "}
+                            รายการ
                         </div>
                         <div className="flex justify-center">
                             <Pagination
-                                currentPage={current_page}
+                                currentPage={currentPage}
+                                totalPages={Math.ceil(
+                                    (categoriesPaginate.total || 0) / (categoriesPaginate.per_page || 10)
+                                )}
                                 onPageChange={onPageChange}
-                                showIcons={true}
-                                totalPages={Math.ceil(categoriesPaginate.total / categoriesPaginate.per_page)}
+                                showIcons
+                                layout="pagination"
+                                theme={{
+                                    pages: {
+                                        base: "xs:mt-0 mt-2 inline-flex items-center -space-x-px",
+                                        showIcon: "inline-flex",
+                                    },
+                                }}
                             />
                         </div>
                     </div>
-                </div>
-            </AdminLayout>
+                </Card>
+            </div>
         </AuthenticatedLayout>
     );
 }

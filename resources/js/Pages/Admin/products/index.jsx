@@ -155,7 +155,6 @@ export default function Index({ productsPaginate }) {
                                 <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
                                     ราคาขาย
                                 </Table.HeadCell>
-
                                 <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
                                     <span className="sr-only">Actions</span>
                                 </Table.HeadCell>
@@ -290,6 +289,7 @@ export default function Index({ productsPaginate }) {
                             </span>{" "}
                             รายการ
                         </div>
+
                         <div className="flex justify-center">
                             <Pagination
                                 currentPage={current_page}
