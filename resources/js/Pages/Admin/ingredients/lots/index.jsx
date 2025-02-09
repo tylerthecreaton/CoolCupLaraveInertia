@@ -259,20 +259,31 @@ export default function Index({ auth, lots }) {
 
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center justify-between mb-6">
                                 <h2 className="flex items-center text-xl font-semibold text-gray-800">
                                     <HiCalendar className="mr-2 w-6 h-6 text-gray-600" />
                                     ประวัติการเพิ่ม Lot วัตถุดิบ
                                 </h2>
 
                                 <div className="flex gap-2">
-                                    <Button 
+                                    <Button
                                         gradientDuoTone="cyanToBlue"
                                         onClick={handleShowExpiration}
                                     >
                                         <HiCalendar className="mr-2 w-4 h-4" />
                                         ตรวจวันหมดอายุ
                                     </Button>
+
+                                    <Link
+                                        href={route("admin.ingredient-lots.expired.index")}
+                                    >
+                                        <Button
+                                            gradientDuoTone="redToYellow"
+                                        >
+                                            <HiOutlineTrash className="mr-2 w-4 h-4" />
+                                            จำหน่ายวัตถุดิบหมดอายุ
+                                        </Button>
+                                    </Link>
 
                                     <Link
                                         href={route("admin.ingredient-lots.create")}

@@ -29,8 +29,8 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
         // Refresh data via Inertia
         router.get(
             route('dashboard'),
-            { 
-                dateRange: 'custom', 
+            {
+                dateRange: 'custom',
                 startDate: start,
                 endDate: end
             },
