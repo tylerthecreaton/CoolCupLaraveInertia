@@ -7,6 +7,7 @@ use App\Models\ConsumableLot;
 use App\Models\IngredientLot;
 use App\Models\Withdraw;
 use App\Models\WithdrawItem;
+use App\Models\ProductIngredientUsage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -204,6 +205,15 @@ class WithdrawController extends Controller
                             // Update expiration date from lot detail
                             $ingredient->update([
                                 'expiration_date' => $ingredientDetail->expiration_date
+                            ]);
+
+                            // บันทึกประวัติการเคลื่อนไหว
+                            ProductIngredientUsage::create([
+                                'ingredient_id' => $ingredient->id,
+                                'amount' => $addAmount,
+                                'usage_type' => 'ADD',
+                                'created_by' => Auth::id(),
+                                'note' => "เบิกวัตถุดิบจาก Lot #{$lot->id}" . ($transformer ? " แปลงหน่วยด้วย {$transformer->name}" : "")
                             ]);
 
                             $withdrawItem->unit = optional($ingredient->unit)->name;
