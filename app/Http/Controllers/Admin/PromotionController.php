@@ -14,7 +14,26 @@ class PromotionController extends Controller
 
     public function index()
     {
-        $promotions = Promotion::OrderBy('id', 'desc')->get();
+        $currentDate = now();
+        $promotions = Promotion::orderBy('id', 'desc')
+            ->get()
+            ->map(function ($promotion) use ($currentDate) {
+                $startDate = \Carbon\Carbon::parse($promotion->start_date);
+                $endDate = \Carbon\Carbon::parse($promotion->end_date);
+                
+                if (!$promotion->is_active) {
+                    $promotion->status = 'inactive';
+                } else if ($currentDate->gt($endDate)) {
+                    $promotion->status = 'expired';
+                } else if ($currentDate->lt($startDate)) {
+                    $promotion->status = 'inactive';
+                } else {
+                    $promotion->status = 'active';
+                }
+                
+                return $promotion;
+            });
+
         return Inertia::render('Admin/promotions/index', compact('promotions'));
     }
 

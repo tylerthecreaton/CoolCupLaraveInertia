@@ -18,19 +18,28 @@ class PromotionController extends Controller
 
     public function index()
     {
-        $promotions = Promotion::where('start_date', '<=', date('Y-m-d'))
-            ->where('end_date', '>=', date('Y-m-d'))
-            ->get();
-        $promotion_types = [
-            ['BUY_X_GET_Y' => 'ซื้อ x รับ y'],
-            ['PERCENTAGE' => 'เปอร์เซ็นต์'],
-            ['FIXED' => 'ค่าคงที่'],
-            ['CATEGORY_DISCOUNT' => 'ส่วนลดสําหรับหมวดหมู่']
-        ];
+        $currentDate = now();
+        $promotions = Promotion::orderBy('id', 'desc')
+            ->get()
+            ->map(function ($promotion) use ($currentDate) {
+                $startDate = \Carbon\Carbon::parse($promotion->start_date);
+                $endDate = \Carbon\Carbon::parse($promotion->end_date);
+                
+                if (!$promotion->is_active) {
+                    $promotion->status = 'inactive';
+                } else if ($currentDate->gt($endDate)) {
+                    $promotion->status = 'expired';
+                } else if ($currentDate->lt($startDate)) {
+                    $promotion->status = 'inactive';
+                } else {
+                    $promotion->status = 'active';
+                }
+                
+                return $promotion;
+            });
 
-        return Inertia::render('Promotion', [
-            'promotions' => $promotions,
-            'types' => $promotion_types
+        return Inertia::render('Admin/promotions/index', [
+            'promotions' => $promotions
         ]);
     }
 }
