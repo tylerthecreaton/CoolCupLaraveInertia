@@ -55,6 +55,13 @@ class OrderController extends Controller implements HasMiddleware
         $order->payment_note = $request->get("paymentNote");
         $order->received_points = $this->calculatePoint(total: $cart['total']);
         $order->total_Items = $this->calculateTotalItems($cart['items']);
+        
+        // Set promotion_id if a promotion is applied
+        if ($cart['appliedPromotion']) {
+            $order->promotion_id = $cart['appliedPromotion']['id'] ?? null;
+            $order->discount_type = 'promotion';
+        }
+        
         $order->save();
         if ($request->get("memberPhone")) {
             $this->addPointToCustomer($cart['total'], $request->get("memberPhone"), $order->id);
@@ -208,25 +215,44 @@ class OrderController extends Controller implements HasMiddleware
 
     private function saveOrderDetails(array $items, int $orderId)
     {
-
         foreach ($items as $item) {
             $orderDetail = new OrderDetail();
             $orderDetail->order_id = $orderId;
-            $orderDetail->product_id = $item['id'];
-            $orderDetail->line_item_id = $item['id'];
-            $orderDetail->product_name = $item['name'];
-            $orderDetail->product_image = $item['image'];
-            $orderDetail->price = $item['price'];
-            $orderDetail->size = $item['size'];
-            $orderDetail->sweetness = $item['sweetness'];
-            $orderDetail->toppings = json_encode($item['toppings']);
-            $orderDetail->quantity = $item['quantity'];
-            $orderDetail->subtotal = $item['quantity'] * $item['price']; // TODO: Calculate subtotal
-            $orderDetail->save();
+            
+            // Check if this is a promotion item
+            $isPromotion = is_string($item['id']) && str_starts_with($item['id'], 'promotion-');
+            
+            if ($isPromotion) {
+                // For promotion items, use a special product_id (0 for discounts)
+                $orderDetail->product_id = 0;
+                $orderDetail->line_item_id = $item['id'];
+                $orderDetail->product_name = $item['name'];
+                $orderDetail->product_image = ''; 
+                $orderDetail->price = $item['price'];
+                $orderDetail->size = ''; 
+                $orderDetail->sweetness = ''; 
+                $orderDetail->toppings = null; 
+                $orderDetail->quantity = $item['quantity'];
+                $orderDetail->subtotal = $item['quantity'] * $item['price'];
+                $orderDetail->save();
+            } else {
+                // Regular product
+                $orderDetail->product_id = $item['id'];
+                $orderDetail->line_item_id = $item['id'];
+                $orderDetail->product_name = $item['name'];
+                $orderDetail->product_image = $item['image'] ?? '';
+                $orderDetail->price = $item['price'];
+                $orderDetail->size = $item['size'] ?? '';
+                $orderDetail->sweetness = $item['sweetness'] ?? '';
+                $orderDetail->toppings = isset($item['toppings']) ? json_encode($item['toppings']) : null;
+                $orderDetail->quantity = $item['quantity'];
+                $orderDetail->subtotal = $item['quantity'] * $item['price'];
+                $orderDetail->save();
 
-            $this->calculateIngredients($item,  $orderDetail->id, $item['sweetness']);
-            $this->calculateConsumable($item, $orderDetail->id);
-            $this->calculateToppings($item, $orderDetail->id);
+                $this->calculateIngredients($item, $orderDetail->id, $item['sweetness'] ?? '100%');
+                $this->calculateConsumable($item, $orderDetail->id);
+                $this->calculateToppings($item, $orderDetail->id);
+            }
         }
     }
 
@@ -237,7 +263,7 @@ class OrderController extends Controller implements HasMiddleware
             try {
                 // Get consumables based on product size
                 $consumables = ProductConsumables::where('product_id', $product->id)
-                    ->where('size', $item['size'])
+                    ->where('size', $item['size'] ?? 'S')
                     ->get();
 
                 if (!$consumables->count()) {
@@ -251,7 +277,7 @@ class OrderController extends Controller implements HasMiddleware
                     $consumableUsage->quantity_used = $item['quantity'] * $consumable->quantity_used;
                     $consumableUsage->usage_type = 'USE';
                     $consumableUsage->created_by = Auth::user()->id;
-                    $consumableUsage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId . " (ขนาด " . strtoupper($item['size']) . ")";
+                    $consumableUsage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId . " (ขนาด " . strtoupper($item['size'] ?? 'S') . ")";
                     $consumableUsage->save();
 
                     // อัพเดทจำนวนวัตถุดิบ
