@@ -28,9 +28,11 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
     const [quantity, setQuantity] = useState(1);
     const [maxQuantity, setMaxQuantity] = useState(0);
     const [availableItems, setAvailableItems] = useState([]);
+    const [note, setNote] = useState("");
 
     const { data, setData, post, processing, errors } = useForm({
         items: [],
+        note: "",
     });
 
     // เมื่อเลือกประเภทวัตถุดิบ
@@ -150,8 +152,14 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
             transformer_multiplier: selectedTransformerData?.multiplier || null,
         };
 
-        setWithdrawItems([...withdrawItems, newItem]);
-        setData("items", [...withdrawItems, newItem]);
+        console.log('Adding new item:', newItem);
+        const newItems = [...withdrawItems, newItem];
+        setWithdrawItems(newItems);
+        setData(prev => ({
+            ...prev,
+            items: newItems
+        }));
+        console.log('Updated form data:', data);
 
         // Reset form
         setSelectedItem("");
@@ -345,14 +353,14 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                                                     const lot = availableItems.find((l) => l.id === lotId);
                                                                     const item = lot.items.find((i) => i.id === itemId);
                                                                     return item.transformers?.map((transformer) => (
-                                                                        <option
-                                                                            key={transformer.id}
-                                                                            value={transformer.id}
-                                                                        >
-                                                                            {transformer.name} (x{transformer.multiplier})
-                                                                        </option>
-                                                                    )) || [];
-                                                                }
+                                                                    <option
+                                                                        key={transformer.id}
+                                                                        value={transformer.id}
+                                                                    >
+                                                                        {transformer.name} (x{transformer.multiplier})
+                                                                    </option>
+                                                                )) || [];
+                                                            }
                                                             }
                                                             return [];
                                                         })()}
@@ -463,7 +471,10 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                                                 (_, i) => i !== index
                                                             );
                                                             setWithdrawItems(newItems);
-                                                            setData("items", newItems);
+                                                            setData(prev => ({
+                                                                ...prev,
+                                                                items: newItems
+                                                            }));
                                                         }}
                                                         className="transition-all duration-200 hover:scale-105 shrink-0"
                                                     >
@@ -473,11 +484,32 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                             ))}
                                         </div>
                                         <div className="mt-6">
+                                            <div className="mb-4">
+                                                <Label
+                                                    htmlFor="note"
+                                                    value="หมายเหตุ"
+                                                    className="inline-flex items-center mb-2 text-gray-700"
+                                                />
+                                                <TextInput
+                                                    id="note"
+                                                    value={note}
+                                                    onChange={(e) => {
+                                                        setNote(e.target.value);
+                                                        setData(prev => ({
+                                                            ...prev,
+                                                            note: e.target.value
+                                                        }));
+                                                    }}
+                                                    placeholder="เพิ่มหมายเหตุ (ถ้ามี)"
+                                                />
+                                            </div>
                                             <Button
                                                 type="button"
                                                 onClick={() => {
+                                                    console.log('Submitting data:', data);
                                                     post(route("admin.withdraw.store"), {
                                                         onSuccess: () => {
+                                                            console.log('Submit success');
                                                             Swal.fire({
                                                                 title: "สำเร็จ!",
                                                                 text: "บันทึกการเบิกเรียบร้อยแล้ว",
@@ -487,7 +519,8 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                                                 window.location.href = route("admin.withdraw.index");
                                                             });
                                                         },
-                                                        onError: () => {
+                                                        onError: (errors) => {
+                                                            console.error('Submit error:', errors);
                                                             Swal.fire({
                                                                 title: "เกิดข้อผิดพลาด!",
                                                                 text: "ไม่สามารถบันทึกการเบิกได้",

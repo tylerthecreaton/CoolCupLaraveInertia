@@ -89,8 +89,18 @@ export default function Create({ auth, ingredients }) {
     };
 
     const handleTransformerChange = (index, value) => {
+        const selectedIngredient = ingredients.find(
+            (i) => i.id.toString() === data[index].ingredient_id
+        );
+        const selectedTransformer = selectedIngredient?.transformers.find(
+            (t) => t.id.toString() === value
+        );
+
         const newData = [...data];
         newData[index].transformer_id = value;
+        if (selectedTransformer) {
+            newData[index].per_pack = selectedTransformer.multiplier.toString();
+        }
         setData(newData);
     };
 

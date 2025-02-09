@@ -163,14 +163,13 @@ export default function Index({ auth, lots }) {
         router.get(route("admin.ingredient-lots.index", { page }));
     };
 
-    const formatDate = (date) => {
-        return new Date(date).toLocaleDateString("th-TH", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-        });
+    const formatDate = (dateString) => {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear() + 543; // แปลงเป็นปี พ.ศ.
+        return `${day}/${month}/${year}`;
     };
 
     const calculateRemainingDays = (expirationDate) => {
@@ -392,6 +391,9 @@ export default function Index({ auth, lots }) {
                                         จำนวนวันที่หมดอายุ
                                     </Table.HeadCell>
                                     <Table.HeadCell className="bg-gray-50">
+                                        ยี่ห้อ/ขนาด
+                                    </Table.HeadCell>
+                                    <Table.HeadCell className="bg-gray-50">
                                         หมายเหตุ
                                     </Table.HeadCell>
                                     <Table.HeadCell className="bg-gray-50">
@@ -428,18 +430,49 @@ export default function Index({ auth, lots }) {
                                                     บาท
                                                 </Table.Cell>
                                                 <Table.Cell>
-                                                    {detail.price.toLocaleString()}{" "}
+                                                    {(
+                                                        detail.cost_per_unit *
+                                                        detail.quantity
+                                                    ).toLocaleString()}{" "}
                                                     บาท
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     {detail.expiration_date
-                                                        ? new Date(
-                                                        detail.expiration_date
-                                                        ).toLocaleDateString()
+                                                        ? formatDate(
+                                                              detail.expiration_date
+                                                          )
                                                         : "-"}
                                                 </Table.Cell>
                                                 <Table.Cell>
-                                                    {getRemainingDaysDisplay(remainingDays)}
+                                                    {remainingDays !== null ? (
+                                                        <Badge
+                                                            color={
+                                                                isExpired
+                                                                    ? "failure"
+                                                                    : remainingDays <= 30
+                                                                    ? "warning"
+                                                                    : "success"
+                                                            }
+                                                        >
+                                                            {isExpired
+                                                                ? "หมดอายุแล้ว"
+                                                                : `${remainingDays} วัน`}
+                                                        </Badge>
+                                                    ) : (
+                                                        "-"
+                                                    )}
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    {detail.transformer ? (
+                                                        <Badge
+                                                            color="info"
+                                                            className="mr-1"
+                                                        >
+                                                            {detail.transformer.name} ({detail.transformer.multiplier}x)
+                                                        </Badge>
+                                                    ) : (
+                                                        "-"
+                                                    )}
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     {detail.notes || "-"}

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->enum('usage_type', ['ADD', 'USE'])->default('ADD');
             $table->string('reference_no', 50)->nullable()->default(null);
+            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->text('note')->nullable()->default(null);
             $table->timestamps();
         });

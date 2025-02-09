@@ -18,7 +18,7 @@ class IngredientLotController extends Controller
 {
     public function index()
     {
-        $lots = IngredientLot::with(['details.ingredient.unit', 'user'])
+        $lots = IngredientLot::with(['details.ingredient.unit', 'details.transformer', 'user'])
             ->select('ingredient_lots.*')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -42,6 +42,12 @@ class IngredientLotController extends Controller
                                 'name' => $detail->ingredient->unit->name
                             ] : null
                         ],
+                        'transformer' => $detail->transformer ? [
+                            'id' => $detail->transformer->id,
+                            'name' => $detail->transformer->name,
+                            'multiplier' => $detail->transformer->multiplier,
+                            'type' => $detail->transformer->type
+                        ] : null,
                         'quantity' => $detail->quantity,
                         'price' => $detail->price,
                         'cost_per_unit' => $detail->cost_per_unit,

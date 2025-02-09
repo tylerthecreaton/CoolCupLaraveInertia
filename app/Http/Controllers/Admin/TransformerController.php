@@ -8,6 +8,7 @@ use App\Models\Ingredient;
 use App\Models\Consumable;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Validation\Rule;
 
 class TransformerController extends Controller
 {
@@ -32,10 +33,25 @@ class TransformerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'ingredient_id' => 'exists:ingredients,id|nullable',
-            'consumable_id' => 'exists:consumables,id|nullable',
-            'multiplier' => 'required|numeric',
             'type' => 'required|in:ingredient,consumable',
+            'multiplier' => 'required|numeric',
+            'ingredient_id' => [
+                'nullable',
+                'exists:ingredients,id',
+                Rule::requiredIf(function () use ($request) {
+                    return $request->type === 'ingredient';
+                }),
+            ],
+            'consumable_id' => [
+                'nullable',
+                'exists:consumables,id',
+                Rule::requiredIf(function () use ($request) {
+                    return $request->type === 'consumable';
+                }),
+            ],
+        ], [
+            'ingredient_id.required_if' => 'กรุณาเลือกวัตถุดิบที่จะแปรรูป',
+            'consumable_id.required_if' => 'กรุณาเลือกวัตถุดิบสิ้นเปลืองที่จะแปรรูป',
         ]);
 
         Transformer::create($validated);
@@ -59,10 +75,25 @@ class TransformerController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'ingredient_id' => 'exists:ingredients,id|nullable',
-            'consumable_id' => 'exists:consumables,id|nullable',
-            'multiplier' => 'required|numeric',
             'type' => 'required|in:ingredient,consumable',
+            'multiplier' => 'required|numeric',
+            'ingredient_id' => [
+                'nullable',
+                'exists:ingredients,id',
+                Rule::requiredIf(function () use ($request) {
+                    return $request->type === 'ingredient';
+                }),
+            ],
+            'consumable_id' => [
+                'nullable',
+                'exists:consumables,id',
+                Rule::requiredIf(function () use ($request) {
+                    return $request->type === 'consumable';
+                }),
+            ],
+        ], [
+            'ingredient_id.required_if' => 'กรุณาเลือกวัตถุดิบที่จะแปรรูป',
+            'consumable_id.required_if' => 'กรุณาเลือกวัตถุดิบสิ้นเปลืองที่จะแปรรูป',
         ]);
 
         $transformer->update($validated);

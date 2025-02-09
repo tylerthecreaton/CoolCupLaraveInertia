@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('transformers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('consumable_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('ingredient_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('consumable_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('ingredient_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('description')->nullable();
             $table->decimal('multiplier', 10, 2)->default(0.00);

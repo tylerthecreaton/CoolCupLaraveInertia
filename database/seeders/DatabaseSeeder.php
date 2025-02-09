@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             UnitSeeder::class,
             ConsumableSeeder::class,
             IngredientSeeder::class,
+            CustomerSeeder::class,
+            TransformerSeeder::class,
         ]);
     }
 }

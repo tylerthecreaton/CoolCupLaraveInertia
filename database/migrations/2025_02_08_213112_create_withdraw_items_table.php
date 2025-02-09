@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('withdraw_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('withdraw_id')->constrained()->onDelete('cascade');
-            $table->foreignId('consumable_id')->constrained()->onDelete('cascade');
-            $table->foreignId('ingredient_id')->constrained()->onDelete('cascade');
-            $table->foreignId('transformer_id')->constrained()->onDelete('cascade');
             $table->string('type');
             $table->decimal('quantity', 10, 2)->default(0.00);
             $table->string('unit')->nullable();
+            $table->foreignId('transformer_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('ingredient_lot_id')->nullable()->references('id')->on('ingredient_lots')->onDelete('cascade');
+            $table->foreignId('consumable_lot_id')->nullable()->references('id')->on('consumable_lots')->onDelete('cascade');
             $table->timestamps();
         });
     }

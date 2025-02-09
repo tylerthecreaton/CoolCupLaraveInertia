@@ -86,8 +86,18 @@ export default function Create({ consumables }) {
     };
 
     const handleTransformerChange = (index, value) => {
+        const selectedConsumable = consumables.find(
+            (c) => c.id.toString() === data[index].consumable_id
+        );
+        const selectedTransformer = selectedConsumable?.transformers.find(
+            (t) => t.id.toString() === value
+        );
+
         const newData = [...data];
         newData[index].transformer_id = value;
+        if (selectedTransformer) {
+            newData[index].per_pack = selectedTransformer.multiplier.toString();
+        }
         setData(newData);
     };
 

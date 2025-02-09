@@ -10,6 +10,7 @@ use App\Models\WithdrawItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class WithdrawController extends Controller
@@ -122,32 +123,43 @@ class WithdrawController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'items' => 'required|array',
-            'items.*.type' => 'required|in:ingredient,consumable',
-            'items.*.lot_id' => 'required|integer',
-            'items.*.quantity' => 'required|numeric|min:0.01',
-            'items.*.transformer_id' => 'nullable|integer'
-        ]);
-
         try {
-            DB::transaction(function () use ($request) {
+            Log::info('Withdraw request data:', $request->all());
+            
+            $request->validate([
+                'items' => 'required|array',
+                'items.*.type' => 'required|in:ingredient,consumable',
+                'items.*.lot_id' => 'required|integer',
+                'items.*.quantity' => 'required|numeric|min:0.01',
+                'items.*.transformer_id' => 'nullable|integer'
+            ]);
+
+            DB::beginTransaction();
+            try {
                 $withdraw = Withdraw::create([
                     'user_id' => Auth::id(),
                     'status' => 'completed',
                     'note' => $request->note ?? null
                 ]);
 
+                Log::info('Created withdraw:', ['id' => $withdraw->id]);
+
                 foreach ($request->items as $item) {
+                    Log::info('Processing item:', $item);
+                    
                     $withdrawItem = new WithdrawItem([
                         'type' => $item['type'],
                         'quantity' => $item['quantity'],
                         'transformer_id' => $item['transformer_id'] ?? null
                     ]);
 
+                    Log::info('Created withdraw item:', $withdrawItem->toArray());
+
                     if ($item['type'] === 'ingredient') {
                         $lot = IngredientLot::with(['details.ingredient', 'details.ingredient.unit'])->findOrFail($item['lot_id']);
                         $withdrawItem->ingredient_lot_id = $lot->id;
+
+                        Log::info('Found ingredient lot:', ['lot_id' => $lot->id]);
 
                         $ingredientDetail = $lot->details->first();
                         if ($ingredientDetail) {
@@ -159,6 +171,12 @@ class WithdrawController extends Controller
                                 $transformer = $ingredient->transformers()->find($item['transformer_id']);
                                 if ($transformer) {
                                     $addAmount *= floatval($transformer->multiplier);
+                                    Log::info('Applied transformer:', [
+                                        'transformer_id' => $transformer->id,
+                                        'multiplier' => $transformer->multiplier,
+                                        'original_amount' => $withdrawAmount,
+                                        'final_amount' => $addAmount
+                                    ]);
                                 }
                             }
 
@@ -169,16 +187,42 @@ class WithdrawController extends Controller
 
                             // Deduct from lot
                             $ingredientDetail->decrement('quantity', $withdrawAmount);
+                            Log::info('Deducted from lot:', [
+                                'lot_id' => $lot->id,
+                                'amount' => $withdrawAmount,
+                                'new_quantity' => $ingredientDetail->quantity
+                            ]);
 
                             // Add to ingredient total
                             $ingredient->increment('quantity', $addAmount);
-                            
+                            Log::info('Added to ingredient total:', [
+                                'ingredient_id' => $ingredient->id,
+                                'amount' => $addAmount,
+                                'new_quantity' => $ingredient->quantity
+                            ]);
+
                             // Update expiration date from lot detail
                             $ingredient->update([
                                 'expiration_date' => $ingredientDetail->expiration_date
                             ]);
-                            
+
                             $withdrawItem->unit = optional($ingredient->unit)->name;
+                            
+                            // Save withdraw item
+                            try {
+                                $withdraw->items()->save($withdrawItem);
+                                Log::info('Saved ingredient withdraw item successfully:', [
+                                    'withdraw_id' => $withdraw->id,
+                                    'withdraw_item_id' => $withdrawItem->id
+                                ]);
+                            } catch (\Exception $e) {
+                                Log::error('Failed to save ingredient withdraw item:', [
+                                    'error' => $e->getMessage(),
+                                    'withdraw_id' => $withdraw->id,
+                                    'withdraw_item' => $withdrawItem->toArray()
+                                ]);
+                                throw $e;
+                            }
                         }
                     } else {
                         $lot = ConsumableLot::with(['details.consumable'])->findOrFail($item['lot_id']);
@@ -194,32 +238,68 @@ class WithdrawController extends Controller
                                 $transformer = $consumable->transformers()->find($item['transformer_id']);
                                 if ($transformer) {
                                     $addAmount *= floatval($transformer->multiplier);
+                                    Log::info('Applied transformer:', [
+                                        'transformer_id' => $transformer->id,
+                                        'multiplier' => $transformer->multiplier,
+                                        'original_amount' => $withdrawAmount,
+                                        'final_amount' => $addAmount
+                                    ]);
                                 }
                             }
 
                             // Check if lot has enough stock
                             if ($consumableDetail->quantity < $withdrawAmount) {
-                                throw new \Exception("ไม่มีวัสดุสิ้นเปลืองเพียงพอใน Lot นี้");
+                                throw new \Exception("ไม่มีวัตถุดิบสิ้นเปลืองเพียงพอใน Lot นี้");
                             }
 
                             // Deduct from lot
                             $consumableDetail->decrement('quantity', $withdrawAmount);
+                            Log::info('Deducted from lot:', [
+                                'lot_id' => $lot->id,
+                                'amount' => $withdrawAmount,
+                                'new_quantity' => $consumableDetail->quantity
+                            ]);
 
                             // Add to consumable total
                             $consumable->increment('quantity', $addAmount);
+                            Log::info('Added to consumable total:', [
+                                'consumable_id' => $consumable->id,
+                                'amount' => $addAmount,
+                                'new_quantity' => $consumable->quantity
+                            ]);
+
                             $withdrawItem->unit = $consumable->unit;
+                            
+                            // Save withdraw item
+                            try {
+                                $withdraw->items()->save($withdrawItem);
+                                Log::info('Saved consumable withdraw item successfully:', [
+                                    'withdraw_id' => $withdraw->id,
+                                    'withdraw_item_id' => $withdrawItem->id
+                                ]);
+                            } catch (\Exception $e) {
+                                Log::error('Failed to save consumable withdraw item:', [
+                                    'error' => $e->getMessage(),
+                                    'withdraw_id' => $withdraw->id,
+                                    'withdraw_item' => $withdrawItem->toArray()
+                                ]);
+                                throw $e;
+                            }
                         }
                     }
-
-                    $withdraw->items()->save($withdrawItem);
                 }
-            });
 
-            return redirect()->route('admin.withdraw.index')
-                ->with('success', 'บันทึกการเบิกสำเร็จ');
+                DB::commit();
+                Log::info('Transaction committed successfully');
+                return redirect()->route('admin.withdraw.index')->with('success', 'บันทึกการเบิกเรียบร้อยแล้ว');
+            } catch (\Exception $e) {
+                DB::rollback();
+                Log::error('Transaction rolled back:', ['error' => $e->getMessage()]);
+                throw $e;
+            }
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+            Log::error('Withdraw store failed:', ['error' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
@@ -264,7 +344,7 @@ class WithdrawController extends Controller
 
                             // Return to lot
                             $ingredientDetail->increment('quantity', $returnAmount);
-                            
+
                             // Subtract from ingredient total
                             $ingredient->decrement('quantity', $subtractAmount);
                         }
@@ -289,7 +369,7 @@ class WithdrawController extends Controller
 
                             // Return to lot
                             $consumableDetail->increment('quantity', $returnAmount);
-                            
+
                             // Subtract from consumable total
                             $consumable->decrement('quantity', $subtractAmount);
                         }
