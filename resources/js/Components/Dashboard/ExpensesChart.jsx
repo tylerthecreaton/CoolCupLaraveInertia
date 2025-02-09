@@ -103,7 +103,10 @@ export default function ExpensesChart({ data }) {
         }
     };
 
-    const totalExpenses = data.reduce((acc, curr) => acc + curr.total_amount, 0);
+    const totalExpenses = data.reduce((acc, curr) => {
+        const amount = parseFloat(curr.total_amount) || 0;
+        return acc + amount;
+    }, 0);
 
     return (
         <div className="bg-white rounded-lg shadow">
