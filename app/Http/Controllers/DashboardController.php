@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -47,21 +48,31 @@ class DashboardController extends Controller
             ->get();
 
         // Inventory Status
-        $ingredients = Ingredient::with(['lots' => function($query) {
-            $query->where('expiration_date', '>', now())
-                  ->where('quantity', '>', 0)
-                  ->where('type', 'in');
-        }])
-        ->get()
-        ->map(function($ingredient) {
-            $totalQuantity = $ingredient->lots->sum('quantity');
-            return [
-                'name' => $ingredient->name,
-                'total_quantity' => $totalQuantity,
-                'unit' => $ingredient->unit->name,
-                'status' => $totalQuantity < ($ingredient->minimum_stock ?? 10) ? 'low' : 'normal'
-            ];
-        });
+        Log::info('Starting inventory status calculation');
+        
+        $ingredients = Ingredient::with('unit')
+            ->select('ingredients.*')
+            ->get()
+            ->map(function($ingredient) {
+                Log::info("Ingredient: {$ingredient->name}", [
+                    'id' => $ingredient->id,
+                    'quantity' => $ingredient->quantity,
+                    'minimum_stock' => $ingredient->minimum_stock ?? 10
+                ]);
+
+                return [
+                    'name' => $ingredient->name,
+                    'total_quantity' => $ingredient->quantity ?? 0,
+                    'unit' => $ingredient->unit->name ?? 'หน่วย',
+                    'status' => ($ingredient->quantity ?? 0) < ($ingredient->minimum_stock ?? 10) ? 'low' : 'normal',
+                    'minimum_stock' => $ingredient->minimum_stock ?? 10
+                ];
+            });
+
+        Log::info('Finished inventory status calculation', [
+            'total_ingredients' => $ingredients->count(),
+            'low_stock_count' => $ingredients->where('status', 'low')->count()
+        ]);
 
         // Expenses Summary
         $expenses = Expense::join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')

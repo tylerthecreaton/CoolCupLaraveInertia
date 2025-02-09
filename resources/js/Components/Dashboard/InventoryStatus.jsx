@@ -31,7 +31,7 @@ export default function InventoryStatus({ ingredients }) {
                                             <p className={`text-sm ${
                                                 ingredient.status === 'low' ? 'text-red-600' : 'text-gray-500'
                                             }`}>
-                                                {ingredient.total_quantity.toLocaleString()} {ingredient.unit}
+                                                {(ingredient.total_quantity || 0).toLocaleString()} {ingredient.unit}
                                             </p>
                                         </div>
                                     </div>
