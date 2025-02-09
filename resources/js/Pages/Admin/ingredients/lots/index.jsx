@@ -17,11 +17,36 @@ import Swal from "sweetalert2";
 
 export default function Index({ auth, lots }) {
     const [showModal, setShowModal] = useState(false);
+    const [showExpirationModal, setShowExpirationModal] = useState(false);
     const [selectedLot, setSelectedLot] = useState(null);
+    const [expirationData, setExpirationData] = useState([]);
 
     const handleShowDetails = (lot) => {
         setSelectedLot(lot);
         setShowModal(true);
+    };
+
+    const handleShowExpiration = () => {
+        // Collect all unique ingredients and their expiration dates from all lots
+        const allIngredients = [];
+        lots.data.forEach(lot => {
+            lot.details.forEach(detail => {
+                if (detail.expiration_date) {
+                    allIngredients.push({
+                        lotNumber: lot.lot_number,
+                        name: detail.ingredient?.name,
+                        expirationDate: detail.expiration_date,
+                        remainingDays: calculateRemainingDays(detail.expiration_date),
+                        quantity: `${detail.quantity} x ${detail.per_pack} ${detail.ingredient?.unit?.name || ""}`
+                    });
+                }
+            });
+        });
+
+        // Sort by remaining days (expired first)
+        const sortedIngredients = allIngredients.sort((a, b) => a.remainingDays - b.remainingDays);
+        setExpirationData(sortedIngredients);
+        setShowExpirationModal(true);
     };
 
     const handleRevert = (lotId) => {
@@ -239,14 +264,25 @@ export default function Index({ auth, lots }) {
                                     <HiCalendar className="mr-2 w-6 h-6 text-gray-600" />
                                     ประวัติการเพิ่ม Lot วัตถุดิบ
                                 </h2>
-                                <Link
-                                    href={route("admin.ingredient-lots.create")}
-                                >
-                                    <Button gradientDuoTone="greenToBlue">
-                                        <FaPlus className="mr-2 w-4 h-4" />
-                                        เพิ่ม Lot ใหม่
+
+                                <div className="flex gap-2">
+                                    <Button 
+                                        gradientDuoTone="cyanToBlue"
+                                        onClick={handleShowExpiration}
+                                    >
+                                        <HiCalendar className="mr-2 w-4 h-4" />
+                                        ตรวจวันหมดอายุ
                                     </Button>
-                                </Link>
+
+                                    <Link
+                                        href={route("admin.ingredient-lots.create")}
+                                    >
+                                        <Button gradientDuoTone="greenToBlue">
+                                            <FaPlus className="mr-2 w-4 h-4" />
+                                            เพิ่ม Lot ใหม่
+                                        </Button>
+                                    </Link>
+                                </div>
                             </div>
 
                             <div className="overflow-x-auto">
@@ -351,6 +387,7 @@ export default function Index({ auth, lots }) {
                 </div>
             </div>
 
+            {/* Modal for Lot Details */}
             <Modal show={showModal} onClose={() => setShowModal(false)} size="7xl">
                 <Modal.Header>
                     <div className="flex items-center">
@@ -439,8 +476,8 @@ export default function Index({ auth, lots }) {
                                                 <Table.Cell>
                                                     {detail.expiration_date
                                                         ? formatDate(
-                                                              detail.expiration_date
-                                                          )
+                                                            detail.expiration_date
+                                                        )
                                                         : "-"}
                                                 </Table.Cell>
                                                 <Table.Cell>
@@ -450,8 +487,8 @@ export default function Index({ auth, lots }) {
                                                                 isExpired
                                                                     ? "failure"
                                                                     : remainingDays <= 30
-                                                                    ? "warning"
-                                                                    : "success"
+                                                                        ? "warning"
+                                                                        : "success"
                                                             }
                                                         >
                                                             {isExpired
@@ -514,6 +551,75 @@ export default function Index({ auth, lots }) {
                         ปิด
                     </Button>
                 </Modal.Footer>
+            </Modal>
+
+            {/* Modal for Expiration Check */}
+            <Modal show={showExpirationModal} onClose={() => setShowExpirationModal(false)} size="4xl">
+                <Modal.Header>
+                    <div className="flex items-center">
+                        <HiCalendar className="mr-2 w-5 h-5 text-gray-600" />
+                        รายการวันหมดอายุของวัตถุดิบทั้งหมด
+                    </div>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="space-y-6">
+                        <div className="overflow-x-auto">
+                            <Table hoverable>
+                                <Table.Head>
+                                    <Table.HeadCell className="bg-gray-50">Lot Number</Table.HeadCell>
+                                    <Table.HeadCell className="bg-gray-50">วัตถุดิบ</Table.HeadCell>
+                                    <Table.HeadCell className="bg-gray-50">จำนวน</Table.HeadCell>
+                                    <Table.HeadCell className="bg-gray-50">วันหมดอายุ</Table.HeadCell>
+                                    <Table.HeadCell className="bg-gray-50">สถานะ</Table.HeadCell>
+                                </Table.Head>
+                                <Table.Body className="divide-y">
+                                    {expirationData.map((item, index) => (
+                                        <Table.Row key={index} className="bg-white">
+                                            <Table.Cell>
+                                                <Badge color="info" className="px-3 py-1">
+                                                    #{item.lotNumber}
+                                                </Badge>
+                                            </Table.Cell>
+                                            <Table.Cell className="font-medium">
+                                                {item.name}
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                {item.quantity}
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                {formatDate(item.expirationDate)}
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                {item.remainingDays < 0 ? (
+                                                    <Badge color="failure">
+                                                        หมดอายุแล้ว {Math.abs(item.remainingDays)} วัน
+                                                    </Badge>
+                                                ) : item.remainingDays === 0 ? (
+                                                    <Badge color="failure">
+                                                        หมดอายุวันนี้
+                                                    </Badge>
+                                                ) : item.remainingDays <= 30 ? (
+                                                    <Badge color="warning">
+                                                        เหลือ {item.remainingDays} วัน
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge color="success">
+                                                        เหลือ {item.remainingDays} วัน
+                                                    </Badge>
+                                                )}
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    ))}
+                                </Table.Body>
+                            </Table>
+                            {expirationData.length === 0 && (
+                                <div className="text-center py-4 text-gray-500">
+                                    ไม่พบข้อมูลวันหมดอายุของวัตถุดิบ
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </Modal.Body>
             </Modal>
         </AuthenticatedLayout>
     );

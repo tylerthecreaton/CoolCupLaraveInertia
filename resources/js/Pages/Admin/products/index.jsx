@@ -9,16 +9,14 @@ import {
     TextInput,
     Badge,
     Modal,
+    Card,
 } from "flowbite-react";
 import { useEffect, useState } from "react";
 import {
     HiHome,
     HiSearch,
-    HiPlus,
-    HiPencil,
-    HiTrash,
-    HiTag,
 } from "react-icons/hi";
+import { FaList, FaPlus, FaEdit, FaTrash, FaBox, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
 
 export default function Index({ productsPaginate }) {
@@ -98,46 +96,54 @@ export default function Index({ productsPaginate }) {
             }
         >
             <Head title="จัดการสินค้า" />
-            <AdminLayout className="container p-8 mx-auto mt-5 bg-white rounded-lg shadow-sm">
-                <div className="space-y-6">
-                    {/* Breadcrumb */}
-                    <div className="flex items-center justify-between">
-                        <Breadcrumb
-                            aria-label="Breadcrumb navigation"
-                            className="py-2"
-                        >
-                            <Breadcrumb.Item
-                                href={route("dashboard")}
-                                icon={HiHome}
-                            >
-                                หน้าแรก
-                            </Breadcrumb.Item>
-                            <Breadcrumb.Item>สินค้าทั้งหมด</Breadcrumb.Item>
-                        </Breadcrumb>
-                    </div>
+            <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+                <div className="mb-6">
+                    <Breadcrumb aria-label="Default breadcrumb example">
+                        <Breadcrumb.Item href="/dashboard" icon={HiHome}>
+                            <p className="text-gray-700 hover:text-blue-600 transition-colors">หน้าแรก</p>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item href={route("admin.products.index")}>
+                            <p className="text-gray-700 hover:text-blue-600 transition-colors">สินค้า</p>
+                        </Breadcrumb.Item>
+                    </Breadcrumb>
+                </div>
 
-                    {/* Search and Add Product */}
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="w-full sm:w-72">
-                            <TextInput
-                                icon={HiSearch}
-                                placeholder="ค้นหาสินค้า..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="transition-all duration-200 focus:ring-2 focus:ring-primary-500"
-                            />
+                <Card className="shadow-lg">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md">
+                                <FaBox className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900">รายการสินค้า</h2>
+                                <p className="text-sm text-gray-500">จัดการข้อมูลสินค้าทั้งหมด</p>
+                            </div>
                         </div>
-                        <Link
-                            href={route("admin.products.create")}
-                            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-cyan-600 rounded-lg hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 hover:scale-105"
-                        >
-                            <HiPlus className="w-5 h-5 mr-2" />
-                            เพิ่มสินค้า
-                        </Link>
+
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <FaSearch className="w-4 h-4 text-gray-500" />
+                                </div>
+                                <TextInput
+                                    type="text"
+                                    placeholder="ค้นหาสินค้า..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
+                            <Link
+                                href={route("admin.products.create")}
+                                className="flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                            >
+                                <FaPlus className="w-4 h-4 mr-2" />
+                                เพิ่มสินค้า
+                            </Link>
+                        </div>
                     </div>
 
-                    {/* Products Table */}
-                    <div className="overflow-hidden border border-gray-200 rounded-lg shadow-sm">
+                    <div className="overflow-x-auto">
                         <Table hoverable>
                             <Table.Head>
                                 <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
@@ -208,7 +214,7 @@ export default function Index({ productsPaginate }) {
                                         <Table.Cell className="px-6 py-4 font-medium text-gray-900">
                                             ฿
                                             {(
-                                                product.cost_price || 0
+                                                product.sale_price || 0
                                             ).toLocaleString()}
                                         </Table.Cell>
                                         <Table.Cell className="px-6 py-4">
@@ -220,7 +226,7 @@ export default function Index({ productsPaginate }) {
                                                     )}
                                                     className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-700 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors duration-150"
                                                 >
-                                                    <HiPencil className="w-4 h-4 mr-1.5" />
+                                                    <FaEdit className="w-4 h-4 mr-1.5" />
                                                     แก้ไข
                                                 </Link>
                                                 <button
@@ -229,7 +235,7 @@ export default function Index({ productsPaginate }) {
                                                     }
                                                     className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 rounded-md hover:bg-red-100 transition-colors duration-150"
                                                 >
-                                                    <HiTrash className="w-4 h-4 mr-1.5" />
+                                                    <FaTrash className="w-4 h-4 mr-1.5" />
                                                     ลบ
                                                 </button>
                                             </div>
@@ -272,122 +278,103 @@ export default function Index({ productsPaginate }) {
                         </Table>
                     </div>
 
-                    {/* Pagination */}
-                    <div className="flex flex-col items-center justify-between gap-4 px-4 py-3 sm:flex-row bg-gray-50 rounded-lg">
-                        <div className="text-sm text-gray-700">
-                            แสดง{" "}
-                            <span className="font-medium text-gray-900">
-                                {productsPaginate.from}
-                            </span>{" "}
-                            ถึง{" "}
-                            <span className="font-medium text-gray-900">
-                                {productsPaginate.to}
-                            </span>{" "}
-                            จาก{" "}
-                            <span className="font-medium text-gray-900">
-                                {productsPaginate.total}
-                            </span>{" "}
-                            รายการ
+                    <div className="flex items-center justify-center mt-4">
+                        <Pagination
+                            currentPage={current_page}
+                            onPageChange={onPageChange}
+                            showIcons
+                            layout="pagination"
+                            totalPages={Math.ceil(
+                                productsPaginate.total / productsPaginate.per_page
+                            )}
+                        />
+                    </div>
+                </Card>
+            </div>
+
+            {/* Ingredients Modal */}
+            <Modal
+                show={showIngredientsModal}
+                onClose={() => setShowIngredientsModal(false)}
+                size="xl"
+            >
+                <Modal.Header>
+                    รายละเอียดสูตร {selectedProduct?.name}
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="space-y-6">
+                        {/* Ingredients Section */}
+                        <div>
+                            <h3 className="mb-4 text-lg font-semibold">วัตถุดิบที่ใช้</h3>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <Table.Head>
+                                        <Table.HeadCell>ชื่อวัตถุดิบ</Table.HeadCell>
+                                        <Table.HeadCell>ปริมาณที่ใช้</Table.HeadCell>
+                                        <Table.HeadCell>หน่วย</Table.HeadCell>
+                                    </Table.Head>
+                                    <Table.Body>
+                                        {selectedProduct?.ingredients?.map((item) => (
+                                            <Table.Row key={item.id}>
+                                                <Table.Cell>{item.ingredient?.name || 'ไม่ระบุชื่อ'}</Table.Cell>
+                                                <Table.Cell>{item.quantity_used}</Table.Cell>
+                                                <Table.Cell>{item.ingredient?.unit?.name || 'ไม่ระบุหน่วย'}</Table.Cell>
+                                            </Table.Row>
+                                        ))}
+                                        {(!selectedProduct?.ingredients || selectedProduct.ingredients.length === 0) && (
+                                            <Table.Row>
+                                                <Table.Cell colSpan={3}>
+                                                    <div className="flex items-center justify-center py-4 text-gray-500">
+                                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        ไม่มีวัตถุดิบที่ใช้ในสินค้านี้
+                                                    </div>
+                                                </Table.Cell>
+                                            </Table.Row>
+                                        )}
+                                    </Table.Body>
+                                </Table>
+                            </div>
                         </div>
 
-                        <div className="flex justify-center">
-                            <Pagination
-                                currentPage={current_page}
-                                onPageChange={onPageChange}
-                                showIcons={true}
-                                totalPages={Math.ceil(
-                                    productsPaginate.total /
-                                        productsPaginate.per_page
-                                )}
-                            />
+                        {/* Consumables Section */}
+                        <div>
+                            <h3 className="mb-4 text-lg font-semibold">วัตถุดิบสิ้นเปลืองที่ใช้</h3>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <Table.Head>
+                                        <Table.HeadCell>ชื่อวัตถุดิบสิ้นเปลือง</Table.HeadCell>
+                                        <Table.HeadCell>ปริมาณที่ใช้</Table.HeadCell>
+                                        <Table.HeadCell>หน่วย</Table.HeadCell>
+                                    </Table.Head>
+                                    <Table.Body>
+                                        {selectedProduct?.consumables?.map((item) => (
+                                            <Table.Row key={item.id}>
+                                                <Table.Cell>{item.consumable?.name || 'ไม่ระบุชื่อ'}</Table.Cell>
+                                                <Table.Cell>{item.quantity_used}</Table.Cell>
+                                                <Table.Cell>{item.consumable?.unit?.name || 'ไม่ระบุหน่วย'}</Table.Cell>
+                                            </Table.Row>
+                                        ))}
+                                        {(!selectedProduct?.consumables || selectedProduct.consumables.length === 0) && (
+                                            <Table.Row>
+                                                <Table.Cell colSpan={3}>
+                                                    <div className="flex items-center justify-center py-4 text-gray-500">
+                                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        ไม่มีวัตถุดิบสิ้นเปลืองที่ใช้ในสินค้านี้
+                                                    </div>
+                                                </Table.Cell>
+                                            </Table.Row>
+                                        )}
+                                    </Table.Body>
+                                </Table>
+                            </div>
                         </div>
                     </div>
-
-                    {/* Ingredients Modal */}
-                    <Modal
-                        show={showIngredientsModal}
-                        onClose={() => setShowIngredientsModal(false)}
-                        size="xl"
-                    >
-                        <Modal.Header>
-                            รายละเอียดสูตร {selectedProduct?.name}
-                        </Modal.Header>
-                        <Modal.Body>
-                            <div className="space-y-6">
-                                {/* Ingredients Section */}
-                                <div>
-                                    <h3 className="mb-4 text-lg font-semibold">วัตถุดิบที่ใช้</h3>
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <Table.Head>
-                                                <Table.HeadCell>ชื่อวัตถุดิบ</Table.HeadCell>
-                                                <Table.HeadCell>ปริมาณที่ใช้</Table.HeadCell>
-                                                <Table.HeadCell>หน่วย</Table.HeadCell>
-                                            </Table.Head>
-                                            <Table.Body>
-                                                {selectedProduct?.ingredients?.map((item) => (
-                                                    <Table.Row key={item.id}>
-                                                        <Table.Cell>{item.ingredient?.name || 'ไม่ระบุชื่อ'}</Table.Cell>
-                                                        <Table.Cell>{item.quantity_used}</Table.Cell>
-                                                        <Table.Cell>{item.ingredient?.unit?.name || 'ไม่ระบุหน่วย'}</Table.Cell>
-                                                    </Table.Row>
-                                                ))}
-                                                {(!selectedProduct?.ingredients || selectedProduct.ingredients.length === 0) && (
-                                                    <Table.Row>
-                                                        <Table.Cell colSpan={3}>
-                                                            <div className="flex items-center justify-center py-4 text-gray-500">
-                                                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                </svg>
-                                                                ไม่มีวัตถุดิบที่ใช้ในสินค้านี้
-                                                            </div>
-                                                        </Table.Cell>
-                                                    </Table.Row>
-                                                )}
-                                            </Table.Body>
-                                        </Table>
-                                    </div>
-                                </div>
-
-                                {/* Consumables Section */}
-                                <div>
-                                    <h3 className="mb-4 text-lg font-semibold">วัตถุดิบสิ้นเปลืองที่ใช้</h3>
-                                    <div className="overflow-x-auto">
-                                        <Table>
-                                            <Table.Head>
-                                                <Table.HeadCell>ชื่อวัตถุดิบสิ้นเปลือง</Table.HeadCell>
-                                                <Table.HeadCell>ปริมาณที่ใช้</Table.HeadCell>
-                                                <Table.HeadCell>หน่วย</Table.HeadCell>
-                                            </Table.Head>
-                                            <Table.Body>
-                                                {selectedProduct?.consumables?.map((item) => (
-                                                    <Table.Row key={item.id}>
-                                                        <Table.Cell>{item.consumable?.name || 'ไม่ระบุชื่อ'}</Table.Cell>
-                                                        <Table.Cell>{item.quantity_used}</Table.Cell>
-                                                        <Table.Cell>{item.consumable?.unit?.name || 'ไม่ระบุหน่วย'}</Table.Cell>
-                                                    </Table.Row>
-                                                ))}
-                                                {(!selectedProduct?.consumables || selectedProduct.consumables.length === 0) && (
-                                                    <Table.Row>
-                                                        <Table.Cell colSpan={3}>
-                                                            <div className="flex items-center justify-center py-4 text-gray-500">
-                                                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                </svg>
-                                                                ไม่มีวัตถุดิบสิ้นเปลืองที่ใช้ในสินค้านี้
-                                                            </div>
-                                                        </Table.Cell>
-                                                    </Table.Row>
-                                                )}
-                                            </Table.Body>
-                                        </Table>
-                                    </div>
-                                </div>
-                            </div>
-                        </Modal.Body>
-                    </Modal>
-                </div>
-            </AdminLayout>
+                </Modal.Body>
+            </Modal>
         </AuthenticatedLayout>
     );
 }
