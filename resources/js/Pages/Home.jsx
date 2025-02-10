@@ -8,17 +8,24 @@ import { useGlobalState } from "@/Store/state";
 import { appActions } from "@/Store/state/appState";
 import { Transition } from "@headlessui/react";
 import { Head } from "@inertiajs/react";
+import axios from "axios";
 
 export default function Home({ categories, products }) {
     const { state, dispatch } = useGlobalState();
     const { isCartOpen } = state.app;
 
+
+
     useEffect(() => {
-        fetch("/api/settings")
-            .then((response) => response.json())
-            .then((data) => {
-                dispatch(appActions.setGlobalSettings(data));
-            });
+        async function fetchSettings() {
+            try {
+                const response = await axios.get("/api/settings");
+                dispatch(appActions.setGlobalSettings(response.data));
+            } catch (error) {
+                console.error("Error fetching settings:", error);
+            }
+        }
+        fetchSettings();
     }, []);
 
     return (

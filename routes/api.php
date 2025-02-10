@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Api\SettingController as ApiSettingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReceiptController;
@@ -18,7 +19,7 @@ Route::get('/get-last-order-number', [ReceiptController::class, 'getLastOrderNum
 Route::get('/admin/notifications', [NotificationController::class, 'index'])->name('api.admin.notifications');
 
 # Settings
-Route::get('/settings', [SettingController::class, 'settings'])->name('api.settings');
+Route::get('/settings', [ApiSettingController::class, 'index'])->name('api.settings');
 Route::group(['middleware' => ['role:admin']], function () {
     Route::post('/settings', [SettingController::class, 'store'])->name('api.settings.store');
     Route::put('/settings/{setting}', [SettingController::class, 'update'])->name('api.settings.update');

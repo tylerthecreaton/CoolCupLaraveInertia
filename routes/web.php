@@ -31,6 +31,7 @@ use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\RegisterMemberController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SaleDashboardController;
+use App\Http\Controllers\SlipController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +56,8 @@ Route::delete('/member/{id}', [MemberController::class, 'destroy'])->name('membe
 Route::middleware('auth', 'can:view dashboard')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/receipt-history', [OrderController::class, 'receiptHistory'])->name('receipt.history');
+    Route::get('/sendslip', [SlipController::class, 'index'])->name('slip.index');
+    Route::post('/sendslip/{orderId}/upload', [SlipController::class, 'upload'])->name('slip.upload');
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');
     Route::get('/toppings', [AdminProductsController::class, 'getToppings'])->name('products.toppings');
 
