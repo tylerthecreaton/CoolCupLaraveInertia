@@ -32,6 +32,7 @@ use App\Http\Controllers\RegisterMemberController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SaleDashboardController;
 use App\Http\Controllers\SlipController;
+use App\Http\Controllers\TelegramController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -241,6 +242,7 @@ Route::middleware('auth', 'can:view dashboard')->group(function () {
 
 require __DIR__ . '/auth.php';
 
-Route::get('/playground', function () {
-    return Auth::user()->roles;
-});
+
+
+Route::post('/telegram/webhook', [TelegramController::class, 'handle']);
+Route::get('/telegram/send-message/{message}', [TelegramController::class, 'sendMessage']);
