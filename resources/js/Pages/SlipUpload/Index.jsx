@@ -1,11 +1,10 @@
-// import AppLayout from '@/Layouts/AppLayout';
 import { Tab } from '@headlessui/react';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { useState } from 'react';
 
-export default function Index({ pendingSlips }) {
+export default function Index({ pendingSlips, uploadedSlips }) {
     const [selectedTab, setSelectedTab] = useState(0);
     const [uploadingOrder, setUploadingOrder] = useState(null);
     const [refreshKey, setRefreshKey] = useState(0);
@@ -32,6 +31,72 @@ export default function Index({ pendingSlips }) {
     const handlePullToRefresh = () => {
         window.location.reload();
     };
+
+    const OrderCard = ({ order, showUploadButton = false }) => (
+        <div key={order.id} className="bg-white rounded-lg shadow p-4">
+            <div className="flex justify-between items-start">
+                <div>
+                    <h3 className="text-lg font-medium">{order.order_number}</h3>
+                    <p className="text-sm text-gray-500">
+                        {format(new Date(order.created_at), 'dd/MM/yyyy HH:mm')}
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1">
+                        {order.customer_name}
+                    </p>
+                    <p className="text-sm font-medium mt-1">
+                        Total: ฿{Number(order.total).toFixed(2)}
+                    </p>
+                    {order.confirmed_at && (
+                        <p className="text-sm text-green-600 mt-1">
+                            Confirmed: {format(new Date(order.confirmed_at), 'dd/MM/yyyy HH:mm')}
+                        </p>
+                    )}
+                </div>
+                <div>
+                    {showUploadButton ? (
+                        <>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                id={`slip-upload-${order.id}`}
+                                onChange={(e) => {
+                                    if (e.target.files?.[0]) {
+                                        handleFileUpload(order.id, e.target.files[0]);
+                                    }
+                                }}
+                            />
+                            <label
+                                htmlFor={`slip-upload-${order.id}`}
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                                Upload Slip
+                            </label>
+                        </>
+                    ) : (
+                        <a
+                            href={order.slip_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            View Slip
+                        </a>
+                    )}
+                </div>
+            </div>
+            <div className="mt-3">
+                <h4 className="text-sm font-medium text-gray-900">Items:</h4>
+                <ul className="mt-1 space-y-1">
+                    {order.items.map((item, index) => (
+                        <li key={index} className="text-sm text-gray-600">
+                            {item.quantity}x {item.name} - ฿{Number(item.price).toFixed(2)}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    );
 
     return (
         <div>
@@ -78,59 +143,33 @@ export default function Index({ pendingSlips }) {
                                 <Tab.Panel>
                                     <div className="space-y-4">
                                         {pendingSlips.map((order) => (
-                                            <div key={order.id} className="bg-white rounded-lg shadow p-4">
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <h3 className="text-lg font-medium">{order.order_number}</h3>
-                                                        <p className="text-sm text-gray-500">
-                                                            {format(new Date(order.created_at), 'dd/MM/yyyy HH:mm')}
-                                                        </p>
-                                                        <p className="text-sm text-gray-600 mt-1">
-                                                            {order.customer_name}
-                                                        </p>
-                                                        <p className="text-sm font-medium mt-1">
-                                                            Total: ฿{order.total.toFixed(2)}
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <input
-                                                            type="file"
-                                                            accept="image/*"
-                                                            className="hidden"
-                                                            id={`slip-upload-${order.id}`}
-                                                            onChange={(e) => {
-                                                                if (e.target.files?.[0]) {
-                                                                    handleFileUpload(order.id, e.target.files[0]);
-                                                                }
-                                                            }}
-                                                        />
-                                                        <label
-                                                            htmlFor={`slip-upload-${order.id}`}
-                                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                                        >
-                                                            Upload Slip
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-3">
-                                                    <h4 className="text-sm font-medium text-gray-900">Items:</h4>
-                                                    <ul className="mt-1 space-y-1">
-                                                        {order.items.map((item, index) => (
-                                                            <li key={index} className="text-sm text-gray-600">
-                                                                {item.quantity}x {item.name} - ฿{item.price.toFixed(2)}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            </div>
+                                            <OrderCard 
+                                                key={order.id} 
+                                                order={order} 
+                                                showUploadButton={true}
+                                            />
                                         ))}
+                                        {pendingSlips.length === 0 && (
+                                            <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+                                                No pending slips
+                                            </div>
+                                        )}
                                     </div>
                                 </Tab.Panel>
                                 <Tab.Panel>
-                                    <div className="bg-white rounded-lg shadow p-4">
-                                        <p className="text-center text-gray-500">
-                                            Coming soon...
-                                        </p>
+                                    <div className="space-y-4">
+                                        {uploadedSlips.map((order) => (
+                                            <OrderCard 
+                                                key={order.id} 
+                                                order={order} 
+                                                showUploadButton={false}
+                                            />
+                                        ))}
+                                        {uploadedSlips.length === 0 && (
+                                            <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+                                                No uploaded slips
+                                            </div>
+                                        )}
                                     </div>
                                 </Tab.Panel>
                             </Tab.Panels>
