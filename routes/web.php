@@ -240,9 +240,8 @@ Route::middleware('auth', 'can:view dashboard')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__ . '/auth.php';
-
-
-
-Route::post('/telegram/webhook', [TelegramController::class, 'handle']);
+// Telegram Webhook Route
+Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook']);
 Route::get('/telegram/send-message/{message}', [TelegramController::class, 'sendMessage']);
+
+require __DIR__ . '/auth.php';
