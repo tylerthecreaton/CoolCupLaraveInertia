@@ -76,6 +76,8 @@ Route::middleware('auth', 'can:view dashboard')->group(function () {
     Route::post('/orders', [OrderController::class, 'store'])->name('order.store');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('order.show');
     Route::get('/orders/{id}/edit', [OrderController::class, 'edit'])->name('order.edit');
+    Route::get('/orders/{id}/upload-slip', [OrderController::class, 'showUploadSlip'])->name('orders.showUploadSlip');
+    Route::post('/orders/{id}/upload-slip', [OrderController::class, 'uploadSlip'])->name('orders.uploadSlip');
     Route::put('/orders/{id}', [OrderController::class, 'update'])->name('order.update');
     Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('order.destroy');
     Route::get('/get-last-order-number', [OrderController::class, 'getLastOrderNumber'])->name('order.lastNumber');

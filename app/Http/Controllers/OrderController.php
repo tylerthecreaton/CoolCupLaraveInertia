@@ -21,6 +21,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Inertia\Inertia;
@@ -104,6 +105,50 @@ class OrderController extends Controller implements HasMiddleware
 
         $telegram->sendPaymentReminder($txt);
         return $order;
+    }
+
+    public function uploadSlip(Request $request)
+    {
+        $request->validate([
+            'slip_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'order_id' => 'required|exists:orders,id'
+        ]);
+
+        $order = Order::findOrFail($request->order_id);
+
+        if ($request->hasFile('slip_image')) {
+            $file = $request->file('slip_image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $path = $file->storeAs('public/slips', $filename);
+
+            $order->payment_slip = $filename;
+            $order->payment_status = 'pending_verification';
+            $order->save();
+
+            // Send notification to Telegram if configured
+            try {
+                $telegram = new Api(config('services.telegram.bot_token'));
+                $telegram->sendMessage([
+                    'chat_id' => config('services.telegram.chat_id'),
+                    'text' => "🧾 New payment slip uploaded!\nOrder: #{$order->order_number}\nAmount: ฿{$order->total_amount}"
+                ]);
+            } catch (Exception $e) {
+                // Log error but don't stop the process
+                Log::error('Telegram notification failed: ' . $e->getMessage());
+            }
+
+            return redirect()->back()->with('success', 'Payment slip uploaded successfully');
+        }
+
+        return redirect()->back()->with('error', 'Failed to upload payment slip');
+    }
+
+    public function showUploadSlip($id)
+    {
+        $order = Order::findOrFail($id);
+        return Inertia::render('Admin/orders/uploadSlip', [
+            'order' => $order
+        ]);
     }
 
     public function getLastOrderNumber()
