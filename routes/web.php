@@ -33,10 +33,12 @@ use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SaleDashboardController;
 use App\Http\Controllers\SlipController;
 use App\Http\Controllers\TelegramController;
+use App\Models\Order;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Telegram\Bot\Api;
 
 Route::get('/', [HomeController::class, 'index']);
 
@@ -245,3 +247,21 @@ Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook']);
 Route::get('/telegram/send-message/{message}', [TelegramController::class, 'sendMessage']);
 
 require __DIR__ . '/auth.php';
+
+Route::get('/playground', function () {
+    $api = new Api();
+    $telegram = new TelegramController($api);
+
+    $order = Order::with(['orderDetails.product', 'customer'])->find(15);
+    $url = env('APP_URL') . '/order/upload-slip/' . $order->id;
+    // dd($url);
+    $txt = 'กรุณาอัปโหลดสลิปการชําระเงิน \n';
+    $txt .= 'Order Number: ' . $order->order_number . "\n";
+    $txt .= 'Customer Name: ' . $order->customer->name . "\n";
+    $txt .= 'Total Amount: ' . $order->total_amount . "\n";
+    $txt .= "เวลา: " . date('Y-m-d H:i:s') . "\n";
+    $txt .= "[กดที่นี่เพื่ออัปโหลดสลิป](https://d92c-27-145-9-21.ngrok-free.app)";
+
+    $telegram->sendPaymentReminder($txt);
+    return $order;
+});

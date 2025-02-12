@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Inertia\Inertia;
+use Telegram\Bot\Api;
 
 class OrderController extends Controller implements HasMiddleware
 {
@@ -55,13 +56,13 @@ class OrderController extends Controller implements HasMiddleware
         $order->payment_note = $request->get("paymentNote");
         $order->received_points = $this->calculatePoint(total: $cart['total']);
         $order->total_Items = $this->calculateTotalItems($cart['items']);
-        
+
         // Set promotion_id if a promotion is applied
         if ($cart['appliedPromotion']) {
             $order->promotion_id = $cart['appliedPromotion']['id'] ?? null;
             $order->discount_type = 'promotion';
         }
-        
+
         $order->save();
         if ($request->get("memberPhone")) {
             $this->addPointToCustomer($cart['total'], $request->get("memberPhone"), $order->id);
@@ -78,11 +79,31 @@ class OrderController extends Controller implements HasMiddleware
             $this->saveUsedPoints($cart['usedPoints'], $cart['pointDiscountAmount'], $order->id, $order->customer_id);
         }
 
+        $this->sendReminderToAttachedPaymentSlip($order);
+
         return Order::with([
             'orderDetails',
             'user',
             'customer',
         ])->find($order->id);
+    }
+
+    private function sendReminderToAttachedPaymentSlip($order)
+    {
+        $api = new Api();
+        $telegram = new TelegramController($api);
+
+        $order = Order::with(['orderDetails.product', 'customer'])->find(15);
+        $url = env('APP_URL') . '/order/upload-slip/' . $order->id;
+        $txt = 'กรุณาอัปโหลดสลิปการชําระเงิน \n';
+        $txt .= 'Order Number: ' . $order->order_number . "\n";
+        $txt .= 'Customer Name: ' . $order->customer->name . "\n";
+        $txt .= 'Total Amount: ' . $order->total_amount . "\n";
+        $txt .= "เวลา: " . date('Y-m-d H:i:s') . "\n";
+        $txt .= "[กดที่นี่เพื่ออัปโหลดสลิป]($url)";
+
+        $telegram->sendPaymentReminder($txt);
+        return $order;
     }
 
     public function getLastOrderNumber()
@@ -218,20 +239,20 @@ class OrderController extends Controller implements HasMiddleware
         foreach ($items as $item) {
             $orderDetail = new OrderDetail();
             $orderDetail->order_id = $orderId;
-            
+
             // Check if this is a promotion item
             $isPromotion = is_string($item['id']) && str_starts_with($item['id'], 'promotion-');
-            
+
             if ($isPromotion) {
                 // For promotion items, use a special product_id (0 for discounts)
                 $orderDetail->product_id = 0;
                 $orderDetail->line_item_id = $item['id'];
                 $orderDetail->product_name = $item['name'];
-                $orderDetail->product_image = ''; 
+                $orderDetail->product_image = '';
                 $orderDetail->price = $item['price'];
-                $orderDetail->size = ''; 
-                $orderDetail->sweetness = ''; 
-                $orderDetail->toppings = null; 
+                $orderDetail->size = '';
+                $orderDetail->sweetness = '';
+                $orderDetail->toppings = null;
                 $orderDetail->quantity = $item['quantity'];
                 $orderDetail->subtotal = $item['quantity'] * $item['price'];
                 $orderDetail->save();
