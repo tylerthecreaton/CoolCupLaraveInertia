@@ -119,28 +119,26 @@ class OrderController extends Controller implements HasMiddleware
         if ($request->hasFile('slip_image')) {
             $file = $request->file('slip_image');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('public/slips', $filename);
 
-            $order->payment_slip = $filename;
-            $order->payment_status = 'pending_verification';
+            $file->move(public_path('storage/slips'), $filename);
+
+            $order->payment_slip = '/storage/slips/' . $filename;
             $order->save();
 
-            // Send notification to Telegram if configured
             try {
                 $telegram = new Api(config('services.telegram.bot_token'));
                 $telegram->sendMessage([
                     'chat_id' => config('services.telegram.chat_id'),
-                    'text' => "🧾 New payment slip uploaded!\nOrder: #{$order->order_number}\nAmount: ฿{$order->total_amount}"
+                    'text' => "🧾 มีการอัพโหลดสลิปการชำระเงินใหม่!\nหมายเลขคำสั่งซื้อ: #{$order->order_number}\nยอดเงิน: ฿{$order->total_amount}"
                 ]);
             } catch (Exception $e) {
-                // Log error but don't stop the process
                 Log::error('Telegram notification failed: ' . $e->getMessage());
             }
 
-            return redirect()->back()->with('success', 'Payment slip uploaded successfully');
+            return redirect()->back()->with('success', 'อัพโหลดสลิปการชำระเงินเรียบร้อยแล้ว');
         }
 
-        return redirect()->back()->with('error', 'Failed to upload payment slip');
+        return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการอัพโหลดสลิป กรุณาลองใหม่อีกครั้ง');
     }
 
     public function showUploadSlip($id)
