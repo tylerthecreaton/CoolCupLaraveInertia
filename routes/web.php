@@ -244,7 +244,7 @@ Route::middleware('auth', 'can:view dashboard')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Telegram Webhook Route
+// Telegram webhook
 Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook']);
 Route::get('/telegram/send-message/{message}', [TelegramController::class, 'sendMessage']);
 

@@ -6,6 +6,7 @@ use App\Models\TelegramUser;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Telegram\Bot\Api;
 
@@ -91,6 +92,18 @@ class TelegramController extends Controller
 
     public function sendPaymentReminder(string $message)
     {
-        $this->sendTelegramMessage('7386484222', $message, 'Markdown');
+        // ดึง chat_id จากตาราง telegram_users
+        $telegramUsers = TelegramUser::all();
+
+        if ($telegramUsers->isEmpty()) {
+            Log::error('ไม่พบผู้ใช้ Telegram ในระบบ');
+            return;
+        }
+
+        foreach ($telegramUsers as $user) {
+            if (!empty($user->chat_id)) {
+                $this->sendTelegramMessage($user->chat_id, $message, 'Markdown');
+            }
+        }
     }
 }

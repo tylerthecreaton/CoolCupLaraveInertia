@@ -26,6 +26,7 @@ use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Inertia\Inertia;
 use Telegram\Bot\Api;
+use App\Http\Controllers\TelegramController;
 
 class OrderController extends Controller implements HasMiddleware
 {
@@ -65,6 +66,7 @@ class OrderController extends Controller implements HasMiddleware
         }
 
         $order->save();
+
         if ($request->get("memberPhone")) {
             $this->addPointToCustomer($cart['total'], $request->get("memberPhone"), $order->id);
         }
@@ -72,7 +74,7 @@ class OrderController extends Controller implements HasMiddleware
         $this->saveOrderDetails($cart['items'], $order->id);
 
         if ($cart['appliedPromotion']) {
-            $onlyPromotionDiscount  = $cart['manualDiscountAmount'] + $cart['pointDiscountAmount'];
+            $onlyPromotionDiscount = $cart['manualDiscountAmount'] + $cart['pointDiscountAmount'];
             $this->savePromotionUsage($cart['appliedPromotion'], $onlyPromotionDiscount, $order->id);
         }
 
@@ -80,7 +82,13 @@ class OrderController extends Controller implements HasMiddleware
             $this->saveUsedPoints($cart['usedPoints'], $cart['pointDiscountAmount'], $order->id, $order->customer_id);
         }
 
-        $this->sendReminderToAttachedPaymentSlip($order);
+        // Load the relationships needed for the reminder
+        $order->load(['customer', 'orderDetails.product']);
+
+        // Send reminder for QR code payments
+        if ($order->payment_method === 'qr_code') {
+            $this->sendReminderToAttachedPaymentSlip($order);
+        }
 
         return Order::with([
             'orderDetails',
@@ -91,19 +99,33 @@ class OrderController extends Controller implements HasMiddleware
 
     private function sendReminderToAttachedPaymentSlip($order)
     {
-        $api = new Api();
-        $telegram = new TelegramController($api);
+        // ส่งการแจ้งเตือนเฉพาะเมื่อเป็นการชำระเงินด้วย QR Code
+        if ($order->payment_method !== 'qr_code') {
+            return;
+        }
 
-        $order = Order::with(['orderDetails.product', 'customer'])->find(15);
-        $url = env('APP_URL') . '/order/upload-slip/' . $order->id;
-        $txt = 'กรุณาอัปโหลดสลิปการชําระเงิน \n';
-        $txt .= 'Order Number: ' . $order->order_number . "\n";
-        $txt .= 'Customer Name: ' . $order->customer->name . "\n";
-        $txt .= 'Total Amount: ' . $order->total_amount . "\n";
-        $txt .= "เวลา: " . date('Y-m-d H:i:s') . "\n";
-        $txt .= "[กดที่นี่เพื่ออัปโหลดสลิป]($url)";
+        try {
+            // สร้าง URL สำหรับอัพโหลดสลิป
+            $uploadUrl = env('APP_URL') . '/orders/' . $order->id . '/upload-slip';
+            
+            // สร้างข้อความแจ้งเตือน
+            $message = "🔔 *แจ้งเตือน: รอการอัพโหลดสลิปการชำระเงิน*\n\n";
+            $message .= "📋 หมายเลขคำสั่งซื้อ: `#" . $order->order_number . "`\n";
+            if ($order->customer) {
+                $message .= "👤 ลูกค้า: " . $order->customer->name . "\n";
+            }
+            $message .= "💰 ยอดชำระ: ฿" . number_format($order->total_amount, 2) . "\n";
+            $message .= "⏰ เวลาสั่งซื้อ: " . $order->created_at->format('d/m/Y H:i') . "\n\n";
+            $message .= "[📎 คลิกที่นี่เพื่ออัพโหลดสลิป](" . $uploadUrl . ")";
 
-        $telegram->sendPaymentReminder($txt);
+            // ส่งข้อความผ่าน TelegramController
+            $telegram = new TelegramController(new Api(config('services.telegram.bot_token')));
+            $telegram->sendPaymentReminder($message);
+
+        } catch (Exception $e) {
+            Log::error('ไม่สามารถส่งการแจ้งเตือน Telegram ได้: ' . $e->getMessage());
+        }
+
         return $order;
     }
 
