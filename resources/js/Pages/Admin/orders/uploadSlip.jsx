@@ -3,6 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, useForm, Link } from "@inertiajs/react";
 import { Breadcrumb, Button, Label, Alert } from "flowbite-react";
 import { HiHome, HiUpload, HiDocumentText } from "react-icons/hi";
+import Swal from 'sweetalert2';
 
 export default function UploadSlip({ order }) {
     const [preview, setPreview] = useState(null);
@@ -30,7 +31,23 @@ export default function UploadSlip({ order }) {
             onSuccess: () => {
                 reset();
                 setPreview(null);
+                Swal.fire({
+                    title: 'สำเร็จ!',
+                    text: 'อัพโหลดหลักฐานการชำระเงินเรียบร้อยแล้ว',
+                    icon: 'success',
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#3085d6'
+                });
             },
+            onError: (errors) => {
+                Swal.fire({
+                    title: 'เกิดข้อผิดพลาด!',
+                    text: errors.message || 'ไม่สามารถอัพโหลดหลักฐานการชำระเงินได้',
+                    icon: 'error',
+                    confirmButtonText: 'ตกลง',
+                    confirmButtonColor: '#d33'
+                });
+            }
         });
     };
 
@@ -71,7 +88,7 @@ export default function UploadSlip({ order }) {
                                 </h2>
                                 <HiDocumentText className="h-8 w-8 text-blue-500" />
                             </div>
-                        
+
                             {order && (
                                 <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
                                     <h3 className="font-medium text-lg text-blue-800 mb-2">ข้อมูลคำสั่งซื้อ</h3>
@@ -121,9 +138,9 @@ export default function UploadSlip({ order }) {
                                     <div className="mt-4">
                                         <p className="text-sm text-gray-600 mb-2">ตัวอย่างรูปภาพ:</p>
                                         <div className="relative rounded-lg overflow-hidden border border-gray-200">
-                                            <img 
-                                                src={preview} 
-                                                alt="ตัวอย่างสลิป" 
+                                            <img
+                                                src={preview}
+                                                alt="ตัวอย่างสลิป"
                                                 className="max-w-full h-auto max-h-96 mx-auto"
                                             />
                                         </div>

@@ -27,6 +27,7 @@ use Spatie\Permission\Middleware\RoleMiddleware;
 use Inertia\Inertia;
 use Telegram\Bot\Api;
 use App\Http\Controllers\TelegramController;
+use App\Models\TelegramUser;
 
 class OrderController extends Controller implements HasMiddleware
 {
@@ -107,7 +108,7 @@ class OrderController extends Controller implements HasMiddleware
         try {
             // สร้าง URL สำหรับอัพโหลดสลิป
             $uploadUrl = env('APP_URL') . '/orders/' . $order->id . '/upload-slip';
-            
+
             // สร้างข้อความแจ้งเตือน
             $message = "🔔 *แจ้งเตือน: รอการอัพโหลดสลิปการชำระเงิน*\n\n";
             $message .= "📋 หมายเลขคำสั่งซื้อ: `#" . $order->order_number . "`\n";
@@ -148,11 +149,11 @@ class OrderController extends Controller implements HasMiddleware
             $order->save();
 
             try {
-                $telegram = new Api(config('services.telegram.bot_token'));
-                $telegram->sendMessage([
-                    'chat_id' => config('services.telegram.chat_id'),
-                    'text' => "🧾 มีการอัพโหลดสลิปการชำระเงินใหม่!\nหมายเลขคำสั่งซื้อ: #{$order->order_number}\nยอดเงิน: ฿{$order->total_amount}"
-                ]);
+                $telegram = new TelegramController(new Api());
+                $user_id = Auth::user()->id;
+
+                $chat_id = TelegramUser::where('user_id', $user_id)->first()->chat_id;
+                $telegram->sendTelegramMessage($chat_id, "🧾 มีการอัพโหลดสลิปการชำระเงินใหม่!\nหมายเลขคำสั่งซื้อ: #{$order->order_number}\nยอดเงิน: ฿{$order->total_amount}");
             } catch (Exception $e) {
                 Log::error('Telegram notification failed: ' . $e->getMessage());
             }

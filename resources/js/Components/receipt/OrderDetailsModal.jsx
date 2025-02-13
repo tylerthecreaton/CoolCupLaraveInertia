@@ -96,7 +96,7 @@ export default function OrderDetailsModal({ show, onClose, order }) {
                                                 {item.size}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {item.sweetness}%
+                                                {item.sweetness}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {item.quantity}
@@ -108,6 +108,14 @@ export default function OrderDetailsModal({ show, onClose, order }) {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div className="p-6">
+                            หลักฐานการชำระเงิน
+                            <div>
+                                <img src={order.payment_slip} alt="slip" className="w-48 h-48 object-cover rounded-lg border border-gray-200 shadow-sm" />
+                            </div>
                         </div>
                     </div>
                 </div>
