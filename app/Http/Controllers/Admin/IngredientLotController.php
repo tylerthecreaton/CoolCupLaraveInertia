@@ -182,7 +182,8 @@ class IngredientLotController extends Controller
         );
 
         Expense::create([
-            'name' => sprintf('ซื้อวัตถุดิบ (%d รายการ)',
+            'name' => sprintf(
+                'ซื้อวัตถุดิบ (%d รายการ)',
                 collect($lots)->sum(function ($lot) {
                     return $lot->details->count();
                 })

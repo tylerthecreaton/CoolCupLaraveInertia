@@ -196,11 +196,11 @@ Route::middleware('auth', 'can:view dashboard')->group(function () {
         Route::get('/ingredient-lots', [AdminIngredientLotController::class, 'index'])->name('ingredient-lots.index');
         Route::get('/ingredient-lots/create', [AdminIngredientLotController::class, 'create'])->name('ingredient-lots.create');
         Route::post('/ingredient-lots', [AdminIngredientLotController::class, 'store'])->name('ingredient-lots.store');
+        Route::get('/ingredient-lots/expired', [AdminExpiredController::class, 'index'])->name('ingredient-lots.expired.index');
+        Route::delete('/ingredient-lots/expired/{ingredientLot}', [AdminExpiredController::class, 'dispose'])->name('ingredient-lots.expired.dispose');
         Route::get('/ingredient-lots/{id}', [AdminIngredientLotController::class, 'show'])->name('ingredient-lots.show');
         Route::delete('/ingredient-lots/{id}', [AdminIngredientLotController::class, 'destroy'])->name('ingredient-lots.destroy');
         Route::delete('/ingredient-lots/{id}/revert', [AdminIngredientLotController::class, 'revert'])->name('ingredient-lots.revert');
-        Route::get('/ingredient-lots/expired', [AdminIngredientLotController::class, 'expired'])->name('ingredient-lots.expired.index');
-        Route::delete('/ingredient-lots/expired/{ingredientLot}', [AdminExpiredController::class, 'dispose'])->name('ingredient-lots.expired.dispose');
 
         // ---------------------------Units---------------------------
         Route::get('/units', [AdminUnitController::class, 'index'])->name('units.index');

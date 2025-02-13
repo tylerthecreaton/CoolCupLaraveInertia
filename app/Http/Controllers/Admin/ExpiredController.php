@@ -14,19 +14,19 @@ class ExpiredController extends Controller
 {
     public function index()
     {
-        try {
-            $expiredIngredients = IngredientLot::with(['ingredient', 'user'])
-                ->whereDate('expiration_date', '<', Carbon::now())
-                ->orderBy('expiration_date', 'asc')
-                ->get();
 
-            return Inertia::render('Admin/ingredientLot/Expired', [
-                'expired_ingredients' => $expiredIngredients
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error fetching expired ingredients: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการดึงข้อมูลวัตถุดิบที่หมดอายุ');
-        }
+        $expiryDate = now();
+
+        $expiredLots = IngredientLot::with(['details.ingredient.unit', 'user'])
+            ->whereHas('details', function ($query) use ($expiryDate) {
+                $query->where('expiration_date', '<=', $expiryDate);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return Inertia::render('Admin/ingredients/lots/Expired', [
+            'expired_lots' => $expiredLots
+        ]);
     }
 
     public function dispose(IngredientLot $ingredientLot)

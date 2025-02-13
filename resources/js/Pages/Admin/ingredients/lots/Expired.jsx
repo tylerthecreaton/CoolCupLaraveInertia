@@ -9,7 +9,7 @@ import {
 } from "react-icons/hi";
 import { format } from "date-fns";
 
-const Expired = ({ auth, expired_ingredients }) => {
+const Expired = ({ auth, expired_lots }) => {
     const { delete: destroy } = useForm();
     const [openModal, setOpenModal] = React.useState(false);
     const [selectedItem, setSelectedItem] = React.useState(null);
@@ -25,22 +25,22 @@ const Expired = ({ auth, expired_ingredients }) => {
     };
 
     // Calculate summary statistics
-    const totalExpiredItems = expired_ingredients.length;
-    const totalExpiredQuantity = expired_ingredients.reduce(
-        (sum, item) => sum + parseFloat(item.quantity),
-        0
-    );
-    const earliestExpiry =
-        expired_ingredients.length > 0
-            ? format(
-                  Math.min(
-                      ...expired_ingredients.map(
-                          (item) => new Date(item.expiration_date)
-                      )
-                  ),
-                  "dd/MM/yyyy"
-              )
-            : null;
+    const totalExpiredItems = expired_lots.data.length;
+    const totalExpiredQuantity = expired_lots.data.reduce((sum, lot) => {
+        return sum + lot.details.reduce((detailSum, detail) => {
+            return detailSum + (detail.quantity || 0);
+        }, 0);
+    }, 0);
+    const earliestExpiry = expired_lots.data.length > 0
+        ? format(
+            Math.min(
+                ...expired_lots.data.flatMap(lot =>
+                    lot.details.map(detail => new Date(detail.expiration_date))
+                )
+            ),
+            "dd/MM/yyyy"
+        )
+        : null;
 
     return (
         <AuthenticatedLayout user={auth.user}>
@@ -69,8 +69,7 @@ const Expired = ({ auth, expired_ingredients }) => {
                                         ปริมาณรวมที่หมดอายุ
                                     </p>
                                     <h5 className="text-2xl font-bold tracking-tight text-red-600">
-                                        {totalExpiredQuantity.toLocaleString()}{" "}
-                                        หน่วย
+                                        {totalExpiredQuantity.toLocaleString()} หน่วย
                                     </h5>
                                 </div>
                                 <HiOutlineExclamationCircle className="h-8 w-8 text-red-600" />
@@ -113,58 +112,58 @@ const Expired = ({ auth, expired_ingredients }) => {
                                 <Table.HeadCell>การจัดการ</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y">
-                                {expired_ingredients.map((item) => (
-                                    <Table.Row
-                                        key={item.id}
-                                        className="bg-white"
-                                    >
-                                        <Table.Cell>
-                                            <img
-                                                src={`/storage/ingredients/${item.ingredient.image}`}
-                                                alt={item.ingredient.name}
-                                                className="w-12 h-12 object-cover rounded-lg"
-                                            />
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            <div className="font-medium text-gray-900">
-                                                {item.ingredient.name}
-                                            </div>
-                                            <div className="text-sm text-gray-500">
-                                                {item.notes}
-                                            </div>
-                                        </Table.Cell>
-                                        <Table.Cell className="font-medium">
-                                            {parseFloat(
-                                                item.quantity
-                                            ).toLocaleString()}{" "}
-                                            หน่วย
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            <div className="flex items-center text-red-600">
-                                                <HiCalendar className="mr-1" />
-                                                {format(
-                                                    item.expiration_date,
-                                                    "dd/MM/yyyy"
-                                                )}
-                                            </div>
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            {item.user.name}
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            <Button
-                                                color="failure"
-                                                size="sm"
-                                                onClick={() => {
-                                                    setSelectedItem(item);
-                                                    setOpenModal(true);
-                                                }}
-                                            >
-                                                <HiTrash className="mr-2 h-4 w-4" />
-                                                จำหน่าย
-                                            </Button>
-                                        </Table.Cell>
-                                    </Table.Row>
+                                {expired_lots.data.map((lot) => (
+                                    lot.details.map((detail) => (
+                                        <Table.Row
+                                            key={`${lot.id}-${detail.id}`}
+                                            className="bg-white"
+                                        >
+                                            <Table.Cell>
+                                                <img
+                                                    src={`/storage/ingredients/${detail.ingredient.image}`}
+                                                    alt={detail.ingredient.name}
+                                                    className="w-12 h-12 object-cover rounded-lg"
+                                                />
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                <div className="font-medium text-gray-900">
+                                                    {detail.ingredient.name}
+                                                </div>
+                                                <div className="text-sm text-gray-500">
+                                                    {detail.note || lot.note || '-'}
+                                                </div>
+                                            </Table.Cell>
+                                            <Table.Cell className="font-medium">
+                                                {parseFloat(detail.quantity).toLocaleString()}{" "}
+                                                {detail.ingredient.unit.abbreviation}
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                <div className="flex items-center text-red-600">
+                                                    <HiCalendar className="mr-1" />
+                                                    {format(
+                                                        new Date(detail.expiration_date),
+                                                        "dd/MM/yyyy"
+                                                    )}
+                                                </div>
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                -
+                                            </Table.Cell>
+                                            <Table.Cell>
+                                                <Button
+                                                    color="failure"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setSelectedItem(detail);
+                                                        setOpenModal(true);
+                                                    }}
+                                                >
+                                                    <HiTrash className="mr-2 h-4 w-4" />
+                                                    จำหน่าย
+                                                </Button>
+                                            </Table.Cell>
+                                        </Table.Row>
+                                    ))
                                 ))}
                             </Table.Body>
                         </Table>
