@@ -37,4 +37,9 @@ class Ingredient extends Model
     {
         return $this->hasMany(Transformer::class);
     }
+
+    public function hasEnoughStock($requiredQuantity)
+    {
+        return $this->quantity >= $requiredQuantity;
+    }
 }

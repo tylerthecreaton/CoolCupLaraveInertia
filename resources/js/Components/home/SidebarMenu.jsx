@@ -153,13 +153,6 @@ export default function SidebarMenu() {
                             )}
                         </Link>
                     </li>
-                    <li className="flex items-center">
-                        {isOpen ? (
-                            <MenuText>รายงาน</MenuText>
-                        ) : (
-                            <MdAssessment className="text-2xl" />
-                        )}
-                    </li>
                 </ul>
             </div>
             <div>

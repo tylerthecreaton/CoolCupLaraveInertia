@@ -1,6 +1,7 @@
 import { Modal } from 'flowbite-react';
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
+import { isAbsoluteUrl } from '@/helpers';
 
 export default function OrderDetailsModal({ show, onClose, order }) {
     if (!order) return null;
@@ -9,7 +10,7 @@ export default function OrderDetailsModal({ show, onClose, order }) {
         <Modal
             show={show}
             onClose={onClose}
-            size="xl"
+            size="2xl"
             className="dark:bg-gray-800"
         >
             <Modal.Header className="border-b border-gray-200 !p-6 bg-gray-50">
@@ -81,7 +82,11 @@ export default function OrderDetailsModal({ show, onClose, order }) {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <img
-                                                        src={item.product_image}
+                                                        src={
+                                                            isAbsoluteUrl(item.product_image)
+                                                                ? item.product_image
+                                                                : `/images/products/${item.product_image}`
+                                                        }
                                                         alt={item.product_name}
                                                         className="w-12 h-12 rounded-lg object-cover border border-gray-200 shadow-sm"
                                                     />
@@ -110,14 +115,21 @@ export default function OrderDetailsModal({ show, onClose, order }) {
                             </table>
                         </div>
                     </div>
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                        <div className="p-6">
-                            หลักฐานการชำระเงิน
-                            <div>
-                                <img src={order.payment_slip} alt="slip" className="w-48 h-48 object-cover rounded-lg border border-gray-200 shadow-sm" />
+
+                    {/* Payment Slip Section */}
+                    {order.payment_slip && (
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <h4 className="text-lg font-medium text-gray-900 mb-4">หลักฐานการชำระเงิน</h4>
+                            <div className="flex justify-center">
+                                <img
+                                    src={order.payment_slip}
+                                    alt="หลักฐานการชำระเงิน"
+                                    className="w-64 h-64 object-cover rounded-lg shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                    onClick={() => window.open(order.payment_slip, '_blank')}
+                                />
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </Modal.Body>
         </Modal>

@@ -39,6 +39,16 @@ class OrderController extends Controller implements HasMiddleware
     }
     public function store(Request $request)
     {
+        $cart = $request->get("cart");
+        
+        // Validate stock before creating order
+        try {
+            $this->validateStock($cart['items']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
 
         $order = new Order();
         $order->user_id = Auth::user()->id;
@@ -367,7 +377,7 @@ class OrderController extends Controller implements HasMiddleware
                     $consumableUsage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId . " (ขนาด " . strtoupper($item['size'] ?? 'S') . ")";
                     $consumableUsage->save();
 
-                    // อัพเดทจำนวนวัตถุดิบ
+                    // อัพเดทจำนวนวัสดุสิ้นเปลือง
                     $consumableModel = Consumable::find($consumable->consumable_id);
                     if ($consumableModel) {
                         $consumableModel->quantity = max(0, $consumableModel->quantity - $consumableUsage->quantity_used);
@@ -495,6 +505,139 @@ class OrderController extends Controller implements HasMiddleware
             return redirect()->back()->with('success', 'ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว');
         } catch (Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    private function validateStock(array $items)
+    {
+        $outOfStockItems = [];
+
+        foreach ($items as $item) {
+            // Skip promotion items
+            if (is_string($item['id']) && str_starts_with($item['id'], 'promotion-')) {
+                continue;
+            }
+
+            $product = Product::find($item['id']);
+            if (!$product) continue;
+
+            // Check ingredients stock
+            $productIngredients = ProductIngredients::where('product_id', $product->id)->get();
+            foreach ($productIngredients as $productIngredient) {
+                $ingredient = Ingredient::find($productIngredient->ingredient_id);
+                if ($ingredient) {
+                    $usedQuantity = $item['quantity'] * $productIngredient->quantity_used;
+                    
+                    // Calculate sweetness usage for sweetness ingredients
+                    if ($ingredient->is_sweetness) {
+                        $sweetnessRate = $this->calculateSweetnessUsage($usedQuantity, $item['sweetness'] ?? '100%');
+                        $requiredQuantity = abs($sweetnessRate);
+                    } else {
+                        $requiredQuantity = $usedQuantity;
+                    }
+
+                    if (!$ingredient->hasEnoughStock($requiredQuantity)) {
+                        $outOfStockItems[] = [
+                            'type' => 'ingredient',
+                            'name' => $ingredient->name,
+                            'current_stock' => $ingredient->quantity . ' ' . ($ingredient->unit ? $ingredient->unit->name : ''),
+                            'required' => $requiredQuantity . ' ' . ($ingredient->unit ? $ingredient->unit->name : ''),
+                            'product' => $item['name']
+                        ];
+                    }
+                }
+            }
+
+            // Check consumables stock
+            $consumables = ProductConsumables::where('product_id', $product->id)
+                ->where('size', $item['size'] ?? 'S')
+                ->get();
+
+            foreach ($consumables as $consumable) {
+                $consumableModel = Consumable::find($consumable->consumable_id);
+                if ($consumableModel) {
+                    $requiredQuantity = $item['quantity'] * $consumable->quantity_used;
+                    if ($consumableModel->quantity < $requiredQuantity) {
+                        $outOfStockItems[] = [
+                            'type' => 'consumable',
+                            'name' => $consumableModel->name,
+                            'current_stock' => $consumableModel->quantity . ' ' . ($consumableModel->unit ? $consumableModel->unit->name : ''),
+                            'required' => $requiredQuantity . ' ' . ($consumableModel->unit ? $consumableModel->unit->name : ''),
+                            'product' => $item['name']
+                        ];
+                    }
+                }
+            }
+
+            // Check toppings stock if any
+            if (!empty($item['toppings'])) {
+                $toppings = is_string($item['toppings'])
+                    ? json_decode($item['toppings'], true)
+                    : $item['toppings'];
+
+                if (is_array($toppings)) {
+                    foreach ($toppings as $topping) {
+                        $toppingProduct = Product::find($topping['id']);
+                        if (!$toppingProduct) continue;
+
+                        // Check topping ingredients
+                        $toppingIngredients = ProductIngredients::where('product_id', $topping['id'])->get();
+                        foreach ($toppingIngredients as $toppingIngredient) {
+                            $ingredient = Ingredient::find($toppingIngredient->ingredient_id);
+                            if ($ingredient) {
+                                $requiredQuantity = $item['quantity'] * $toppingIngredient->quantity_used;
+                                if (!$ingredient->hasEnoughStock($requiredQuantity)) {
+                                    $outOfStockItems[] = [
+                                        'type' => 'topping_ingredient',
+                                        'name' => $ingredient->name,
+                                        'current_stock' => $ingredient->quantity . ' ' . ($ingredient->unit ? $ingredient->unit->name : ''),
+                                        'required' => $requiredQuantity . ' ' . ($ingredient->unit ? $ingredient->unit->name : ''),
+                                        'product' => $toppingProduct->name
+                                    ];
+                                }
+                            }
+                        }
+
+                        // Check topping consumables
+                        $toppingConsumables = ProductConsumables::where('product_id', $topping['id'])
+                            ->where('size', 'S')
+                            ->get();
+
+                        foreach ($toppingConsumables as $consumable) {
+                            $consumableModel = Consumable::find($consumable->consumable_id);
+                            if ($consumableModel) {
+                                $requiredQuantity = $item['quantity'] * $consumable->quantity_used;
+                                if ($consumableModel->quantity < $requiredQuantity) {
+                                    $outOfStockItems[] = [
+                                        'type' => 'topping_consumable',
+                                        'name' => $consumableModel->name,
+                                        'current_stock' => $consumableModel->quantity . ' ' . ($consumableModel->unit ? $consumableModel->unit->name : ''),
+                                        'required' => $requiredQuantity . ' ' . ($consumableModel->unit ? $consumableModel->unit->name : ''),
+                                        'product' => $toppingProduct->name
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!empty($outOfStockItems)) {
+            $errorMessage = "⚠️ ไม่สามารถสร้างออเดอร์ได้เนื่องจากวัตถุดิบไม่เพียงพอ:\n\n";
+            foreach ($outOfStockItems as $item) {
+                $productType = match($item['type']) {
+                    'ingredient' => 'เครื่องดื่ม',
+                    'consumable' => 'เครื่องดื่ม',
+                    'topping_ingredient', 'topping_consumable' => 'ท็อปปิ้ง'
+                };
+                
+                $errorMessage .= "• {$item['name']} สำหรับ{$productType} {$item['product']}\n";
+                $errorMessage .= "  - คงเหลือ: {$item['current_stock']}\n";
+                $errorMessage .= "  - ต้องการ: {$item['required']}\n\n";
+            }
+            
+            throw new \Exception($errorMessage);
         }
     }
 }

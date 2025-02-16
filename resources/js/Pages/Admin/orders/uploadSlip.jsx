@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, useForm, Link } from "@inertiajs/react";
+import { Head, useForm, Link, router } from "@inertiajs/react";
 import { Breadcrumb, Button, Label, Alert } from "flowbite-react";
 import { HiHome, HiUpload, HiDocumentText } from "react-icons/hi";
 import Swal from 'sweetalert2';
@@ -37,6 +37,8 @@ export default function UploadSlip({ order }) {
                     icon: 'success',
                     confirmButtonText: 'ตกลง',
                     confirmButtonColor: '#3085d6'
+                }).then(() => {
+                    router.visit(route('receipt.history'));
                 });
             },
             onError: (errors) => {
@@ -70,7 +72,7 @@ export default function UploadSlip({ order }) {
                         </Link>
                     </Breadcrumb.Item>
                     <Breadcrumb.Item>
-                        <Link href={route('order.index')} className="text-blue-600 hover:text-blue-800">
+                        <Link href={route('receipt.history')} className="text-blue-600 hover:text-blue-800">
                             รายการคำสั่งซื้อ
                         </Link>
                     </Breadcrumb.Item>

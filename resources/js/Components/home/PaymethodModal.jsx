@@ -300,20 +300,29 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                     title: "สำเร็จ!",
                     text: "ขอบคุณที่ใช้บริการ",
                     icon: "success",
-                    timer: 1500,
-                    showConfirmButton: false,
+                    confirmButtonText: "ตกลง",
                 });
 
-                // Clear cart and close modal
+                // Clear cart
                 dispatch(cartActions.clearCart());
                 onClose();
             }
         } catch (error) {
-            console.error("Error confirming order:", error);
+            console.error("Error creating order:", error);
+            let errorMessage = "เกิดข้อผิดพลาดในการสร้างออเดอร์";
+            
+            // Check if it's a validation error with a message
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            }
+
+            // Show error message
             Swal.fire({
-                icon: "error",
                 title: "เกิดข้อผิดพลาด!",
-                text: "ไม่สามารถบันทึกคำสั่งซื้อได้ กรุณาลองใหม่อีกครั้ง",
+                text: errorMessage,
+                icon: "error",
+                confirmButtonText: "ตกลง",
+                confirmButtonColor: "#d33",
             });
         }
     };
