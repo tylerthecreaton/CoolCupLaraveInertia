@@ -10,7 +10,7 @@ export default function OrderDetailsModal({ show, onClose, order }) {
         <Modal
             show={show}
             onClose={onClose}
-            size="2xl"
+            size="3xl"
             className="dark:bg-gray-800"
         >
             <Modal.Header className="border-b border-gray-200 !p-6 bg-gray-50">
@@ -113,6 +113,26 @@ export default function OrderDetailsModal({ show, onClose, order }) {
                                     ))}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    {/* Order Summary */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">ยอดรวม</span>
+                                <span className="text-sm font-medium text-gray-900">฿{order.total_amount.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-green-600">
+                                <span className="text-sm">ส่วนลด</span>
+                                <span className="text-sm font-medium">-฿{order.discount_amount?.toLocaleString() || '0'}</span>
+                            </div>
+                            <div className="border-t border-gray-200 pt-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-base font-medium text-gray-900">ยอดสุทธิ</span>
+                                    <span className="text-lg font-semibold text-blue-600">฿{(order.total_amount - (order.discount_amount || 0)).toLocaleString()}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
