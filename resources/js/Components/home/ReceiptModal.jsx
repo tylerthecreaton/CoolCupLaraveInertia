@@ -14,6 +14,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
     const { state } = useGlobalState();
     const settings = state.app.settings || [];
     const vatRate = Array.isArray(settings) ? settings.find(setting => setting.key === 'vat_rate')?.value || 7 : 7;
+    const taxpayerNumber = Array.isArray(settings) ? settings.find(setting => setting.key === 'taxpayer_number')?.value || '-' : '-';
 
     // แสดงใบเสร็จตอนกด Button พิมพ์ใบเสร็จ
     useEffect(() => {
@@ -173,7 +174,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                         </div>
                         <div className="text-sm text-gray-600">
                             <p className="font-medium">ใบเสร็จรับเงิน/ใบกำกับภาษีอย่างย่อ</p>
-                            <p className="text-xs">เลขประจำตัวผู้เสียภาษี: x-xxxx-xxxxx-xx-x</p>
+                            <p className="text-xs">เลขประจำตัวผู้เสียภาษี: {taxpayerNumber}</p>
                             <p className="text-xs">ราคารวมภาษีมูลค่าเพิ่มแล้ว (VAT INCLUDED)</p>
                         </div>
                     </div>
