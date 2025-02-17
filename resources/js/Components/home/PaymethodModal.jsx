@@ -180,8 +180,8 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
             discount,
             pointsUsed: usePoints
                 ? Math.ceil(
-                      total * (pointPerThb ? parseFloat(pointPerThb.value) : 10)
-                  )
+                    total * (pointPerThb ? parseFloat(pointPerThb.value) : 10)
+                )
                 : 0,
             pointDiscount: usePoints ? total : 0,
             finalTotal: usePoints ? 0 : total,
@@ -225,7 +225,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                     amount: pointsToUse,
                     point: points
                         ? points /
-                          (pointPerThb ? parseFloat(pointPerThb.value) : 10)
+                        (pointPerThb ? parseFloat(pointPerThb.value) : 10)
                         : total,
                 })
             );
@@ -271,7 +271,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                 cashReceived:
                     data.selectedMethod === "cash"
                         ? data.cashReceived
-                        : finalTotal,
+                        : data.cashReceived,
                 paymentNote: data.paymentNote || "",
             });
 
@@ -310,7 +310,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
         } catch (error) {
             console.error("Error creating order:", error);
             let errorMessage = "เกิดข้อผิดพลาดในการสร้างออเดอร์";
-            
+
             // Check if it's a validation error with a message
             if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;
@@ -429,13 +429,12 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                 {cartDiscount > 0 && (
                                     <div className="text-sm text-blue-600">
                                         {state.cart.appliedPromotion
-                                            ? `โปรโมชั่น (${
-                                                  state.cart.appliedPromotion
-                                                      .name
-                                              }): ฿${cartDiscount.toFixed(2)}`
+                                            ? `โปรโมชั่น (${state.cart.appliedPromotion
+                                                .name
+                                            }): ฿${cartDiscount.toFixed(2)}`
                                             : `ส่วนลดจากโปรโมชั่น/คูปอง: ฿${cartDiscount.toFixed(
-                                                  2
-                                              )}`}
+                                                2
+                                            )}`}
                                     </div>
                                 )}
                                 {pointDiscount > 0 && (
@@ -467,12 +466,11 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                     {paymentMethods.map((method) => (
                                         <div
                                             key={method.id}
-                                            className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-                                                data.selectedMethod ===
+                                            className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${data.selectedMethod ===
                                                 method.id
-                                                    ? "border-blue-500 bg-blue-50"
-                                                    : "hover:bg-gray-50"
-                                            }`}
+                                                ? "border-blue-500 bg-blue-50"
+                                                : "hover:bg-gray-50"
+                                                }`}
                                             onClick={() =>
                                                 handleMethodSelect(method.id)
                                             }
@@ -630,12 +628,12 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                         </div>
                                         {member &&
                                             member.loyalty_points /
-                                                (pointPerThb
-                                                    ? parseFloat(
-                                                          pointPerThb.value
-                                                      )
-                                                    : 10) >=
-                                                total && (
+                                            (pointPerThb
+                                                ? parseFloat(
+                                                    pointPerThb.value
+                                                )
+                                                : 10) >=
+                                            total && (
                                                 <Button
                                                     size="sm"
                                                     color={
@@ -650,11 +648,11 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                                     {
                                                                         amount: Math.ceil(
                                                                             total *
-                                                                                (pointPerThb
-                                                                                    ? parseFloat(
-                                                                                          pointPerThb.value
-                                                                                      )
-                                                                                    : 10)
+                                                                            (pointPerThb
+                                                                                ? parseFloat(
+                                                                                    pointPerThb.value
+                                                                                )
+                                                                                : 10)
                                                                         ),
                                                                         point: total,
                                                                     }
@@ -679,11 +677,11 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     ใช้แต้มทั้งหมด{" "}
                                                     {Math.ceil(
                                                         total *
-                                                            (pointPerThb
-                                                                ? parseFloat(
-                                                                      pointPerThb.value
-                                                                  )
-                                                                : 10)
+                                                        (pointPerThb
+                                                            ? parseFloat(
+                                                                pointPerThb.value
+                                                            )
+                                                            : 10)
                                                     )}{" "}
                                                     แต้ม = ฿{total.toFixed(2)}
                                                 </Button>
@@ -704,8 +702,8 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     100 /
                                                     (pointPerThb
                                                         ? parseFloat(
-                                                              pointPerThb.value
-                                                          )
+                                                            pointPerThb.value
+                                                        )
                                                         : 10)
                                                 ).toFixed(2)}
                                             </Button>
@@ -724,8 +722,8 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     200 /
                                                     (pointPerThb
                                                         ? parseFloat(
-                                                              pointPerThb.value
-                                                          )
+                                                            pointPerThb.value
+                                                        )
                                                         : 10)
                                                 ).toFixed(2)}
                                             </Button>
@@ -744,8 +742,8 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     300 /
                                                     (pointPerThb
                                                         ? parseFloat(
-                                                              pointPerThb.value
-                                                          )
+                                                            pointPerThb.value
+                                                        )
                                                         : 10)
                                                 ).toFixed(2)}
                                             </Button>
@@ -764,8 +762,8 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     400 /
                                                     (pointPerThb
                                                         ? parseFloat(
-                                                              pointPerThb.value
-                                                          )
+                                                            pointPerThb.value
+                                                        )
                                                         : 10)
                                                 ).toFixed(2)}
                                             </Button>
@@ -784,8 +782,8 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     500 /
                                                     (pointPerThb
                                                         ? parseFloat(
-                                                              pointPerThb.value
-                                                          )
+                                                            pointPerThb.value
+                                                        )
                                                         : 10)
                                                 ).toFixed(2)}
                                             </Button>
@@ -804,8 +802,8 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                                     1000 /
                                                     (pointPerThb
                                                         ? parseFloat(
-                                                              pointPerThb.value
-                                                          )
+                                                            pointPerThb.value
+                                                        )
                                                         : 10)
                                                 ).toFixed(2)}
                                             </Button>
@@ -876,7 +874,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                             {Math.max(
                                                 0,
                                                 parseFloat(data.cashReceived) -
-                                                    total
+                                                total
                                             ).toFixed(2)}
                                         </div>
                                     </div>
