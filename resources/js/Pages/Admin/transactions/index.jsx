@@ -3,7 +3,7 @@ import { Table, Badge, Breadcrumb, Card, Tooltip, Pagination, Select } from "flo
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, router } from "@inertiajs/react";
 import { FaList, FaSearch, FaExchangeAlt, FaInfoCircle, FaPlus, FaMinus, FaFilter } from "react-icons/fa";
-import { HiHome } from "react-icons/hi";
+import { HiHome, HiTrash } from "react-icons/hi";
 
 export default function Index({ auth, transactions, filters }) {
     const [searchTerm, setSearchTerm] = useState("");
@@ -72,6 +72,15 @@ export default function Index({ auth, transactions, filters }) {
                         <div className="flex items-center gap-1">
                             <FaMinus className="w-3 h-3" />
                             <span>ใช้วัตถุดิบ</span>
+                        </div>
+                    </Badge>
+                );
+            case "DISPOSE":
+                return (
+                    <Badge color="failure" className="w-24 justify-center">
+                        <div className="flex items-center gap-1">
+                            <HiTrash className="w-3 h-3" />
+                            <span>จำหน่าย</span>
                         </div>
                     </Badge>
                 );

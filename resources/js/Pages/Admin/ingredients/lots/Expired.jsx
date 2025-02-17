@@ -8,6 +8,7 @@ import {
     HiTrash,
 } from "react-icons/hi";
 import { format } from "date-fns";
+import { isAbsoluteUrl } from "@/helpers";
 
 const Expired = ({ auth, expired_lots }) => {
     const { delete: destroy } = useForm();
@@ -120,7 +121,11 @@ const Expired = ({ auth, expired_lots }) => {
                                         >
                                             <Table.Cell>
                                                 <img
-                                                    src={`/storage/ingredients/${detail.ingredient.image}`}
+                                                    src={
+                                                        isAbsoluteUrl(detail.ingredient.image)
+                                                            ? detail.ingredient.image
+                                                            : `/images/ingredients/${detail.ingredient.image}`
+                                                    }
                                                     alt={detail.ingredient.name}
                                                     className="w-12 h-12 object-cover rounded-lg"
                                                 />
@@ -130,12 +135,12 @@ const Expired = ({ auth, expired_lots }) => {
                                                     {detail.ingredient.name}
                                                 </div>
                                                 <div className="text-sm text-gray-500">
-                                                    {detail.note || lot.note || '-'}
+                                                    จาก Lot ที่ {detail.lot_number || lot.lot_number || '-'}
                                                 </div>
                                             </Table.Cell>
                                             <Table.Cell className="font-medium">
-                                                {parseFloat(detail.quantity).toLocaleString()}{" "}
-                                                {detail.ingredient.unit.abbreviation}
+                                                {parseFloat(detail.quantity).toLocaleString()}{" "} ชิ้น
+                                                {/* ชื้น {detail.ingredient.unit.abbreviation} */}
                                             </Table.Cell>
                                             <Table.Cell>
                                                 <div className="flex items-center text-red-600">
@@ -189,7 +194,7 @@ const Expired = ({ auth, expired_lots }) => {
                                                 {parseFloat(
                                                     selectedItem.quantity
                                                 ).toLocaleString()}{" "}
-                                                หน่วย
+                                                ชื่น
                                             </div>
                                         </div>
                                     )}
