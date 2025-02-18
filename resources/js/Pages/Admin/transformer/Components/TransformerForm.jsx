@@ -230,7 +230,7 @@ export default function TransformerForm({
                         <div>
                             <Label
                                 htmlFor="multiplier"
-                                value="ตัวคูณ"
+                                value="ปริมาณสุทธิของวัตถุดิบ"
                                 className="inline-flex items-center mb-2"
                             >
                                 <HiCalculator className="mr-2 w-5 h-5 text-gray-500" />
@@ -244,7 +244,7 @@ export default function TransformerForm({
                                 onChange={(e) =>
                                     setData("multiplier", e.target.value)
                                 }
-                                placeholder="กรุณากรอกตัวคูณ"
+                                placeholder="กรุณากรอกปริมาณสุทธิของวัตถุดิบ"
                                 required
                                 color={errors.multiplier ? "failure" : "gray"}
                                 helperText={errors.multiplier}
@@ -252,7 +252,7 @@ export default function TransformerForm({
                         </div>
 
                         {/* Submit Button */}
-                        <div className="flex justify-end gap-4">
+                        <div className="flex gap-4 justify-end">
                             <Button
                                 color="gray"
                                 onClick={() => window.history.back()}

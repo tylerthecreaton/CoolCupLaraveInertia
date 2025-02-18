@@ -213,7 +213,7 @@ export default function Create({ auth, ingredients }) {
                 <Head title="เพิ่ม Lot วัตถุดิบ" />
 
                 <div className="py-12">
-                    <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                         <Breadcrumb className="mb-4">
                             <Breadcrumb.Item
                                 href={route("dashboard")}
@@ -229,17 +229,17 @@ export default function Create({ auth, ingredients }) {
                             <Breadcrumb.Item>เพิ่ม Lot ใหม่</Breadcrumb.Item>
                         </Breadcrumb>
 
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                             <div className="p-6">
                                 <form onSubmit={handleSubmit}>
                                     <div className="space-y-6">
                                         {data.map((item, index) => (
                                             <div
                                                 key={index}
-                                                className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow transition-shadow duration-200"
+                                                className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm transition-shadow duration-200 hover:shadow"
                                             >
                                                 <div className="flex justify-between items-center mb-4">
-                                                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                                                    <h3 className="flex items-center text-lg font-semibold text-gray-900">
                                                         <span className="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded">
                                                             รายการที่{" "}
                                                             {index + 1}
@@ -256,7 +256,7 @@ export default function Create({ auth, ingredients }) {
                                                                 )
                                                             }
                                                         >
-                                                            <HiTrash className="mr-2 h-4 w-4" />
+                                                            <HiTrash className="mr-2 w-4 h-4" />
                                                             ลบรายการ
                                                         </Button>
                                                     )}
@@ -373,7 +373,7 @@ export default function Create({ auth, ingredients }) {
                                                         <InputLabel
                                                             htmlFor={`quantity-${index}`}
                                                         >
-                                                            จำนวน
+                                                            จำนวน(แพ็กเกจจิ้ง)
                                                             {/* ({getIngredientUnit(item.ingredient_id)}) * */}
                                                         </InputLabel>
                                                         <TextInput
@@ -384,7 +384,7 @@ export default function Create({ auth, ingredients }) {
                                                             value={
                                                                 item.quantity
                                                             }
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
                                                                     index,
@@ -409,7 +409,7 @@ export default function Create({ auth, ingredients }) {
                                                         <InputLabel
                                                             htmlFor={`price-${index}`}
                                                         >
-                                                            ราคา *
+                                                            ราคาต่อแพ็ค *
                                                         </InputLabel>
                                                         <TextInput
                                                             id={`price-${index}`}
@@ -417,7 +417,7 @@ export default function Create({ auth, ingredients }) {
                                                             min="0.01"
                                                             step="0.01"
                                                             value={item.price}
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
                                                                     index,
@@ -455,7 +455,7 @@ export default function Create({ auth, ingredients }) {
                                                             value={
                                                                 item.per_pack
                                                             }
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
                                                                     index,
@@ -480,7 +480,7 @@ export default function Create({ auth, ingredients }) {
                                                         <InputLabel
                                                             htmlFor={`cost_per_unit-${index}`}
                                                         >
-                                                            ราคาต่อแพ็ค *
+                                                            ราคา(แพ็กเกจจิ้ง) *
                                                         </InputLabel>
                                                         <TextInput
                                                             id={`cost_per_unit-${index}`}
@@ -490,7 +490,7 @@ export default function Create({ auth, ingredients }) {
                                                             value={
                                                                 item.cost_per_unit
                                                             }
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
                                                                     index,
@@ -523,7 +523,7 @@ export default function Create({ auth, ingredients }) {
                                                             value={
                                                                 item.supplier
                                                             }
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) => {
                                                                 const newData =
                                                                     [...data];
@@ -558,7 +558,7 @@ export default function Create({ auth, ingredients }) {
                                                             value={
                                                                 item.expiration_date
                                                             }
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) => {
                                                                 const newData =
                                                                     [...data];
@@ -624,7 +624,7 @@ export default function Create({ auth, ingredients }) {
                                                 size="lg"
                                                 onClick={handleAddRow}
                                             >
-                                                <HiPlus className="mr-2 h-5 w-5" />
+                                                <HiPlus className="mr-2 w-5 h-5" />
                                                 เพิ่มรายการ
                                             </Button>
                                         </div>

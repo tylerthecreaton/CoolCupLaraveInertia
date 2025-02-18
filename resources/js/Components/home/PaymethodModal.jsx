@@ -15,7 +15,7 @@ import {
     Banknote,
     CreditCard,
     QrCode,
-    Receipt,
+    Receipt, 
     SquarePercent,
 } from "lucide-react";
 import Swal from "sweetalert2";
@@ -310,7 +310,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
         } catch (error) {
             console.error("Error creating order:", error);
             let errorMessage = "เกิดข้อผิดพลาดในการสร้างออเดอร์";
-            
+
             // Check if it's a validation error with a message
             if (error.response?.data?.message) {
                 errorMessage = error.response.data.message;

@@ -259,7 +259,7 @@ export default function Index({ auth, lots }) {
 
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6">
-                            <div className="flex items-center justify-between mb-6">
+                            <div className="flex justify-between items-center mb-6">
                                 <h2 className="flex items-center text-xl font-semibold text-gray-800">
                                     <HiCalendar className="mr-2 w-6 h-6 text-gray-600" />
                                     ประวัติการเพิ่ม Lot วัตถุดิบ
@@ -300,7 +300,7 @@ export default function Index({ auth, lots }) {
                                 <Table hoverable>
                                     <Table.Head>
                                         <Table.HeadCell className="bg-gray-50">
-                                            Lot Number
+                                            หมายเลข Lot
                                         </Table.HeadCell>
                                         <Table.HeadCell className="bg-gray-50">
                                             วันที่บันทึก
@@ -577,7 +577,7 @@ export default function Index({ auth, lots }) {
                         <div className="overflow-x-auto">
                             <Table hoverable>
                                 <Table.Head>
-                                    <Table.HeadCell className="bg-gray-50">Lot Number</Table.HeadCell>
+                                    <Table.HeadCell className="bg-gray-50">หมายเลข Lot</Table.HeadCell>
                                     <Table.HeadCell className="bg-gray-50">วัตถุดิบ</Table.HeadCell>
                                     <Table.HeadCell className="bg-gray-50">จำนวน</Table.HeadCell>
                                     <Table.HeadCell className="bg-gray-50">วันหมดอายุ</Table.HeadCell>
@@ -624,7 +624,7 @@ export default function Index({ auth, lots }) {
                                 </Table.Body>
                             </Table>
                             {expirationData.length === 0 && (
-                                <div className="text-center py-4 text-gray-500">
+                                <div className="py-4 text-center text-gray-500">
                                     ไม่พบข้อมูลวันหมดอายุของวัตถุดิบ
                                 </div>
                             )}

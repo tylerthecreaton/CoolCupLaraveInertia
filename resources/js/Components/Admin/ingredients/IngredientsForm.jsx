@@ -201,7 +201,7 @@ export default function IngredientsForm({
                         <div>
                             <Label
                                 htmlFor="expiration_date"
-                                value="วันหมดอายุ"
+                                value="วันที่เพิ่มรายการวัตถุดิบ"
                                 className="inline-flex items-center mb-2"
                             >
                                 <HiCalendar className="mr-2 w-5 h-5 text-gray-500" />
@@ -229,7 +229,7 @@ export default function IngredientsForm({
                                 onChange={(e) =>
                                     setData("is_sweetness", e.target.checked)
                                 }
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                className="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 focus:ring-2"
                             />
                             <Label
                                 htmlFor="is_sweetness"
@@ -267,7 +267,7 @@ export default function IngredientsForm({
                             )}
                             {isEditing && ingredient.image_url && !previewImage && (
                                 <div className="mt-4">
-                                    <p className="text-sm text-gray-600 mb-2">รูปภาพปัจจุบัน:</p>
+                                    <p className="mb-2 text-sm text-gray-600">รูปภาพปัจจุบัน:</p>
                                     <img
                                         src={ingredient.image_url}
                                         alt="Current"
