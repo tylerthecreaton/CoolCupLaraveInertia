@@ -38,7 +38,7 @@ class PromotionController extends Controller
                 return $promotion;
             });
 
-        return Inertia::render('Admin/promotions/index', [
+        return Inertia::render('Promotion', [
             'promotions' => $promotions
         ]);
     }

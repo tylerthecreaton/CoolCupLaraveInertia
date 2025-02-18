@@ -95,7 +95,7 @@ export default function ExpensesChart({ data }) {
                         const label = context.label || '';
                         const value = context.raw || 0;
                         const total = context.dataset.data.reduce((acc, curr) => acc + curr, 0);
-                        const percentage = ((value / total) * 100).toFixed(1);
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
                         return `${label}: ${formatCurrency(value)} (${percentage}%)`;
                     }
                 }

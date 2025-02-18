@@ -58,6 +58,7 @@ Route::delete('/member/{id}', [MemberController::class, 'destroy'])->name('membe
 // ---------------------------ReceiptHistory---------------------------
 Route::middleware('auth', 'can:view dashboard')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/promotion', [PromotionController::class, 'index'])->name('promotion.index');
     Route::get('/receipt-history', [OrderController::class, 'receiptHistory'])->name('receipt.history');
     Route::get('/sendslip', [SlipController::class, 'index'])->name('slip.index');
     Route::post('/sendslip/{orderId}/upload', [SlipController::class, 'upload'])->name('slip.upload');
