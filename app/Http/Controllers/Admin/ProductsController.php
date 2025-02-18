@@ -112,22 +112,19 @@ class ProductsController extends Controller
     {
         $rules = [
             'name' => 'required|min:3|max:255|unique:products,name,' . $id,
-            'category_id'=> 'required',
+            'category_id' => 'required',
             'description' => 'required',
             'cost_price' => 'required|numeric',
             'sale_price' => 'required|numeric',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-
         ];
 
         $message = [
             'name.required' => 'กรุณากรอกชื่อสินค้า',
             'name.unique' => 'ชื่อสินค้านี้ถูกใช้ไปแล้ว',
             'description.required' => 'กรุณากรอกรายละเอียด',
-            'category_id'=> 'กรุณาเลือกหมวดหมู่',
-            'cost_price'=> 'กรุณากรอกราคาต้นทุน',
-            'sale_price'=> 'กรุณากรอกราคาขาย',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'category_id' => 'กรุณาเลือกหมวดหมู่',
+            'cost_price' => 'กรุณากรอกราคาต้นทุน',
+            'sale_price' => 'กรุณากรอกราคาขาย',
         ];
 
         if ($request->hasFile('image')) {
