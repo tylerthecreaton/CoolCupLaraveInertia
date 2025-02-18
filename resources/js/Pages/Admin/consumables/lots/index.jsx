@@ -80,8 +80,8 @@ export default function ConsumableLotHistory({ lots }) {
     const getConsumableListTooltip = (details) => {
         return (
             <div className="max-w-xs">
-                <p className="font-medium mb-2">รายการวัตถุดิบสิ้นเปลืองที่เพิ่ม:</p>
-                <ul className="list-disc list-inside space-y-1">
+                <p className="mb-2 font-medium">รายการวัตถุดิบสิ้นเปลืองที่เพิ่ม:</p>
+                <ul className="space-y-1 list-disc list-inside">
                     {details.map((detail) => (
                         <li key={detail.id} className="text-sm">
                             {detail.consumable.name} ({detail.quantity} x {detail.per_pack} {detail.consumable.unit?.name || ""})
@@ -140,7 +140,7 @@ export default function ConsumableLotHistory({ lots }) {
                                     <Table hoverable>
                                         <Table.Head>
                                             <Table.HeadCell className="bg-gray-50">
-                                                Lot Number
+                                                หมายเลข Lot
                                             </Table.HeadCell>
                                             <Table.HeadCell className="bg-gray-50">
                                                 วันที่บันทึก
@@ -215,7 +215,7 @@ export default function ConsumableLotHistory({ lots }) {
                                             ))}
                                         </Table.Body>
                                     </Table>
-                                    <div className="flex items-center justify-center text-center">
+                                    <div className="flex justify-center items-center text-center">
                                         <Pagination
                                             currentPage={lots.current_page}
                                             totalPages={lots.last_page}

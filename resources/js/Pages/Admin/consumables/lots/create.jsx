@@ -207,7 +207,7 @@ export default function Create({ consumables }) {
                 <Head title="เพิ่ม Lot วัตถุดิบสิ้นเปลือง" />
 
                 <div className="py-12">
-                    <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                         <Breadcrumb className="mb-4">
                             <Breadcrumb.Item
                                 href={route("dashboard")}
@@ -223,17 +223,17 @@ export default function Create({ consumables }) {
                             <Breadcrumb.Item>เพิ่ม Lot ใหม่</Breadcrumb.Item>
                         </Breadcrumb>
 
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                             <div className="p-6">
                                 <form onSubmit={handleSubmit}>
                                     <div className="space-y-6">
                                         {data.map((item, index) => (
                                             <div
                                                 key={index}
-                                                className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow transition-shadow duration-200"
+                                                className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm transition-shadow duration-200 hover:shadow"
                                             >
                                                 <div className="flex justify-between items-center mb-4">
-                                                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                                                    <h3 className="flex items-center text-lg font-semibold text-gray-900">
                                                         <span className="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded">
                                                             รายการที่{" "}
                                                             {index + 1}
@@ -250,7 +250,7 @@ export default function Create({ consumables }) {
                                                                 )
                                                             }
                                                         >
-                                                            <HiTrash className="mr-2 h-4 w-4" />
+                                                            <HiTrash className="mr-2 w-4 h-4" />
                                                             ลบรายการ
                                                         </Button>
                                                     )}
@@ -359,7 +359,7 @@ export default function Create({ consumables }) {
                                                         <InputLabel
                                                             htmlFor={`quantity-${index}`}
                                                         >
-                                                            จำนวน *
+                                                            จำนวน(แพคเกจจิ้ง) *
                                                         </InputLabel>
                                                         <TextInput
                                                             id={`quantity-${index}`}
@@ -369,7 +369,7 @@ export default function Create({ consumables }) {
                                                             value={
                                                                 item.quantity
                                                             }
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
                                                                     index,
@@ -404,7 +404,7 @@ export default function Create({ consumables }) {
                                                             value={
                                                                 item.cost_per_unit
                                                             }
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
                                                                     index,
@@ -429,7 +429,7 @@ export default function Create({ consumables }) {
                                                         <InputLabel
                                                             htmlFor={`per_pack-${index}`}
                                                         >
-                                                            จำนวนต่อแพ็ก *
+                                                            จำนวนต่อแพค *
                                                         </InputLabel>
                                                         <TextInput
                                                             id={`per_pack-${index}`}
@@ -439,7 +439,7 @@ export default function Create({ consumables }) {
                                                             value={
                                                                 item.per_pack
                                                             }
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
                                                                     index,
@@ -464,7 +464,7 @@ export default function Create({ consumables }) {
                                                         <InputLabel
                                                             htmlFor={`price-${index}`}
                                                         >
-                                                            ราคา *
+                                                            ราคา(แพคเกจจิ้ง) *
                                                         </InputLabel>
                                                         <TextInput
                                                             id={`price-${index}`}
@@ -472,7 +472,7 @@ export default function Create({ consumables }) {
                                                             min="0.01"
                                                             step="0.01"
                                                             value={item.price}
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) =>
                                                                 handleNumberChange(
                                                                     index,
@@ -505,7 +505,7 @@ export default function Create({ consumables }) {
                                                             value={
                                                                 item.supplier
                                                             }
-                                                            className="mt-1 block w-full"
+                                                            className="block mt-1 w-full"
                                                             onChange={(e) => {
                                                                 const newData =
                                                                     [...data];
@@ -548,7 +548,7 @@ export default function Create({ consumables }) {
                                                                     newData
                                                                 );
                                                             }}
-                                                            className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                                            className="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                             rows="2"
                                                         />
                                                         <InputError
@@ -565,13 +565,13 @@ export default function Create({ consumables }) {
                                         ))}
                                     </div>
 
-                                    <div className="mt-6 flex justify-between items-center">
+                                    <div className="flex justify-between items-center mt-6">
                                         <Button
                                             type="button"
                                             gradientDuoTone="purpleToBlue"
                                             onClick={handleAddRow}
                                         >
-                                            <HiPlus className="mr-2 h-4 w-4" />
+                                            <HiPlus className="mr-2 w-4 h-4" />
                                             เพิ่มรายการ
                                         </Button>
 

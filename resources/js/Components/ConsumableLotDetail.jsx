@@ -14,7 +14,7 @@ export default function ConsumableLotDetail({ lot }) {
                 <Table hoverable>
                     <Table.Head>
                         <Table.HeadCell className="bg-gray-50">
-                            วัตถุดิบ
+                            วัตถุดิบสิ้นเปลือง
                         </Table.HeadCell>
                         <Table.HeadCell className="bg-gray-50">
                             จำนวน
@@ -23,10 +23,10 @@ export default function ConsumableLotDetail({ lot }) {
                             ราคาต่อหน่วย
                         </Table.HeadCell>
                         <Table.HeadCell className="bg-gray-50">
-                            จำนวนต่อแพ็ค
+                            จำนวนต่อแพค
                         </Table.HeadCell>
                         <Table.HeadCell className="bg-gray-50">
-                            ราคา
+                            ราคา(แพคเกจจิ้ง)
                         </Table.HeadCell>
                         <Table.HeadCell className="bg-gray-50">
                             ผู้จำหน่าย
