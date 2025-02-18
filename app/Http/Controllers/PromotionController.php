@@ -38,8 +38,18 @@ class PromotionController extends Controller
                 return $promotion;
             });
 
+        // Get unique promotion types
+        $types = Promotion::select('type')
+            ->distinct()
+            ->whereNotNull('type')
+            ->get()
+            ->map(function ($type) {
+                return [$type->type => $type->type];
+            });
+
         return Inertia::render('Promotion', [
-            'promotions' => $promotions
+            'promotions' => $promotions,
+            'types' => $types
         ]);
     }
 }
