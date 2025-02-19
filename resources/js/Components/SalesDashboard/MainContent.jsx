@@ -12,6 +12,7 @@ import {
     Legend,
     Filler
 } from 'chart.js';
+import { isAbsoluteUrl } from "@/helpers";
 
 ChartJS.register(
     CategoryScale,
@@ -234,7 +235,10 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
                                     <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
                                         {product.image ? (
                                             <img
-                                                src={product.image}
+                                                src={isAbsoluteUrl(product.image)
+                                                    ? product.image
+                                                    : `/images/products/${product.image}`
+                                            }
                                                 alt={product.name}
                                                 className="w-full h-full object-cover"
                                                 onError={(e) => {
