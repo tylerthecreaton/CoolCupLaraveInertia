@@ -36,7 +36,7 @@ export default function SidebarMenu() {
             showCancelButton: true,
             confirmButtonColor: "#0891b2",
             cancelButtonColor: "#d33",
-            confirmButtonText: "ใช่, ออกจากระบบ",
+            confirmButtonText: "ออกจากระบบ",
             cancelButtonText: "ยกเลิก",
         }).then((result) => {
             if (result.isConfirmed) {
