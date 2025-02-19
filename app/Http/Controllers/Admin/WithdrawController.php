@@ -245,48 +245,57 @@ class WithdrawController extends Controller
                             }
                         }
                     } else {
-                        $lot = ConsumableLot::with(['details.consumable'])->findOrFail($lotId);
-                        $consumableDetail = $lot->details->first();
-                        if ($consumableDetail) {
-                            $consumable = $consumableDetail->consumable;
-                            $withdrawAmount = $lotItems->sum('quantity');
-                            $addAmount = $withdrawAmount;
+                        // dd($request->all());
+                        $lot = ConsumableLot::with(['details.consumable', 'details.consumable.unit'])->findOrFail($lotId);
+                        Log::info('Lot details:', ['lot_id' => $lotId, 'details' => $lot->details->toArray()]);
 
-                            if (!empty($lotItems->first()['transformer_id'])) {
-                                $transformer = $consumable->transformers()->find($lotItems->first()['transformer_id']);
-                                if ($transformer) {
-                                    $addAmount *= $transformer->multiplier;
-                                    Log::info('Applied transformer:', [
-                                        'transformer_id' => $transformer->id,
-                                        'multiplier' => $transformer->multiplier,
-                                        'original_amount' => $withdrawAmount,
-                                        'final_amount' => $addAmount
-                                    ]);
+                        foreach ($lotItems as $item) {
+                            // item_id ที่ส่งมาคือ id ของ detail
+                            $consumableDetail = $lot->details->firstWhere('id', $item['item_id']);
+                            Log::info('Found consumable detail:', [
+                                'item_id' => $item['item_id'],
+                                'detail' => $consumableDetail ? $consumableDetail->toArray() : null
+                            ]);
+
+                            if ($consumableDetail) {
+                                $consumable = $consumableDetail->consumable;
+                                $withdrawAmount = $item['quantity'];
+                                $addAmount = $withdrawAmount;
+
+                                if (!empty($item['transformer_id'])) {
+                                    $transformer = $consumable->transformers()->find($item['transformer_id']);
+                                    if ($transformer) {
+                                        $addAmount *= floatval($transformer->multiplier);
+                                        Log::info('Applied transformer:', [
+                                            'transformer_id' => $transformer->id,
+                                            'multiplier' => $transformer->multiplier,
+                                            'original_amount' => $withdrawAmount,
+                                            'final_amount' => $addAmount
+                                        ]);
+                                    }
                                 }
-                            }
 
-                            // Check if lot has enough stock
-                            if ($consumableDetail->quantity < $withdrawAmount) {
-                                throw new \Exception("ไม่มีวัตถุดิบสิ้นเปลืองเพียงพอใน Lot นี้ สำหรับ {$consumable->name}");
-                            }
+                                // Check if lot has enough stock
+                                if ($consumableDetail->quantity < $withdrawAmount) {
+                                    throw new \Exception("ไม่มีวัตถุดิบสิ้นเปลืองเพียงพอใน Lot นี้ สำหรับ {$consumable->name}");
+                                }
 
-                            // Deduct from lot
-                            $consumableDetail->decrement('quantity', $withdrawAmount);
-                            Log::info('Deducted from lot:', [
-                                'lot_id' => $lot->id,
-                                'amount' => $withdrawAmount,
-                                'new_quantity' => $consumableDetail->quantity
-                            ]);
+                                // Deduct from lot
+                                $consumableDetail->decrement('quantity', $withdrawAmount);
+                                Log::info('Deducted from lot:', [
+                                    'lot_id' => $lot->id,
+                                    'amount' => $withdrawAmount,
+                                    'new_quantity' => $consumableDetail->quantity
+                                ]);
 
-                            // Add to consumable total
-                            $consumable->increment('quantity', $addAmount);
-                            Log::info('Added to consumable total:', [
-                                'consumable_id' => $consumable->id,
-                                'amount' => $addAmount,
-                                'new_quantity' => $consumable->quantity
-                            ]);
+                                // Add to consumable total
+                                $consumable->increment('quantity', $addAmount);
+                                Log::info('Added to consumable total:', [
+                                    'consumable_id' => $consumable->id,
+                                    'amount' => $addAmount,
+                                    'new_quantity' => $consumable->quantity
+                                ]);
 
-                            foreach ($lotItems as $item) {
                                 $withdrawItem = new WithdrawItem([
                                     'type' => $item['type'],
                                     'quantity' => $item['quantity'],
@@ -294,7 +303,6 @@ class WithdrawController extends Controller
                                 ]);
 
                                 $withdrawItem->consumable_lot_id = $lot->id;
-
                                 $withdrawItem->unit = $consumable->unit;
 
                                 // Save withdraw item
