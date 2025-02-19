@@ -15,7 +15,7 @@ import {
     Banknote,
     CreditCard,
     QrCode,
-    Receipt, 
+    Receipt,
     SquarePercent,
 } from "lucide-react";
 import Swal from "sweetalert2";
