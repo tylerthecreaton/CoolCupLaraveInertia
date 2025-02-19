@@ -78,6 +78,51 @@ const ShowThankYouModal = ({ localState, isShowing = false }) => {
     );
 };
 
+const CashPaymentModal = ({ paymentInfo, onClose }) => {
+    if (!paymentInfo?.showAsModal) return null;
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (onClose) onClose();
+        }, 3000); // Auto close after 3 seconds
+
+        return () => clearTimeout(timer);
+    }, [paymentInfo]);
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
+            <div className="p-8 mx-4 w-full max-w-md bg-white rounded-2xl shadow-2xl transform transition-all duration-500 animate-scale-up">
+                <div className="relative">
+                    {/* Decorative Elements */}
+                    <div className="absolute -top-12 -left-12 w-24 h-24 bg-blue-100 rounded-full opacity-20"></div>
+                    <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-blue-100 rounded-full opacity-20"></div>
+
+                    {/* Content */}
+                    <div className="relative z-10 text-center space-y-6">
+                        <div className="p-6 bg-blue-50 rounded-xl">
+                            <h3 className="text-2xl font-semibold text-blue-800 mb-4">รายละเอียดการชำระเงิน</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <p className="text-lg text-blue-600 mb-1">รับเงิน</p>
+                                    <p className="text-4xl font-bold text-blue-700">
+                                        ฿{paymentInfo.received.toLocaleString()}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-lg text-blue-600 mb-1">เงินทอน</p>
+                                    <p className="text-4xl font-bold text-blue-700">
+                                        ฿{paymentInfo.change.toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default function ClientPage() {
     const { dispatch } = useGlobalState();
     const [localState, setLocalState] = useState({
@@ -152,6 +197,20 @@ export default function ClientPage() {
             }, 5000);
         }
     }, [localState.clientScreen?.paymentInfo?.status]);
+
+    const handlePaymentComplete = () => {
+        setLocalState((prev) => ({
+            ...prev,
+            clientScreen: {
+                ...prev.clientScreen,
+                customerInfo: null,
+                paymentInfo: {
+                    ...prev.clientScreen?.paymentInfo,
+                    showAsModal: false,
+                },
+            },
+        }));
+    };
 
     return (
         <StorefrontLayout>
@@ -474,6 +533,10 @@ export default function ClientPage() {
                     )}
             </div>
             <ShowThankYouModal localState={localState} isShowing={localState.isShowingThankYouModal} />
+            <CashPaymentModal 
+                paymentInfo={localState.clientScreen?.paymentInfo}
+                onClose={handlePaymentComplete}
+            />
         </StorefrontLayout>
     );
 }
