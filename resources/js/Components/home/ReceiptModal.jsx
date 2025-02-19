@@ -5,13 +5,14 @@ import html2canvas from 'html2canvas';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useGlobalState } from "@/Store/state";
+import { clientScreenActions } from "@/Store/state/clientScreenState";
 
 const ReceiptModal = ({ show, onClose, orderData }) => {
     const receiptRef = useRef(null);
     const [receiptUrl, setReceiptUrl] = React.useState(null);
     const [error, setError] = React.useState(null);
     const [isSaving, setIsSaving] = React.useState(false);
-    const { state } = useGlobalState();
+    const { state, dispatch } = useGlobalState();
     const settings = state.app.settings || [];
     const vatRate = Array.isArray(settings) ? settings.find(setting => setting.key === 'vat_rate')?.value || 7 : 7;
     const taxpayerNumber = Array.isArray(settings) ? settings.find(setting => setting.key === 'taxpayer_number')?.value || '-' : '-';
@@ -104,7 +105,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                 svgData: imageData,
                 orderId: orderData.id
             });
-
+            dispatch(clientScreenActions.showCustomerInfo(null));
             console.log('Receipt save response:', response.data);
             if (response.data.success) {
                 setReceiptUrl(response.data.url);
