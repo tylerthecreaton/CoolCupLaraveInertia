@@ -101,7 +101,8 @@ const ProductModal = ({ show, onClose, product }) => {
             toppings: selectedToppingItems,
             price: parseFloat(totalPrice / parseInt(quantity)),
             total: parseFloat(totalPrice),
-            image: product.image
+            image: product.image,
+            categoryId: parseInt(product.category_id)
         };
 
         dispatch(cartActions.addToCart(item));
