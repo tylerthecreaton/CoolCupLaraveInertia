@@ -31,9 +31,8 @@ class WithdrawController extends Controller
 
     public function create()
     {
-        // ดึง lots พร้อมข้อมูล ingredient
         $ingredientLots = IngredientLot::with(['details.ingredient.unit', 'details.ingredient.transformers'])
-            ->whereHas('details', function($query) {
+            ->whereHas('details', function ($query) {
                 $query->where('quantity', '>', 0);
             })
             ->orderBy('created_at', 'asc')
@@ -43,11 +42,20 @@ class WithdrawController extends Controller
                 foreach ($lotsDetails as $detail) {
                     $detail->ingredient->unit = $detail->ingredient->unit ? $detail->ingredient->unit : null;
                 }
+                $filteredItems = $lotsDetails->filter(function ($detail) {
+                    $currentDate = now();
+                    return $detail->quantity > 0 && ($detail->expiration_date === null || $detail->expiration_date > $currentDate);
+                })->values();
+
+                if ($filteredItems->isEmpty()) {
+                    return null;
+                }
+
                 return [
                     'id' => $lots->id,
                     'created_at' => $lots->created_at,
                     'items_count' => $lotsDetails->count(),
-                    'items' => $lotsDetails->map(function ($detail) {
+                    'items' => $filteredItems->map(function ($detail) {
                         return [
                             'id' => $detail->id,
                             'name' => $detail->ingredient->name,
@@ -64,20 +72,32 @@ class WithdrawController extends Controller
                         ];
                     }),
                 ];
-            });
+            })
+            ->filter()
+            ->values();
 
         // ดึง lots พร้อมข้อมูล consumable และ transformers
         $consumableLots = ConsumableLot::with(['details.consumable.transformers'])
-            ->whereHas('details', function($query) {
+            ->whereHas('details', function ($query) {
                 $query->where('quantity', '>', 0);
             })
             ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($lots) {
+                $lotsDetails = $lots->details;
+                $filteredItems = $lotsDetails->filter(function ($detail) {
+                    $currentDate = now();
+                    return $detail->quantity > 0 && ($detail->expiration_date === null || $detail->expiration_date > $currentDate);
+                })->values();
+
+                if ($filteredItems->isEmpty()) {
+                    return null;
+                }
+
                 return [
                     'id' => $lots->id,
                     'created_at' => $lots->created_at,
-                    'items' => $lots->details->map(function ($detail) use ($lots) {
+                    'items' => $filteredItems->map(function ($detail) use ($lots) {
                         return [
                             'lot_id' => $lots->id,
                             'lot_created_at' => $lots->created_at,
@@ -96,6 +116,8 @@ class WithdrawController extends Controller
                     }),
                 ];
             })
+            ->filter()
+            ->values()
             ->reduce(function ($result, $lot) {
                 foreach ($lot['items'] as $item) {
                     $itemName = $item['name'];
