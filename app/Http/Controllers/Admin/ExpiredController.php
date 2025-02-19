@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ingredient;
 use App\Models\IngredientLot;
+use App\Models\IngredientLotDetail;
+use App\Models\ProductIngredientUsage;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -29,27 +32,39 @@ class ExpiredController extends Controller
         ]);
     }
 
-    public function dispose(IngredientLot $ingredientLot)
+    public function dispose(Request $request, $id)
     {
+        $ingredientLotDetail = IngredientLotDetail::findOrFail($id);
+
+
+        // dd($ingredientLotDetail->ingredient);
         try {
             DB::beginTransaction();
 
+
+
             // Log the disposal
             Log::info('Disposing expired ingredient lot', [
-                'lot_id' => $ingredientLot->id,
-                'ingredient_name' => $ingredientLot->ingredient->name,
-                'quantity' => $ingredientLot->quantity,
-                'expiration_date' => $ingredientLot->expiration_date,
+                'lot_id' => $ingredientLotDetail->id,
+                'ingredient_name' => $ingredientLotDetail->ingredient->name,
+                'quantity' => $ingredientLotDetail->quantity,
+                'expiration_date' => $ingredientLotDetail->expiration_date,
                 'user_id' => auth()->id()
             ]);
 
-            // update ingredient quantity
-            $ingredient = $ingredientLot->ingredient;
-            $ingredient->quantity -= $ingredientLot->quantity;
+            $ingredient = Ingredient::findOrFail($ingredientLotDetail->ingredient_id);
+            $ingredient->quantity -= $ingredientLotDetail->quantity * $ingredientLotDetail->transformer->multiplier;
             $ingredient->save();
 
-            // Delete the expired ingredient lot
-            $ingredientLot->delete();
+
+            $productIngredientUsage = new ProductIngredientUsage();
+            $productIngredientUsage->ingredient_id = $ingredient->id;
+            $productIngredientUsage->amount = $ingredientLotDetail->quantity;
+            $productIngredientUsage->usage_type = 'DISPOSE';
+            $productIngredientUsage->created_by = auth()->id();
+            $productIngredientUsage->note = "จำหน่ายวัตถุดิบ #" . $ingredientLotDetail->id;
+            $productIngredientUsage->save();
+            $ingredientLotDetail->delete();
 
             DB::commit();
             return redirect()->back()->with('success', 'วัตถุดิบถูกจำหน่ายออกเรียบร้อยแล้ว');

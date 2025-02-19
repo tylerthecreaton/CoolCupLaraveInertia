@@ -24,4 +24,9 @@ class IngredientLot extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function ingredient()
+    {
+        return $this->belongsTo(Ingredient::class);
+    }
 }
