@@ -15,6 +15,7 @@ import {
 import Swal from "sweetalert2";
 import { Link, router } from "@inertiajs/react";
 import { TbSlideshow } from "react-icons/tb";
+
 export default function SidebarMenu() {
     const [isOpen, setIsOpen] = useState(() => {
         // Check if we're on a different page (not home)
@@ -77,11 +78,10 @@ export default function SidebarMenu() {
 
     const MenuText = ({ children }) => (
         <span
-            className={`whitespace-nowrap transition-all duration-300 ${
-                isOpen
+            className={`ml-3 whitespace-nowrap transition-all duration-300 ${isOpen
                     ? "opacity-100 translate-x-0"
                     : "opacity-0 -translate-x-10"
-            }`}
+                }`}
         >
             {children}
         </span>
@@ -89,134 +89,112 @@ export default function SidebarMenu() {
 
     return (
         <div
-            className={`flex flex-col justify-between ${
-                isOpen ? "w-[180px]" : "w-[100px]"
-            } h-screen min-h-screen bg-gray-100 border border-gray-300 px-2 transition-all duration-300 overflow-hidden`}
+            className={`flex flex-col justify-between ${isOpen ? "w-[240px]" : "w-[80px]"
+                } h-screen min-h-screen bg-white shadow-lg transition-all duration-500 ease-in-out overflow-hidden`}
         >
+            {/* Decorative gradient line */}
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600"></div>
+
             <div>
-                <div className="flex justify-center items-center h-24">
+                <div className="flex justify-center items-center h-20 bg-gradient-to-r from-cyan-600 to-cyan-700 relative overflow-hidden">
+                    {/* Animated background effect */}
+                    <div className="absolute inset-0 opacity-20">
+                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:200%_200%] animate-shimmer"></div>
+                    </div>
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className="p-2 rounded-full hover:bg-gray-200"
+                        className="p-2 rounded-full hover:bg-white/20 transition-all duration-300 transform hover:scale-110 active:scale-95"
                     >
                         <MdMenu
-                            className={`text-4xl transition-transform duration-300 ${
-                                isOpen ? "":"rotate-180"}`}
+                            className={`text-3xl text-white transition-transform duration-500 ease-in-out ${isOpen ? "rotate-180" : "rotate-0"}`}
                         />
                     </button>
                 </div>
-                <Link
-                    href="/"
-                    className="flex justify-center py-2 w-full border border-r-0 border-l-0 border-gray-500 hover:bg-gray-200"
-                >
-                    {isOpen ? (
-                        <MenuText>หน้าหลัก</MenuText>
-                    ) : (
-                        <MdApps className="text-2xl" />
-                    )}
-                </Link>
 
-                <ul className="flex flex-col gap-5 justify-center items-center py-5">
-                    <li className="flex items-center">
-                    <Link
-                            href={route("sale.dashboard")}
-                            className="text-blue-500 hover:text-blue-700"
+                <ul className="flex flex-col gap-1 py-4 px-2">
+                    <li>
+                        <Link
+                            href="/"
+                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
                         >
-                            {isOpen ? (
-                                <MenuText>แดชบอร์ด</MenuText>
-                            ) : (
-                                <MdDashboard className="text-2xl" />
-                            )}
+                            <MdApps className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            {isOpen && <MenuText>หน้าขาย</MenuText>}
                         </Link>
                     </li>
-                    <li className="flex items-center">
+                    <li>
+                        <Link
+                            href={route("sale.dashboard")}
+                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
+                        >
+                            <MdDashboard className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            {isOpen && <MenuText>แดชบอร์ด</MenuText>}
+                        </Link>
+                    </li>
+                    <li>
                         <Link
                             href={route("promotion.index")}
-                            className="text-blue-500 hover:text-blue-700"
+                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
                         >
-                            {isOpen ? (
-                                <MenuText>โปรโมชั่น</MenuText>
-                            ) : (
-                                <MdLocalOffer className="text-2xl" />
-                            )}
+                            <MdLocalOffer className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            {isOpen && <MenuText>โปรโมชั่น</MenuText>}
                         </Link>
                     </li>
-                    <li className="flex items-center">
+                    <li>
                         <Link
                             href="/receipt-history"
-                            className="text-blue-500 hover:text-blue-700"
+                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
                         >
-                            {isOpen ? (
-                                <MenuText>ประวัติใบเสร็จ</MenuText>
-                            ) : (
-                                <MdHistory className="text-2xl" />
-                            )}
+                            <MdHistory className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            {isOpen && <MenuText>ประวัติใบเสร็จ</MenuText>}
                         </Link>
                     </li>
                 </ul>
             </div>
             <div>
-                <ul className="flex flex-col gap-5 justify-center items-center py-5">
-                <li>
+                <ul className="flex flex-col gap-1 py-4 px-2">
+                    <li>
                         <Link
                             href="/client"
-                            className="text-blue-500 hover:text-blue-700"
+                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
                         >
-                            <span className="flex items-center text-base font-semibold">
-                                {isOpen ? (
-                                    <MenuText>Carousal</MenuText>
-                                ) : (
-                                    <TbSlideshow className="text-2xl" />
-                                )}
-                            </span>
+                            <TbSlideshow className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            {isOpen && <MenuText>Carousal</MenuText>}
                         </Link>
                     </li>
                     <li>
                         <Link
                             href="/member"
-                            className="text-blue-500 hover:text-blue-700"
+                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
                         >
-                            <span className="flex items-center text-base font-semibold">
-                                {isOpen ? (
-                                    <MenuText>สมาชิก</MenuText>
-                                ) : (
-                                    <MdPerson className="text-2xl" />
-                                )}
-                            </span>
+                            <MdPerson className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            {isOpen && <MenuText>สมาชิก</MenuText>}
                         </Link>
                     </li>
                     <li>
                         <Link
                             href="/registermember"
-                            className="text-blue-500 hover:text-blue-700"
+                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
                         >
-                            <span className="flex items-center text-base font-semibold">
-                                {isOpen ? (
-                                    <MenuText>สมัครสมาชิก</MenuText>
-                                ) : (
-                                    <MdPersonAdd className="text-2xl" />
-                                )}
-                            </span>
+                            <MdPersonAdd className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            {isOpen && <MenuText>สมัครสมาชิก</MenuText>}
                         </Link>
                     </li>
-                    <li className="flex items-center">
-                        {isOpen ? (
-                            <MenuText>แมนนวล</MenuText>
-                        ) : (
-                            <MdBook className="text-2xl" />
-                        )}
+                    <li>
+                        <Link
+                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
+                        >
+                            <MdBook className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            {isOpen && <MenuText>แมนนวล</MenuText>}
+                        </Link>
                     </li>
                     <li>
                         <button
                             type="button"
-                            className="flex justify-center items-center w-full text-red-500"
                             onClick={handleLogout}
+                            className="w-full flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-red-50 text-gray-700 hover:text-red-600 group"
                         >
-                            {isOpen ? (
-                                <MenuText>ออกจากระบบ</MenuText>
-                            ) : (
-                                <MdExitToApp className="text-2xl transition-transform hover:scale-110" />
-                            )}
+                            <MdExitToApp className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            {isOpen && <MenuText>ออกจากระบบ</MenuText>}
                         </button>
                     </li>
                 </ul>
@@ -224,3 +202,15 @@ export default function SidebarMenu() {
         </div>
     );
 }
+
+const style = document.createElement('style');
+style.textContent = `
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+.animate-shimmer {
+    animation: shimmer 3s linear infinite;
+}
+`;
+document.head.appendChild(style);
