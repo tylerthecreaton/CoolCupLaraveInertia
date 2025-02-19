@@ -178,7 +178,7 @@ export default function Index({ settings, types }) {
                                 <Table.HeadCell className="font-semibold text-gray-900">ลำดับ</Table.HeadCell>
                                 <Table.HeadCell className="font-semibold text-gray-900">ชื่อการตั้งค่า</Table.HeadCell>
                                 <Table.HeadCell className="font-semibold text-gray-900">ค่า</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-900">คำอธิบาย</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-900">คำอธิบายของการตั้งค่า</Table.HeadCell>
                                 <Table.HeadCell className="font-semibold text-gray-900 w-32 text-right">จัดการ</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y">
@@ -263,7 +263,7 @@ export default function Index({ settings, types }) {
                 <Modal.Body>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <Label htmlFor="key" value="Key" />
+                            <Label htmlFor="key" value="ชื่อการตั้งค่า" />
                             <TextInput
                                 id="key"
                                 value={data.key}
@@ -274,7 +274,7 @@ export default function Index({ settings, types }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="value" value="Value" />
+                            <Label htmlFor="value" value="ค่า" />
                             <TextInput
                                 id="value"
                                 value={data.value}
@@ -285,7 +285,7 @@ export default function Index({ settings, types }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="description" value="Description" />
+                            <Label htmlFor="description" value="คำอธิบายของการตั้งค่า" />
                             <Textarea
                                 id="description"
                                 value={data.description}
@@ -296,7 +296,7 @@ export default function Index({ settings, types }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="type" value="Type" />
+                            <Label htmlFor="type" value="ประเภทการตั้งค่า" />
                             <Select
                                 id="type"
                                 value={data.type}
@@ -312,7 +312,7 @@ export default function Index({ settings, types }) {
                         </div>
 
                         <div>
-                            <Label htmlFor="comment" value="Comment" />
+                            <Label htmlFor="comment" value="คำอธิบายข้อควรระวัง" />
                             <Textarea
                                 id="comment"
                                 value={data.comment}

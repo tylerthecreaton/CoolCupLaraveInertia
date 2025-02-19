@@ -161,7 +161,7 @@ export default function ProductsForm({
                         onChange={(e) => setData("description", e.target.value)}
                     />
                 </div>
-                <Button type="submit">Submit</Button>
+                <Button type="submit">บันทึก</Button>
                 <ProductIngredientsForm
                     product={product}
                     ingredients={ingredients}

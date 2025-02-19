@@ -99,7 +99,7 @@ export default function CustomersForm({ isEditing = false, customer = null }) {
                         onChange={(e) => setData("birthdate", e.target.value)}
                     />
                 </div>
-                <Button type="submit">Submit</Button>
+                <Button type="submit">บันทึก</Button>
             </form>
         </div>
     );

@@ -82,7 +82,7 @@ export default function CategoriesForm({ category, isEditing = false }) {
                         onChange={(e) => setData("description", e.target.value)}
                     />
                 </div>
-                <Button type="submit">Submit</Button>
+                <Button type="submit">บันทึก</Button>
             </form>
         </div>
     );
