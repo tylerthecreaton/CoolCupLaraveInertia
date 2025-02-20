@@ -13,6 +13,7 @@ use App\Models\Consumable;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class OrderCancellationService
 {
@@ -27,24 +28,29 @@ class OrderCancellationService
             }
 
             // 2. สร้างรายการยกเลิก
+            Log::info("Creating cancellation for order {$order->id}");
             $cancellation = $this->createCancellation($order, $data);
 
             // 3. อัพเดทสถานะ order
+            Log::info("Updating order status for order {$order->id}");
             $order->update(['status' => 'cancelled']);
 
             // 4. จัดการการคืนวัตถุดิบและอุปกรณ์ (ถ้าสามารถคืนได้)
             if ($data['is_restock_possible']) {
+                Log::info("Restocking items for order {$order->id}");
                 $restoredItems = $this->restoreStockItems($order);
                 $cancellation->update($restoredItems);
             }
 
             // 5. จัดการคะแนนสะสม (ถ้ามี)
             if ($order->customer_id && $order->received_points > 0) {
+                Log::info("Refunding points for order {$order->id}");
                 $this->refundPoints($order);
             }
 
             // 6. บันทึกค่าใช้จ่าย (ถ้าจำเป็น)
             if ($data['refunded_amount'] > $order->final_amount) {
+                Log::info("Recording expense for order {$order->id}");
                 $this->createExpenseRecord($order, $data['refunded_amount']);
             }
 
@@ -94,6 +100,8 @@ class OrderCancellationService
                 ];
             }
 
+            Log::info("Restoring consumables for order {$order->id}");
+
             // TODO: เพิ่มการจัดการ consumables ตามความต้องการ
         }
 
@@ -112,7 +120,7 @@ class OrderCancellationService
 
         // คำนวณคะแนนที่ต้องคืน
         $pointsToRefund = 0;
-        
+
         // ตรวจสอบว่ามี pointUsages หรือไม่
         if ($order->pointUsages) {
             foreach ($order->pointUsages as $usage) {

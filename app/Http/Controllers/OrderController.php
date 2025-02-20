@@ -132,7 +132,6 @@ class OrderController extends Controller implements HasMiddleware
             // ส่งข้อความผ่าน TelegramController
             $telegram = new TelegramController(new Api(config('services.telegram.bot_token')));
             $telegram->sendPaymentReminder($message);
-
         } catch (Exception $e) {
             Log::error('ไม่สามารถส่งการแจ้งเตือน Telegram ได้: ' . $e->getMessage());
         }
@@ -488,8 +487,9 @@ class OrderController extends Controller implements HasMiddleware
         return $totalItems;
     }
 
-    public function cancel(Request $request, Order $order)
+    public function cancel(Request $request, $id)
     {
+        $order = Order::find($id);
         $request->validate([
             'cancellation_reason' => 'required|string|min:3',
             'is_restock_possible' => 'required|boolean',
@@ -626,7 +626,7 @@ class OrderController extends Controller implements HasMiddleware
         if (!empty($outOfStockItems)) {
             $errorMessage = "⚠️ ไม่สามารถสร้างออเดอร์ได้เนื่องจากวัตถุดิบไม่เพียงพอ:\n\n";
             foreach ($outOfStockItems as $item) {
-                $productType = match($item['type']) {
+                $productType = match ($item['type']) {
                     'ingredient' => 'เครื่องดื่ม',
                     'consumable' => 'เครื่องดื่ม',
                     'topping_ingredient', 'topping_consumable' => 'ท็อปปิ้ง'
