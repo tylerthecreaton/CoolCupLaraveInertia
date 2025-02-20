@@ -163,7 +163,9 @@ export default function Index({ auth, withdraws }) {
                                                             </span>
                                                             <span className="mx-1">-</span>
                                                             <Badge color="success" className="px-2 py-1">
-                                                                {item.quantity} {item.unit}
+                                                                {item.quantity} {item.type === "ingredient" ?
+                                                                    item.ingredientLot?.details?.ingredient?.unit?.name :
+                                                                    item.consumableLot?.details?.consumable?.unit?.name}
                                                             </Badge>
                                                         </div>
                                                     ))}
@@ -319,7 +321,7 @@ export default function Index({ auth, withdraws }) {
                                                 <Table.Head>
                                                     <Table.HeadCell>รายการ</Table.HeadCell>
                                                     <Table.HeadCell>จำนวน</Table.HeadCell>
-                                                    <Table.HeadCell>หน่วย</Table.HeadCell>
+                                                    {/* <Table.HeadCell>หน่วย</Table.HeadCell> */}
                                                 </Table.Head>
                                                 <Table.Body>
                                                     {selectedWithdraw.items.map((item, index) => (
@@ -342,7 +344,11 @@ export default function Index({ auth, withdraws }) {
                                                                     {item.quantity}
                                                                 </Badge>
                                                             </Table.Cell>
-                                                            <Table.Cell>{item.unit}</Table.Cell>
+                                                            <Table.Cell>
+                                                                {item.type === "ingredient" ?
+                                                                    item.ingredientLot?.details?.ingredient?.unit?.name :
+                                                                    item.consumableLot?.details?.consumable?.unit?.name}
+                                                            </Table.Cell>
                                                         </Table.Row>
                                                     ))}
                                                 </Table.Body>

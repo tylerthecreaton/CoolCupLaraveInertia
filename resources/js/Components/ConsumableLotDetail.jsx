@@ -17,6 +17,9 @@ export default function ConsumableLotDetail({ lot }) {
                             วัตถุดิบสิ้นเปลือง
                         </Table.HeadCell>
                         <Table.HeadCell className="bg-gray-50">
+                            ยี่ห้อ
+                        </Table.HeadCell>
+                        <Table.HeadCell className="bg-gray-50">
                             จำนวน
                         </Table.HeadCell>
                         <Table.HeadCell className="bg-gray-50">
@@ -44,6 +47,11 @@ export default function ConsumableLotDetail({ lot }) {
                                 <Table.Cell>
                                     <div className="font-medium text-gray-900">
                                         {detail.consumable?.name || '-'}
+                                    </div>
+                                </Table.Cell>
+                                <Table.Cell>
+                                    <div className="font-medium text-gray-900">
+                                        {detail.transformer?.name || '-'}
                                     </div>
                                 </Table.Cell>
                                 <Table.Cell>

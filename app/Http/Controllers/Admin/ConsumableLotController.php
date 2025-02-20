@@ -17,7 +17,7 @@ class ConsumableLotController extends Controller
 {
     public function index()
     {
-        $lots = ConsumableLot::with(['details.consumable', 'user'])
+        $lots = ConsumableLot::with(['details.consumable.unit', 'details.transformer', 'user'])
             ->select('consumable_lots.*')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -30,11 +30,17 @@ class ConsumableLotController extends Controller
                 'created_at' => $lot->created_at,
                 'note' => $lot->note,
                 'user' => $lot->user,
+                'transformer_name' => $lot->details->first()?->transformer?->name,
                 'details' => $lot->details->map(function ($detail) use ($lot) {
                     return [
                         'id' => $detail->id,
                         'lot_number' => $lot->lot_number,
-                        'consumable' => $detail->consumable,
+                        'consumable' => [
+                            'id' => $detail->consumable->id,
+                            'name' => $detail->consumable->name,
+                            'unit' => $detail->consumable->unit?->name
+                        ],
+                        'transformer' => $detail->transformer,
                         'quantity' => $detail->quantity,
                         'price' => $detail->price,
                         'cost_per_unit' => $detail->cost_per_unit,
@@ -145,7 +151,7 @@ class ConsumableLotController extends Controller
                     " %s: %d %s (ราคารวม %s บาท) จาก %s",
                     $detail->consumable->name,
                     $detail->quantity * $detail->per_pack,
-                    $detail->consumable->unit,
+                    $detail->consumable->unit->name,
                     number_format($detail->price, 2),
                     $detail->supplier
                 );
