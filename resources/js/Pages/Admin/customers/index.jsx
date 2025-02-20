@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 
 export default function Index({ customersPaginate }) {
-    const { current_page, next_page_url, prev_page_url } = customersPaginate;
+    const { current_page, next_page_url, prev_page_url, last_page } = customersPaginate;
     const [customers, setCustomers] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredCustomers, setFilteredCustomers] = useState([]);
@@ -136,7 +136,7 @@ export default function Index({ customersPaginate }) {
                                     </Table.Head>
                                     <Table.Body className="divide-y divide-gray-200">
                                         {filteredCustomers.map((customer, index) => (
-                                            <Table.Row 
+                                            <Table.Row
                                                 key={customer.id}
                                                 className="bg-white hover:bg-gray-50/60 transition-colors"
                                             >
@@ -204,30 +204,60 @@ export default function Index({ customersPaginate }) {
                                 </Table>
                             </div>
 
-                            {/* Pagination */}
-                            {customersPaginate.total > customersPaginate.per_page && (
-                                <div className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-lg">
-                                    <div className="text-sm text-gray-700">
-                                        แสดง{" "}
-                                        <span className="font-medium">{customersPaginate.from || 0}</span>{" "}
-                                        ถึง{" "}
-                                        <span className="font-medium">{customersPaginate.to || 0}</span>{" "}
-                                        จาก{" "}
-                                        <span className="font-medium">{customersPaginate.total || 0}</span>{" "}
-                                        รายการ
-                                    </div>
-                                    <div className="flex justify-center">
-                                        <Pagination
-                                            currentPage={currentPage}
-                                            totalPages={Math.ceil(
-                                                (customersPaginate.total || 0) / (customersPaginate.per_page || 10)
-                                            )}
-                                            onPageChange={onPageChange}
-                                            showIcons
-                                        />
-                                    </div>
+                            {/* Pagination Section */}
+                            <div className="flex flex-col items-center justify-between gap-4 px-4 py-3 bg-gray-50 rounded-lg sm:flex-row">
+                                <div className="text-sm text-gray-700">
+                                    แสดง{" "}
+                                    <span className="font-medium">{customersPaginate.from || 0}</span>{" "}
+                                    ถึง{" "}
+                                    <span className="font-medium">{customersPaginate.to || 0}</span>{" "}
+                                    จาก{" "}
+                                    <span className="font-medium">{customersPaginate.total || 0}</span>{" "}
+                                    รายการ
                                 </div>
-                            )}
+                                <div className="flex items-center gap-2">
+                                    {/* <Button
+                                        size="sm"
+                                        disabled={currentPage === 1}
+                                        onClick={() => onPageChange(1)}
+                                    >
+                                        หน้าแรก
+                                    </Button> */}
+                                    <Pagination
+                                        currentPage={currentPage}
+                                        totalPages={last_page}
+                                        onPageChange={onPageChange}
+                                        showIcons
+                                        layout="pagination"
+                                        theme={{
+                                            pages: {
+                                                base: "xs:mt-0 mt-2 inline-flex items-center -space-x-px",
+                                                showIcon: "inline-flex",
+                                                previous: {
+                                                    base: "ml-0 rounded-l-lg border border-gray-300 bg-white py-2 px-3 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white",
+                                                    icon: "h-5 w-5"
+                                                },
+                                                next: {
+                                                    base: "rounded-r-lg border border-gray-300 bg-white py-2 px-3 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white",
+                                                    icon: "h-5 w-5"
+                                                },
+                                                selector: {
+                                                    base: "border border-gray-300 bg-white py-2 px-3 leading-tight text-gray-500 enabled:hover:bg-gray-100 enabled:hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 enabled:dark:hover:bg-gray-700 enabled:dark:hover:text-white",
+                                                    active: "bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white",
+                                                    disabled: "opacity-50 cursor-normal"
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    {/* <Button
+                                        size="sm"
+                                        disabled={currentPage === last_page}
+                                        onClick={() => onPageChange(last_page)}
+                                    >
+                                        หน้าสุดท้าย
+                                    </Button> */}
+                                </div>
+                            </div>
                         </div>
                     </Card>
                 </div>
