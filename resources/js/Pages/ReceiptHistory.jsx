@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Breadcrumb, Card, Select } from 'flowbite-react';
 import SearchBar from "@/Components/receipt/SearchBar";
 import ReceiptTable from "@/Components/receipt/ReceiptTable";
-import OrderDetailsModal from "@/Components/receipt/OrderDetailsModal";
+import OrderDetailsModal from "../Components/receipt/OrderDetailsModal";
 import CancelOrderModal from "@/Components/receipt/CancelOrderModal";
 import { format, subDays, startOfWeek, endOfWeek } from 'date-fns';
 import { th } from 'date-fns/locale';

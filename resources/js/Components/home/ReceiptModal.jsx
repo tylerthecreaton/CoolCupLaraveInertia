@@ -287,25 +287,25 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                             )}
                         </div>
 
-                        {/* แต้มสะสม */}
-                        <div className="p-3 space-y-2 text-sm bg-green-50 rounded-md">
-                            <div className="flex justify-between items-center">
-                                <span className="font-medium text-green-700">แต้มสะสมที่ได้รับ</span>
-                                <span className="bg-green-100 px-2 py-0.5 rounded font-medium text-green-700">
-                                    +{Number(orderData?.received_points || 0).toFixed(2)}
-                                </span>
-                            </div>
-                            {orderData?.customer && (
+                        {/* แสดงคะแนนที่ได้รับเมื่อเป็นลูกค้าสมาชิก */}
+                        {orderData?.customer && (
+                            <div className="p-3 space-y-2 text-sm bg-green-50 rounded-md">
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium text-green-700">คะแนนที่ได้รับ</span>
+                                    <span className="bg-green-100 px-2 py-0.5 rounded font-medium text-green-700">
+                                        +{Number(orderData?.received_points || 0).toFixed(2)}
+                                    </span>
+                                </div>
                                 <div className="pt-1.5 border-t border-green-100">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-green-700">แต้มสะสมทั้งหมด</span>
+                                        <span className="text-green-700">คะแนนทั้งหมด</span>
                                         <span className="font-medium text-green-700">
                                             {Number(orderData.customer.loyalty_points || 0).toFixed(2)} แต้ม
                                         </span>
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
                         {/* ข้อมูลลูกค้า */}
                         {orderData?.customer && (
