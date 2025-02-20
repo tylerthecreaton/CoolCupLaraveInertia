@@ -252,10 +252,10 @@ const ProductModal = ({ show, onClose, product }) => {
                             onClick={handleClose}
                             className="flex-1"
                         >
-                            Cancel
+                            ยกเลิก
                         </Button>
                         <Button className="flex-1" onClick={handleAddToCart}>
-                            Add to Order
+                            เพิ่มในตะกร้า
                         </Button>
                     </div>
                 </div>

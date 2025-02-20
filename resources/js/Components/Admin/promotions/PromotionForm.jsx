@@ -1,4 +1,4 @@
-import { useForm } from "@inertiajs/react";
+import { router, useForm } from "@inertiajs/react";
 import {
     Button,
     FileInput,
@@ -14,6 +14,12 @@ export default function PromotionForm({
     isEditing = false,
     promotion = null,
 }) {
+    const formatDateForInput = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+    };
+
     const { data, setData, post, put, processing, errors, reset } = useForm({
         name: isEditing ? promotion?.name : "",
         image: null,
@@ -32,8 +38,8 @@ export default function PromotionForm({
             discount_value: isEditing ? promotion?.category?.discount_value : 0,
             category_id: isEditing ? promotion?.category?.category_id : "",
         },
-        start_date: isEditing ? promotion?.start_date : "",
-        end_date: isEditing ? promotion?.end_date : "",
+        start_date: isEditing ? formatDateForInput(promotion?.start_date) : "",
+        end_date: isEditing ? formatDateForInput(promotion?.end_date) : "",
     });
 
     const handleFileChange = (e) => {
@@ -469,10 +475,13 @@ export default function PromotionForm({
                     <Button
                         type="button"
                         color="light"
-                        onClick={() => reset()}
+                        onClick={() => {
+                            reset();
+                            router.visit(route("admin.promotions.index"));
+                        }}
                         disabled={processing}
                     >
-                        ล้างข้อมูล
+                        ยกเลิก
                     </Button>
                     <Button type="submit" disabled={processing}>
                         {processing

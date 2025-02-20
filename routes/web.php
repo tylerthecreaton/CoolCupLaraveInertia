@@ -231,10 +231,10 @@ Route::middleware('auth', 'can:view dashboard')->group(function () {
         Route::get('/promotions', [AdminPromotionController::class, 'index'])->name('promotions.index');
         Route::get('/promotions/create', [AdminPromotionController::class, 'create'])->name('promotions.create');
         Route::post('/promotions', [AdminPromotionController::class, 'store'])->name('promotions.store');
-        Route::get('/promotions/{id}', [AdminPromotionController::class, 'show'])->name('promotions.show');
-        Route::get('/promotions/{id}/edit', [AdminPromotionController::class, 'edit'])->name('promotions.edit');
-        Route::put('/promotions/{id}', [AdminPromotionController::class, 'update'])->name('promotions.update');
-        Route::delete('/promotions/{id}', [AdminPromotionController::class, 'destroy'])->name('promotions.destroy');
+        Route::get('/promotions/{promotion}', [AdminPromotionController::class, 'show'])->name('promotions.show');
+        Route::get('/promotions/{promotion}/edit', [AdminPromotionController::class, 'edit'])->name('promotions.edit');
+        Route::put('/promotions/{promotion}', [AdminPromotionController::class, 'update'])->name('promotions.update');
+        Route::delete('/promotions/{promotion}', [AdminPromotionController::class, 'destroy'])->name('promotions.destroy');
 
         // ---------------------------Daily Reports---------------------------
         Route::get('/report', [AdminReportController::class, 'index'])->name('report.index');
