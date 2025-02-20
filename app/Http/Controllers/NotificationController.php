@@ -74,13 +74,13 @@ class NotificationController extends Controller
             $notifications[] = new Notification(
                 type: "low_stock",
                 title: 'แจ้งเตือนวัตถุดิบใกล้หมด',
-                message: "วัตถุดิบ {$ingredient->name} เหลือน้อยกว่าจำนวนขั้นต่ำ ({$ingredient->quantity} {$ingredient->unit?->abbreviation}) กรุณาเพิ่มวัตถุดิบที่หน้า Lot",
+                message: "วัตถุดิบ {$ingredient->name} เหลือน้อยกว่าจำนวนขั้นต่ำ ({$ingredient->quantity} {$ingredient->unit?->abbreviation}) กรุณาเบิกวัตถุดิบที่หน้าเบิกวัตถุดิบ",
                 data: array_merge($ingredient->toArray(), [
                     'minimum_stock' => $minimumStock,
                     'current_stock' => $ingredient->quantity,
                     'unit' => $ingredient->unit?->abbreviation
                 ]),
-                url: route('admin.ingredient-lots.create', ['ingredient_id' => $ingredient->id]),
+                url: route('admin.withdraw.create'),
                 color: 'warning',
                 id: $index + 1
             );
