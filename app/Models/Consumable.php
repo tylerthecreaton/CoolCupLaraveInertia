@@ -17,7 +17,7 @@ class Consumable extends Model
      */
     protected $fillable = [
         'name',
-        'unit',
+        'unit_id',
         'quantity',
         'is_depend_on_sale',
     ];
@@ -29,7 +29,7 @@ class Consumable extends Model
      */
     protected $casts = [
         'quantity' => 'integer',
-        'unit' => 'string',
+        'unit_id' => 'integer',
         'name' => 'string',
         'is_depend_on_sale' => 'boolean',
     ];

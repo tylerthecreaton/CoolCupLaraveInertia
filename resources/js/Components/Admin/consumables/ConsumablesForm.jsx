@@ -9,7 +9,7 @@ export default function ConsumablesForm({ consumable, units = [], isEditing = fa
     const { data, setData, post, put, processing, errors } = useForm({
         name: isEditing ? consumable?.name : "",
         quantity: isEditing ? consumable?.quantity : "",
-        unit: isEditing ? consumable?.unit : "",
+        unit_id: isEditing ? consumable?.unit_id : "",
         is_depend_on_sale: isEditing ? consumable?.is_depend_on_sale : false,
     });
 
@@ -112,7 +112,7 @@ export default function ConsumablesForm({ consumable, units = [], isEditing = fa
 
                             <div>
                                 <Label
-                                    htmlFor="unit"
+                                    htmlFor="unit_id"
                                     value="หน่วยวัด"
                                     className="inline-flex items-center mb-2"
                                 >
@@ -120,27 +120,27 @@ export default function ConsumablesForm({ consumable, units = [], isEditing = fa
                                     <span>หน่วยวัด</span>
                                 </Label>
                                 <select
-                                    id="unit"
-                                    name="unit"
-                                    value={data.unit}
-                                    onChange={(e) => setData("unit", e.target.value)}
+                                    id="unit_id"
+                                    name="unit_id"
+                                    value={data.unit_id}
+                                    onChange={(e) => setData("unit_id", e.target.value)}
                                     required
                                     className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${
-                                        errors.unit
+                                        errors.unit_id
                                             ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-red-500"
                                             : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                                     } bg-white shadow-sm`}
                                 >
                                     <option value="">เลือกหน่วยวัด</option>
                                     {units?.map((unit) => (
-                                        <option key={unit.id} value={unit.abbreviation}>
+                                        <option key={unit.id} value={unit.id}>
                                             {unit.name} ({unit.abbreviation})
                                         </option>
                                     ))}
                                 </select>
-                                {errors.unit && (
+                                {errors.unit_id && (
                                     <p className="mt-1 text-sm text-red-600">
-                                        {errors.unit}
+                                        {errors.unit_id}
                                     </p>
                                 )}
                             </div>

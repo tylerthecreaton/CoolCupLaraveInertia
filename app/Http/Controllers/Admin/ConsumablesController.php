@@ -13,7 +13,7 @@ class ConsumablesController extends Controller
 
     public function index()
     {
-        $consumables = Consumable::orderBy('created_at', 'desc')->paginate(10);
+        $consumables = Consumable::with('unit')->orderBy('created_at', 'desc')->paginate(10);
         return Inertia::render('Admin/consumables/index', compact('consumables'));
     }
 
@@ -27,7 +27,7 @@ class ConsumablesController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'unit' => ['required', 'string', 'max:255', 'exists:units,abbreviation,type,consumable'],
+            'unit_id' => ['required', 'exists:units,id,type,consumable'],
             'quantity' => ['required', 'numeric'],
             'is_depend_on_sale' => ['required', 'boolean'],
         ]);
@@ -39,7 +39,7 @@ class ConsumablesController extends Controller
 
     public function edit($id)
     {
-        $consumable = Consumable::find($id);
+        $consumable = Consumable::with('unit')->find($id);
         $units = Unit::where('type', 'consumable')->get();
         return Inertia::render('Admin/consumables/edit', compact('consumable', 'units'));
     }
@@ -48,7 +48,7 @@ class ConsumablesController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'unit' => ['required', 'string', 'max:255', 'exists:units,abbreviation,type,consumable'],
+            'unit_id' => ['required', 'exists:units,id,type,consumable'],
             'quantity' => ['required', 'numeric'],
             'is_depend_on_sale' => ['required', 'boolean'],
         ]);

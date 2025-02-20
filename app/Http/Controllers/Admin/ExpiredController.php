@@ -59,10 +59,10 @@ class ExpiredController extends Controller
 
             $productIngredientUsage = new ProductIngredientUsage();
             $productIngredientUsage->ingredient_id = $ingredient->id;
-            $productIngredientUsage->amount = $ingredientLotDetail->quantity;
+            $productIngredientUsage->amount = $ingredientLotDetail->quantity * $ingredientLotDetail->transformer->multiplier;
             $productIngredientUsage->usage_type = 'DISPOSE';
             $productIngredientUsage->created_by = auth()->id();
-            $productIngredientUsage->note = "จำหน่ายวัตถุดิบ #" . $ingredientLotDetail->id;
+            $productIngredientUsage->note = "จำหน่ายวัตถุดิบหมดอายุ (" . $ingredient->name . ") จาก Lot วัตถุดิบที่ " . $ingredientLotDetail->id;
             $productIngredientUsage->save();
             $ingredientLotDetail->delete();
 

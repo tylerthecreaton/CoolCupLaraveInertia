@@ -40,7 +40,7 @@ class OrderController extends Controller implements HasMiddleware
     public function store(Request $request)
     {
         $cart = $request->get("cart");
-        
+
         // Validate stock before creating order
         try {
             $this->validateStock($cart['items']);
@@ -85,8 +85,8 @@ class OrderController extends Controller implements HasMiddleware
         $this->saveOrderDetails($cart['items'], $order->id);
 
         if ($cart['appliedPromotion']) {
-            $onlyPromotionDiscount = $cart['manualDiscountAmount'] + $cart['pointDiscountAmount'];
-            $this->savePromotionUsage($cart['appliedPromotion'], $onlyPromotionDiscount, $order->id);
+            $promotionDiscount = $cart['totalDiscount'] - ($cart['manualDiscountAmount'] + $cart['pointDiscountAmount']);
+            $this->savePromotionUsage($cart['appliedPromotion'], $promotionDiscount, $order->id);
         }
 
         if ($cart['usedPoints']) {
@@ -527,7 +527,7 @@ class OrderController extends Controller implements HasMiddleware
                 $ingredient = Ingredient::find($productIngredient->ingredient_id);
                 if ($ingredient) {
                     $usedQuantity = $item['quantity'] * $productIngredient->quantity_used;
-                    
+
                     // Calculate sweetness usage for sweetness ingredients
                     if ($ingredient->is_sweetness) {
                         $sweetnessRate = $this->calculateSweetnessUsage($usedQuantity, $item['sweetness'] ?? '100%');
@@ -631,12 +631,12 @@ class OrderController extends Controller implements HasMiddleware
                     'consumable' => 'เครื่องดื่ม',
                     'topping_ingredient', 'topping_consumable' => 'ท็อปปิ้ง'
                 };
-                
+
                 $errorMessage .= "• {$item['name']} สำหรับ{$productType} {$item['product']}\n";
                 $errorMessage .= "  - คงเหลือ: {$item['current_stock']}\n";
                 $errorMessage .= "  - ต้องการ: {$item['required']}\n\n";
             }
-            
+
             throw new \Exception($errorMessage);
         }
     }

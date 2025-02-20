@@ -166,7 +166,7 @@ export default function Index({ consumables }) {
                                                                 <div className="grid grid-cols-2 gap-2 text-sm">
                                                                     <div>
                                                                         <p className="text-gray-500">จำนวน:</p>
-                                                                        <p className="font-medium">{consumable.quantity} {consumable.unit}</p>
+                                                                        <p className="font-medium">{consumable.quantity} {consumable.unit.name}</p>
                                                                     </div>
                                                                     <div>
                                                                         <p className="text-gray-500">ใช้ในการขาย:</p>
@@ -190,7 +190,7 @@ export default function Index({ consumables }) {
                                             </Table.Cell>
                                             <Table.Cell className="px-6 text-center">
                                                 <Badge color="purple" className="w-fit mx-auto">
-                                                    {consumable.quantity}
+                                                    {consumable.quantity} {consumable.unit.name}
                                                 </Badge>
                                             </Table.Cell>
                                             <Table.Cell className="px-6 text-center">
