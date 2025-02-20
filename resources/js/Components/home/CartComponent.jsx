@@ -192,7 +192,6 @@ const CartComponent = () => {
             setSelectedPromotion("");
             return;
         }
-
         if (!promotionId) {
             setSelectedPromotion("");
             dispatch(cartActions.applyPromotion(null));
@@ -209,6 +208,9 @@ const CartComponent = () => {
         const promotion = promotions.find(
             (p) => p.id === parseInt(promotionId)
         );
+
+        console.log(`ton test`, promotion);
+
         if (!promotion) return;
 
         // Check for existing manual discount
@@ -259,7 +261,7 @@ const CartComponent = () => {
                 isDiscount: true,
                 isPromotionDiscount: true,
             };
-
+            console.log(promotion);
             dispatch(cartActions.addToCart(discountItem));
             dispatch(cartActions.applyPromotion(promotion));
             setSelectedPromotion(promotionId);

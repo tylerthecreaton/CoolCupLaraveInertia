@@ -252,6 +252,7 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                                     color={errors.item ? "failure" : "gray"}
                                                     className="w-full"
                                                 >
+                                                    <option value="">เลือกสินค้า</option>
                                                     {selectedType === "consumable"
                                                         ? availableItems.map(
                                                               (group, groupIndex) => (

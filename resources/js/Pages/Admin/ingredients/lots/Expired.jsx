@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Head, useForm } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Table, Button, Card, Modal } from "flowbite-react";
@@ -9,8 +9,10 @@ import {
 } from "react-icons/hi";
 import { format } from "date-fns";
 import { isAbsoluteUrl } from "@/helpers";
+import Swal from "sweetalert2";
 
-const Expired = ({ auth, expired_lots }) => {
+const Expired = ({ auth, expired_lots, flash }) => {
+    const { error } = flash;
     const { delete: destroy } = useForm();
     const [openModal, setOpenModal] = React.useState(false);
     const [selectedItem, setSelectedItem] = React.useState(null);
@@ -24,6 +26,17 @@ const Expired = ({ auth, expired_lots }) => {
             });
         }
     };
+
+    useEffect(() => {
+        console.log(error);
+        if (error) {
+            Swal.fire({
+                title: "เกิดข้อผิดพลาด!",
+                text: error,
+                icon: "error",
+            });
+        }
+    }, [error]);
 
     // Calculate summary statistics
     const totalExpiredItems = expired_lots.data.length;

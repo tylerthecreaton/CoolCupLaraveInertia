@@ -15,7 +15,7 @@ import {
     Banknote,
     CreditCard,
     QrCode,
-    Receipt, 
+    Receipt,
     SquarePercent,
 } from "lucide-react";
 import Swal from "sweetalert2";
@@ -280,6 +280,8 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                 setReceipt(response.data);
                 setShowReceipt(true);
 
+                // Clear customer info and payment info
+                // dispatch(clientScreenActions.showCustomerInfo(null));
                 dispatch(
                     clientScreenActions.showPaymentInfo({
                         ...response.data,
@@ -295,6 +297,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                 : 0,
                     })
                 );
+
                 // Show success message
                 Swal.fire({
                     title: "สำเร็จ!",
@@ -303,8 +306,10 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                     confirmButtonText: "ตกลง",
                 });
 
-                // Clear cart
+                // Clear cart and reset form
                 dispatch(cartActions.clearCart());
+                setData("memberPhone", "");
+                setMember(null);
                 onClose();
             }
         } catch (error) {

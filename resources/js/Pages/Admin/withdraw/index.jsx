@@ -159,9 +159,7 @@ export default function Index({ auth, withdraws }) {
                                                                 {item.type === "ingredient" ? "วัตถุดิบ" : "วัตถุดิบสิ้นเปลือง"}
                                                             </Badge>
                                                             <span className="font-medium">
-                                                                {item.type === "ingredient"
-                                                                    ? item.ingredient_lot?.details?.[0]?.ingredient?.name
-                                                                    : item.consumable_lot?.details?.[0]?.consumable?.name}
+                                                                {item.transformer?.name}
                                                             </span>
                                                             <span className="mx-1">-</span>
                                                             <Badge color="success" className="px-2 py-1">
@@ -335,9 +333,7 @@ export default function Index({ auth, withdraws }) {
                                                                         {item.type === "ingredient" ? "วัตถุดิบ" : "วัตถุดิบสิ้นเปลือง"}
                                                                     </Badge>
                                                                     <span className="font-medium">
-                                                                        {item.type === "ingredient"
-                                                                            ? item.ingredient_lot?.details?.[0]?.ingredient?.name
-                                                                            : item.consumable_lot?.details?.[0]?.consumable?.name}
+                                                                        {item.transformer?.name}
                                                                     </span>
                                                                 </div>
                                                             </Table.Cell>
