@@ -433,7 +433,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                             <div className="text-right">
                                 {cartDiscount > 0 && (
                                     <div className="text-sm text-blue-600">
-                                        {state.cart.appliedPromotion
+                                        {state.cart?.appliedPromotion
                                             ? `โปรโมชั่น (${state.cart.appliedPromotion
                                                 .name
                                             }): ฿${cartDiscount.toFixed(2)}`
@@ -856,7 +856,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                         </span>
                                     </div>
                                 </div>
-                                {data.cashReceived > 0 && (
+                                {data.cashReceived >= 0 && (
                                     <div className="grid grid-cols-2 gap-y-2 p-4 bg-white rounded-lg">
                                         <div className="font-medium">
                                             ยอดที่ต้องชำระ:
@@ -984,16 +984,24 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                 </Modal.Body>
                 <Modal.Footer className="bg-gray-50 border-t">
                     <div className="flex justify-center space-x-3 w-full">
-                        {data.cashReceived > 0 && (
+                        {data.cashReceived >= 0 && (
                             <>
                                 <Button onClick={onClose} color="gray">
                                     ยกเลิก
                                 </Button>
                                 <Button
                                     onClick={handleConfirm}
-                                    className="bg-blue-600 hover:bg-blue-700"
+                                    color="success"
+                                    disabled={processing}
                                 >
-                                    ยืนยันการชำระเงิน
+                                    {processing ? (
+                                        <div className="flex items-center">
+                                            <Spinner size="sm" className="mr-2" />
+                                            กำลังดำเนินการ...
+                                        </div>
+                                    ) : (
+                                        "ยืนยันการชำระเงิน"
+                                    )}
                                 </Button>
                             </>
                         )}
