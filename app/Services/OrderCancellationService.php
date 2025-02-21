@@ -10,6 +10,7 @@ use App\Models\PointUsage;
 use App\Models\ProductIngredients;
 use App\Models\Ingredient;
 use App\Models\Consumable;
+use App\Models\ProductIngredientUsage;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +40,8 @@ class OrderCancellationService
             if ($data['is_restock_possible']) {
                 Log::info("Restocking items for order {$order->id}");
                 $restoredItems = $this->restoreStockItems($order);
-                $cancellation->update($restoredItems);
+
+                $this->updateProductIngredientUsages($restoredItems['restored_ingredients']);
             }
 
             Log::info("คืนคะแนนให้กับลูกค้าในคำสั่งซื้อนี้ {$order->id}");
@@ -59,6 +61,27 @@ class OrderCancellationService
             return $cancellation;
         } catch (Exception $e) {
             DB::rollBack();
+            throw $e;
+        }
+    }
+
+    private function updateProductIngredientUsages(array $ingredients): void
+    {
+        try {
+            Log::info("Updating product ingredient usages for order {$ingredients[0]['order_id']}");
+            foreach ($ingredients as $ingredient) {
+                ProductIngredientUsage::create([
+                    'order_detail_id' => $ingredient['order_detail_id'],
+                    'ingredient_id' => $ingredient['ingredient_id'],
+                    'amount' => $ingredient['amount'],
+                    'usage_type' => $ingredient['usage_type'],
+                    'created_by' => $ingredient['created_by'],
+                    'note' => $ingredient['note'],
+                ]);
+            }
+            Log::info("Updated product ingredient usages for order {$ingredient['order_id']}");
+        } catch (\Exception $e) {
+            Log::error("Error updating product ingredient usages: " . $e->getMessage());
             throw $e;
         }
     }
@@ -94,10 +117,14 @@ class OrderCancellationService
                 $ingredient->ingredient->increment('quantity', $quantity);
 
                 $restoredIngredients[] = [
+                    'order_id' => $order->id,
+                    'order_detail_id' => $detail->id,
                     'ingredient_id' => $ingredient->ingredient_id,
                     'name' => $ingredient->ingredient->name,
-                    'quantity' => $quantity,
-                    'unit' => $ingredient->ingredient->unit,
+                    'amount' => $quantity,
+                    'usage_type' => 'ADD',
+                    'created_by' => Auth::user()->id,
+                    'note' => "คืนวัตถุดิบ {$ingredient->ingredient->name} จากคำสั่งซื้อ {$order->id}"
                 ];
             }
 

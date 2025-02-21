@@ -34,6 +34,7 @@ use App\Http\Controllers\SaleDashboardController;
 use App\Http\Controllers\SlipController;
 use App\Http\Controllers\TelegramController;
 use App\Models\Order;
+use App\Models\ProductIngredients;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -268,3 +269,14 @@ Route::get('/playground', function () {
     $telegram->sendPaymentReminder($txt);
     return $order;
 });
+
+
+// Route::get('/playground2', function () {
+//     $ingredients = ProductIngredients::where('product_id', 2)
+//         ->with('ingredient')
+//         ->get();
+//     foreach ($ingredients as $ingredient) {
+//         $ingredient->ingredient->increment('quantity', 5);
+//     }
+//     return $ingredients;
+// });
