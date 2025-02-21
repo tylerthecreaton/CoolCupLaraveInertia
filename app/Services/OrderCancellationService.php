@@ -51,10 +51,9 @@ class OrderCancellationService
             }
 
             // 6. บันทึกค่าใช้จ่าย (ถ้าจำเป็น)
-            if ($data['refunded_amount'] > $order->final_amount) {
-                Log::info("Recording expense for order {$order->id}");
-                $this->createExpenseRecord($order, $data['refunded_amount']);
-            }
+            Log::info("Recording expense for order {$order->id}");
+            $this->createExpenseRecord($order, $data['refunded_amount']);
+
 
             DB::commit();
             return $cancellation;
@@ -169,18 +168,19 @@ class OrderCancellationService
 
     private function createExpenseRecord(Order $order, float $refundAmount)
     {
-        $expenseAmount = $refundAmount - $order->final_amount;
-
-        if ($expenseAmount <= 0) {
-            return;
+        Log::debug('สร้างบันทึกค่าใช้จ่ายสำหรับการคืนเงินส่วนต่างจากการยกเลิกคำสั่งซื้อ #' . $order->order_number);
+        try {
+            Expense::create([
+                'amount' => $refundAmount,
+                'expense_category_id' => 3, // ต้องกำหนด category_id สำหรับการคืนเงิน
+                'name' => 'คืนเงินส่วนต่างจากการยกเลิกคำสั่งซื้อ #' . $order->order_number,
+                'description' => 'คืนเงินส่วนต่างจากการยกเลิกคำสั่งซื้อ #' . $order->order_number,
+                'date' => now(),
+                'user_id' => Auth::user()->id
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Error recording expense: ' . $e->getMessage());
+            throw $e;
         }
-
-        Expense::create([
-            'amount' => $expenseAmount,
-            'category_id' => 1, // ต้องกำหนด category_id สำหรับการคืนเงิน
-            'description' => 'คืนเงินส่วนต่างจากการยกเลิกคำสั่งซื้อ #' . $order->order_number,
-            'date' => now(),
-            'user_id' => Auth::user()->id
-        ]);
     }
 }
