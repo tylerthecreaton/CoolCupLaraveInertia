@@ -42,6 +42,11 @@ class OrderCancellationService
                 $restoredItems = $this->restoreStockItems($order);
 
                 $this->updateProductIngredientUsages($restoredItems['restored_ingredients']);
+
+                $cancellation->update([
+                    'restored_ingredients' => $restoredItems['restored_ingredients'],
+                    'expense_amount' => $data['refunded_amount']
+                ]);
             }
 
             Log::info("คืนคะแนนให้กับลูกค้าในคำสั่งซื้อนี้ {$order->id}");
