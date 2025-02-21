@@ -42,6 +42,8 @@ class OrderCancellationService
                 $cancellation->update($restoredItems);
             }
 
+            Log::info("คืนคะแนนให้กับลูกค้าในคำสั่งซื้อนี้ {$order->id}");
+
             // 5. จัดการคะแนนสะสม (ถ้ามี)
             if ($order->customer_id && $order->received_points > 0) {
                 Log::info("Refunding points for order {$order->id}");
@@ -113,31 +115,44 @@ class OrderCancellationService
 
     private function refundPoints(Order $order)
     {
+        Log::debug(__METHOD__ . ': Start');
+
         // Load point usages relationship if not loaded
         if (!$order->relationLoaded('pointUsages')) {
+            Log::debug(__METHOD__ . ': Load pointUsages relationship');
             $order->load('pointUsages');
         }
 
         // คำนวณคะแนนที่ต้องคืน
         $pointsToRefund = 0;
 
+        Log::debug(__METHOD__ . ': Calculate points to refund');
+
         // ตรวจสอบว่ามี pointUsages หรือไม่
         if ($order->pointUsages) {
+            Log::debug(__METHOD__ . ': Point usages found');
+
             foreach ($order->pointUsages as $usage) {
-                if ($usage->type === 'earn') {
+                if ($usage->type === 'plus') {
+                    Log::debug(__METHOD__ . ': Found plus point usage');
                     $pointsToRefund += $usage->point_amount;
                 }
             }
         }
 
         if ($pointsToRefund <= 0) {
+            Log::debug(__METHOD__ . ': Points to refund is 0, return');
             return;
         }
 
         $customer = $order->customer;
 
+        Log::debug(__METHOD__ . ': Decrement customer points');
+
         // หักคะแนนที่ได้รับจากการซื้อ
         $customer->decrement('loyalty_points', $pointsToRefund);
+
+        Log::debug(__METHOD__ . ': Create point usage');
 
         // สร้างประวัติการคืนคะแนน
         PointUsage::create([
@@ -146,8 +161,10 @@ class OrderCancellationService
             'user_id' => Auth::user()->id,
             'point_amount' => $pointsToRefund,
             'point_discount_amount' => 0,
-            'type' => 'cancellation'
+            'type' => 'minus'
         ]);
+
+        Log::debug(__METHOD__ . ': End');
     }
 
     private function createExpenseRecord(Order $order, float $refundAmount)
