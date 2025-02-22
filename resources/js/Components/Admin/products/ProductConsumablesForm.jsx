@@ -180,24 +180,33 @@ export default function ProductConsumablesForm({
     };
 
     return (
-        <Card className="max-w-4xl mx-auto">
-            <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    จัดการวัตถุดิบสิ้นเปลืองสำหรับ {product?.name}
-                </h2>
+        <Card className="max-w-5xl mx-auto p-6">
+            <div className="space-y-8">
+                <div className="border-b border-gray-200 dark:border-gray-700 pb-5">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <span className="bg-purple-100 dark:bg-purple-900 p-2.5 rounded-lg">
+                            📦
+                        </span>
+                        จัดการวัตถุดิบสิ้นเปลืองสำหรับ{" "}
+                        <span className="text-purple-600 dark:text-purple-400">
+                            {product?.name}
+                        </span>
+                    </h2>
+                </div>
 
-                <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-800">
-                    <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-3 mb-6">
+                        <HiPlus className="h-6 w-6 text-purple-500" />
                         เพิ่มวัตถุดิบสิ้นเปลืองใหม่
                     </h3>
-                    <form className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <form className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="col-span-2">
-                                <div className="block mb-2">
+                                <div className="mb-2.5">
                                     <Label
                                         htmlFor="consumable_id"
                                         value="เลือกวัตถุดิบสิ้นเปลือง"
-                                        className="text-gray-700 dark:text-gray-300"
+                                        className="text-sm font-medium text-gray-700 dark:text-gray-300"
                                     />
                                 </div>
                                 <Select
@@ -206,7 +215,7 @@ export default function ProductConsumablesForm({
                                     value={data.consumable_id}
                                     onChange={(e) => setData('consumable_id', e.target.value)}
                                     required
-                                    className="w-full"
+                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500"
                                 >
                                     <option value="">เลือกวัตถุดิบสิ้นเปลือง</option>
                                     {consumables.map((consumable) => (
@@ -216,21 +225,22 @@ export default function ProductConsumablesForm({
                                             disabled={localConsumables.some(
                                                 (item) => item.consumable_id === consumable.id
                                             )}
+                                            className="py-2"
                                         >
                                             {consumable.name} {consumable.unit ? `(${consumable.unit.name})` : ''}
                                         </option>
                                     ))}
                                 </Select>
                             </div>
-                            <div>
-                                <div className="block mb-2">
-                                    <Label
-                                        htmlFor="quantity_used"
-                                        value="ปริมาณ"
-                                        className="text-gray-700 dark:text-gray-300"
-                                    />
-                                </div>
-                                <div className="flex items-center gap-2">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div className="mb-2.5">
+                                        <Label
+                                            htmlFor="quantity_used"
+                                            value="ปริมาณ"
+                                            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                                        />
+                                    </div>
                                     <TextInput
                                         id="quantity_used"
                                         name="quantity_used"
@@ -240,24 +250,24 @@ export default function ProductConsumablesForm({
                                         value={data.quantity_used}
                                         onChange={(e) => setData('quantity_used', e.target.value)}
                                         required
+                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500"
                                     />
                                 </div>
-                            </div>
-                            <div>
-                                <div className="block mb-2">
-                                    <Label
-                                        htmlFor="size"
-                                        value="ขนาด"
-                                        className="text-gray-700 dark:text-gray-300"
-                                    />
-                                </div>
-                                <div className="flex items-center gap-2">
+                                <div>
+                                    <div className="mb-2.5">
+                                        <Label
+                                            htmlFor="size"
+                                            value="ขนาด"
+                                            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                                        />
+                                    </div>
                                     <Select
                                         id="size"
                                         name="size"
                                         value={data.size}
                                         onChange={(e) => setData('size', e.target.value)}
                                         required
+                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500"
                                     >
                                         <option value="s">S</option>
                                         <option value="m">M</option>
@@ -266,93 +276,101 @@ export default function ProductConsumablesForm({
                                 </div>
                             </div>
                         </div>
-                        <Button
-                            onClick={handleAddConsumable}
-                            disabled={!data.consumable_id || !data.quantity_used}
-                            color="primary"
-                            type="button"
-                        >
-                            <HiPlus className="h-4 w-4 mr-2" />
-                            เพิ่มวัตถุดิบสิ้นเปลือง
-                        </Button>
+                        <div className="flex justify-end mt-6">
+                            <Button
+                                onClick={handleAddConsumable}
+                                disabled={!data.consumable_id || !data.quantity_used}
+                                color="primary"
+                                type="button"
+                                className="px-6 py-2.5 text-sm font-medium transition-transform hover:scale-105 active:scale-95 disabled:hover:scale-100"
+                            >
+                                <HiPlus className="h-5 w-5 mr-2" />
+                                เพิ่มวัตถุดิบสิ้นเปลือง
+                            </Button>
+                        </div>
                     </form>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                     <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-3">
+                            <span className="bg-green-100 dark:bg-green-900 p-2.5 rounded-lg">
+                                📋
+                            </span>
                             วัตถุดิบสิ้นเปลืองที่ใช้ในสูตร
                         </h3>
                         {localConsumables.length > 0 && (
                             <Button
                                 onClick={handleSubmit}
                                 color="success"
-                                className="px-4"
+                                className="px-6 py-2.5 text-sm font-medium transition-transform hover:scale-105 active:scale-95"
                                 disabled={isSubmitting}
                             >
-                                <HiCheck className="h-4 w-4 mr-2" />
+                                <HiCheck className="h-5 w-5 mr-2" />
                                 บันทึกสูตร
                             </Button>
                         )}
                     </div>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
                         <Table hoverable>
-                            <Table.Head>
-                                <Table.HeadCell className="bg-gray-50">วัตถุดิบสิ้นเปลือง</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">ปริมาณ</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">หน่วย</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">จัดการ</Table.HeadCell>
+                            <Table.Head className="bg-gray-50 dark:bg-gray-800">
+                                <Table.HeadCell className="py-4 px-6 font-semibold">วัตถุดิบสิ้นเปลือง</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold">ปริมาณ</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold">หน่วย</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold">จัดการ</Table.HeadCell>
                             </Table.Head>
-                            <Table.Body className="divide-y">
+                            <Table.Body className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {localConsumables.map((item) => (
                                     <Table.Row
                                         key={item.id}
-                                        className="bg-white dark:border-gray-700 dark:bg-gray-800"
+                                        className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800"
                                     >
-                                        <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                        <Table.Cell className="py-4 px-6 font-medium">
                                             {item.consumable.name}
                                         </Table.Cell>
-                                        <Table.Cell>
+                                        <Table.Cell className="py-4 px-6">
                                             {editingId === item.id ? (
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-3">
                                                     <TextInput
                                                         type="number"
                                                         min="0.01"
                                                         step="0.01"
                                                         value={editQuantity}
                                                         onChange={(e) => setEditQuantity(e.target.value)}
-                                                        className="w-24"
+                                                        className="w-24 text-center rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500"
                                                     />
-                                                    <span className="text-gray-600">
+                                                    <span className="text-gray-600 dark:text-gray-400">
                                                         {item.consumable.unit?.name || ''}
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <span className="font-medium">
+                                                <span className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg inline-block min-w-[60px] text-center">
                                                     {item.quantity_used}
                                                 </span>
                                             )}
                                         </Table.Cell>
-                                        <Table.Cell>
-                                            {item.consumable.unit?.name || '-'}
+                                        <Table.Cell className="py-4 px-6">
+                                            <span className="text-gray-600 dark:text-gray-400">
+                                                {item.consumable.unit?.name || '-'}
+                                            </span>
                                         </Table.Cell>
-                                        <Table.Cell>
+                                        <Table.Cell className="py-4 px-6">
                                             <div className="flex gap-2">
                                                 {editingId === item.id ? (
                                                     <>
                                                         <Button
                                                             color="success"
-                                                            size="sm"
+                                                            size="xs"
                                                             onClick={() => handleUpdate(item)}
-                                                            className="px-2"
+                                                            className="transition-transform hover:scale-110 active:scale-95"
                                                         >
                                                             <HiCheck className="h-4 w-4" />
                                                         </Button>
                                                         <Button
                                                             color="gray"
-                                                            size="sm"
+                                                            size="xs"
                                                             onClick={cancelEditing}
-                                                            className="px-2"
+                                                            className="transition-transform hover:scale-110 active:scale-95"
                                                         >
                                                             <HiX className="h-4 w-4" />
                                                         </Button>
@@ -361,17 +379,17 @@ export default function ProductConsumablesForm({
                                                     <>
                                                         <Button
                                                             color="info"
-                                                            size="sm"
+                                                            size="xs"
                                                             onClick={() => startEditing(item)}
-                                                            className="px-2"
+                                                            className="transition-transform hover:scale-110 active:scale-95"
                                                         >
                                                             <HiPencil className="h-4 w-4" />
                                                         </Button>
                                                         <Button
                                                             color="failure"
-                                                            size="sm"
+                                                            size="xs"
                                                             onClick={() => handleDelete(item)}
-                                                            className="px-2"
+                                                            className="transition-transform hover:scale-110 active:scale-95"
                                                         >
                                                             <HiTrash className="h-4 w-4" />
                                                         </Button>
@@ -381,6 +399,13 @@ export default function ProductConsumablesForm({
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}
+                                {localConsumables.length === 0 && (
+                                    <Table.Row>
+                                        <Table.Cell colSpan={4} className="text-center py-8 text-gray-500">
+                                            ยังไม่มีวัตถุดิบสิ้นเปลืองในสูตรนี้
+                                        </Table.Cell>
+                                    </Table.Row>
+                                )}
                             </Table.Body>
                         </Table>
                     </div>

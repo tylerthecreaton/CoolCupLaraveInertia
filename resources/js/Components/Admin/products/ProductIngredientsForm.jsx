@@ -198,32 +198,41 @@ export default function ProductIngredientsForm({
     };
 
     return (
-        <Card className="max-w-4xl mx-auto">
-            <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    จัดการวัตถุดิบสำหรับ {product?.name}
-                </h2>
+        <Card className="max-w-5xl mx-auto p-6">
+            <div className="space-y-8">
+                <div className="border-b border-gray-200 dark:border-gray-700 pb-5">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                        <span className="bg-blue-100 dark:bg-blue-900 p-2.5 rounded-lg">
+                            🥤
+                        </span>
+                        จัดการวัตถุดิบสำหรับ{" "}
+                        <span className="text-blue-600 dark:text-blue-400">
+                            {product?.name}
+                        </span>
+                    </h2>
+                </div>
 
-                <div className="p-4 bg-gray-50 rounded-lg dark:bg-gray-800">
-                    <h3 className="mb-4 text-lg font-medium text-gray-900 dark:text-white">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-3 mb-6">
+                        <HiPlus className="h-6 w-6 text-blue-500" />
                         เพิ่มวัตถุดิบใหม่
                     </h3>
-                    <form className="space-y-4">
-                        <div className="grid gap-4 mb-4 sm:grid-cols-5">
+                    <form className="space-y-6">
+                        <div className="grid gap-6 sm:grid-cols-5">
                             <div className="sm:col-span-2">
-                                <Label htmlFor="ingredient_id" value="วัตถุดิบ" />
+                                <Label htmlFor="ingredient_id" value="วัตถุดิบ" className="text-sm font-medium mb-2.5 block" />
                                 <Select
                                     id="ingredient_id"
                                     value={data.ingredient_id}
-                                    onChange={(e) =>
-                                        setData("ingredient_id", e.target.value)
-                                    }
+                                    onChange={(e) => setData("ingredient_id", e.target.value)}
+                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
                                 >
                                     <option value="">เลือกวัตถุดิบ</option>
                                     {ingredients.map((ingredient) => (
                                         <option
                                             key={ingredient.id}
                                             value={ingredient.id}
+                                            className="py-2"
                                         >
                                             {ingredient.name}
                                         </option>
@@ -231,184 +240,178 @@ export default function ProductIngredientsForm({
                                 </Select>
                             </div>
                             <div>
-                                <Label htmlFor="quantity_size_s" value="ปริมาณ (ไซส์ S)" />
+                                <Label htmlFor="quantity_size_s" value="ปริมาณ (ไซส์ S)" className="text-sm font-medium mb-2.5 block" />
                                 <TextInput
                                     id="quantity_size_s"
                                     type="number"
                                     step="0.01"
                                     min="0"
                                     value={data.quantity_size_s}
-                                    onChange={(e) =>
-                                        setData("quantity_size_s", e.target.value)
-                                    }
+                                    onChange={(e) => setData("quantity_size_s", e.target.value)}
+                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="quantity_size_m" value="ปริมาณ (ไซส์ M)" />
+                                <Label htmlFor="quantity_size_m" value="ปริมาณ (ไซส์ M)" className="text-sm font-medium mb-2.5 block" />
                                 <TextInput
                                     id="quantity_size_m"
                                     type="number"
                                     step="0.01"
                                     min="0"
                                     value={data.quantity_size_m}
-                                    onChange={(e) =>
-                                        setData("quantity_size_m", e.target.value)
-                                    }
+                                    onChange={(e) => setData("quantity_size_m", e.target.value)}
+                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
                             <div>
-                                <Label htmlFor="quantity_size_l" value="ปริมาณ (ไซส์ L)" />
+                                <Label htmlFor="quantity_size_l" value="ปริมาณ (ไซส์ L)" className="text-sm font-medium mb-2.5 block" />
                                 <TextInput
                                     id="quantity_size_l"
                                     type="number"
                                     step="0.01"
                                     min="0"
                                     value={data.quantity_size_l}
-                                    onChange={(e) =>
-                                        setData("quantity_size_l", e.target.value)
-                                    }
+                                    onChange={(e) => setData("quantity_size_l", e.target.value)}
+                                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
                                 />
                             </div>
                         </div>
-                        <Button
-                            onClick={handleAddIngredient}
-                            disabled={!data.ingredient_id || !data.quantity_size_s || !data.quantity_size_m || !data.quantity_size_l}
-                            color="primary"
-                            type="button"
-                        >
-                            <HiPlus className="h-4 w-4 mr-2" />
-                            เพิ่มวัตถุดิบ
-                        </Button>
+                        <div className="flex justify-end mt-6">
+                            <Button
+                                onClick={handleAddIngredient}
+                                disabled={!data.ingredient_id || !data.quantity_size_s || !data.quantity_size_m || !data.quantity_size_l}
+                                color="primary"
+                                type="button"
+                                className="px-6 py-2.5 text-sm font-medium transition-transform hover:scale-105 active:scale-95 disabled:hover:scale-100"
+                            >
+                                <HiPlus className="h-5 w-5 mr-2" />
+                                เพิ่มวัตถุดิบ
+                            </Button>
+                        </div>
                     </form>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                     <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-3">
+                            <span className="bg-green-100 dark:bg-green-900 p-2.5 rounded-lg">
+                                📋
+                            </span>
                             วัตถุดิบที่ใช้ในสูตร
                         </h3>
                         {localIngredients.length > 0 && (
                             <Button
                                 onClick={handleSubmit}
                                 color="success"
-                                className="px-4"
+                                className="px-6 py-2.5 text-sm font-medium transition-transform hover:scale-105 active:scale-95"
                                 disabled={isSubmitting}
                             >
-                                <HiCheck className="h-4 w-4 mr-2" />
+                                <HiCheck className="h-5 w-5 mr-2" />
                                 บันทึกสูตร
                             </Button>
                         )}
                     </div>
-                    <div className="overflow-x-auto">
-                        <Table>
-                            <Table.Head>
-                                <Table.HeadCell>วัตถุดิบ</Table.HeadCell>
-                                <Table.HeadCell>ปริมาณ (ไซส์ S)</Table.HeadCell>
-                                <Table.HeadCell>ปริมาณ (ไซส์ M)</Table.HeadCell>
-                                <Table.HeadCell>ปริมาณ (ไซส์ L)</Table.HeadCell>
-                                <Table.HeadCell>จัดการ</Table.HeadCell>
+                    <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+                        <Table hoverable>
+                            <Table.Head className="bg-gray-50 dark:bg-gray-800">
+                                <Table.HeadCell className="py-4 px-6 font-semibold">วัตถุดิบ</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold">ปริมาณ (ไซส์ S)</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold">ปริมาณ (ไซส์ M)</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold">ปริมาณ (ไซส์ L)</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold">จัดการ</Table.HeadCell>
                             </Table.Head>
-                            <Table.Body>
+                            <Table.Body className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {localIngredients.map((item) => (
-                                    <Table.Row key={item.id}>
-                                        <Table.Cell>
+                                    <Table.Row 
+                                        key={item.id}
+                                        className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                    >
+                                        <Table.Cell className="py-4 px-6 font-medium">
                                             {item.ingredient.name}
                                         </Table.Cell>
-                                        <Table.Cell>
+                                        <Table.Cell className="py-4 px-6">
                                             {editingId === item.id ? (
                                                 <TextInput
                                                     type="number"
                                                     step="0.01"
                                                     min="0"
                                                     value={editQuantityS}
-                                                    onChange={(e) =>
-                                                        setEditQuantityS(e.target.value)
-                                                    }
+                                                    onChange={(e) => setEditQuantityS(e.target.value)}
+                                                    className="w-24 text-center rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
                                                 />
                                             ) : (
-                                                item.quantity_size_s
+                                                <span className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg inline-block min-w-[60px] text-center">
+                                                    {item.quantity_size_s}
+                                                </span>
                                             )}
                                         </Table.Cell>
-                                        <Table.Cell>
+                                        <Table.Cell className="py-4 px-6">
                                             {editingId === item.id ? (
                                                 <TextInput
                                                     type="number"
                                                     step="0.01"
                                                     min="0"
                                                     value={editQuantityM}
-                                                    onChange={(e) =>
-                                                        setEditQuantityM(e.target.value)
-                                                    }
+                                                    onChange={(e) => setEditQuantityM(e.target.value)}
+                                                    className="w-24 text-center rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
                                                 />
                                             ) : (
-                                                item.quantity_size_m
+                                                <span className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg inline-block min-w-[60px] text-center">
+                                                    {item.quantity_size_m}
+                                                </span>
                                             )}
                                         </Table.Cell>
-                                        <Table.Cell>
+                                        <Table.Cell className="py-4 px-6">
                                             {editingId === item.id ? (
                                                 <TextInput
                                                     type="number"
                                                     step="0.01"
                                                     min="0"
                                                     value={editQuantityL}
-                                                    onChange={(e) =>
-                                                        setEditQuantityL(e.target.value)
-                                                    }
+                                                    onChange={(e) => setEditQuantityL(e.target.value)}
+                                                    className="w-24 text-center rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
                                                 />
                                             ) : (
-                                                item.quantity_size_l
+                                                <span className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg inline-block min-w-[60px] text-center">
+                                                    {item.quantity_size_l}
+                                                </span>
                                             )}
                                         </Table.Cell>
-                                        <Table.Cell>
+                                        <Table.Cell className="py-4 px-6">
                                             {editingId === item.id ? (
-                                                <div className="flex space-x-2">
+                                                <div className="flex gap-2">
                                                     <Button
                                                         size="xs"
-                                                        onClick={() => {
-                                                            const updatedIngredients = localIngredients.map(
-                                                                (ing) =>
-                                                                    ing.id === item.id
-                                                                        ? {
-                                                                              ...ing,
-                                                                              quantity_size_s: parseFloat(editQuantityS),
-                                                                              quantity_size_m: parseFloat(editQuantityM),
-                                                                              quantity_size_l: parseFloat(editQuantityL),
-                                                                          }
-                                                                        : ing
-                                                            );
-                                                            setLocalIngredients(updatedIngredients);
-                                                            setEditingId(null);
-                                                        }}
+                                                        color="success"
+                                                        onClick={() => handleUpdate(item)}
+                                                        className="transition-transform hover:scale-110 active:scale-95"
                                                     >
                                                         <HiCheck className="h-4 w-4" />
                                                     </Button>
                                                     <Button
                                                         size="xs"
-                                                        color="failure"
-                                                        onClick={() => setEditingId(null)}
+                                                        color="gray"
+                                                        onClick={cancelEditing}
+                                                        className="transition-transform hover:scale-110 active:scale-95"
                                                     >
                                                         <HiX className="h-4 w-4" />
                                                     </Button>
                                                 </div>
                                             ) : (
-                                                <div className="flex space-x-2">
+                                                <div className="flex gap-2">
                                                     <Button
                                                         size="xs"
-                                                        onClick={() => {
-                                                            setEditingId(item.id);
-                                                            setEditQuantityS(item.quantity_size_s.toString());
-                                                            setEditQuantityM(item.quantity_size_m.toString());
-                                                            setEditQuantityL(item.quantity_size_l.toString());
-                                                        }}
+                                                        color="info"
+                                                        onClick={() => startEditing(item)}
+                                                        className="transition-transform hover:scale-110 active:scale-95"
                                                     >
                                                         <HiPencil className="h-4 w-4" />
                                                     </Button>
                                                     <Button
                                                         size="xs"
                                                         color="failure"
-                                                        onClick={() =>
-                                                            handleDelete(item)
-                                                        }
+                                                        onClick={() => handleDelete(item)}
+                                                        className="transition-transform hover:scale-110 active:scale-95"
                                                     >
                                                         <HiTrash className="h-4 w-4" />
                                                     </Button>
@@ -419,7 +422,7 @@ export default function ProductIngredientsForm({
                                 ))}
                                 {localIngredients.length === 0 && (
                                     <Table.Row>
-                                        <Table.Cell colSpan={5} className="text-center py-4 text-gray-500">
+                                        <Table.Cell colSpan={5} className="text-center py-8 text-gray-500">
                                             ยังไม่มีวัตถุดิบในสูตรนี้
                                         </Table.Cell>
                                     </Table.Row>
