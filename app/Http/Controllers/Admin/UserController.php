@@ -36,7 +36,8 @@ class UserController extends Controller
             'role' => 'required|in:admin,manager,employee',
             "email" => "required|email|unique:users",
             'username' => 'required|min:3|unique:users',
-            "password" => "required|confirmed",
+            "password" => "required|confirmed|min:8",
+            'password_confirmation' => 'required|min:8',
         ];
         $message = [
             "name.required" => "กรุณากรอกชื่อ",
@@ -49,7 +50,10 @@ class UserController extends Controller
             "username.min" => "ชื่อผู้ใช้ต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
             "username.unique" => "ชื่อผู้ใช้นี้ถูกใช้ไปแล้ว",
             'password.required' => 'กรุณากรอกรหัสผ่าน',
+            'password.min' => 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร',
             'password.confirmed' => 'รหัสผ่านไม่ตรงกัน',
+            'password_confirmation.required' => 'กรุณายืนยันรหัสผ่าน',
+            'password_confirmation.min' => 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร',
         ];
         $request->validate($rules, $message);
 

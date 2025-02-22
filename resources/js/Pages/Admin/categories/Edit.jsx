@@ -5,7 +5,7 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function EditCategory({ category }) {
+export default function EditCategory({ category, errors }) {
     return (
         <AuthenticatedLayout
             header={
@@ -24,7 +24,7 @@ export default function EditCategory({ category }) {
                     <Breadcrumb.Item>แก้ไขหมวดหมู่</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
-            <CategoriesForm category={category} isEditing={true} />
+            <CategoriesForm category={category} isEditing={true} errors={errors} />
         </AuthenticatedLayout>
     );
 }

@@ -42,7 +42,7 @@ export default function ExpenseForm({ expense = null, expenseCategories }) {
                     required
                 />
                 {errors.name && (
-                    <div className="text-red-500">{errors.name}</div>
+                    <div className="text-red-500 p-2">{errors.name}</div>
                 )}
             </div>
 
@@ -65,7 +65,7 @@ export default function ExpenseForm({ expense = null, expenseCategories }) {
                     ))}
                 </Select>
                 {errors.expense_category_id && (
-                    <div className="text-red-500">
+                    <div className="text-red-500 ">
                         {errors.expense_category_id}
                     </div>
                 )}
@@ -115,7 +115,7 @@ export default function ExpenseForm({ expense = null, expenseCategories }) {
                 )}
             </div>
 
-            <Button type="submit" disabled={processing}>
+            <Button type="submit"  disabled={processing}>
                 {expense ? "อัปเดตค่าใช้จ่าย" : "สร้างค่าใช้จ่าย"}
             </Button>
         </form>

@@ -30,6 +30,20 @@ class ExpenseController extends Controller
     public function store(Request $request)
     {
         // Validation logic here
+        $rules = [
+            "name" => "required|min:3",
+            "expense_category_id" => "required",
+            "amount" => "required|numeric",
+            "date" => "required",
+        ];
+        $message = [
+            "name.required" => "กรุณากรอกชื่อ",
+            "name.min" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
+            "expense_category_id.required" => "กรุณาเลือกหมวดหมู่รายจ่าย",
+            "amount.required" => "กรุณากรอกจำนวนเงิน",
+            "amount.numeric" => "จำนวนเงินต้องเป็นตัวเลข",
+        ];
+        $request->validate($rules, $message);
         $expense = Expense::create(array_merge($request->all(), ['user_id' => Auth::user()->id]));
         return redirect()->route('admin.expenses.index')->with('success', 'Expense created successfully.');
     }

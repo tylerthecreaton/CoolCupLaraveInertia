@@ -22,8 +22,18 @@ class ExpenseCategoryController extends Controller
 
     public function store(Request $request)
     {
+        $rules = [
+            "name" => "required|min:3",
+        ];
+        $message = [
+            "name.required" => "กรุณากรอกชื่อ",
+            "name.min" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
+        ];
+        $request->validate($rules, $message);
+
         ExpenseCategory::create($request->all());
         return redirect()->route('admin.expense-categories.index')->with('success', 'Expense category created successfully.');
+
     }
 
     public function edit($id)
@@ -34,6 +44,14 @@ class ExpenseCategoryController extends Controller
 
     public function update(Request $request, $id)
     {
+        $rules = [
+            "name" => "required|min:3",
+        ];
+        $message = [
+            "name.required" => "กรุณากรอกชื่อ",
+            "name.min" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
+        ];
+        $request->validate($rules, $message);
         $category = ExpenseCategory::findOrFail($id);
         $category->update($request->all());
         return redirect()->route('admin.expense-categories.index')->with('success', 'Expense category updated successfully.');

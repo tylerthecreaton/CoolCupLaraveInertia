@@ -74,7 +74,7 @@ class CategoriesController extends Controller
     public function update(Request $request, string $id)
     {
         $rules = [
-            'name' => 'required|min:3|max:255|unique:categories,name,' . $id,
+            'name' => 'required|max:255|unique:categories,name,' . $id,
 
             'description' => 'required',
         ];

@@ -6,7 +6,7 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function CreateUser() {
+export default function CreateUser({errors}) {
     return (
         <AuthenticatedLayout
             header={
@@ -27,7 +27,7 @@ export default function CreateUser() {
                     <Breadcrumb.Item>เพิ่มผู้ใช้งาน</Breadcrumb.Item>
                 </Breadcrumb>
 
-                <UserForm />
+                <UserForm errors={errors}/>
             </AdminLayout>
         </AuthenticatedLayout>
     );

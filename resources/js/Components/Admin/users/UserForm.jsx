@@ -1,8 +1,8 @@
 import { useForm } from "@inertiajs/react";
 import { Button, FileInput, Label, TextInput } from "flowbite-react";
 
-export default function UserForm({ isEditing = false, user = null }) {
-    const { data, setData, post, put, processing, errors } = useForm({
+export default function UserForm({ isEditing = false, user = null, errors = {} }) {
+    const { data, setData, post, put, processing } = useForm({
         name: isEditing ? user.name : "",
         email: isEditing ? user.email : "",
         username: isEditing ? user.username : "",
@@ -40,7 +40,9 @@ export default function UserForm({ isEditing = false, user = null }) {
                     </div>
                     <select
                         id="role"
-                        className="block px-4 py-2 w-full text-gray-700 bg-white rounded-md border border-gray-300 shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        className={`block px-4 py-2 w-full text-gray-700 bg-white rounded-md border shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 ${
+                            errors?.role ? "border-red-500" : "border-gray-300"
+                        }`}
                         required
                         value={data.role}
                         onChange={(e) => setData("role", e.target.value)}
@@ -49,6 +51,11 @@ export default function UserForm({ isEditing = false, user = null }) {
                         <option value="manager">ผู้จัดการ</option>
                         <option value="employee">พนักงาน</option>
                     </select>
+                    {errors?.role && (
+                        <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                            {errors.role}
+                        </p>
+                    )}
                 </div>
                 <div>
                     <div className="block mb-2">
@@ -61,6 +68,8 @@ export default function UserForm({ isEditing = false, user = null }) {
                         required
                         value={data.name}
                         onChange={(e) => setData("name", e.target.value)}
+                        color={errors?.name ? "failure" : "gray"}
+                        helperText={errors?.name}
                     />
                 </div>
                 <div>
@@ -72,9 +81,10 @@ export default function UserForm({ isEditing = false, user = null }) {
                     </div>
                     <FileInput
                         id="file-upload-helper-text"
-                        helperText="SVG, PNG, JPG or GIF (MAX. 800x400px)."
+                        helperText={errors?.image ? errors.image : "SVG, PNG, JPG or GIF (MAX. 800x400px)."}
                         accept="image/*"
                         onChange={handleFileChange}
+                        color={errors?.image ? "failure" : "gray"}
                     />
                 </div>
                 <div>
@@ -88,6 +98,8 @@ export default function UserForm({ isEditing = false, user = null }) {
                         required
                         value={data.email}
                         onChange={(e) => setData("email", e.target.value)}
+                        color={errors?.email ? "failure" : "gray"}
+                        helperText={errors?.email}
                     />
                 </div>
                 <div>
@@ -101,6 +113,8 @@ export default function UserForm({ isEditing = false, user = null }) {
                         required
                         value={data.username}
                         onChange={(e) => setData("username", e.target.value)}
+                        color={errors?.username ? "failure" : "gray"}
+                        helperText={errors?.username}
                     />
                 </div>
                 {isEditing && (
@@ -112,15 +126,17 @@ export default function UserForm({ isEditing = false, user = null }) {
                 )}
                 <div>
                     <div className="block mb-2">
-                        <Label htmlFor="password1" value="รหัสผ่าน" />
+                        <Label htmlFor="password" value="รหัสผ่าน" />
                     </div>
                     <TextInput
-                        id="password1"
+                        id="password"
                         type="password"
-                        placeholder="กรุณากรอกรหัสผ่าน"
-                        required={isEditing ? false : true}
+                        placeholder="••••••••"
+                        required={!isEditing}
                         value={data.password}
                         onChange={(e) => setData("password", e.target.value)}
+                        color={errors?.password ? "failure" : "gray"}
+                        helperText={errors?.password}
                     />
                 </div>
                 <div>
@@ -133,12 +149,14 @@ export default function UserForm({ isEditing = false, user = null }) {
                     <TextInput
                         id="password_confirmation"
                         type="password"
-                        placeholder="กรุณายืนยันรหัสผ่าน"
-                        required={isEditing ? false : true}
+                        placeholder="••••••••"
+                        required={!isEditing}
                         value={data.password_confirmation}
                         onChange={(e) =>
                             setData("password_confirmation", e.target.value)
                         }
+                        color={errors?.password_confirmation ? "failure" : "gray"}
+                        helperText={errors?.password_confirmation}
                     />
                 </div>
                 <Button type="submit">บันทึก</Button>

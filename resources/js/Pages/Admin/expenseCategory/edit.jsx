@@ -4,7 +4,7 @@ import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 import ExpenseCategoryForm from "./ExpenseCategoryForm";
 
-export default function Edit({ auth, category }) {
+export default function Edit({ auth, category, errors }) {
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="Edit Expense Category" />
@@ -16,23 +16,23 @@ export default function Edit({ auth, category }) {
                                 href={route("dashboard")}
                                 icon={HiHome}
                             >
-                                Dashboard
+                                หน้าแรก
                             </Breadcrumb.Item>
                             <Breadcrumb.Item
                                 href={route("admin.expense-categories.index")}
                             >
-                                Expense Categories
+                                หมวดหมู่รายจ่ายทั้งหมด
                             </Breadcrumb.Item>
-                            <Breadcrumb.Item>Edit</Breadcrumb.Item>
+                            <Breadcrumb.Item>แก้ไข</Breadcrumb.Item>
                         </Breadcrumb>
                     </div>
                     <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                        Edit Expense Category: {category.name}
+                        แก้ไขหมวดหมู่รายจ่าย {category.name}
                     </h1>
                 </div>
             </div>
             <div className="p-4">
-                <ExpenseCategoryForm category={category} />
+                <ExpenseCategoryForm category={category} errors={errors}/>
             </div>
         </AuthenticatedLayout>
     );

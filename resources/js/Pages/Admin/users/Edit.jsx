@@ -5,7 +5,7 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function EditUser({ user }) {
+export default function EditUser({ user, errors }) {
     return (
         <AuthenticatedLayout
             header={
@@ -24,7 +24,7 @@ export default function EditUser({ user }) {
                     <Breadcrumb.Item>แก้ไขผู้ใช้งาน</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
-            <UserForm user={user} isEditing={true} />
+            <UserForm user={user} isEditing={true} errors={errors} />
         </AuthenticatedLayout>
     );
 }

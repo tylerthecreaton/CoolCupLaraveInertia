@@ -42,6 +42,8 @@ export default function CategoriesForm({ category, isEditing = false }) {
                         required
                         value={data.name}
                         onChange={(e) => setData("name", e.target.value)}
+                        color={errors?.name ? "failure" : "gray"}
+                        helperText={errors?.name}
                     />
                 </div>
                 {category?.image && (
@@ -61,9 +63,11 @@ export default function CategoriesForm({ category, isEditing = false }) {
                     </div>
                     <FileInput
                         id="image"
-                        helperText="SVG, PNG, JPG or GIF (MAX. 800x400px)."
+                        helperText={errors?.image ? errors.image : "SVG, PNG, JPG or GIF (MAX. 800x400px)."}
                         accept="image/*"
                         onChange={handleFileChange}
+                        color={errors?.image ? "failure" : "gray"}
+
                     />
                 </div>
                 <div>
@@ -80,6 +84,8 @@ export default function CategoriesForm({ category, isEditing = false }) {
                         required
                         value={data.description}
                         onChange={(e) => setData("description", e.target.value)}
+                        color={errors?.description ? "failure" : "gray"}
+                        helperText={errors?.description}
                     />
                 </div>
                 <Button type="submit">บันทึก</Button>

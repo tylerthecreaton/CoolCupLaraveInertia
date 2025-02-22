@@ -39,7 +39,6 @@ class ProductsController extends Controller
             'name' => 'required|min:3',
             'image' => 'required',
             'category_id' => 'required',
-            'description' => 'required',
             'cost_price' => 'required|numeric',
             'sale_price' => 'required|numeric',
         ];
@@ -47,7 +46,6 @@ class ProductsController extends Controller
             'name.required' => 'กรุณากรอกชื่อสินค้า',
             'name.min' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :min ตัวอักษร',
             'category_id.required' => 'กรุณาเลือกหมวดหมู่สินค้า',
-            'description.required' => 'กรุณากรอกรายละเอียดสินค้า',
             'cost_price.required' => 'กรุณากรอกราคาต้นทุนสินค้า',
             'cost_price.numeric' => 'กรุณากรอกราคาต้นทุนสินค้าเป็นตัวเลข',
             'sale_price.required' => 'กรุณากรอกราคาขายสินค้า',
@@ -56,7 +54,7 @@ class ProductsController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            $rules['image'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:2048';
+            $rules['image'] = 'image|mimes:jpeg,png,jpg,svg|max:2048';
             $message['image.image'] = 'กรุณาอัปโหลดรูปภาพสินค้าให้ถูกต้อง';
             $message['image.mimes'] = 'กรุณาอัปโหลดรูปภาพสินค้าให้ถูกต้อง';
             $message['image.max'] = 'กรุณาอัปโหลดรูปภาพสินค้าให้ถูกต้อง';
@@ -113,7 +111,6 @@ class ProductsController extends Controller
         $rules = [
             'name' => 'required|min:3|max:255|unique:products,name,' . $id,
             'category_id' => 'required',
-            'description' => 'required',
             'cost_price' => 'required|numeric',
             'sale_price' => 'required|numeric',
         ];
@@ -121,7 +118,6 @@ class ProductsController extends Controller
         $message = [
             'name.required' => 'กรุณากรอกชื่อสินค้า',
             'name.unique' => 'ชื่อสินค้านี้ถูกใช้ไปแล้ว',
-            'description.required' => 'กรุณากรอกรายละเอียด',
             'category_id' => 'กรุณาเลือกหมวดหมู่',
             'cost_price' => 'กรุณากรอกราคาต้นทุน',
             'sale_price' => 'กรุณากรอกราคาขาย',

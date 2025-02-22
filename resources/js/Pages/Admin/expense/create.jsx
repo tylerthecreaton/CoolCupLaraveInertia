@@ -5,7 +5,7 @@ import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 import ExpenseForm from "./ExpenseForm";
 
-export default function Create({ expenseCategories }) {
+export default function Create({ expenseCategories, errors }) {
     return (
         <AuthenticatedLayout>
             <Head title="Create Expense" />
@@ -27,6 +27,7 @@ export default function Create({ expenseCategories }) {
                             </h1>
                             <ExpenseForm
                                 expenseCategories={expenseCategories}
+                                errors={errors}
                             />
                         </div>
                     </div>

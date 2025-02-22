@@ -5,7 +5,7 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function CreateCustomer() {
+export default function CreateCustomer({errors}) {
     return (
         <AuthenticatedLayout
             header={
@@ -24,7 +24,7 @@ export default function CreateCustomer() {
                     <Breadcrumb.Item>เพิ่มสมาชิก</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
-            <CustomersForm />
+            <CustomersForm errors={errors} />
         </AuthenticatedLayout>
     );
 }

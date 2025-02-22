@@ -1,13 +1,14 @@
 import { useForm, usePage } from "@inertiajs/react";
 import { Button, Label, TextInput, Card } from "flowbite-react";
 import Swal from "sweetalert2";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { HiPhone, HiUser, HiCalendar, HiCheck } from "react-icons/hi";
 
-export default function CustomersForm({ isEditing = false, customer = null }) {
+export default function CustomersForm({ isEditing = false, customer = null, errors = {} }) {
     const { flash } = usePage().props;
-    const { data, setData, post, put, processing, errors } = useForm({
+    const [phoneError, setPhoneError] = useState("");
+    const { data, setData, post, put, processing } = useForm({
         name: isEditing ? customer.name : "",
         phone_number: isEditing ? customer.phone_number : "",
         birthdate: isEditing ? customer.birthdate : "",
@@ -36,6 +37,35 @@ export default function CustomersForm({ isEditing = false, customer = null }) {
         }
     };
 
+    const validatePhoneNumber = (phoneNumber) => {
+        if (!phoneNumber) return false;
+        // Remove any spaces or dashes
+        const cleanPhone = phoneNumber.replace(/[\s-]/g, '');
+        
+        // Check if it's a valid Thai mobile number (10 digits starting with 06, 08, or 09)
+        const mobilePattern = /^(06|08|09)\d{8}$/;
+        
+        // Check if it's a valid Thai landline number (9 digits starting with 0)
+        const landlinePattern = /^0\d{8}$/;
+        
+        return mobilePattern.test(cleanPhone) || landlinePattern.test(cleanPhone);
+    };
+
+    const handlePhoneChange = (e) => {
+        const value = e.target.value;
+        setData("phone_number", value);
+        
+        if (!value) {
+            setPhoneError("กรุณากรอกเบอร์โทรศัพท์");
+        } else if (value.length < 9) {
+            setPhoneError("กรุณากรอกเบอร์โทรให้ครบ (เบอร์มือถือ 10 หลัก หรือเบอร์บ้าน 9 หลัก)");
+        } else if (!validatePhoneNumber(value)) {
+            setPhoneError("รูปแบบเบอร์โทรไม่ถูกต้อง (เบอร์มือถือขึ้นต้นด้วย 06, 08, 09)");
+        } else {
+            setPhoneError("");
+        }
+    };
+
     const handleCheckPhoneNumber = async () => {
         if (!data.phone_number) {
             Swal.fire({
@@ -45,11 +75,20 @@ export default function CustomersForm({ isEditing = false, customer = null }) {
             });
             return;
         }
-        
+
+        if (!validatePhoneNumber(data.phone_number)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง',
+                text: 'กรุณากรอกเบอร์มือถือ 10 หลัก (06,08,09) หรือเบอร์บ้าน 9 หลัก',
+            });
+            return;
+        }
+
         try {
-            const response = await axios.post(route("member.checkPhoneNumber"), { 
+            const response = await axios.post(route("member.checkPhoneNumber"), {
                 phone_number: data.phone_number,
-                exclude_id: isEditing ? customer.id : null 
+                exclude_id: isEditing ? customer.id : null
             });
             handlePhoneCheckResult(response.data.exists);
         } catch (error) {
@@ -73,27 +112,39 @@ export default function CustomersForm({ isEditing = false, customer = null }) {
             return;
         }
 
-        try {
-            const response = await axios.post(route("member.checkPhoneNumber"), { 
-                phone_number: data.phone_number,
-                exclude_id: isEditing ? customer.id : null 
+        if (!validatePhoneNumber(data.phone_number)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'รูปแบบเบอร์โทรศัพท์ไม่ถูกต้อง',
+                text: 'กรุณากรอกเบอร์มือถือ 10 หลัก (06,08,09) หรือเบอร์บ้าน 9 หลัก',
             });
-            
-            if (response.data.exists) {
+            return;
+        }
+
+        // Skip phone number check if editing and phone number hasn't changed
+        if (!isEditing || (isEditing && data.phone_number !== customer.phone_number)) {
+            try {
+                const response = await axios.post(route("member.checkPhoneNumber"), {
+                    phone_number: data.phone_number,
+                    exclude_id: isEditing ? customer.id : null
+                });
+
+                if (response.data.exists) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'เบอร์นี้มีผู้ใช้งานแล้ว',
+                        text: 'กรุณาใช้เบอร์อื่น',
+                    });
+                    return;
+                }
+            } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'เบอร์นี้มีผู้ใช้งานแล้ว',
-                    text: 'กรุณาใช้เบอร์อื่น',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: 'ไม่สามารถตรวจสอบเบอร์โทรศัพท์ได้',
                 });
                 return;
             }
-        } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'เกิดข้อผิดพลาด',
-                text: 'ไม่สามารถตรวจสอบเบอร์โทรศัพท์ได้',
-            });
-            return;
         }
 
         // ดำเนินการ submit form หลังจากตรวจสอบเบอร์โทรศัพท์แล้ว
@@ -142,7 +193,7 @@ export default function CustomersForm({ isEditing = false, customer = null }) {
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {isEditing ? "แก้ไขข้อมูลลูกค้า" : "เพิ่มลูกค้าใหม่"}
                 </h2>
-                
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <div className="mb-2 block">
@@ -157,7 +208,11 @@ export default function CustomersForm({ isEditing = false, customer = null }) {
                             required
                             icon={HiUser}
                             color={errors.name ? "failure" : "gray"}
-                            helperText={errors.name}
+                            helperText={errors?.name && (
+                                <>
+                                  <span className="font-medium">Oops!</span> {errors.name}
+                                </>
+                              )}
                         />
                     </div>
 
@@ -170,23 +225,28 @@ export default function CustomersForm({ isEditing = false, customer = null }) {
                                 id="phone_number"
                                 type="tel"
                                 value={data.phone_number}
-                                onChange={(e) => setData("phone_number", e.target.value)}
+                                onChange={handlePhoneChange}
                                 placeholder="กรุณากรอกเบอร์โทรศัพท์"
                                 required
                                 icon={HiPhone}
-                                color={errors.phone_number ? "failure" : "gray"}
-                                helperText={errors.phone_number}
+                                color={phoneError || errors?.phone_number ? "failure" : "gray"}
                                 className="flex-1"
                             />
+
                             <Button
                                 type="button"
                                 onClick={handleCheckPhoneNumber}
-                                disabled={!data.phone_number}
+                                disabled={!data.phone_number || phoneError}
                                 color="light"
                             >
                                 ตรวจสอบเบอร์
                             </Button>
                         </div>
+                        {(phoneError || errors?.phone_number) && (
+                            <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                                <span className="font-medium">Oops!</span> {phoneError || errors.phone_number}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -202,7 +262,11 @@ export default function CustomersForm({ isEditing = false, customer = null }) {
                             required
                             icon={HiCalendar}
                             color={errors.birthdate ? "failure" : "gray"}
-                            helperText={errors.birthdate}
+                            helperText={errors?.birthdate && (
+                                <>
+                                  <span className="font-medium">Oops!</span> {errors.birthdate}
+                                </>
+                              )}
                         />
                     </div>
 

@@ -113,10 +113,22 @@ export default function ProductsForm({
                     <FileInput
                         id="image"
                         name="image"
-                        helperText="SVG, PNG, JPG or GIF (MAX. 800x400px)."
                         accept="image/*"
                         onChange={handleFileChange}
+                        color={errors.image ? "failure" : undefined}
+                        helperText={
+                            <span>
+                                {errors.image && (
+                                    <span>
+                                        {errors.image}
+                                    </span>
+                                )}
+                            </span>
+                        }
                     />
+                    <span className="text-sm text-gray-500">
+                        อัพโหลดไฟล์รูปภาพ SVG, PNG, JPG , JPEG (MAX. 800x400px)
+                    </span>
                 </div>
                 <div>
                     <div>
@@ -130,6 +142,15 @@ export default function ProductsForm({
                         required
                         value={data.cost_price}
                         onChange={(e) => setData("cost_price", e.target.value)}
+                        helperText={
+                            <span>
+                                {errors.cost_price && (
+                                    <span>
+                                        {errors.cost_price}
+                                    </span>
+                                )}
+                            </span>
+                        }
                     />
                     <div>
                         <Label htmlFor="sale_price" value="ราคาขาย" />
@@ -142,20 +163,29 @@ export default function ProductsForm({
                         required
                         value={data.sale_price}
                         onChange={(e) => setData("sale_price", e.target.value)}
+                        helperText={
+                            <span>
+                                {errors.sale_price && (
+                                    <span>
+                                        {errors.sale_price}
+                                    </span>
+                                )}
+                            </span>
+                        }
                     />
                 </div>
                 <div>
                     <div className="block mb-2">
                         <Label
                             htmlFor="description"
-                            value="คําอธิบายหมวดหมู่"
+                            value="คําอธิบายสินค้า"
                         />
                     </div>
                     <TextInput
                         id="description"
                         name="description"
                         type="text"
-                        placeholder="กรุณากรอกคำอธิบายหมวดหมู่"
+                        placeholder="กรุณากรอกคำอธิบายสินค้า"
                         required
                         value={data.description}
                         onChange={(e) => setData("description", e.target.value)}

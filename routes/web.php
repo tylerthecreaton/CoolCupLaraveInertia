@@ -57,7 +57,7 @@ Route::put('/member/{id}', [MemberController::class, 'update'])->name('member.up
 Route::delete('/member/{id}', [MemberController::class, 'destroy'])->name('member.destroy');
 
 // ---------------------------ReceiptHistory---------------------------
-Route::middleware('auth', 'can:view dashboard')->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/promotion', [PromotionController::class, 'index'])->name('promotion.index');
     Route::get('/receipt-history', [OrderController::class, 'receiptHistory'])->name('receipt.history');

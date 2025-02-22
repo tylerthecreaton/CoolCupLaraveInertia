@@ -4,7 +4,7 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function CreateExpenseCategory() {
+export default function CreateExpenseCategory({errors}) {
     return (
         <AuthenticatedLayout
             header={
@@ -14,7 +14,7 @@ export default function CreateExpenseCategory() {
             }
         >
             <Head title="เพิ่มหมวดหมู่รายจ่าย" />
-            <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
+            <div className="container px-5 py-3 mx-auto mt-5 sm:px-8">
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
                         หน้าแรก
@@ -25,7 +25,7 @@ export default function CreateExpenseCategory() {
                     <Breadcrumb.Item>เพิ่มหมวดหมู่รายจ่าย</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
-            <ExpenseCategoryForm />
+            <ExpenseCategoryForm errors={errors}/>
         </AuthenticatedLayout>
     );
 }
