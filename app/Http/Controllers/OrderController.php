@@ -317,9 +317,10 @@ class OrderController extends Controller implements HasMiddleware
 
             // Check if this is a promotion item
             $isPromotion = is_string($item['id']) && str_starts_with($item['id'], 'promotion-');
+            $isManualDiscount = is_string($item['id']) && str_starts_with($item['id'], 'manual-discount-');
 
-            if ($isPromotion) {
-                // For promotion items, use a special product_id (0 for discounts)
+            if ($isPromotion || $isManualDiscount) {
+                // For promotion and manual discount items, use a special product_id (0 for discounts)
                 $orderDetail->product_id = 0;
                 $orderDetail->line_item_id = $item['id'];
                 $orderDetail->product_name = $item['name'];

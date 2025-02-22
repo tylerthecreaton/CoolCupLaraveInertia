@@ -597,7 +597,7 @@ const CartComponent = () => {
                                 />
                                 <Button
                                     size="sm"
-                                    color="light"
+                                    color="success"
                                     onClick={handleManualDiscount}
                                     disabled={selectedPromotion !== ""}
                                 >
