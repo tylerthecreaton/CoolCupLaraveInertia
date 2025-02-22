@@ -46,7 +46,7 @@ export default function ProductsForm({
     return (
         <div className="container px-4 py-8 mx-auto mt-5 bg-white rounded-md sm:px-8">
             <form
-                className="flex flex-col gap-4 mx-auto max-w-md"
+                className="flex flex-col gap-4 mx-auto max-w-lg"
                 onSubmit={handleSubmit}
             >
                 <div>

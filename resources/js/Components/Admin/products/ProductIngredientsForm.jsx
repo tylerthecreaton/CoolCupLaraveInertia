@@ -15,18 +15,22 @@ export default function ProductIngredientsForm({
 }) {
     const [localIngredients, setLocalIngredients] = useState(productIngredients);
     const [editingId, setEditingId] = useState(null);
-    const [editQuantity, setEditQuantity] = useState("");
+    const [editQuantityS, setEditQuantityS] = useState("");
+    const [editQuantityM, setEditQuantityM] = useState("");
+    const [editQuantityL, setEditQuantityL] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { data, setData } = useForm({
         product_id: product?.id,
         ingredient_id: "",
-        quantity_used: "",
+        quantity_size_s: 0,
+        quantity_size_m: 0,
+        quantity_size_l: 0,
     });
 
     const handleAddIngredient = (e) => {
         e.preventDefault();
-        
+
         const selectedIngredient = ingredients.find(ing => ing.id === parseInt(data.ingredient_id));
         if (!selectedIngredient) {
             MySwal.fire({
@@ -38,10 +42,11 @@ export default function ProductIngredientsForm({
             return;
         }
 
-        if (!data.quantity_used || parseFloat(data.quantity_used) <= 0) {
+        if (!data.quantity_size_s || !data.quantity_size_m || !data.quantity_size_l ||
+            parseFloat(data.quantity_size_s) < 0 || parseFloat(data.quantity_size_m) < 0 || parseFloat(data.quantity_size_l) < 0) {
             MySwal.fire({
                 title: "แจ้งเตือน",
-                text: "กรุณาระบุปริมาณที่ถูกต้อง",
+                text: "กรุณาระบุปริมาณที่ถูกต้องสำหรับทุกขนาด",
                 icon: "warning",
                 confirmButtonText: "ตกลง",
             });
@@ -61,7 +66,9 @@ export default function ProductIngredientsForm({
         const newIngredient = {
             id: `temp_${Date.now()}`,
             ingredient_id: parseInt(data.ingredient_id),
-            quantity_used: parseFloat(data.quantity_used),
+            quantity_size_s: parseFloat(data.quantity_size_s),
+            quantity_size_m: parseFloat(data.quantity_size_m),
+            quantity_size_l: parseFloat(data.quantity_size_l),
             ingredient: selectedIngredient,
             isNew: true
         };
@@ -70,7 +77,9 @@ export default function ProductIngredientsForm({
         setData({
             product_id: product?.id,
             ingredient_id: "",
-            quantity_used: "",
+            quantity_size_s: "",
+            quantity_size_m: "",
+            quantity_size_l: "",
         });
     };
 
@@ -95,7 +104,9 @@ export default function ProductIngredientsForm({
                 ingredients: localIngredients.map(item => ({
                     id: item.isNew ? null : item.id,
                     ingredient_id: item.ingredient_id,
-                    quantity_used: parseFloat(item.quantity_used)
+                    quantity_size_s: item.quantity_size_s,
+                    quantity_size_m: item.quantity_size_m,
+                    quantity_size_l: item.quantity_size_l,
                 }))
             });
 
@@ -119,10 +130,11 @@ export default function ProductIngredientsForm({
     };
 
     const handleUpdate = (productIngredient) => {
-        if (!editQuantity || parseFloat(editQuantity) <= 0) {
+        if (!editQuantityS || !editQuantityM || !editQuantityL ||
+            parseFloat(editQuantityS) < 0 || parseFloat(editQuantityM) < 0 || parseFloat(editQuantityL) < 0) {
             MySwal.fire({
                 title: "แจ้งเตือน",
-                text: "กรุณาระบุปริมาณที่ถูกต้อง",
+                text: "กรุณาระบุปริมาณที่ถูกต้องสำหรับทุกขนาด",
                 icon: "warning",
                 confirmButtonText: "ตกลง",
             });
@@ -132,12 +144,19 @@ export default function ProductIngredientsForm({
         setLocalIngredients(prev =>
             prev.map(item =>
                 item.id === productIngredient.id
-                    ? { ...item, quantity_used: parseFloat(editQuantity) }
+                    ? {
+                        ...item,
+                        quantity_size_s: parseFloat(editQuantityS),
+                        quantity_size_m: parseFloat(editQuantityM),
+                        quantity_size_l: parseFloat(editQuantityL)
+                    }
                     : item
             )
         );
         setEditingId(null);
-        setEditQuantity("");
+        setEditQuantityS("");
+        setEditQuantityM("");
+        setEditQuantityL("");
     };
 
     const handleDelete = (productIngredient) => {
@@ -166,12 +185,16 @@ export default function ProductIngredientsForm({
 
     const startEditing = (item) => {
         setEditingId(item.id);
-        setEditQuantity(item.quantity_used);
+        setEditQuantityS(item.quantity_size_s.toString());
+        setEditQuantityM(item.quantity_size_m.toString());
+        setEditQuantityL(item.quantity_size_l.toString());
     };
 
     const cancelEditing = () => {
         setEditingId(null);
-        setEditQuantity("");
+        setEditQuantityS("");
+        setEditQuantityM("");
+        setEditQuantityL("");
     };
 
     return (
@@ -186,62 +209,70 @@ export default function ProductIngredientsForm({
                         เพิ่มวัตถุดิบใหม่
                     </h3>
                     <form className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="col-span-2">
-                                <div className="block mb-2">
-                                    <Label
-                                        htmlFor="ingredient_id"
-                                        value="เลือกวัตถุดิบ"
-                                        className="text-gray-700 dark:text-gray-300"
-                                    />
-                                </div>
+                        <div className="grid gap-4 mb-4 sm:grid-cols-5">
+                            <div className="sm:col-span-2">
+                                <Label htmlFor="ingredient_id" value="วัตถุดิบ" />
                                 <Select
                                     id="ingredient_id"
-                                    name="ingredient_id"
                                     value={data.ingredient_id}
-                                    onChange={(e) => setData('ingredient_id', e.target.value)}
-                                    required
-                                    className="w-full"
+                                    onChange={(e) =>
+                                        setData("ingredient_id", e.target.value)
+                                    }
                                 >
                                     <option value="">เลือกวัตถุดิบ</option>
                                     {ingredients.map((ingredient) => (
                                         <option
                                             key={ingredient.id}
                                             value={ingredient.id}
-                                            disabled={localIngredients.some(
-                                                (item) => item.ingredient_id === ingredient.id
-                                            )}
                                         >
-                                            {ingredient.name} {ingredient.unit ? `(${ingredient.unit.name})` : ''}
+                                            {ingredient.name}
                                         </option>
                                     ))}
                                 </Select>
                             </div>
                             <div>
-                                <div className="block mb-2">
-                                    <Label
-                                        htmlFor="quantity_used"
-                                        value="ปริมาณ"
-                                        className="text-gray-700 dark:text-gray-300"
-                                    />
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <TextInput
-                                        id="quantity_used"
-                                        name="quantity_used"
-                                        type="number"
-                                        min="0.01"
-                                        step="0.01"
-                                        value={data.quantity_used}
-                                        onChange={(e) => setData('quantity_used', e.target.value)}
-                                        required
-                                    />
-                                </div>
+                                <Label htmlFor="quantity_size_s" value="ปริมาณ (ไซส์ S)" />
+                                <TextInput
+                                    id="quantity_size_s"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={data.quantity_size_s}
+                                    onChange={(e) =>
+                                        setData("quantity_size_s", e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="quantity_size_m" value="ปริมาณ (ไซส์ M)" />
+                                <TextInput
+                                    id="quantity_size_m"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={data.quantity_size_m}
+                                    onChange={(e) =>
+                                        setData("quantity_size_m", e.target.value)
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="quantity_size_l" value="ปริมาณ (ไซส์ L)" />
+                                <TextInput
+                                    id="quantity_size_l"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={data.quantity_size_l}
+                                    onChange={(e) =>
+                                        setData("quantity_size_l", e.target.value)
+                                    }
+                                />
                             </div>
                         </div>
                         <Button
                             onClick={handleAddIngredient}
-                            disabled={!data.ingredient_id || !data.quantity_used}
+                            disabled={!data.ingredient_id || !data.quantity_size_s || !data.quantity_size_m || !data.quantity_size_l}
                             color="primary"
                             type="button"
                         >
@@ -269,94 +300,126 @@ export default function ProductIngredientsForm({
                         )}
                     </div>
                     <div className="overflow-x-auto">
-                        <Table hoverable>
+                        <Table>
                             <Table.Head>
-                                <Table.HeadCell className="bg-gray-50">วัตถุดิบ</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">ปริมาณ</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">หน่วย</Table.HeadCell>
-                                <Table.HeadCell className="bg-gray-50">จัดการ</Table.HeadCell>
+                                <Table.HeadCell>วัตถุดิบ</Table.HeadCell>
+                                <Table.HeadCell>ปริมาณ (ไซส์ S)</Table.HeadCell>
+                                <Table.HeadCell>ปริมาณ (ไซส์ M)</Table.HeadCell>
+                                <Table.HeadCell>ปริมาณ (ไซส์ L)</Table.HeadCell>
+                                <Table.HeadCell>จัดการ</Table.HeadCell>
                             </Table.Head>
-                            <Table.Body className="divide-y">
+                            <Table.Body>
                                 {localIngredients.map((item) => (
-                                    <Table.Row
-                                        key={item.id}
-                                        className="bg-white dark:border-gray-700 dark:bg-gray-800"
-                                    >
-                                        <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                    <Table.Row key={item.id}>
+                                        <Table.Cell>
                                             {item.ingredient.name}
                                         </Table.Cell>
                                         <Table.Cell>
                                             {editingId === item.id ? (
-                                                <div className="flex items-center gap-2">
-                                                    <TextInput
-                                                        type="number"
-                                                        min="0.01"
-                                                        step="0.01"
-                                                        value={editQuantity}
-                                                        onChange={(e) => setEditQuantity(e.target.value)}
-                                                        className="w-24"
-                                                    />
-                                                    <span className="text-gray-600">
-                                                        {item.ingredient.unit?.name || ''}
-                                                    </span>
-                                                </div>
+                                                <TextInput
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    value={editQuantityS}
+                                                    onChange={(e) =>
+                                                        setEditQuantityS(e.target.value)
+                                                    }
+                                                />
                                             ) : (
-                                                <span className="font-medium">
-                                                    {item.quantity_used}
-                                                </span>
+                                                item.quantity_size_s
                                             )}
                                         </Table.Cell>
                                         <Table.Cell>
-                                            {item.ingredient.unit?.name || '-'}
+                                            {editingId === item.id ? (
+                                                <TextInput
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    value={editQuantityM}
+                                                    onChange={(e) =>
+                                                        setEditQuantityM(e.target.value)
+                                                    }
+                                                />
+                                            ) : (
+                                                item.quantity_size_m
+                                            )}
                                         </Table.Cell>
                                         <Table.Cell>
-                                            <div className="flex gap-2">
-                                                {editingId === item.id ? (
-                                                    <>
-                                                        <Button
-                                                            color="success"
-                                                            size="sm"
-                                                            onClick={() => handleUpdate(item)}
-                                                            className="px-2"
-                                                        >
-                                                            <HiCheck className="h-4 w-4" />
-                                                        </Button>
-                                                        <Button
-                                                            color="gray"
-                                                            size="sm"
-                                                            onClick={cancelEditing}
-                                                            className="px-2"
-                                                        >
-                                                            <HiX className="h-4 w-4" />
-                                                        </Button>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Button
-                                                            color="info"
-                                                            size="sm"
-                                                            onClick={() => startEditing(item)}
-                                                            className="px-2"
-                                                        >
-                                                            <HiPencil className="h-4 w-4" />
-                                                        </Button>
-                                                        <Button
-                                                            color="failure"
-                                                            size="sm"
-                                                            onClick={() => handleDelete(item)}
-                                                            className="px-2"
-                                                        >
-                                                            <HiTrash className="h-4 w-4" />
-                                                        </Button>
-                                                    </>
-                                                )}
-                                            </div>
+                                            {editingId === item.id ? (
+                                                <TextInput
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    value={editQuantityL}
+                                                    onChange={(e) =>
+                                                        setEditQuantityL(e.target.value)
+                                                    }
+                                                />
+                                            ) : (
+                                                item.quantity_size_l
+                                            )}
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            {editingId === item.id ? (
+                                                <div className="flex space-x-2">
+                                                    <Button
+                                                        size="xs"
+                                                        onClick={() => {
+                                                            const updatedIngredients = localIngredients.map(
+                                                                (ing) =>
+                                                                    ing.id === item.id
+                                                                        ? {
+                                                                              ...ing,
+                                                                              quantity_size_s: parseFloat(editQuantityS),
+                                                                              quantity_size_m: parseFloat(editQuantityM),
+                                                                              quantity_size_l: parseFloat(editQuantityL),
+                                                                          }
+                                                                        : ing
+                                                            );
+                                                            setLocalIngredients(updatedIngredients);
+                                                            setEditingId(null);
+                                                        }}
+                                                    >
+                                                        <HiCheck className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="xs"
+                                                        color="failure"
+                                                        onClick={() => setEditingId(null)}
+                                                    >
+                                                        <HiX className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex space-x-2">
+                                                    <Button
+                                                        size="xs"
+                                                        onClick={() => {
+                                                            setEditingId(item.id);
+                                                            setEditQuantityS(item.quantity_size_s.toString());
+                                                            setEditQuantityM(item.quantity_size_m.toString());
+                                                            setEditQuantityL(item.quantity_size_l.toString());
+                                                        }}
+                                                    >
+                                                        <HiPencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="xs"
+                                                        color="failure"
+                                                        onClick={() =>
+                                                            handleDelete(item)
+                                                        }
+                                                    >
+                                                        <HiTrash className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </Table.Cell>
                                     </Table.Row>
                                 ))}
                                 {localIngredients.length === 0 && (
                                     <Table.Row>
-                                        <Table.Cell colSpan={4} className="text-center py-4 text-gray-500">
+                                        <Table.Cell colSpan={5} className="text-center py-4 text-gray-500">
                                             ยังไม่มีวัตถุดิบในสูตรนี้
                                         </Table.Cell>
                                     </Table.Row>
