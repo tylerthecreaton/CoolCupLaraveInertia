@@ -942,7 +942,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                         </span>
                                     </div>
                                 </div>
-                                <div>
+                                {/* <div>
                                     <Label
                                         htmlFor="payment-file"
                                         value="แนบหลักฐานการโอน"
@@ -958,7 +958,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                                         }
                                         className="mt-1"
                                     />
-                                </div>
+                                </div> */}
                                 <div>
                                     <Label
                                         htmlFor="payment-note"

@@ -18,7 +18,7 @@ export default function CreateCustomer() {
             <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
-                        Home
+                        หน้าแรก
                     </Breadcrumb.Item>
                     <Breadcrumb.Item href="/admin/customers">สมาชิกทั้งหมด</Breadcrumb.Item>
                     <Breadcrumb.Item>เพิ่มสมาชิก</Breadcrumb.Item>

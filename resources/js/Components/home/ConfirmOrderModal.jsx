@@ -7,7 +7,7 @@ import { cartActions } from "@/Store/state/cartState";
 import { useForm } from "@inertiajs/react";
 import { isAbsoluteUrl } from "@/helpers";
 
-const ConfirmOrderModal = ({ show, onClose }) => {
+const ConfirmOrderModal = ({ show, onClose, totalItems }) => {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const { state, dispatch } = useGlobalState();
 
@@ -123,7 +123,7 @@ const ConfirmOrderModal = ({ show, onClose }) => {
                                     จำนวนสินค้า:
                                 </span>
                                 <span className="font-medium">
-                                    {summary.totalItems} แก้ว
+                                    {totalItems}  แก้ว
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm">

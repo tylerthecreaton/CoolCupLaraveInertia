@@ -78,16 +78,25 @@ const ShowThankYouModal = ({ localState, isShowing = false }) => {
     );
 };
 
-const CashPaymentModal = ({ paymentInfo, onClose }) => {
+const CashPaymentModal = ({ paymentInfo, onClose, localState }) => {
     if (!paymentInfo?.showAsModal) return null;
 
     useEffect(() => {
         const timer = setTimeout(() => {
             if (onClose) onClose();
-        }, 3000); // Auto close after 3 seconds
+        }, 5000); // Auto close after 5 seconds
 
         return () => clearTimeout(timer);
     }, [paymentInfo]);
+
+    // Ensure we have valid numbers with default values
+    const total = localState?.cart?.total || 0;
+    const received = paymentInfo?.received || 0;
+    const change = received - total;
+
+    const formatPrice = (amount) => {
+        return amount.toLocaleString();
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in">
@@ -103,15 +112,21 @@ const CashPaymentModal = ({ paymentInfo, onClose }) => {
                             <h3 className="text-2xl font-semibold text-blue-800 mb-4">รายละเอียดการชำระเงิน</h3>
                             <div className="space-y-4">
                                 <div>
+                                    <p className="text-lg text-blue-600 mb-1">ราคารวม</p>
+                                    <p className="text-3xl font-bold text-blue-700">
+                                        ฿{(localState?.cart?.total || 0).toFixed(2)}
+                                    </p>
+                                </div>
+                                <div>
                                     <p className="text-lg text-blue-600 mb-1">รับเงิน</p>
                                     <p className="text-4xl font-bold text-blue-700">
-                                        ฿{paymentInfo.received.toLocaleString()}
+                                        ฿{formatPrice(received)}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-lg text-blue-600 mb-1">เงินทอน</p>
-                                    <p className="text-4xl font-bold text-blue-700">
-                                        ฿{paymentInfo.change.toLocaleString()}
+                                    <p className="text-4xl font-bold text-green-600">
+                                        ฿{formatPrice(change)}
                                     </p>
                                 </div>
                             </div>
@@ -533,9 +548,10 @@ export default function ClientPage() {
                     )}
             </div>
             <ShowThankYouModal localState={localState} isShowing={localState.isShowingThankYouModal} />
-            <CashPaymentModal 
+            <CashPaymentModal
                 paymentInfo={localState.clientScreen?.paymentInfo}
                 onClose={handlePaymentComplete}
+                localState={localState}
             />
         </StorefrontLayout>
     );

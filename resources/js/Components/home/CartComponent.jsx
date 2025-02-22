@@ -664,6 +664,7 @@ const CartComponent = () => {
             <ConfirmOrderModal
                 show={showOrderModal}
                 onClose={() => setShowOrderModal(false)}
+                totalItems={calculateTotalItems()}
             />
         </div>
     );

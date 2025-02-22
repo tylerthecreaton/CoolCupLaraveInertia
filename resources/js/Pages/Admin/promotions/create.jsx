@@ -18,7 +18,7 @@ export default function CreatePromotion({ categories }) {
             <AdminLayout>
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
-                        Home
+                        หน้าแรก
                     </Breadcrumb.Item>
                     <Breadcrumb.Item href="/admin/promotions">
                         โปรโมชันทั้งหมด

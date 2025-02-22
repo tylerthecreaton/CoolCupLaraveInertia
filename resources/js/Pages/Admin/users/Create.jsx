@@ -19,7 +19,7 @@ export default function CreateUser() {
             <AdminLayout>
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
-                        Home
+                        หน้าแรก
                     </Breadcrumb.Item>
                     <Breadcrumb.Item href="/admin/users">
                         ผู้ใช้งานทั้งหมด

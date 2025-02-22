@@ -141,7 +141,7 @@ export default function UserForm({ isEditing = false, user = null }) {
                         }
                     />
                 </div>
-                <Button type="submit">Submit</Button>
+                <Button type="submit">บันทึก</Button>
             </form>
         </div>
     );

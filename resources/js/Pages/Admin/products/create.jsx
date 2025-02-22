@@ -17,7 +17,7 @@ export default function CreateProduct({ categories, ingredients, consumables }) 
             <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
-                        Home
+                        หน้าแรก
                     </Breadcrumb.Item>
                     <Breadcrumb.Item href="/admin/products">
                         สินค้าทั้งหมด
@@ -25,8 +25,8 @@ export default function CreateProduct({ categories, ingredients, consumables }) 
                     <Breadcrumb.Item>เพิ่มสินค้า</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
-            <ProductsForm 
-                categories={categories} 
+            <ProductsForm
+                categories={categories}
                 ingredients={ingredients}
                 consumables={consumables}
                 productIngredients={[]}
