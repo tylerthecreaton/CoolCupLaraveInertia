@@ -355,39 +355,48 @@ class OrderController extends Controller implements HasMiddleware
 
     private function calculateConsumable(array $item, int $orderDetailId)
     {
+        Log::info('calculateConsumable: Start');
+        Log::info('calculateConsumable: item = ' . json_encode($item));
+        Log::info('calculateConsumable: orderDetailId = ' . $orderDetailId);
+
         $product = Product::find($item['id']);
         if ($product) {
             try {
                 // Get consumables based on product size
+                Log::info('calculateConsumable: product = ' . json_encode($product));
                 $consumables = ProductConsumables::where('product_id', $product->id)
-                    ->where('size', $item['size'] ?? 'S')
+                    ->where('size', $item['size'] ?? 's')
                     ->get();
 
                 if (!$consumables->count()) {
+                    Log::info('calculateConsumable: No consumables found');
                     return;
                 }
 
                 foreach ($consumables as $consumable) {
+                    Log::info('calculateConsumable: consumable = ' . json_encode($consumable));
                     $consumableUsage = new ProductConsumableUsage();
                     $consumableUsage->order_detail_id = $orderDetailId;
                     $consumableUsage->consumable_id = $consumable->consumable_id;
                     $consumableUsage->quantity_used = $item['quantity'] * $consumable->quantity_used;
                     $consumableUsage->usage_type = 'USE';
-                    $consumableUsage->created_by = Auth::user()->id;
                     $consumableUsage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId . " (ขนาด " . strtoupper($item['size'] ?? 'S') . ")";
                     $consumableUsage->save();
 
                     // อัพเดทจำนวนวัสดุสิ้นเปลือง
                     $consumableModel = Consumable::find($consumable->consumable_id);
                     if ($consumableModel) {
+                        Log::info('calculateConsumable: consumableModel = ' . json_encode($consumableModel));
                         $consumableModel->quantity = max(0, $consumableModel->quantity - $consumableUsage->quantity_used);
                         $consumableModel->save();
                     }
                 }
             } catch (\Exception $e) {
+                Log::info('calculateConsumable: Exception = ' . $e->getMessage());
                 throw new \Exception("Error calculating ingredients: " . $e->getMessage());
             }
         }
+        Log::info('calculateConsumable: End');
     }
 
     private function calculateToppings(array $item, int $orderDetailId)

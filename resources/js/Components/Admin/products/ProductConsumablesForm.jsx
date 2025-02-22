@@ -22,11 +22,12 @@ export default function ProductConsumablesForm({
         product_id: product?.id,
         consumable_id: "",
         quantity_used: "",
+        size: "s",
     });
 
     const handleAddConsumable = (e) => {
         e.preventDefault();
-        
+
         const selectedConsumable = consumables.find(cons => cons.id === parseInt(data.consumable_id));
         if (!selectedConsumable) {
             MySwal.fire({
@@ -62,6 +63,7 @@ export default function ProductConsumablesForm({
             id: `temp_${Date.now()}`,
             consumable_id: parseInt(data.consumable_id),
             quantity_used: parseFloat(data.quantity_used),
+            size: data.size,
             consumable: selectedConsumable,
             isNew: true
         };
@@ -71,6 +73,7 @@ export default function ProductConsumablesForm({
             product_id: product?.id,
             consumable_id: "",
             quantity_used: "",
+            size: "s",
         });
     };
 
@@ -95,7 +98,8 @@ export default function ProductConsumablesForm({
                 consumables: localConsumables.map(item => ({
                     id: item.isNew ? null : item.id,
                     consumable_id: item.consumable_id,
-                    quantity_used: parseFloat(item.quantity_used)
+                    quantity_used: parseFloat(item.quantity_used),
+                    size: item.size
                 })),
                 preserveScroll: true
             });
@@ -237,6 +241,28 @@ export default function ProductConsumablesForm({
                                         onChange={(e) => setData('quantity_used', e.target.value)}
                                         required
                                     />
+                                </div>
+                            </div>
+                            <div>
+                                <div className="block mb-2">
+                                    <Label
+                                        htmlFor="size"
+                                        value="ขนาด"
+                                        className="text-gray-700 dark:text-gray-300"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Select
+                                        id="size"
+                                        name="size"
+                                        value={data.size}
+                                        onChange={(e) => setData('size', e.target.value)}
+                                        required
+                                    >
+                                        <option value="s">S</option>
+                                        <option value="m">M</option>
+                                        <option value="l">L</option>
+                                    </Select>
                                 </div>
                             </div>
                         </div>
