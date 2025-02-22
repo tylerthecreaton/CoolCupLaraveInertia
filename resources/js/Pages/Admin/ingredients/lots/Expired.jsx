@@ -118,70 +118,99 @@ const Expired = ({ auth, expired_lots, flash }) => {
 
                         <Table hoverable>
                             <Table.Head>
+                                <Table.HeadCell>Lot</Table.HeadCell>
                                 <Table.HeadCell>รูปภาพ</Table.HeadCell>
                                 <Table.HeadCell>ชื่อวัตถุดิบ</Table.HeadCell>
                                 <Table.HeadCell>จำนวน</Table.HeadCell>
+                                <Table.HeadCell>หน่วย</Table.HeadCell>
                                 <Table.HeadCell>วันหมดอายุ</Table.HeadCell>
+                                <Table.HeadCell>สถานะ</Table.HeadCell>
                                 <Table.HeadCell>ผู้บันทึก</Table.HeadCell>
                                 <Table.HeadCell>การจัดการ</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y">
                                 {expired_lots.data.map((lot) => (
-                                    lot.details.map((detail) => (
-                                        <Table.Row
-                                            key={`${lot.id}-${detail.id}`}
-                                            className="bg-white"
-                                        >
-                                            <Table.Cell>
-                                                <img
-                                                    src={
-                                                        isAbsoluteUrl(detail.ingredient.image)
-                                                            ? detail.ingredient.image
-                                                            : `/images/ingredients/${detail.ingredient.image}`
-                                                    }
-                                                    alt={detail.ingredient.name}
-                                                    className="w-12 h-12 object-cover rounded-lg"
-                                                />
-                                            </Table.Cell>
-                                            <Table.Cell>
-                                                <div className="font-medium text-gray-900">
-                                                    {detail.ingredient.name}
-                                                </div>
-                                                <div className="text-sm text-gray-500">
-                                                    จาก Lot ที่ {detail.lot_number || lot.lot_number || '-'}
-                                                </div>
-                                            </Table.Cell>
-                                            <Table.Cell className="font-medium">
-                                                {parseFloat(detail.quantity).toLocaleString()}{" "} ชิ้น
-                                                {/* ชื้น {detail.ingredient.unit.abbreviation} */}
-                                            </Table.Cell>
-                                            <Table.Cell>
-                                                <div className="flex items-center text-red-600">
-                                                    <HiCalendar className="mr-1" />
-                                                    {format(
-                                                        new Date(detail.expiration_date),
-                                                        "dd/MM/yyyy"
-                                                    )}
-                                                </div>
-                                            </Table.Cell>
-                                            <Table.Cell>
-                                                -
-                                            </Table.Cell>
-                                            <Table.Cell>
-                                                <Button
-                                                    color="failure"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setSelectedItem(detail);
-                                                        setOpenModal(true);
-                                                    }}
+                                    // Only render if lot has expired items
+                                    lot.details.length > 0 && (
+                                        <React.Fragment key={lot.id}>
+                                            {/* Group header */}
+                                            <Table.Row className="bg-gray-50">
+                                                <Table.Cell colSpan={9} className="font-medium">
+                                                    <div className="flex justify-between items-center">
+                                                        <span>Lot #{lot.lot_number || '-'}</span>
+                                                        <span className="text-sm text-gray-500">
+                                                            บันทึกโดย: {lot.user?.name || '-'} | 
+                                                            วันที่: {format(new Date(lot.created_at), "dd/MM/yyyy")}
+                                                        </span>
+                                                    </div>
+                                                </Table.Cell>
+                                            </Table.Row>
+                                            
+                                            {/* Expired items */}
+                                            {lot.details.map((detail) => (
+                                                <Table.Row
+                                                    key={`${lot.id}-${detail.id}`}
+                                                    className="bg-red-50"
                                                 >
-                                                    <HiTrash className="mr-2 h-4 w-4" />
-                                                    จำหน่าย
-                                                </Button>
-                                            </Table.Cell>
-                                        </Table.Row>
-                                    ))
+                                                    <Table.Cell>{lot.lot_number || '-'}</Table.Cell>
+                                                    <Table.Cell>
+                                                        <img
+                                                            src={
+                                                                detail.ingredient.image
+                                                                    ? (isAbsoluteUrl(detail.ingredient.image)
+                                                                        ? detail.ingredient.image
+                                                                        : `/images/ingredients/${detail.ingredient.image}`)
+                                                                    : '/images/no-image.png'
+                                                            }
+                                                            alt={detail.ingredient.name}
+                                                            className="w-12 h-12 object-cover rounded-lg"
+                                                        />
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <div className="font-medium text-gray-900">
+                                                            {detail.ingredient.name}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">
+                                                            จาก {detail.supplier}
+                                                        </div>
+                                                    </Table.Cell>
+                                                    <Table.Cell className="font-medium">
+                                                        {parseFloat(detail.total_quantity).toLocaleString()}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {detail.ingredient.unit?.name || '-'}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <div className="flex items-center text-red-600">
+                                                            <HiCalendar className="mr-1" />
+                                                            {detail.formatted_expiration_date}
+                                                        </div>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <div className="text-red-600 font-medium">
+                                                            {detail.expiration_status}
+                                                        </div>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        {lot.user?.name || '-'}
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <Button
+                                                            color="failure"
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                setSelectedItem(detail);
+                                                                setOpenModal(true);
+                                                            }}
+                                                        >
+                                                            <HiTrash className="mr-2 h-4 w-4" />
+                                                            จำหน่าย
+                                                        </Button>
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            ))}
+                                        </React.Fragment>
+                                    )
                                 ))}
                             </Table.Body>
                         </Table>
@@ -205,7 +234,7 @@ const Expired = ({ auth, expired_lots, flash }) => {
                                             <div className="text-sm">
                                                 จำนวน{" "}
                                                 {parseFloat(
-                                                    selectedItem.quantity
+                                                    selectedItem.total_quantity
                                                 ).toLocaleString()}{" "}
                                                 ชื่น
                                             </div>

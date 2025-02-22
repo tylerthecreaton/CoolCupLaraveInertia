@@ -17,15 +17,53 @@ class ExpiredController extends Controller
 {
     public function index()
     {
+        $now = now();
 
-        $expiryDate = now();
-
-        $expiredLots = IngredientLot::with(['details.ingredient.unit', 'user'])
-            ->whereHas('details', function ($query) use ($expiryDate) {
-                $query->where('expiration_date', '<=', $expiryDate);
+        // ดึง lots ที่มีอย่างน้อย 1 รายการหมดอายุ
+        $expiredLots = IngredientLot::with(['details.ingredient.unit', 'details.transformer', 'user'])
+            ->whereHas('details', function ($query) use ($now) {
+                $query->where('expiration_date', '<=', $now);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        // กรองและแปลงข้อมูล
+        $expiredLots->through(function ($lot) use ($now) {
+            // กรองเฉพาะรายการที่หมดอายุแล้ว และตั้งค่า collection ใหม่
+            $expiredDetails = $lot->details->filter(function ($detail) use ($now) {
+                return Carbon::parse($detail->expiration_date)->lte($now);
+            })->values();
+
+            // แทนที่ details collection เดิมด้วย collection ที่กรองแล้ว
+            $lot->setRelation('details', $expiredDetails);
+
+            // แปลงข้อมูลสำหรับรายการที่หมดอายุ
+            $lot->details->transform(function ($detail) use ($now) {
+                $expirationDate = Carbon::parse($detail->expiration_date);
+                $detail->is_expired = true;
+                $detail->days_until_expiry = $now->diffInDays($expirationDate, false);
+                $detail->formatted_expiration_date = $expirationDate->format('d/m/Y');
+                $detail->expiration_status = 'หมดอายุ';
+
+                // คำนวณจำนวนรวม (quantity * transformer multiplier)
+                if ($detail->transformer) {
+                    $detail->total_quantity = $detail->quantity * $detail->transformer->multiplier;
+                } else {
+                    $detail->total_quantity = $detail->quantity * ($detail->per_pack ?? 1);
+                }
+
+                return $detail;
+            });
+
+            return $lot;
+        });
+
+        // กรอง lots ที่ไม่มีรายการหมดอายุออก
+        $expiredLots->setCollection(
+            $expiredLots->getCollection()->filter(function ($lot) {
+                return $lot->details->isNotEmpty();
+            })
+        );
 
         return Inertia::render('Admin/ingredients/lots/Expired', [
             'expired_lots' => $expiredLots
