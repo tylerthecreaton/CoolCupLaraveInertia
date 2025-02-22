@@ -91,8 +91,8 @@ class ExpiredController extends Controller
             ]);
 
             $ingredient = Ingredient::findOrFail($ingredientLotDetail->ingredient_id);
-            $ingredient->quantity -= $ingredientLotDetail->quantity * $ingredientLotDetail->transformer->multiplier;
-            $ingredient->save();
+            // $ingredient->quantity -= $ingredientLotDetail->quantity * $ingredientLotDetail->transformer->multiplier;
+            // $ingredient->save();
 
 
             $productIngredientUsage = new ProductIngredientUsage();
