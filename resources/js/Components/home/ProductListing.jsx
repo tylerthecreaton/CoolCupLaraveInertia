@@ -25,12 +25,12 @@ export default function ProductListing({
 
         // ตรวจสอบว่ามีวัตถุดิบที่ไม่เพียงพอหรือไม่
         return product.ingredients.some(ingredient => {
-            if (!ingredient || ingredient.quantity === null || ingredient.quantity_used === null) {
+            if (!ingredient || ingredient.quantity === null || ingredient.quantity_size_s === null) {
                 return false;
             }
             // แปลงค่าเป็นตัวเลขเพื่อเปรียบเทียบ
             const remaining = parseFloat(ingredient.quantity);
-            const required = parseFloat(ingredient.quantity_used);
+            const required = parseFloat(ingredient.quantity_size_s);
             return remaining < required;
         });
     };
@@ -56,7 +56,7 @@ export default function ProductListing({
                         if (!ingredient) return null;
                         // แปลงค่าเป็นตัวเลขเพื่อเปรียบเทียบ
                         const remaining = parseFloat(ingredient.quantity) || 0;
-                        const required = parseFloat(ingredient.quantity_used) || 0;
+                        const required = parseFloat(ingredient.quantity_size_s) || 0;
                         const isLow = remaining < required;
 
                         return (
