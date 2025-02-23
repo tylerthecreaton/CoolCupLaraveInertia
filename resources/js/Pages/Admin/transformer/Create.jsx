@@ -7,7 +7,7 @@ import { Breadcrumb } from 'flowbite-react';
 import { HiHome } from 'react-icons/hi';
 import AdminLayout from '@/Layouts/AdminLayout';
 
-export default function Create({ auth, ingredients, consumables }) {
+export default function Create({ auth, ingredients, consumables , errors}) {
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -34,6 +34,7 @@ export default function Create({ auth, ingredients, consumables }) {
                     <TransformerForm
                         ingredients={ingredients}
                         consumables={consumables}
+                        errors={errors}
                     />
                 </AdminLayout>
             </div>

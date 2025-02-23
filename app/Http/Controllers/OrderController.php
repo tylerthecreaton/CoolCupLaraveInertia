@@ -29,14 +29,9 @@ use Telegram\Bot\Api;
 use App\Http\Controllers\TelegramController;
 use App\Models\TelegramUser;
 
-class OrderController extends Controller implements HasMiddleware
+class OrderController extends Controller
 {
-    public static function middleware(): array
-    {
-        return [
-            'role_or_permission:manager|view dashboard',
-        ];
-    }
+
     public function store(Request $request)
     {
         $cart = $request->get("cart");

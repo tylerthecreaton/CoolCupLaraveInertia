@@ -11,51 +11,51 @@ class RoleAndPermissionSeeder extends Seeder
     public function run()
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
-        // Clear existing roles and permissions
+        // Clear existing data
         Role::query()->delete();
         Permission::query()->delete();
 
+        // Define permissions based on Route requirements
+        $permissions = [
+            'view dashboard' => ['admin', 'manager'],              // Dashboard, Notifications, Telegram
+            'manage users' => ['admin', 'manager'],                // Admin Users
+            'manage categories' => ['admin', 'manager'],           // Admin Categories
+            'manage products' => ['admin', 'manager', 'employee'], // Products, Product Ingredients, Product Consumables, Promotions
+            'manage orders' => ['admin', 'manager', 'employee'],   // Orders (implicitly covered in routes)
+            'view reports' => ['admin', 'manager'],                // Admin Reports
+            'manage inventory' => ['admin', 'manager'],            // Ingredients, Consumables, Lots, Transactions, etc.
+            'manage settings' => ['admin'],                        // Admin Settings
+        ];
+
         // Create permissions
-        Permission::create(['name' => 'view dashboard']);
-        Permission::create(['name' => 'manage users']);
-        Permission::create(attributes: ['name' => 'manage users:no-delete']);
-        Permission::create(['name' => 'manage categories']);
-        Permission::create(['name' => 'manage products']);
-        Permission::create(['name' => 'manage orders']);
-        Permission::create(['name' => 'view reports']);
-        Permission::create(['name' => 'manage inventory']);
-        Permission::create(['name' => 'manage settings']);
+        foreach ($permissions as $permission => $roles) {
+            Permission::create(['name' => $permission]);
+        }
+
+        // Define roles and their permissions
+        $roles = [
+            'admin' => array_keys($permissions), // Full access
+            'manager' => [
+                'view dashboard',
+                'manage users',
+                'manage categories',
+                'manage products',
+                'manage orders',
+                'view reports',
+                'manage inventory',
+            ],
+            'employee' => [
+                'manage products',
+                'manage orders',
+            ],
+        ];
 
         // Create roles and assign permissions
-        $adminRole = Role::create(['name' => 'admin']);
-        $adminRole->givePermissionTo([
-            'view dashboard',
-            'manage users',
-            'manage products',
-            'manage orders',
-            'view reports',
-            'manage inventory',
-            'manage settings'
-        ]);
-
-        // Create manager role with most permissions except user management
-        $managerRole = Role::create(['name' => 'manager']);
-        $managerRole->givePermissionTo([
-            'view dashboard',
-            'manage users',
-            'manage products',
-            'manage orders',
-            'view reports',
-            'manage inventory'
-        ]);
-
-        // Create employee role with limited permissions
-        $employeeRole = Role::create(['name' => 'employee']);
-        $employeeRole->givePermissionTo([
-            'manage products',
-            'manage orders'
-        ]);
+        foreach ($roles as $roleName => $rolePermissions) {
+            $role = Role::create(['name' => $roleName]);
+            $role->givePermissionTo($rolePermissions);
+        }
     }
 }

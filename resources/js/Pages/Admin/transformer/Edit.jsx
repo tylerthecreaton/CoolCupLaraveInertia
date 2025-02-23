@@ -6,7 +6,7 @@ import { Breadcrumb } from 'flowbite-react';
 import { HiHome } from 'react-icons/hi';
 import AdminLayout from '@/Layouts/AdminLayout';
 
-export default function Edit({ auth, transformer, ingredients, consumables }) {
+export default function Edit({ auth, transformer, ingredients, consumables ,errors }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -34,6 +34,7 @@ export default function Edit({ auth, transformer, ingredients, consumables }) {
                         transformer={transformer}
                         ingredients={ingredients}
                         consumables={consumables}
+                        errors={errors}
                         isEditing={true}
                     />
                 </AdminLayout>

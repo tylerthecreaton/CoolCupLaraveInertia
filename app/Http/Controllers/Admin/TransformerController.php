@@ -30,8 +30,8 @@ class TransformerController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
+        $rules = [
+            'name' => 'required|string|max:255|min:3',
             'description' => 'nullable|string',
             'type' => 'required|in:ingredient,consumable',
             'multiplier' => 'required|numeric',
@@ -49,10 +49,21 @@ class TransformerController extends Controller
                     return $request->type === 'consumable';
                 }),
             ],
-        ], [
+        ];
+        $messages = [
+            'name.required' => 'กรุณากรอกชื่อ',
+            'name.max' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :max ตัวอักษร',
+            'name.min' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :min ตัวอักษร',
+            'type.required' => 'กรุณาเลือกประเภทวัตถุดิบ',
+            'type.in' => 'กรุณาเลือกประเภทวัตถุดิบ',
+            'multiplier.required' => 'กรุณากรอกค่าคูณ',
+            'multiplier.numeric' => 'กรุณากรอกค่าคูณ',
             'ingredient_id.required_if' => 'กรุณาเลือกวัตถุดิบที่จะแปรรูป',
             'consumable_id.required_if' => 'กรุณาเลือกวัตถุดิบสิ้นเปลืองที่จะแปรรูป',
-        ]);
+        ];
+        $request->validate($rules, $messages);
+
+        $validated = $request->validate($rules);
 
         Transformer::create($validated);
 
@@ -72,8 +83,8 @@ class TransformerController extends Controller
 
     public function update(Request $request, Transformer $transformer)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
+        $rules = [
+            'name' => 'required|string|max:255|min:3',
             'description' => 'nullable|string',
             'type' => 'required|in:ingredient,consumable',
             'multiplier' => 'required|numeric',
@@ -91,11 +102,20 @@ class TransformerController extends Controller
                     return $request->type === 'consumable';
                 }),
             ],
-        ], [
+        ];
+        $messages = [
+            'name.required' => 'กรุณากรอกชื่อ',
+            'name.max' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :max ตัวอักษร',
+            'name.min' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :min ตัวอักษร',
+            'type.required' => 'กรุณาเลือกประเภทวัตถุดิบ',
+            'type.in' => 'กรุณาเลือกประเภทวัตถุดิบ',
+            'multiplier.required' => 'กรุณากรอกค่าคูณ',
+            'multiplier.numeric' => 'กรุณากรอกค่าคูณ',
             'ingredient_id.required_if' => 'กรุณาเลือกวัตถุดิบที่จะแปรรูป',
             'consumable_id.required_if' => 'กรุณาเลือกวัตถุดิบสิ้นเปลืองที่จะแปรรูป',
-        ]);
-
+        ];
+        $request->validate($rules, $messages);
+        $validated = $request->validate($rules);
         $transformer->update($validated);
 
         return redirect()->route('admin.transformers.index')

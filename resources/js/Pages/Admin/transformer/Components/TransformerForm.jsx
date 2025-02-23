@@ -75,7 +75,8 @@ export default function TransformerForm({
                                 placeholder="กรุณากรอกชื่อสูตรแปรรูป"
                                 required
                                 color={errors.name ? "failure" : "gray"}
-                                helperText={errors.name}
+                                helperText={<span className="text-red-500">{errors.name}</span>}
+
                             />
                         </div>
 
@@ -97,11 +98,10 @@ export default function TransformerForm({
                                 }
                                 placeholder="กรุณากรอกคำอธิบาย"
                                 rows={4}
-                                className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${
-                                    errors.description
+                                className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${errors.description
                                         ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-red-500"
                                         : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                                } bg-white shadow-sm`}
+                                    } bg-white shadow-sm`}
                             />
                             {errors.description && (
                                 <p className="mt-1 text-sm text-red-600">
@@ -159,11 +159,10 @@ export default function TransformerForm({
                                     onChange={(e) =>
                                         setData("ingredient_id", e.target.value)
                                     }
-                                    className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${
-                                        errors.ingredient_id
+                                    className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${errors.ingredient_id
                                             ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-red-500"
                                             : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                                    } bg-white shadow-sm`}
+                                        } bg-white shadow-sm`}
                                 >
                                     <option value="">เลือกวัตถุดิบ</option>
                                     {ingredients?.map((ingredient) => (
@@ -200,11 +199,10 @@ export default function TransformerForm({
                                     onChange={(e) =>
                                         setData("consumable_id", e.target.value)
                                     }
-                                    className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${
-                                        errors.consumable_id
+                                    className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${errors.consumable_id
                                             ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-red-500"
                                             : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                                    } bg-white shadow-sm`}
+                                        } bg-white shadow-sm`}
                                 >
                                     <option value="">
                                         เลือกวัตถุดิบสิ้นเปลือง

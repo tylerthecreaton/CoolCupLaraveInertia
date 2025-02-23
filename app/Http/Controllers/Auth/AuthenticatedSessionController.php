@@ -36,6 +36,10 @@ class AuthenticatedSessionController extends Controller
         // Assign role after successful login
         $user = Auth::user();
 
+        $user->assignRole($user->role);
+
+        // dd($user);
+
         // Redirect based on user role
         if ($user && $user->hasRole('employee')) {
             return redirect()->intended('/');
