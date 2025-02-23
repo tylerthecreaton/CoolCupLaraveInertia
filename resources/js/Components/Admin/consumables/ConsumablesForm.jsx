@@ -80,7 +80,11 @@ export default function ConsumablesForm({ consumable, units = [], isEditing = fa
                                 placeholder="กรุณากรอกชื่อวัตถุดิบสิ้นเปลือง"
                                 required
                                 color={errors.name ? "failure" : "gray"}
-                                helperText={errors.name}
+                                helperText={
+                                    <span className="text-red-500">
+                                        {errors.name}
+                                    </span>
+                                }
                             />
                         </div>
 
@@ -106,7 +110,11 @@ export default function ConsumablesForm({ consumable, units = [], isEditing = fa
                                     min="0"
                                     step="0.01"
                                     color={errors.quantity ? "failure" : "gray"}
-                                    helperText={errors.quantity}
+                                    helperText={
+                                        <span className="text-red-500">
+                                            {errors.quantity}
+                                        </span>
+                                    }
                                 />
                             </div>
 
@@ -125,11 +133,10 @@ export default function ConsumablesForm({ consumable, units = [], isEditing = fa
                                     value={data.unit_id}
                                     onChange={(e) => setData("unit_id", e.target.value)}
                                     required
-                                    className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${
-                                        errors.unit_id
-                                            ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-red-500"
-                                            : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                                    } bg-white shadow-sm`}
+                                    className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${errors.unit_id
+                                        ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-red-500"
+                                        : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                                        } bg-white shadow-sm`}
                                 >
                                     <option value="">เลือกหน่วยวัด</option>
                                     {units?.map((unit) => (

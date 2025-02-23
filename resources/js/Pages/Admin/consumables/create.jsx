@@ -7,7 +7,7 @@ import { Link } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function Create({ auth, units }) {
+export default function Create({ auth, units, errors }) {
     return (
         <AuthenticatedLayout user={auth.user}>
             <AdminLayout>
@@ -30,7 +30,7 @@ export default function Create({ auth, units }) {
                 </div>
 
                 <div className="p-4">
-                    <ConsumablesForm units={units} />
+                    <ConsumablesForm units={units} errors={errors} />
                 </div>
             </AdminLayout>
         </AuthenticatedLayout>

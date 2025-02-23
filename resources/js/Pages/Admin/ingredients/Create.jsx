@@ -7,7 +7,7 @@ import { Link } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function CreateIngredients({ units }) {
+export default function CreateIngredients({ units, errors }) {
     return (
         <AuthenticatedLayout
             header={
@@ -28,7 +28,7 @@ export default function CreateIngredients({ units }) {
                     <Breadcrumb.Item>เพิ่มวัตถุดิบ</Breadcrumb.Item>
                 </Breadcrumb>
                 <AdminLayout>
-                    <IngredientsForm units={units} />
+                    <IngredientsForm units={units} errors={errors} />
                 </AdminLayout>
             </div>
         </AuthenticatedLayout>

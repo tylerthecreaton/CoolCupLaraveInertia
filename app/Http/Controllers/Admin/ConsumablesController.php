@@ -25,15 +25,29 @@ class ConsumablesController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+        $rules = [
+            'name' => ['required', 'string', 'max:255','min:3'],
             'unit_id' => ['required', 'exists:units,id,type,consumable'],
             'quantity' => ['required', 'numeric'],
             'is_depend_on_sale' => ['required', 'boolean'],
-        ]);
+        ];
 
+        $message = [
+            'name.required' => 'กรุณากรอกชื่อวัตถุดิบสิ้นเปลือง',
+            'name.string' => 'กรุณากรอกชื่อวัตถุดิบสิ้นเปลืองให้ถูกต้อง',
+            'name.max' => 'กรุณากรอกชื่อวัตถุดิบสิ้นเปลืองไม่เกิน 255 ตัวอักษร',
+            'name.min' => 'กรุณากรอกชื่อวัตถุดิบสิ้นเปลืองไม่น้อยกว่า 3 ตัวอักษร',
+            'unit_id.required' => 'กรุณาเลือกหน่วยวัด',
+            'unit_id.exists' => 'หน่วยวัดไม่ถูกต้อง',
+            'unit_id.type' => 'หน่วยวัดไม่ถูกต้อง',
+            'quantity.required' => 'กรุณากรอกจำนวน',
+            'quantity.numeric' => 'กรุณากรอกจำนวนให้ถูกต้อง',
+            'is_depend_on_sale.required' => 'กรุณาเลือกว่าใช่หรือไม่',
+            'is_depend_on_sale.boolean' => 'กรุณาเลือกว่าใช่หรือไม่',
+        ];
+
+        $request->validate($rules, $message);
         Consumable::create($request->all());
-
         return redirect()->route('admin.consumables.index')->with('success', 'บันทึกข้อมูลเรียบร้อย');
     }
 
@@ -46,12 +60,28 @@ class ConsumablesController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+        $rules = [
+            'name' => ['required', 'string', 'max:255','min:3'],
             'unit_id' => ['required', 'exists:units,id,type,consumable'],
             'quantity' => ['required', 'numeric'],
             'is_depend_on_sale' => ['required', 'boolean'],
-        ]);
+        ];
+
+        $message = [
+            'name.required' => 'กรุณากรอกชื่อวัตถุดิบสิ้นเปลือง',
+            'name.string' => 'กรุณากรอกชื่อวัตถุดิบสิ้นเปลืองให้ถูกต้อง',
+            'name.max' => 'กรุณากรอกชื่อวัตถุดิบสิ้นเปลืองไม่เกิน 255 ตัวอักษร',
+            'name.min' => 'กรุณากรอกชื่อวัตถุดิบสิ้นเปลืองไม่น้อยกว่า 3 ตัวอักษร',
+            'unit_id.required' => 'กรุณาเลือกหน่วยวัด',
+            'unit_id.exists' => 'หน่วยวัดไม่ถูกต้อง',
+            'unit_id.type' => 'หน่วยวัดไม่ถูกต้อง',
+            'quantity.required' => 'กรุณากรอกจำนวน',
+            'quantity.numeric' => 'กรุณากรอกจำนวนให้ถูกต้อง',
+            'is_depend_on_sale.required' => 'กรุณาเลือกว่าใช่หรือไม่',
+            'is_depend_on_sale.boolean' => 'กรุณาเลือกว่าใช่หรือไม่',
+        ];
+
+        $request->validate($rules, $message);
 
         $consumable = Consumable::find($id);
         $consumable->update($request->all());

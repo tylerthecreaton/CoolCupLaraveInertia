@@ -6,7 +6,7 @@ import ConsumablesForm from "@/Components/Admin/consumables/ConsumablesForm";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function Edit({ auth, consumable, units }) {
+export default function Edit({ auth, consumable, units ,errors}) {
     return (
         <AuthenticatedLayout user={auth.user}
             header={
@@ -34,7 +34,7 @@ export default function Edit({ auth, consumable, units }) {
                             </Breadcrumb>
                 </div>
                 <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
-                    <ConsumablesForm consumable={consumable} units={units} isEditing = {true} />
+                    <ConsumablesForm consumable={consumable} units={units} isEditing = {true} errors={errors} />
                 </div>
             </AdminLayout>
         </AuthenticatedLayout>

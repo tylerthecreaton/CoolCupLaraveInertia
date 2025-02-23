@@ -6,7 +6,7 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function EditIngredient({ ingredient, units }) {
+export default function EditIngredient({ ingredient, units, errors }) {
     return (
         <AuthenticatedLayout
             header={
@@ -30,6 +30,7 @@ export default function EditIngredient({ ingredient, units }) {
                     ingredient={ingredient}
                     units={units}
                     isEditing={true}
+                    errors={errors}
                 />
             </AdminLayout>
         </AuthenticatedLayout>

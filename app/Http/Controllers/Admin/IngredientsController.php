@@ -87,10 +87,9 @@ class IngredientsController extends Controller
     public function update(Request $request, String $id)
     {
         $rules = [
-            'name' => 'required|min:3|max:255|unique:ingredients,name,' . $id,
+            'name' => 'required|min:3|max:255',
             'quantity' => 'required|numeric',
             'unit_id' => 'required|exists:units,id',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'is_sweetness' => 'required|boolean',
             'expiration_date' => 'nullable|date',
         ];
@@ -99,14 +98,9 @@ class IngredientsController extends Controller
             'name.required' => 'กรุณากรอกชื่อ',
             'name.min' => 'ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร',
             'name.max' => 'ชื่อต้องมีความยาวไม่เกิน 255 ตัวอักษร',
-            'name.unique' => 'มีชื่อวัตถุดิบนี้อยู่แล้ว',
             'quantity.required' => 'กรุณากรอกจํานวน',
             'quantity.numeric' => 'กรุณากรอกจํานวนให้ถูกต้อง',
-            'unit_id.required' => 'กรุณาเลือกหน่วยวัด',
             'unit_id.exists' => 'หน่วยวัดที่เลือกไม่ถูกต้อง',
-            'image.image' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
-            'image.mimes' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
-            'image.max' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
             'is_sweetness.required' => 'กรุณาเลือกรูปแบบวัตถุดิบ',
             'is_sweetness.boolean' => 'กรุณาเลือกรูปแบบวัตถุดิบให้ถูกต้อง',
             'expiration_date.date' => 'รูปแบบวันที่ไม่ถูกต้อง',

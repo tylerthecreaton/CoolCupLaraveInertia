@@ -122,7 +122,11 @@ export default function IngredientsForm({
                                 placeholder="กรุณากรอกชื่อวัตถุดิบ"
                                 required
                                 color={errors.name ? "failure" : "gray"}
-                                helperText={errors.name}
+                                helperText={
+                                    <span className="text-sm text-red-500">
+                                        {errors.name}
+                                    </span>
+                                }
                             />
                         </div>
 
@@ -150,7 +154,11 @@ export default function IngredientsForm({
                                     min="0"
                                     step="0.01"
                                     color={errors.quantity ? "failure" : "gray"}
-                                    helperText={errors.quantity}
+                                    helperText={
+                                        <span className="text-sm text-red-500">
+                                            {errors.quantity}
+                                        </span>
+                                    }
                                 />
                             </div>
 
@@ -216,7 +224,11 @@ export default function IngredientsForm({
                                     setData("expiration_date", e.target.value)
                                 }
                                 color={errors.expiration_date ? "failure" : "gray"}
-                                helperText={errors.expiration_date}
+                                helperText={
+                                    <span className="text-sm text-red-500">
+                                        {errors.expiration_date}
+                                    </span>
+                                }
                             />
                         </div>
 
