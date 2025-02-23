@@ -39,11 +39,12 @@ use App\Http\Controllers\Admin\{
 };
 
 // Public Routes (Role 4)
-Route::get('/', [HomeController::class, 'index'])->name('home');
+
 Route::get('/client', [ClientController::class, 'showClientPage'])->name('client');
 
 // Authenticated Routes
 Route::middleware(['auth'])->group(function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
     // Member Management (Role 4)
     Route::get('/registermember', [MemberController::class, 'register'])->name('member.register');
     Route::post('/member/check-phone', [MemberController::class, 'checkPhoneNumber'])->name('member.checkPhoneNumber');
