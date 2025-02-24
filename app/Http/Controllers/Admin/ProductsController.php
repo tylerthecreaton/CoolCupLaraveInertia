@@ -31,7 +31,7 @@ class ProductsController extends Controller
         $categories = Category::all();
         $ingredients = Ingredient::with('unit')->get();
         $consumables = Consumable::with('unit')->get();
-        return Inertia::render('Admin/products/Create', compact('categories', 'ingredients', 'consumables'));
+        return Inertia::render('Admin/products/create', compact('categories', 'ingredients', 'consumables'));
     }
 
     public function store(Request $request)
@@ -97,7 +97,7 @@ class ProductsController extends Controller
         $productIngredients = $product->ingredients()->with('ingredient.unit')->get();
         $productConsumables = $product->consumables()->with('consumable.unit')->get();
 
-        return Inertia::render('Admin/products/Edit', compact(
+        return Inertia::render('Admin/products/edit', compact(
             'product',
             'categories',
             'ingredients',
