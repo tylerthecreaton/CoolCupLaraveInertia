@@ -15,7 +15,7 @@ export default function Index({ auth, transactions, filters }) {
         setSearchTerm(value);
         router.get(
             route("admin.transactions.index"),
-            { 
+            {
                 search: value,
                 filterType: filterType,
                 startDate: filterType === 'custom' ? customStartDate : null,
@@ -44,8 +44,8 @@ export default function Index({ auth, transactions, filters }) {
     const handlePageChange = (page) => {
         router.get(
             route("admin.transactions.index"),
-            { 
-                page, 
+            {
+                page,
                 search: searchTerm,
                 filterType: filterType,
                 startDate: filterType === 'custom' ? customStartDate : null,
@@ -210,12 +210,12 @@ export default function Index({ auth, transactions, filters }) {
                     <div className="overflow-x-auto">
                         <Table hoverable className="shadow-sm">
                             <Table.Head className="bg-gradient-to-r from-gray-50 to-gray-100">
-                                <Table.HeadCell className="font-semibold text-gray-700">ลำดับ</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700">วัตถุดิบ</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700">ประเภท</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700">จำนวน</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700">หมายเหตุ</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700">วันที่</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700 w-24">ลำดับ</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700 w-52">วัตถุดิบ</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700 w-32">ประเภท</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700 w-24">จำนวน</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700 w-96">หมายเหตุ</Table.HeadCell>
+                                <Table.HeadCell className="font-semibold text-gray-700 w-64">วันที่</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y">
                                 {transactions.data?.map((transaction, index) => (
@@ -223,10 +223,10 @@ export default function Index({ auth, transactions, filters }) {
                                         key={transaction.id}
                                         className="bg-white hover:bg-gray-50 transition-colors"
                                     >
-                                        <Table.Cell className="font-medium text-gray-900 whitespace-nowrap">
+                                        <Table.Cell className="font-medium text-gray-900 whitespace-nowrap w-24">
                                             #{transactions.from + index}
                                         </Table.Cell>
-                                        <Table.Cell>
+                                        <Table.Cell className="w-52">
                                             <Tooltip
                                                 content={
                                                     <div className="p-2 max-w-xs">
@@ -244,7 +244,9 @@ export default function Index({ auth, transactions, filters }) {
                                                                 </div>
                                                                 <div>
                                                                     <p className="text-gray-500">จำนวน:</p>
-                                                                    <p className="font-medium">{formatAmount(transaction.amount)}</p>
+                                                                    <p className={`font-medium ${transaction.usage_type === 'USE' ? 'text-red-600' : 'text-green-600'}`}>
+                                                                        {transaction.usage_type === 'USE' ? '-' : '+'}{formatAmount(transaction.amount)}
+                                                                    </p>
                                                                 </div>
                                                             </div>
                                                             <div className="text-sm">
@@ -261,12 +263,12 @@ export default function Index({ auth, transactions, filters }) {
                                                 </div>
                                             </Tooltip>
                                         </Table.Cell>
-                                        <Table.Cell>{getTypeLabel(transaction.usage_type)}</Table.Cell>
-                                        <Table.Cell className="font-medium">
-                                            {formatAmount(transaction.amount)}
+                                        <Table.Cell className="w-24">{getTypeLabel(transaction.usage_type)}</Table.Cell>
+                                        <Table.Cell className={`font-medium w-24 ${transaction.usage_type === 'USE' ? 'text-red-600' : 'text-green-600'}`}>
+                                            {transaction.usage_type === 'USE' ? '-' : '+'}{formatAmount(transaction.amount)}
                                         </Table.Cell>
-                                        <Table.Cell>{transaction.note || '-'}</Table.Cell>
-                                        <Table.Cell>{formatDate(transaction.created_at)}</Table.Cell>
+                                        <Table.Cell className="w-96">{transaction.note || '-'}</Table.Cell>
+                                        <Table.Cell className="w-64">{formatDate(transaction.created_at)}</Table.Cell>
                                     </Table.Row>
                                 ))}
                             </Table.Body>

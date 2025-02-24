@@ -10,6 +10,7 @@ use App\Models\PointUsage;
 use App\Models\ProductIngredients;
 use App\Models\Ingredient;
 use App\Models\Consumable;
+use App\Models\ProductConsumables;
 use App\Models\ProductIngredientUsage;
 use Illuminate\Support\Facades\DB;
 use Exception;
@@ -45,6 +46,7 @@ class OrderCancellationService
 
                 $cancellation->update([
                     'restored_ingredients' => $restoredItems['restored_ingredients'],
+                    'restored_consumables' => $restoredItems['restored_consumables'],
                     'expense_amount' => $data['refunded_amount']
                 ]);
             }
@@ -109,34 +111,106 @@ class OrderCancellationService
         $restoredIngredients = [];
         $restoredConsumables = [];
 
-        foreach ($order->orderDetails as $detail) {
-            // หาวัตถุดิบที่ใช้ในสินค้า
-            $ingredients = ProductIngredients::where('product_id', $detail->product_id)
-                ->with('ingredient')
-                ->get();
-
-            foreach ($ingredients as $ingredient) {
-                $quantity = $ingredient->quantity_used * $detail->quantity;
-
-                // เพิ่มจำนวนวัตถุดิบกลับเข้าสต็อก
-                $ingredient->ingredient->increment('quantity', $quantity);
-
-                $restoredIngredients[] = [
-                    'order_id' => $order->id,
-                    'order_detail_id' => $detail->id,
-                    'ingredient_id' => $ingredient->ingredient_id,
-                    'name' => $ingredient->ingredient->name,
-                    'amount' => $quantity,
-                    'usage_type' => 'ADD',
-                    'created_by' => Auth::user()->id,
-                    'note' => "คืนวัตถุดิบ {$ingredient->ingredient->name} จากคำสั่งซื้อ {$order->id}"
-                ];
+        // วนลูปแต่ละรายการสินค้าในออเดอร์
+        foreach ($order->orderDetails as $orderItem) {
+            $product = $orderItem->product;
+            if (!$product) {
+                Log::warning("ไม่พบข้อมูลสินค้าสำหรับ order detail ID: {$orderItem->id}");
+                continue;
             }
 
-            Log::info("Restoring consumables for order {$order->id}");
+            Log::info("กำลังค้นหาวัตถุดิบสำหรับสินค้า: {$product->name} (จำนวน: {$orderItem->quantity})");
 
-            // TODO: เพิ่มการจัดการ consumables ตามความต้องการ
+            // วนลูปแต่ละวัตถุดิบที่ใช้ในสินค้า
+            $productIngredients = \App\Models\ProductIngredients::with('ingredient')
+                ->where('product_id', $product->id)
+                ->get();
+
+            foreach ($productIngredients as $productIngredient) {
+                if (!$productIngredient->ingredient) {
+                    Log::warning("ไม่พบข้อมูลวัตถุดิบ ID: {$productIngredient->ingredient_id} สำหรับสินค้า: {$product->name}");
+                    continue;
+                }
+
+                // คำนวณจำนวนที่ต้องคืนตามขนาดแก้ว
+                $amountToRestore = 0;
+                switch (strtoupper($orderItem->size)) {
+                    case 'S':
+                        $amountToRestore = $productIngredient->quantity_size_s * $orderItem->quantity;
+                        break;
+                    case 'M':
+                        $amountToRestore = $productIngredient->quantity_size_m * $orderItem->quantity;
+                        break;
+                    case 'L':
+                        $amountToRestore = $productIngredient->quantity_size_l * $orderItem->quantity;
+                        break;
+                }
+
+                $ingredient = $productIngredient->ingredient;
+
+                Log::info("คืนวัตถุดิบ: {$ingredient->name} จำนวน {$amountToRestore} {$ingredient->unit->name} (ขนาด: {$orderItem->size})");
+
+                if ($amountToRestore > 0) {
+                    // เพิ่มจำนวนวัตถุดิบกลับเข้าคลัง
+                    $ingredient->increment('quantity', $amountToRestore);
+
+                    // เก็บข้อมูลการคืนวัตถุดิบ
+                    $restoredIngredients[] = [
+                        'order_id' => $order->id,
+                        'order_detail_id' => $orderItem->id,
+                        'ingredient_id' => $ingredient->id,
+                        'name' => $ingredient->name,
+                        'amount' => $amountToRestore,
+                        'unit' => $ingredient->unit,
+                        'usage_type' => 'ADD',
+                        'created_by' => auth()->id(),
+                        'note' => "คืนวัตถุดิบ {$ingredient->name} จากคำสั่งซื้อ {$order->id} (ขนาด: {$orderItem->size})"
+                    ];
+                }
+            }
+
+            // วนลูปแต่ละอุปกรณ์ที่ใช้ในสินค้า
+            $productConsumables = \App\Models\ProductConsumables::with('consumable')
+                ->where('product_id', $product->id)
+                ->get();
+
+            foreach ($productConsumables as $productConsumable) {
+                if (!$productConsumable->consumable) {
+                    Log::warning("ไม่พบข้อมูลอุปกรณ์ ID: {$productConsumable->consumable_id} สำหรับสินค้า: {$product->name}");
+                    continue;
+                }
+
+                // คำนวณจำนวนที่ต้องคืนสำหรับอุปกรณ์
+                $amountToRestore = $productConsumable->quantity_used * $orderItem->quantity;
+
+                $consumable = $productConsumable->consumable;
+
+                Log::info("คืนอุปกรณ์: {$consumable->name} จำนวน {$amountToRestore} {$consumable->unit->name}");
+
+                if ($amountToRestore > 0) {
+                    // เพิ่มจำนวนอุปกรณ์กลับเข้าคลัง
+                    $consumable->increment('quantity', $amountToRestore);
+
+                    // เก็บข้อมูลการคืนอุปกรณ์
+                    $restoredConsumables[] = [
+                        'order_id' => $order->id,
+                        'order_detail_id' => $orderItem->id,
+                        'consumable_id' => $consumable->id,
+                        'name' => $consumable->name,
+                        'amount' => $amountToRestore,
+                        'unit' => $consumable->unit,
+                        'usage_type' => 'ADD',
+                        'created_by' => auth()->id(),
+                        'note' => "คืนอุปกรณ์ {$consumable->name} จากคำสั่งซื้อ {$order->id}"
+                    ];
+                }
+            }
         }
+
+        Log::info("สรุปการคืนวัตถุดิบและอุปกรณ์:", [
+            'ingredients' => $restoredIngredients,
+            'consumables' => $restoredConsumables
+        ]);
 
         return [
             'restored_ingredients' => $restoredIngredients,
