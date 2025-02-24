@@ -4,7 +4,7 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function EditPromotion({ promotion }) {
+export default function EditPromotion({ promotion, errors, categories }) {
     return (
         <AuthenticatedLayout
             header={
@@ -25,7 +25,7 @@ export default function EditPromotion({ promotion }) {
                     <Breadcrumb.Item>แก้ไขโปรโมชัน</Breadcrumb.Item>
                 </Breadcrumb>
             </div>
-            <PromotionForm promotion={promotion} isEditing={true} />
+            <PromotionForm promotion={promotion} categories={categories} isEditing={true} errors={errors} />
         </AuthenticatedLayout>
     );
 }

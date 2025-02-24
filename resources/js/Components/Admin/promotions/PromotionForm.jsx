@@ -25,18 +25,23 @@ export default function PromotionForm({
         image: null,
         description: isEditing ? promotion?.description : "",
         type: isEditing ? promotion?.type : "PERCENTAGE",
-        percentage: isEditing ? promotion?.discount_value : 0,
-        fixed: isEditing ? promotion?.discount_value : 0,
-        buyXGetY: {
-            buy: isEditing ? promotion?.buyXGetY?.buy : 0,
-            get: isEditing ? promotion?.buyXGetY?.get : 0,
+        percentage: isEditing ? promotion?.percentage : 0,
+        fixed: isEditing ? promotion?.fixed : 0,
+        buyXGetY: isEditing && promotion?.buy_x_get_y ? {
+            buy: promotion.buy_x_get_y.buy || 0,
+            get: promotion.buy_x_get_y.get || 0,
+        } : {
+            buy: 0,
+            get: 0,
         },
-        category: {
-            discount_type: isEditing
-                ? promotion?.category?.discount_type
-                : "PERCENTAGE",
-            discount_value: isEditing ? promotion?.category?.discount_value : 0,
-            category_id: isEditing ? promotion?.category?.category_id : "",
+        category: isEditing && promotion?.category ? {
+            discount_type: promotion.category.discount_type || "PERCENTAGE",
+            discount_value: promotion.category.discount_value || 0,
+            category_id: promotion.category.category_id?.toString() || "",
+        } : {
+            discount_type: "PERCENTAGE",
+            discount_value: 0,
+            category_id: "",
         },
         start_date: isEditing ? formatDateForInput(promotion?.start_date) : "",
         end_date: isEditing ? formatDateForInput(promotion?.end_date) : "",
@@ -124,7 +129,13 @@ export default function PromotionForm({
                                     setData("name", e.target.value)
                                 }
                                 color={errors.name ? "failure" : "gray"}
-                                helperText={errors.name}
+                                helperText={
+                                    errors.name && (
+                                        <span className="text-sm text-red-500">
+                                            {errors.name}
+                                        </span>
+                                    )
+                                }
                             />
                         </div>
                         <div>
@@ -142,7 +153,13 @@ export default function PromotionForm({
                                     setData("description", e.target.value)
                                 }
                                 color={errors.description ? "failure" : "gray"}
-                                helperText={errors.description}
+                                helperText={
+                                    errors.description && (
+                                        <span className="text-sm text-red-500">
+                                            {errors.description}
+                                        </span>
+                                    )
+                                }
                             />
                         </div>
                     </div>
@@ -167,7 +184,13 @@ export default function PromotionForm({
                             accept="image/*"
                             onChange={handleFileChange}
                             color={errors.image ? "failure" : "gray"}
-                            helperText={errors.image}
+                            helperText={
+                                errors.image && (
+                                    <span className="text-sm text-red-500">
+                                        {errors.image}
+                                    </span>
+                                )
+                            }
                         />
                     </div>
                 </div>
@@ -192,6 +215,11 @@ export default function PromotionForm({
                                 ส่วนลดประเภท
                             </option>
                         </Select>
+                        {errors.type && (
+                            <span className="text-sm text-red-500">
+                                {errors.type}
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -224,7 +252,13 @@ export default function PromotionForm({
                                     )
                                 }
                                 color={errors.percentage ? "failure" : "gray"}
-                                helperText={errors.percentage}
+                                helperText={
+                                    errors.percentage && (
+                                        <span className="text-sm text-red-500">
+                                            {errors.percentage}
+                                        </span>
+                                    )
+                                }
                             />
                         </div>
                     )}
@@ -248,7 +282,13 @@ export default function PromotionForm({
                                     )
                                 }
                                 color={errors.fixed ? "failure" : "gray"}
-                                helperText={errors.fixed}
+                                helperText={
+                                    errors.fixed && (
+                                        <span className="text-sm text-red-500">
+                                            {errors.fixed}
+                                        </span>
+                                    )
+                                }
                             />
                         </div>
                     )}
@@ -277,7 +317,13 @@ export default function PromotionForm({
                                             ? "failure"
                                             : "gray"
                                     }
-                                    helperText={errors["buyXGetY.buy"]}
+                                    helperText={
+                                        errors["buyXGetY.buy"] && (
+                                            <span className="text-sm text-red-500">
+                                                {errors["buyXGetY.buy"]}
+                                            </span>
+                                        )
+                                    }
                                 />
                             </div>
                             <div>
@@ -302,7 +348,13 @@ export default function PromotionForm({
                                             ? "failure"
                                             : "gray"
                                     }
-                                    helperText={errors["buyXGetY.get"]}
+                                    helperText={
+                                        errors["buyXGetY.get"] && (
+                                            <span className="text-sm text-red-500">
+                                                {errors["buyXGetY.get"]}
+                                            </span>
+                                        )
+                                    }
                                 />
                             </div>
                         </div>
@@ -342,9 +394,9 @@ export default function PromotionForm({
                                     ))}
                                 </Select>
                                 {errors["category.category_id"] && (
-                                    <p className="mt-1 text-sm text-red-500">
+                                    <span className="text-sm text-red-500">
                                         {errors["category.category_id"]}
-                                    </p>
+                                    </span>
                                 )}
                             </div>
                             <div>
@@ -373,6 +425,11 @@ export default function PromotionForm({
                                     </option>
                                     <option value="FIXED">ค่าคงที่</option>
                                 </Select>
+                                {errors["category.discount_type"] && (
+                                    <span className="text-sm text-red-500">
+                                        {errors["category.discount_type"]}
+                                    </span>
+                                )}
                             </div>
                             <div>
                                 <Label
@@ -422,7 +479,11 @@ export default function PromotionForm({
                                             : "gray"
                                     }
                                     helperText={
-                                        errors["category.discount_value"]
+                                        errors["category.discount_value"] && (
+                                            <span className="text-sm text-red-500">
+                                                {errors["category.discount_value"]}
+                                            </span>
+                                        )
                                     }
                                 />
                             </div>
@@ -450,7 +511,13 @@ export default function PromotionForm({
                                     setData("start_date", e.target.value)
                                 }
                                 color={errors.start_date ? "failure" : "gray"}
-                                helperText={errors.start_date}
+                                helperText={
+                                    errors.start_date && (
+                                        <span className="text-sm text-red-500">
+                                            {errors.start_date}
+                                        </span>
+                                    )
+                                }
                             />
                         </div>
                         <div>
@@ -464,7 +531,13 @@ export default function PromotionForm({
                                     setData("end_date", e.target.value)
                                 }
                                 color={errors.end_date ? "failure" : "gray"}
-                                helperText={errors.end_date}
+                                helperText={
+                                    errors.end_date && (
+                                        <span className="text-sm text-red-500">
+                                            {errors.end_date}
+                                        </span>
+                                    )
+                                }
                             />
                         </div>
                     </div>

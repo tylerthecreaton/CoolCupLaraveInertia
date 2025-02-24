@@ -5,7 +5,7 @@ import { Head } from "@inertiajs/react";
 import { Breadcrumb } from "flowbite-react";
 import { HiHome } from "react-icons/hi";
 
-export default function CreatePromotion({ categories }) {
+export default function CreatePromotion({ categories ,errors}) {
     return (
         <AuthenticatedLayout
             header={
@@ -25,7 +25,7 @@ export default function CreatePromotion({ categories }) {
                     </Breadcrumb.Item>
                     <Breadcrumb.Item>เพิ่มโปรโมชัน</Breadcrumb.Item>
                 </Breadcrumb>
-                <PromotionForm categories={categories} />
+                <PromotionForm categories={categories} errors={errors} />
             </AdminLayout>
         </AuthenticatedLayout>
     );
