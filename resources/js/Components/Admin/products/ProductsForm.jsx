@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "@inertiajs/react";
+import { router, useForm } from "@inertiajs/react";
 import { Button, FileInput, Label, Select, TextInput } from "flowbite-react";
 import { isAbsoluteUrl } from "@/helpers";
 import ProductIngredientsForm from "./ProductIngredientsForm";
@@ -24,8 +24,10 @@ export default function ProductsForm({
     });
 
     useEffect(() => {
-        console.log(errors);
-    }, [errors]);
+        if (isEditing && product) {
+            setData('category_id', product.category_id);
+        }
+    }, []);
 
     const handleFileChange = (e) => {
         setData("image", e.target.files[0]);
@@ -33,16 +35,59 @@ export default function ProductsForm({
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // Create form data object
+        const formData = new FormData();
+
+        // Add form fields
+        formData.append('name', data.name);
+        formData.append('category_id', data.category_id);
+        formData.append('description', data.description || '');
+        formData.append('cost_price', data.cost_price);
+        formData.append('sale_price', data.sale_price);
+
+        // Only append image if it exists
+        if (data.image) {
+            formData.append('image', data.image);
+        }
+
+        console.log('Submitting form with data:', {
+            name: data.name,
+            category_id: data.category_id,
+            description: data.description,
+            cost_price: data.cost_price,
+            sale_price: data.sale_price,
+        });
+
         if (isEditing) {
-            put(route("admin.products.update", product.id), data, {
-                forceFormData: true,
+            router.post(route("admin.products.update", product.id), {
+                _method: 'PUT',
+                name: data.name,
+                category_id: data.category_id,
+                description: data.description || '',
+                cost_price: data.cost_price,
+                sale_price: data.sale_price,
+                ...(data.image && { image: data.image })
+            }, {
+                onError: (errors) => {
+                    console.log('Submission Errors:', errors);
+                },
+                onSuccess: () => {
+                    console.log('Update successful');
+                },
+                forceFormData: true
             });
         } else {
-            post(route("admin.products.store"), data, {
-                forceFormData: true,
-            });
+            post(route("admin.products.store"), formData);
         }
     };
+
+    const handleCategoryChange = (e) => {
+        const value = e.target.value;
+        console.log('Selected Category:', value);
+        setData('category_id', value);
+    };
+
     return (
         <div className="container px-4 py-8 mx-auto mt-5 bg-white rounded-md sm:px-8">
             <form
@@ -76,7 +121,7 @@ export default function ProductsForm({
                     <Select
                         id="category"
                         required
-                        value={data.category_id}
+                        value={data.category_id || ''}
                         name="category_id"
                         onChange={(e) => setData("category_id", e.target.value)}
                     >
@@ -186,7 +231,6 @@ export default function ProductsForm({
                         name="description"
                         type="text"
                         placeholder="กรุณากรอกคำอธิบายสินค้า"
-                        required
                         value={data.description}
                         onChange={(e) => setData("description", e.target.value)}
                     />

@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Ingredient;
 use App\Models\Consumable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ProductsController extends Controller
@@ -108,19 +109,31 @@ class ProductsController extends Controller
 
     public function update(Request $request, string $id)
     {
+        Log::info('Update Request Data:', [
+            'all' => $request->all(),
+            'category_id' => $request->input('category_id'),
+            'files' => $request->allFiles(),
+            'content_type' => $request->header('Content-Type'),
+        ]);
+
         $rules = [
             'name' => 'required|min:3|max:255|unique:products,name,' . $id,
-            'category_id' => 'required',
+            'category_id' => 'required|numeric',
             'cost_price' => 'required|numeric',
             'sale_price' => 'required|numeric',
         ];
 
         $message = [
             'name.required' => 'กรุณากรอกชื่อสินค้า',
+            'category_id.required' => 'กรุณาเลือกประเภทสินค้า',
+            'category_id.numeric' => 'รูปแบบประเภทสินค้าไม่ถูกต้อง',
+            'name.min' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :min ตัวอักษร',
+            'name.max' => 'ชื่อสินค้าต้องมีความยาวไม่เกิน :max ตัวอักษร',
             'name.unique' => 'ชื่อสินค้านี้ถูกใช้ไปแล้ว',
-            'category_id' => 'กรุณาเลือกหมวดหมู่',
-            'cost_price' => 'กรุณากรอกราคาต้นทุน',
-            'sale_price' => 'กรุณากรอกราคาขาย',
+            'cost_price.required' => 'กรุณากรอกราคาต้นทุน',
+            'cost_price.numeric' => 'กรุณากรอกราคาต้นทุนเป็นตัวเลข',
+            'sale_price.required' => 'กรุณากรอกราคาขาย',
+            'sale_price.numeric' => 'กรุณากรอกราคาขายเป็นตัวเลข',
         ];
 
         if ($request->hasFile('image')) {
@@ -131,8 +144,6 @@ class ProductsController extends Controller
         }
 
         $request->validate($rules, $message);
-
-
 
         $product = Product::find($id);
 
