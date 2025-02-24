@@ -9,6 +9,7 @@ use App\Models\Unit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class IngredientsController extends Controller
@@ -86,13 +87,23 @@ class IngredientsController extends Controller
     }
     public function update(Request $request, String $id)
     {
+        Log::info('Ingredient Update Request Data:', [
+            'all' => $request->all(),
+            'files' => $request->allFiles(),
+            'content_type' => $request->header('Content-Type'),
+        ]);
+
         $rules = [
             'name' => 'required|min:3|max:255',
             'quantity' => 'required|numeric',
-            'unit_id' => 'required|exists:units,id',
+            'unit_id' => 'required|numeric|exists:units,id',
             'is_sweetness' => 'required|boolean',
             'expiration_date' => 'nullable|date',
         ];
+
+        if ($request->hasFile('image')) {
+            $rules['image'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:2048';
+        }
 
         $message = [
             'name.required' => 'กรุณากรอกชื่อ',
@@ -100,10 +111,15 @@ class IngredientsController extends Controller
             'name.max' => 'ชื่อต้องมีความยาวไม่เกิน 255 ตัวอักษร',
             'quantity.required' => 'กรุณากรอกจํานวน',
             'quantity.numeric' => 'กรุณากรอกจํานวนให้ถูกต้อง',
+            'unit_id.required' => 'กรุณาเลือกหน่วยวัด',
+            'unit_id.numeric' => 'หน่วยวัดที่เลือกไม่ถูกต้อง',
             'unit_id.exists' => 'หน่วยวัดที่เลือกไม่ถูกต้อง',
             'is_sweetness.required' => 'กรุณาเลือกรูปแบบวัตถุดิบ',
             'is_sweetness.boolean' => 'กรุณาเลือกรูปแบบวัตถุดิบให้ถูกต้อง',
             'expiration_date.date' => 'รูปแบบวันที่ไม่ถูกต้อง',
+            'image.image' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
+            'image.mimes' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
+            'image.max' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
         ];
 
         $request->validate($rules, $message);

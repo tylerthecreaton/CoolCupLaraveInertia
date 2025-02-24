@@ -10,6 +10,7 @@ import {
     HiCube,
     HiTag,
 } from "react-icons/hi";
+import { router } from "@inertiajs/react";
 
 export default function IngredientsForm({
     ingredient,
@@ -46,7 +47,15 @@ export default function IngredientsForm({
     const handleSubmit = (e) => {
         e.preventDefault();
         if (isEditing) {
-            put(route("admin.ingredients.update", ingredient.id), data, {
+            router.post(route("admin.ingredients.update", ingredient.id), {
+                _method: 'PUT',
+                name: data.name,
+                unit_id: data.unit_id,
+                quantity: data.quantity,
+                is_sweetness: data.is_sweetness,
+                expiration_date: data.expiration_date,
+                ...(data.image && { image: data.image })
+            }, {
                 forceFormData: true,
                 onSuccess: () => {
                     Swal.fire({
@@ -66,7 +75,10 @@ export default function IngredientsForm({
                 },
             });
         } else {
-            post(route("admin.ingredients.store"), data, {
+            post(route("admin.ingredients.store"), {
+                ...data,
+                ...(data.image && { image: data.image })
+            }, {
                 forceFormData: true,
                 onSuccess: () => {
                     Swal.fire({
