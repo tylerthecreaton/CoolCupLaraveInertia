@@ -141,9 +141,9 @@ class NotificationController extends Controller
         return IngredientLot::with(['details.ingredient.unit'])
             ->join('ingredient_lot_details', 'ingredient_lots.id', '=', 'ingredient_lot_details.ingredient_lot_id')
             ->where('ingredient_lot_details.expiration_date', '<=', $expiryDate)
+            ->select('ingredient_lots.*', 'ingredient_lot_details.expiration_date')
             ->orderBy('ingredient_lot_details.expiration_date', 'asc')
-            ->select('ingredient_lots.*')
-            ->distinct()
+            ->distinct('ingredient_lots.id')
             ->get();
     }
 
