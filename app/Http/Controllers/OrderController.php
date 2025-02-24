@@ -434,7 +434,8 @@ class OrderController extends Controller
                 [
                     'id' => $topping['id'],
                     'quantity' => $item['quantity'],
-                    'sweetness' => '100%' // topping ใช้ความหวานปกติ
+                    'sweetness' => '100%', // topping ใช้ความหวานปกติ
+                    'size' => $item['size'] ?? 's' // ใช้ size เดียวกับ parent item หรือ default เป็น s
                 ],
                 $orderDetailId,
                 '100%'
@@ -445,7 +446,7 @@ class OrderController extends Controller
                 [
                     'id' => $topping['id'],
                     'quantity' => $item['quantity'],
-                    'size' => 'S' // topping มักจะมีขนาดเดียว
+                    'size' => $item['size'] ?? 's' // Use parent item's size or default to 'S'
                 ],
                 $orderDetailId
             );
@@ -624,7 +625,7 @@ class OrderController extends Controller
 
                         // Check topping consumables
                         $toppingConsumables = ProductConsumables::where('product_id', $topping['id'])
-                            ->where('size', 'S')
+                            ->where('size', $item['size'] ?? 's')  // Use parent item's size or default to 'S'
                             ->get();
 
                         foreach ($toppingConsumables as $consumable) {
