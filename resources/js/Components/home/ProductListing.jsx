@@ -18,20 +18,55 @@ export default function ProductListing({
     };
 
     const isOutOfStock = (product) => {
-        // ถ้าไม่มีวัตถุดิบในการทำ ไม่ต้องแสดงว่าสินค้าหมด
-        if (!product.ingredients || product.ingredients.length === 0) {
+        // เพิ่ม console.log เพื่อตรวจสอบข้อมูล
+        console.log('Checking product:', product.name, {
+            ingredients: product.ingredients,
+            hasIngredients: product.ingredients && product.ingredients.length > 0
+        });
+
+        // ถ้าไม่มี product หรือไม่มี ingredients ให้ถือว่าสินค้าไม่หมด
+        if (!product || !product.ingredients || product.ingredients.length === 0) {
             return false;
         }
 
         // ตรวจสอบว่ามีวัตถุดิบที่ไม่เพียงพอหรือไม่
         return product.ingredients.some(ingredient => {
-            if (!ingredient || ingredient.quantity === null || ingredient.quantity_size_s === null) {
+            console.log('Checking ingredient:', ingredient.name, {
+                quantity: ingredient.quantity,
+                quantity_size_s: ingredient.quantity_size_s
+            });
+
+            // ถ้าไม่มีข้อมูลวัตถุดิบ ให้ข้ามการตรวจสอบ
+            if (!ingredient || !ingredient.quantity) {
                 return false;
             }
+
             // แปลงค่าเป็นตัวเลขเพื่อเปรียบเทียบ
-            const remaining = parseFloat(ingredient.quantity);
-            const required = parseFloat(ingredient.quantity_size_s);
-            return remaining < required;
+            const remaining = Number(ingredient.quantity);
+
+            // ถ้า quantity เป็น 0 หรือน้อยกว่า 0 ให้ถือว่าสินค้าหมด
+            if (remaining <= 0) {
+                console.log('Out of stock - no quantity remaining:', {
+                    name: ingredient.name,
+                    remaining
+                });
+                return true;
+            }
+
+            // ถ้ามี quantity_size_s ให้เช็คว่าพอสำหรับการทำเมนูหรือไม่
+            if (ingredient.quantity_size_s) {
+                const required = Number(ingredient.quantity_size_s);
+                if (!isNaN(required) && remaining < required) {
+                    console.log('Out of stock - insufficient quantity:', {
+                        name: ingredient.name,
+                        remaining,
+                        required
+                    });
+                    return true;
+                }
+            }
+
+            return false;
         });
     };
 
@@ -101,9 +136,14 @@ export default function ProductListing({
     };
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-6 gap-6 p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-5 gap-4 p-6">
             {products.map((product) => {
                 const outOfStock = isOutOfStock(product);
+                console.log('Product status:', {
+                    name: product.name,
+                    outOfStock,
+                    ingredients: product.ingredients
+                });
                 return (
                     <div
                         key={product.id}
