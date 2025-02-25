@@ -155,6 +155,7 @@ class PromotionController extends Controller
     {
         $rules = [
             'name' => 'required|string|min:3|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             'description' => 'required|string',
             'type' => 'required|in:PERCENTAGE,FIXED,BUY_X_GET_Y,CATEGORY_DISCOUNT',
             'percentage' => 'required_if:type,PERCENTAGE|nullable|numeric|min:0|max:100',
@@ -187,6 +188,14 @@ class PromotionController extends Controller
         ];
 
         $validated = $request->validate($rules, $messages);
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name = time() . '.' . $image->getClientOriginalExtension();
+            $destinationPath = public_path('/images/promotions/');
+            $image->move($destinationPath, $name);
+            $promotion->image = "/images/promotions/" . $name;
+        }
 
         $promotion->name = $validated['name'];
         $promotion->description = $validated['description'];

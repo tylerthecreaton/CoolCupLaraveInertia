@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { router, useForm } from "@inertiajs/react";
 import { Button, FileInput, Label, Select, TextInput } from "flowbite-react";
 import { isAbsoluteUrl } from "@/helpers";
+import Swal from "sweetalert2";
 import ProductIngredientsForm from "./ProductIngredientsForm";
 import ProductConsumablesForm from "./ProductConsumablesForm";
 
@@ -51,35 +52,78 @@ export default function ProductsForm({
             formData.append('image', data.image);
         }
 
-        console.log('Submitting form with data:', {
-            name: data.name,
-            category_id: data.category_id,
-            description: data.description,
-            cost_price: data.cost_price,
-            sale_price: data.sale_price,
+        Swal.fire({
+            title: isEditing ? "ยืนยันการแก้ไข?" : "ยืนยันการเพิ่ม?",
+            text: isEditing 
+                ? "คุณต้องการแก้ไขข้อมูลสินค้านี้ใช่หรือไม่?" 
+                : "คุณต้องการเพิ่มสินค้าใหม่ใช่หรือไม่?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ยืนยัน",
+            cancelButtonText: "ยกเลิก"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (isEditing) {
+                    router.post(route("admin.products.update", product.id), {
+                        _method: 'PUT',
+                        name: data.name,
+                        category_id: data.category_id,
+                        description: data.description || '',
+                        cost_price: data.cost_price,
+                        sale_price: data.sale_price,
+                        ...(data.image && { image: data.image })
+                    }, {
+                        onError: (errors) => {
+                            console.log('Submission Errors:', errors);
+                            Swal.fire({
+                                title: "เกิดข้อผิดพลาด!",
+                                text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                                icon: "error"
+                            });
+                        },
+                        onSuccess: () => {
+                            console.log('Update successful');
+                            Swal.fire({
+                                title: "สำเร็จ!",
+                                text: "แก้ไขข้อมูลสินค้าเรียบร้อยแล้ว",
+                                icon: "success",
+                                timer: 1500
+                            });
+                        },
+                        forceFormData: true
+                    });
+                } else {
+                    router.post(route("admin.products.store"), {
+                        name: data.name,
+                        category_id: data.category_id,
+                        description: data.description || '',
+                        cost_price: data.cost_price,
+                        sale_price: data.sale_price,
+                        ...(data.image && { image: data.image })
+                    }, {
+                        onError: (errors) => {
+                            console.log('Submission Errors:', errors);
+                            Swal.fire({
+                                title: "เกิดข้อผิดพลาด!",
+                                text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                                icon: "error"
+                            });
+                        },
+                        onSuccess: () => {
+                            Swal.fire({
+                                title: "สำเร็จ!",
+                                text: "เพิ่มสินค้าใหม่เรียบร้อยแล้ว",
+                                icon: "success",
+                                timer: 1500
+                            });
+                        },
+                        forceFormData: true
+                    });
+                }
+            }
         });
-
-        if (isEditing) {
-            router.post(route("admin.products.update", product.id), {
-                _method: 'PUT',
-                name: data.name,
-                category_id: data.category_id,
-                description: data.description || '',
-                cost_price: data.cost_price,
-                sale_price: data.sale_price,
-                ...(data.image && { image: data.image })
-            }, {
-                onError: (errors) => {
-                    console.log('Submission Errors:', errors);
-                },
-                onSuccess: () => {
-                    console.log('Update successful');
-                },
-                forceFormData: true
-            });
-        } else {
-            post(route("admin.products.store"), formData);
-        }
     };
 
     const handleCategoryChange = (e) => {

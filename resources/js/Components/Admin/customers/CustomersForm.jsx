@@ -1,4 +1,5 @@
 import { useForm, usePage } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import { Button, Label, TextInput, Card } from "flowbite-react";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
@@ -147,42 +148,73 @@ export default function CustomersForm({ isEditing = false, customer = null, erro
             }
         }
 
-        // ดำเนินการ submit form หลังจากตรวจสอบเบอร์โทรศัพท์แล้ว
+        // Show confirmation dialog before submitting
+        const result = await Swal.fire({
+            title: isEditing ? "ยืนยันการแก้ไข?" : "ยืนยันการเพิ่ม?",
+            text: isEditing 
+                ? "คุณต้องการแก้ไขข้อมูลลูกค้านี้ใช่หรือไม่?" 
+                : "คุณต้องการเพิ่มลูกค้าใหม่ใช่หรือไม่?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ยืนยัน",
+            cancelButtonText: "ยกเลิก"
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        // Submit form after confirmation
         if (isEditing) {
-            put(route("admin.customers.update", customer.id), data, {
-                forceFormData: true,
+            router.post(route("admin.customers.update", customer.id), {
+                _method: 'PUT',
+                ...data
+            }, {
                 onSuccess: () => {
                     Swal.fire({
-                        icon: 'success',
-                        title: 'แก้ไขข้อมูลสำเร็จ',
-                        text: 'ข้อมูลลูกค้าถูกแก้ไขเรียบร้อยแล้ว',
+                        title: "สำเร็จ!",
+                        text: "แก้ไขข้อมูลลูกค้าเรียบร้อยแล้ว",
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        router.visit(route("admin.customers.index"));
                     });
                 },
-                onError: () => {
+                onError: (errors) => {
+                    console.log('Submission Errors:', errors);
                     Swal.fire({
-                        icon: 'error',
-                        title: 'แก้ไขข้อมูลไม่สำเร็จ',
-                        text: 'กรุณาลองใหม่อีกครั้ง',
+                        title: "เกิดข้อผิดพลาด!",
+                        text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                        icon: "error"
                     });
-                },
+                }
             });
         } else {
-            post(route("admin.customers.store"), data, {
-                forceFormData: true,
+            router.post(route("admin.customers.store"), {
+                ...data
+            }, {
                 onSuccess: () => {
                     Swal.fire({
-                        icon: 'success',
-                        title: 'เพิ่มข้อมูลสำเร็จ',
-                        text: 'ข้อมูลลูกค้าถูกเพิ่มเรียบร้อยแล้ว',
+                        title: "สำเร็จ!",
+                        text: "เพิ่มลูกค้าใหม่เรียบร้อยแล้ว",
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        router.visit(route("admin.customers.index"));
                     });
                 },
-                onError: () => {
+                onError: (errors) => {
+                    console.log('Submission Errors:', errors);
                     Swal.fire({
-                        icon: 'error',
-                        title: 'เพิ่มข้อมูลไม่สำเร็จ',
-                        text: 'กรุณาลองใหม่อีกครั้ง',
+                        title: "เกิดข้อผิดพลาด!",
+                        text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                        icon: "error"
                     });
-                },
+                }
             });
         }
     };

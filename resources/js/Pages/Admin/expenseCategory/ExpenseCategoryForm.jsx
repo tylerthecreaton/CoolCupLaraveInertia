@@ -1,19 +1,84 @@
 import { useForm } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import { Button, Label, TextInput, Card } from "flowbite-react";
 import { HiCurrencyDollar } from "react-icons/hi";
+import Swal from "sweetalert2";
 
 export default function ExpenseCategoryForm({ category = null, errors = {} }) {
-    const { data, setData, post, put, processing } = useForm({
+    const { data, setData, processing } = useForm({
         name: category?.name || "",
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (category) {
-            put(route("admin.expense-categories.update", category.id));
-        } else {
-            post(route("admin.expense-categories.store"));
-        }
+
+        Swal.fire({
+            title: category ? "ยืนยันการแก้ไข?" : "ยืนยันการเพิ่ม?",
+            text: category 
+                ? "คุณต้องการแก้ไขหมวดหมู่รายจ่ายนี้ใช่หรือไม่?" 
+                : "คุณต้องการเพิ่มหมวดหมู่รายจ่ายใหม่ใช่หรือไม่?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ยืนยัน",
+            cancelButtonText: "ยกเลิก"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (category) {
+                    router.post(route("admin.expense-categories.update", category.id), {
+                        _method: 'PUT',
+                        ...data
+                    }, {
+                        onSuccess: () => {
+                            Swal.fire({
+                                title: "สำเร็จ!",
+                                text: "แก้ไขหมวดหมู่รายจ่ายเรียบร้อยแล้ว",
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                // Redirect after success
+                                router.visit(route("admin.expense-categories.index"));
+                            });
+                        },
+                        onError: (errors) => {
+                            console.log('Submission Errors:', errors);
+                            Swal.fire({
+                                title: "เกิดข้อผิดพลาด!",
+                                text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                                icon: "error"
+                            });
+                        }
+                    });
+                } else {
+                    router.post(route("admin.expense-categories.store"), {
+                        ...data
+                    }, {
+                        onSuccess: () => {
+                            Swal.fire({
+                                title: "สำเร็จ!",
+                                text: "เพิ่มหมวดหมู่รายจ่ายใหม่เรียบร้อยแล้ว",
+                                icon: "success",
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                // Redirect after success
+                                router.visit(route("admin.expense-categories.index"));
+                            });
+                        },
+                        onError: (errors) => {
+                            console.log('Submission Errors:', errors);
+                            Swal.fire({
+                                title: "เกิดข้อผิดพลาด!",
+                                text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                                icon: "error"
+                            });
+                        }
+                    });
+                }
+            }
+        });
     };
 
     return (

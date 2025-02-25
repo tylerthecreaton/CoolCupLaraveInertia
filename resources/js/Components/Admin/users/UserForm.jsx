@@ -1,8 +1,10 @@
 import { useForm } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import { Button, FileInput, Label, TextInput } from "flowbite-react";
+import Swal from "sweetalert2";
 
 export default function UserForm({ isEditing = false, user = null, errors = {} }) {
-    const { data, setData, post, put, processing } = useForm({
+    const { data, setData, processing } = useForm({
         name: isEditing ? user.name : "",
         email: isEditing ? user.email : "",
         username: isEditing ? user.username : "",
@@ -18,16 +20,70 @@ export default function UserForm({ isEditing = false, user = null, errors = {} }
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (isEditing) {
-            put(route("admin.users.update", user.id), data, {
-                forceFormData: true,
-            });
-        } else {
-            post(route("admin.users.store"), data, {
-                forceFormData: true,
-            });
-        }
+
+        Swal.fire({
+            title: isEditing ? "ยืนยันการแก้ไข?" : "ยืนยันการเพิ่ม?",
+            text: isEditing 
+                ? "คุณต้องการแก้ไขข้อมูลผู้ใช้นี้ใช่หรือไม่?" 
+                : "คุณต้องการเพิ่มผู้ใช้ใหม่ใช่หรือไม่?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ยืนยัน",
+            cancelButtonText: "ยกเลิก"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (isEditing) {
+                    router.post(route("admin.users.update", user.id), {
+                        _method: 'PUT',
+                        ...data,
+                    }, {
+                        forceFormData: true,
+                        onSuccess: () => {
+                            Swal.fire({
+                                title: "สำเร็จ!",
+                                text: "แก้ไขข้อมูลผู้ใช้เรียบร้อยแล้ว",
+                                icon: "success",
+                                timer: 1500
+                            });
+                        },
+                        onError: (errors) => {
+                            console.log('Submission Errors:', errors);
+                            Swal.fire({
+                                title: "เกิดข้อผิดพลาด!",
+                                text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                                icon: "error"
+                            });
+                        }
+                    });
+                } else {
+                    router.post(route("admin.users.store"), {
+                        ...data,
+                    }, {
+                        forceFormData: true,
+                        onSuccess: () => {
+                            Swal.fire({
+                                title: "สำเร็จ!",
+                                text: "เพิ่มผู้ใช้ใหม่เรียบร้อยแล้ว",
+                                icon: "success",
+                                timer: 1500
+                            });
+                        },
+                        onError: (errors) => {
+                            console.log('Submission Errors:', errors);
+                            Swal.fire({
+                                title: "เกิดข้อผิดพลาด!",
+                                text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                                icon: "error"
+                            });
+                        }
+                    });
+                }
+            }
+        });
     };
+
     return (
         <div className="container px-4 py-8 mx-auto mt-5 bg-white rounded-md sm:px-8">
             <form

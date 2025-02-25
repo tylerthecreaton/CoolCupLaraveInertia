@@ -8,6 +8,7 @@ import {
     Alert,
 } from "flowbite-react";
 import { useEffect } from "react";
+import Swal from "sweetalert2";
 
 export default function PromotionForm({
     categories = [],
@@ -78,21 +79,168 @@ export default function PromotionForm({
         return start <= end;
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const validateForm = () => {
+        if (!data.name.trim()) {
+            Swal.fire({
+                icon: 'error',
+                title: 'กรุณากรอกชื่อโปรโมชั่น',
+                text: 'ชื่อโปรโมชั่นเป็นข้อมูลที่จำเป็น',
+            });
+            return false;
+        }
+
+        if (!data.description.trim()) {
+            Swal.fire({
+                icon: 'error',
+                title: 'กรุณากรอกรายละเอียดโปรโมชั่น',
+                text: 'รายละเอียดโปรโมชั่นเป็นข้อมูลที่จำเป็น',
+            });
+            return false;
+        }
 
         if (!validateDates()) {
-            alert("วันที่สิ้นสุดต้องมากกว่าวันที่เริ่มต้น");
+            Swal.fire({
+                icon: 'error',
+                title: 'วันที่ไม่ถูกต้อง',
+                text: 'วันที่สิ้นสุดต้องมากกว่าหรือเท่ากับวันที่เริ่มต้น',
+            });
+            return false;
+        }
+
+        // Validate discount values based on type
+        if (data.type === "PERCENTAGE" && (data.percentage < 0 || data.percentage > 100)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'เปอร์เซ็นต์ส่วนลดไม่ถูกต้อง',
+                text: 'กรุณากรอกเปอร์เซ็นต์ส่วนลดระหว่าง 0-100',
+            });
+            return false;
+        }
+
+        if (data.type === "FIXED" && data.fixed <= 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'จำนวนเงินส่วนลดไม่ถูกต้อง',
+                text: 'กรุณากรอกจำนวนเงินส่วนลดที่มากกว่า 0',
+            });
+            return false;
+        }
+
+        if (data.type === "BUY_X_GET_Y" && (data.buyXGetY.buy <= 0 || data.buyXGetY.get <= 0)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'จำนวนสินค้าไม่ถูกต้อง',
+                text: 'กรุณากรอกจำนวนสินค้าที่ต้องซื้อและจำนวนสินค้าที่จะได้รับให้มากกว่า 0',
+            });
+            return false;
+        }
+
+        if (data.type === "CATEGORY_DISCOUNT") {
+            if (!data.category.category_id) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'กรุณาเลือกประเภทสินค้า',
+                    text: 'ต้องเลือกประเภทสินค้าที่ต้องการให้ส่วนลด',
+                });
+                return false;
+            }
+
+            if (data.category.discount_type === "PERCENTAGE" && 
+                (data.category.discount_value <= 0 || data.category.discount_value > 100)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เปอร์เซ็นต์ส่วนลดไม่ถูกต้อง',
+                    text: 'กรุณากรอกเปอร์เซ็นต์ส่วนลดระหว่าง 1-100',
+                });
+                return false;
+            }
+
+            if (data.category.discount_type === "FIXED" && data.category.discount_value <= 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'จำนวนเงินส่วนลดไม่ถูกต้อง',
+                    text: 'กรุณากรอกจำนวนเงินส่วนลดที่มากกว่า 0',
+                });
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!validateForm()) {
+            return;
+        }
+
+        // Show confirmation dialog
+        const result = await Swal.fire({
+            title: isEditing ? "ยืนยันการแก้ไข?" : "ยืนยันการเพิ่ม?",
+            text: isEditing 
+                ? "คุณต้องการแก้ไขโปรโมชั่นนี้ใช่หรือไม่?" 
+                : "คุณต้องการเพิ่มโปรโมชั่นใหม่ใช่หรือไม่?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ยืนยัน",
+            cancelButtonText: "ยกเลิก"
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
         if (isEditing) {
-            put(route("admin.promotions.update", promotion.id), data, {
+            router.post(route("admin.promotions.update", promotion.id), {
+                _method: 'PUT',
+                ...data
+            }, {
                 forceFormData: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: "สำเร็จ!",
+                        text: "แก้ไขโปรโมชั่นเรียบร้อยแล้ว",
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        router.visit(route("admin.promotions.index"));
+                    });
+                },
+                onError: (errors) => {
+                    console.log('Submission Errors:', errors);
+                    Swal.fire({
+                        title: "เกิดข้อผิดพลาด!",
+                        text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                        icon: "error"
+                    });
+                }
             });
         } else {
-            post(route("admin.promotions.store"), data, {
+            router.post(route("admin.promotions.store"), data, {
                 forceFormData: true,
+                onSuccess: () => {
+                    Swal.fire({
+                        title: "สำเร็จ!",
+                        text: "เพิ่มโปรโมชั่นใหม่เรียบร้อยแล้ว",
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        router.visit(route("admin.promotions.index"));
+                    });
+                },
+                onError: (errors) => {
+                    console.log('Submission Errors:', errors);
+                    Swal.fire({
+                        title: "เกิดข้อผิดพลาด!",
+                        text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                        icon: "error"
+                    });
+                }
             });
         }
     };

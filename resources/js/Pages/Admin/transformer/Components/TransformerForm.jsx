@@ -1,6 +1,7 @@
 import React from "react";
 import { useForm } from "@inertiajs/react";
 import { Label, TextInput, Button } from "flowbite-react";
+import Swal from "sweetalert2";
 import {
     HiTag,
     HiPencilAlt,
@@ -26,11 +27,46 @@ export default function TransformerForm({
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (isEditing) {
-            put(route("admin.transformers.update", transformer.id));
-        } else {
-            post(route("admin.transformers.store"));
-        }
+        
+        const action = isEditing ? put : post;
+        const url = isEditing 
+            ? route("admin.transformers.update", transformer.id)
+            : route("admin.transformers.store");
+
+        Swal.fire({
+            title: isEditing ? "ยืนยันการแก้ไข?" : "ยืนยันการเพิ่ม?",
+            text: isEditing 
+                ? "คุณต้องการแก้ไขสูตรแปรรูปนี้ใช่หรือไม่?" 
+                : "คุณต้องการเพิ่มสูตรแปรรูปนี้ใช่หรือไม่?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "ยืนยัน",
+            cancelButtonText: "ยกเลิก"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                action(url, {
+                    onSuccess: () => {
+                        Swal.fire({
+                            title: "สำเร็จ!",
+                            text: isEditing 
+                                ? "แก้ไขสูตรแปรรูปเรียบร้อยแล้ว"
+                                : "เพิ่มสูตรแปรรูปเรียบร้อยแล้ว",
+                            icon: "success",
+                            timer: 1500
+                        });
+                    },
+                    onError: () => {
+                        Swal.fire({
+                            title: "เกิดข้อผิดพลาด!",
+                            text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                            icon: "error"
+                        });
+                    }
+                });
+            }
+        });
     };
 
     return (
