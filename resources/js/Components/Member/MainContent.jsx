@@ -5,18 +5,22 @@ import axios from 'axios';
 import debounce from 'lodash/debounce';
 import dayjs from 'dayjs';
 import 'dayjs/locale/th';
-import { 
-    FaUser, 
-    FaPhone, 
-    FaCalendarAlt, 
-    FaClock, 
-    FaSearch, 
-    FaStar, 
-    FaShoppingBag, 
-    FaCreditCard, 
-    FaFilter 
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import {
+    FaUser,
+    FaPhone,
+    FaCalendarAlt,
+    FaClock,
+    FaSearch,
+    FaStar,
+    FaShoppingBag,
+    FaCreditCard,
+    FaFilter
 } from 'react-icons/fa';
 
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 dayjs.locale('th');
 
 export default function MainContent({ member }) {
@@ -139,8 +143,10 @@ export default function MainContent({ member }) {
 
             if (dateRange.startDate && dateRange.endDate) {
                 filtered = filtered.filter(order => {
-                    const orderDate = dayjs(order.created_at);
-                    return orderDate.isAfter(dateRange.startDate) && orderDate.isBefore(dateRange.endDate);
+                    const orderDate = dayjs(order.created_at).startOf('day');
+                    const start = dayjs(dateRange.startDate).startOf('day');
+                    const end = dayjs(dateRange.endDate).endOf('day');
+                    return orderDate.isSameOrAfter(start) && orderDate.isSameOrBefore(end);
                 });
             }
 
@@ -151,14 +157,16 @@ export default function MainContent({ member }) {
     useEffect(() => {
         if (member?.point_usages) {
             let filtered = [...member.point_usages];
-            
+
             if (pointDateRange.startDate && pointDateRange.endDate) {
                 filtered = filtered.filter(usage => {
-                    const usageDate = dayjs(usage.created_at);
-                    return usageDate.isAfter(pointDateRange.startDate) && usageDate.isBefore(pointDateRange.endDate);
+                    const usageDate = dayjs(usage.created_at).startOf('day');
+                    const start = dayjs(pointDateRange.startDate).startOf('day');
+                    const end = dayjs(pointDateRange.endDate).endOf('day');
+                    return usageDate.isSameOrAfter(start) && usageDate.isSameOrBefore(end);
                 });
             }
-            
+
             setFilteredPointUsages(filtered);
         }
     }, [member?.point_usages, pointDateRange]);
@@ -192,15 +200,15 @@ export default function MainContent({ member }) {
     };
 
     return (
-        <main className="flex-1 relative py-8 px-6 bg-gradient-to-b from-gray-50 to-white">
-            <div className="space-y-8 max-w-screen-2xl mx-auto">
+        <main className="relative flex-1 px-6 py-8 bg-gradient-to-b from-gray-50 to-white">
+            <div className="mx-auto space-y-8 max-w-screen-2xl">
                 {!member && (
-                    <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+                    <div className="p-6 bg-white rounded-xl border border-gray-100 shadow-lg">
                         <div className="relative mb-6 search-container">
-                            <Label htmlFor="search" className="mb-2 block text-lg font-medium">ค้นหาสมาชิก</Label>
+                            <Label htmlFor="search" className="block mb-2 text-lg font-medium">ค้นหาสมาชิก</Label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <FaSearch className="h-4 w-4 text-gray-400" />
+                                <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+                                    <FaSearch className="w-4 h-4 text-gray-400" />
                                 </div>
                                 <TextInput
                                     id="search"
@@ -209,24 +217,24 @@ export default function MainContent({ member }) {
                                     placeholder="ค้นหาด้วยชื่อหรือเบอร์โทรศัพท์"
                                     value={formData.search}
                                     onChange={handleInputChange}
-                                    className="w-full pl-10"
+                                    className="pl-10 w-full"
                                     autoComplete="off"
                                 />
                             </div>
                             {showSuggestions && suggestions.length > 0 && (
-                                <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-xl mt-1">
+                                <div className="absolute z-10 mt-1 w-full bg-white rounded-lg border border-gray-200 shadow-xl">
                                     {suggestions.map((suggestion) => (
                                         <div
                                             key={suggestion.id}
-                                            className="p-4 hover:bg-blue-50 cursor-pointer border-b last:border-b-0 transition-colors duration-150"
+                                            className="p-4 border-b transition-colors duration-150 cursor-pointer hover:bg-blue-50 last:border-b-0"
                                             onClick={() => handleSuggestionClick(suggestion)}
                                         >
-                                            <div className="font-medium flex items-center gap-2">
-                                                <FaUser className="h-4 w-4 text-blue-500" />
+                                            <div className="flex gap-2 items-center font-medium">
+                                                <FaUser className="w-4 h-4 text-blue-500" />
                                                 {suggestion.name}
                                             </div>
-                                            <div className="text-sm text-gray-600 flex items-center gap-2 mt-1">
-                                                <FaPhone className="h-3 w-3 text-gray-400" />
+                                            <div className="flex gap-2 items-center mt-1 text-sm text-gray-600">
+                                                <FaPhone className="w-3 h-3 text-gray-400" />
                                                 {suggestion.phone_number}
                                             </div>
                                         </div>
@@ -239,17 +247,17 @@ export default function MainContent({ member }) {
 
                 {member && (
                     <>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                             {/* ข้อมูลสมาชิก */}
-                            <Card className="col-span-2 shadow-lg border border-gray-100">
-                                <div className="flex items-center gap-2 mb-6">
-                                    <FaUser className="h-5 w-5 text-blue-500" />
+                            <Card className="col-span-2 border border-gray-100 shadow-lg">
+                                <div className="flex gap-2 items-center mb-6">
+                                    <FaUser className="w-5 h-5 text-blue-500" />
                                     <h2 className="text-2xl font-semibold">ข้อมูลสมาชิก</h2>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                     <div>
-                                        <Label htmlFor="name" className="flex items-center gap-2 mb-2">
-                                            <FaUser className="h-4 w-4 text-gray-400" />
+                                        <Label htmlFor="name" className="flex gap-2 items-center mb-2">
+                                            <FaUser className="w-4 h-4 text-gray-400" />
                                             ชื่อ
                                         </Label>
                                         <TextInput
@@ -262,8 +270,8 @@ export default function MainContent({ member }) {
                                         />
                                     </div>
                                     <div>
-                                        <Label htmlFor="phone_number" className="flex items-center gap-2 mb-2">
-                                            <FaPhone className="h-4 w-4 text-gray-400" />
+                                        <Label htmlFor="phone_number" className="flex gap-2 items-center mb-2">
+                                            <FaPhone className="w-4 h-4 text-gray-400" />
                                             เบอร์โทรศัพท์
                                         </Label>
                                         <TextInput
@@ -276,8 +284,8 @@ export default function MainContent({ member }) {
                                         />
                                     </div>
                                     <div>
-                                        <Label htmlFor="birthdate" className="flex items-center gap-2 mb-2">
-                                            <FaCalendarAlt className="h-4 w-4 text-gray-400" />
+                                        <Label htmlFor="birthdate" className="flex gap-2 items-center mb-2">
+                                            <FaCalendarAlt className="w-4 h-4 text-gray-400" />
                                             วันเกิด
                                         </Label>
                                         <TextInput
@@ -290,8 +298,8 @@ export default function MainContent({ member }) {
                                         />
                                     </div>
                                     <div>
-                                        <Label htmlFor="created_at" className="flex items-center gap-2 mb-2">
-                                            <FaClock className="h-4 w-4 text-gray-400" />
+                                        <Label htmlFor="created_at" className="flex gap-2 items-center mb-2">
+                                            <FaClock className="w-4 h-4 text-gray-400" />
                                             วันที่สมัครสมาชิก
                                         </Label>
                                         <TextInput
@@ -307,34 +315,34 @@ export default function MainContent({ member }) {
                             </Card>
 
                             {/* คะแนนสะสม */}
-                            <Card className="shadow-lg border border-gray-100 bg-gradient-to-br from-blue-50 to-white">
+                            <Card className="bg-gradient-to-br from-blue-50 to-white border border-gray-100 shadow-lg">
                                 <div className="text-center">
-                                    <div className="flex items-center justify-center gap-2">
-                                        <FaStar className="h-5 w-5 text-blue-500" />
+                                    <div className="flex gap-2 justify-center items-center">
+                                        <FaStar className="w-5 h-5 text-blue-500" />
                                         <h3 className="text-xl font-semibold text-gray-900">คะแนนสะสม</h3>
                                     </div>
                                     <div className="mt-6">
-                                        <p className="text-5xl font-bold text-blue-600 tracking-tight">
+                                        <p className="text-5xl font-bold tracking-tight text-blue-600">
                                             {formatPoints(member.loyalty_points)}
                                         </p>
-                                        <p className="text-sm text-gray-600 mt-2 font-medium">คะแนน</p>
+                                        <p className="mt-2 text-sm font-medium text-gray-600">คะแนน</p>
                                     </div>
                                 </div>
                             </Card>
                         </div>
 
                         {/* ประวัติการใช้คะแนน */}
-                        <Card className="shadow-lg border border-gray-100">
+                        <Card className="border border-gray-100 shadow-lg">
                             <div className="flex flex-col space-y-4">
-                                <div className="flex items-center gap-2">
-                                    <FaCreditCard className="h-5 w-5 text-blue-500" />
+                                <div className="flex gap-2 items-center">
+                                    <FaCreditCard className="w-5 h-5 text-blue-500" />
                                     <h3 className="text-xl font-semibold">ประวัติการใช้คะแนน</h3>
                                 </div>
 
-                                <div className="flex flex-col md:flex-row gap-4 items-start md:items-end justify-end">
+                                <div className="flex flex-col gap-4 justify-end items-start md:flex-row md:items-end">
                                     <div className="w-full md:w-auto">
-                                        <Label htmlFor="pointStartDate" className="flex items-center gap-2 mb-2">
-                                            <FaCalendarAlt className="h-4 w-4 text-gray-400" />
+                                        <Label htmlFor="pointStartDate" className="flex gap-2 items-center mb-2">
+                                            <FaCalendarAlt className="w-4 h-4 text-gray-400" />
                                             วันที่เริ่มต้น
                                         </Label>
                                         <Datepicker
@@ -346,8 +354,8 @@ export default function MainContent({ member }) {
                                         />
                                     </div>
                                     <div className="w-full md:w-auto">
-                                        <Label htmlFor="pointEndDate" className="flex items-center gap-2 mb-2">
-                                            <FaCalendarAlt className="h-4 w-4 text-gray-400" />
+                                        <Label htmlFor="pointEndDate" className="flex gap-2 items-center mb-2">
+                                            <FaCalendarAlt className="w-4 h-4 text-gray-400" />
                                             วันที่สิ้นสุด
                                         </Label>
                                         <Datepicker
@@ -364,7 +372,7 @@ export default function MainContent({ member }) {
                                         onClick={clearPointDateFilter}
                                         className="w-full md:w-auto"
                                     >
-                                        <FaFilter className="h-3 w-3 mr-2" />
+                                        <FaFilter className="mr-2 w-3 h-3" />
                                         ล้างตัวกรอง
                                     </Button>
                                 </div>
@@ -376,11 +384,11 @@ export default function MainContent({ member }) {
                                         <Table.HeadCell className="font-semibold">วันที่</Table.HeadCell>
                                         <Table.HeadCell className="font-semibold">รายการ</Table.HeadCell>
                                         <Table.HeadCell className="font-semibold">ประเภท</Table.HeadCell>
-                                        <Table.HeadCell className="text-right font-semibold">คะแนน</Table.HeadCell>
+                                        <Table.HeadCell className="font-semibold text-right">คะแนน</Table.HeadCell>
                                     </Table.Head>
                                     <Table.Body>
                                         {filteredPointUsages.map((usage) => (
-                                            <Table.Row key={usage.id} className="hover:bg-blue-50 transition-colors duration-150">
+                                            <Table.Row key={usage.id} className="transition-colors duration-150 hover:bg-blue-50">
                                                 <Table.Cell>{formatDate(usage.created_at)}</Table.Cell>
                                                 <Table.Cell>{usage.description}</Table.Cell>
                                                 <Table.Cell>
@@ -395,7 +403,7 @@ export default function MainContent({ member }) {
                                         ))}
                                         {filteredPointUsages.length === 0 && (
                                             <Table.Row>
-                                                <Table.Cell colSpan={4} className="text-center py-8 text-gray-500">
+                                                <Table.Cell colSpan={4} className="py-8 text-center text-gray-500">
                                                     ไม่พบรายการในช่วงเวลาที่เลือก
                                                 </Table.Cell>
                                             </Table.Row>
@@ -406,17 +414,17 @@ export default function MainContent({ member }) {
                         </Card>
 
                         {/* ประวัติการสั่งซื้อ */}
-                        <Card className="shadow-lg border border-gray-100">
+                        <Card className="border border-gray-100 shadow-lg">
                             <div className="flex flex-col space-y-4">
-                                <div className="flex items-center gap-2">
-                                    <FaShoppingBag className="h-5 w-5 text-blue-500" />
+                                <div className="flex gap-2 items-center">
+                                    <FaShoppingBag className="w-5 h-5 text-blue-500" />
                                     <h3 className="text-xl font-semibold">ประวัติการสั่งซื้อ</h3>
                                 </div>
 
-                                <div className="flex flex-col md:flex-row gap-4 items-start md:items-end justify-end">
+                                <div className="flex flex-col gap-4 justify-end items-start md:flex-row md:items-end">
                                     <div className="w-full md:w-auto">
-                                        <Label htmlFor="startDate" className="flex items-center gap-2 mb-2">
-                                            <FaCalendarAlt className="h-4 w-4 text-gray-400" />
+                                        <Label htmlFor="startDate" className="flex gap-2 items-center mb-2">
+                                            <FaCalendarAlt className="w-4 h-4 text-gray-400" />
                                             วันที่เริ่มต้น
                                         </Label>
                                         <Datepicker
@@ -428,8 +436,8 @@ export default function MainContent({ member }) {
                                         />
                                     </div>
                                     <div className="w-full md:w-auto">
-                                        <Label htmlFor="endDate" className="flex items-center gap-2 mb-2">
-                                            <FaCalendarAlt className="h-4 w-4 text-gray-400" />
+                                        <Label htmlFor="endDate" className="flex gap-2 items-center mb-2">
+                                            <FaCalendarAlt className="w-4 h-4 text-gray-400" />
                                             วันที่สิ้นสุด
                                         </Label>
                                         <Datepicker
@@ -446,7 +454,7 @@ export default function MainContent({ member }) {
                                         onClick={clearDateFilter}
                                         className="w-full md:w-auto"
                                     >
-                                        <FaFilter className="h-3 w-3 mr-2" />
+                                        <FaFilter className="mr-2 w-3 h-3" />
                                         ล้างตัวกรอง
                                     </Button>
                                 </div>
@@ -458,16 +466,16 @@ export default function MainContent({ member }) {
                                         <Table.HeadCell className="font-semibold">วันที่</Table.HeadCell>
                                         <Table.HeadCell className="font-semibold">รายการ</Table.HeadCell>
                                         <Table.HeadCell className="font-semibold">สถานะ</Table.HeadCell>
-                                        <Table.HeadCell className="text-right font-semibold">ยอดรวม</Table.HeadCell>
+                                        <Table.HeadCell className="font-semibold text-right">ยอดรวม</Table.HeadCell>
                                     </Table.Head>
                                     <Table.Body>
                                         {filteredOrders.map((order) => (
-                                            <Table.Row key={order.id} className="hover:bg-blue-50 transition-colors duration-150">
+                                            <Table.Row key={order.id} className="transition-colors duration-150 hover:bg-blue-50">
                                                 <Table.Cell>{formatDate(order.created_at)}</Table.Cell>
                                                 <Table.Cell>
                                                     <div className="space-y-1.5">
                                                         {order.items.map((item, index) => (
-                                                            <div key={index} className="text-sm flex items-center gap-2">
+                                                            <div key={index} className="flex gap-2 items-center text-sm">
                                                                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
                                                                 {item.product_name} x {item.quantity}
                                                             </div>
@@ -476,15 +484,17 @@ export default function MainContent({ member }) {
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     <Badge color={getStatusColor(order.status)} className="font-medium">
-                                                        {order.status}
+                                                        {order.status === 'completed' ? 'สำเร็จ' :
+                                                         order.status === 'pending' ? 'รอดำเนินการ' :
+                                                         order.status === 'cancelled' ? 'ยกเลิก' : order.status}
                                                     </Badge>
                                                 </Table.Cell>
-                                                <Table.Cell className="text-right font-medium">฿{formatNumber(order.total)}</Table.Cell>
+                                                <Table.Cell className="font-medium text-right">฿{formatNumber(order.total)}</Table.Cell>
                                             </Table.Row>
                                         ))}
                                         {filteredOrders.length === 0 && (
                                             <Table.Row>
-                                                <Table.Cell colSpan={4} className="text-center py-8 text-gray-500">
+                                                <Table.Cell colSpan={4} className="py-8 text-center text-gray-500">
                                                     ไม่พบรายการในช่วงเวลาที่เลือก
                                                 </Table.Cell>
                                             </Table.Row>

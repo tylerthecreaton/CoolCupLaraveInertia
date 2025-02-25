@@ -162,7 +162,7 @@ export default function ReceiptHistory({ orders, filters }) {
                                 {orders.links.map((link, index) => (
                                     <Link
                                         key={index}
-                                        href={link.url || '#'}
+                                        href={link.url ? `${link.url}&filterType=${filterType}${filterType === 'custom' ? `&startDate=${customStartDate}&endDate=${customEndDate}` : ''}` : '#'}
                                         className={`px-3 py-1 rounded-lg border ${link.active
                                             ? 'bg-blue-500 text-white border-blue-500'
                                             : link.url
@@ -170,6 +170,7 @@ export default function ReceiptHistory({ orders, filters }) {
                                                 : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                                             }`}
                                         preserveScroll
+                                        preserveState
                                     >
                                         {link.label === 'pagination.previous'
                                             ? 'ย้อนกลับ'
