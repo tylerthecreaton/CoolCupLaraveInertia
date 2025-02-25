@@ -27,16 +27,16 @@ export default function TransformerForm({
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
+
         const action = isEditing ? put : post;
-        const url = isEditing 
+        const url = isEditing
             ? route("admin.transformers.update", transformer.id)
             : route("admin.transformers.store");
 
         Swal.fire({
             title: isEditing ? "ยืนยันการแก้ไข?" : "ยืนยันการเพิ่ม?",
-            text: isEditing 
-                ? "คุณต้องการแก้ไขสูตรแปรรูปนี้ใช่หรือไม่?" 
+            text: isEditing
+                ? "คุณต้องการแก้ไขสูตรแปรรูปนี้ใช่หรือไม่?"
                 : "คุณต้องการเพิ่มสูตรแปรรูปนี้ใช่หรือไม่?",
             icon: "question",
             showCancelButton: true,
@@ -50,7 +50,7 @@ export default function TransformerForm({
                     onSuccess: () => {
                         Swal.fire({
                             title: "สำเร็จ!",
-                            text: isEditing 
+                            text: isEditing
                                 ? "แก้ไขสูตรแปรรูปเรียบร้อยแล้ว"
                                 : "เพิ่มสูตรแปรรูปเรียบร้อยแล้ว",
                             icon: "success",
@@ -112,8 +112,10 @@ export default function TransformerForm({
                                 required
                                 color={errors.name ? "failure" : "gray"}
                                 helperText={<span className="text-red-500">{errors.name}</span>}
-
                             />
+                            <p className="mt-2 text-sm text-red-500">
+                                *ระบุยี่ห้อหรือชื่อสูตรแปรรูปของวัตถุดิบ/วัตถุสิ้นเปลืองที่ใช้ในการแปรรูปปริมาณ
+                            </p>
                         </div>
 
                         {/* Description Field */}
@@ -139,6 +141,9 @@ export default function TransformerForm({
                                         : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                                     } bg-white shadow-sm`}
                             />
+                            <p className="mt-2 text-sm text-gray-500">
+                                ระบุคำอธิบายเกี่ยวกับสูตรแปรรูป
+                            </p>
                             {errors.description && (
                                 <p className="mt-1 text-sm text-red-600">
                                     {errors.description}
@@ -171,6 +176,9 @@ export default function TransformerForm({
                                     วัตถุดิบสิ้นเปลือง
                                 </option>
                             </select>
+                            <p className="mt-2 text-sm text-gray-500">
+                                เลือกประเภทของวัตถุดิบหรือวัสดุสิ้นเปลืองที่ต้องการเพิ่มยี่ห้อ/ขนาด
+                            </p>
                             {errors.type && (
                                 <p className="mt-1 text-sm text-red-600">
                                     {errors.type}
@@ -210,6 +218,9 @@ export default function TransformerForm({
                                         </option>
                                     ))}
                                 </select>
+                                <p className="mt-2 text-sm text-gray-500">
+                                    ระบุวัตถุดิบที่ใช้ในการแปรรูป เช่น ผงชาเขียว, ผงชาไทย
+                                </p>
                                 {errors.ingredient_id && (
                                     <p className="mt-1 text-sm text-red-600">
                                         {errors.ingredient_id}
@@ -252,6 +263,9 @@ export default function TransformerForm({
                                         </option>
                                     ))}
                                 </select>
+                                <p className="mt-2 text-sm text-gray-500">
+                                    ระบุวัตถุดิบสิ้นเปลืองที่ใช้ในการแปรรูป เช่น แก้ว, ฝาแก้ว
+                                </p>
                                 {errors.consumable_id && (
                                     <p className="mt-1 text-sm text-red-600">
                                         {errors.consumable_id}
@@ -283,6 +297,9 @@ export default function TransformerForm({
                                 color={errors.multiplier ? "failure" : "gray"}
                                 helperText={errors.multiplier}
                             />
+                            <p className="mt-2 text-sm text-red-500">
+                                *ระบุปริมาณสุทธิของวัตถุดิบที่ใช้ในการแปรรูป เช่น ชาเขียวตรามือ ปริมาณ 500 กรัม
+                            </p>
                         </div>
 
                         {/* Submit Button */}

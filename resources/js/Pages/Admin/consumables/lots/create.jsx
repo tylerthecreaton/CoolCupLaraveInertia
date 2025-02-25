@@ -343,6 +343,9 @@ export default function Create({ consumables }) {
                                                                 )
                                                             )}
                                                         </select>
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            เลือกวัสดุสิ้นเปลืองที่ต้องการเพิ่มในล็อต
+                                                        </p>
                                                     </div>
 
                                                     {item.consumable_id && (
@@ -394,6 +397,11 @@ export default function Create({ consumables }) {
                                                                         )
                                                                     )}
                                                             </select>
+                                                            <p className="mt-2 text-sm text-gray-500">
+                                                                เลือกยี่ห้อหรือขนาดของวัสดุสิ้นเปลืองที่ต้องการ
+                                                                <br />
+                                                                <p className="text-red-500">(*จะแสดงเฉพาะยี่ห้อ/ขนาดที่ตั้งค่าไว้กับวัสดุสิ้นเปลืองที่เลือก)</p>
+                                                            </p>
                                                         </div>
                                                     )}
 
@@ -422,6 +430,9 @@ export default function Create({ consumables }) {
                                                                 )
                                                             }
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ระบุจำนวนที่ต้องการเพิ่มใน Lot
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -457,6 +468,9 @@ export default function Create({ consumables }) {
                                                                 )
                                                             }
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ราคาของวัสดุสิ้นเปลืองต่อชิ้น
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -492,6 +506,9 @@ export default function Create({ consumables }) {
                                                                 )
                                                             }
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ปริมาณของวัสดุสิ้นเปลืองต่อชิ้น
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -525,6 +542,13 @@ export default function Create({ consumables }) {
                                                                 )
                                                             }
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ราคาที่ซื้อมาต่อแพ็คเกจจิ้ง
+                                                            <br />
+                                                            <p className="text-red-500">
+                                                                (*หากมีอาจอ้างอิงราคาส่งของวัสดุสิ้นเปลืองจากใบเสร็จ)
+                                                            </p>
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -560,6 +584,9 @@ export default function Create({ consumables }) {
                                                                 );
                                                             }}
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ระบุผู้จำหน่าย
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -593,6 +620,9 @@ export default function Create({ consumables }) {
                                                             className="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                                             rows="2"
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ระบุหมายเหตุของรายการหากมี
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[

@@ -68,8 +68,8 @@ const Expired = ({ auth, expired_lots, flash }) => {
             <Head title="จัดการวัตถุดิบหมดอายุ" />
 
             <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-3">
                         <Card>
                             <div className="flex justify-between">
                                 <div>
@@ -80,7 +80,7 @@ const Expired = ({ auth, expired_lots, flash }) => {
                                         {totalExpiredItems} รายการ
                                     </h5>
                                 </div>
-                                <HiOutlineExclamationCircle className="h-8 w-8 text-red-600" />
+                                <HiOutlineExclamationCircle className="w-8 h-8 text-red-600" />
                             </div>
                         </Card>
                         <Card>
@@ -90,10 +90,10 @@ const Expired = ({ auth, expired_lots, flash }) => {
                                         ปริมาณรวมที่หมดอายุ
                                     </p>
                                     <h5 className="text-2xl font-bold tracking-tight text-red-600">
-                                        {totalExpiredQuantity.toLocaleString()} หน่วย
+                                        {totalExpiredQuantity.toLocaleString()} ชิ้น
                                     </h5>
                                 </div>
-                                <HiOutlineExclamationCircle className="h-8 w-8 text-red-600" />
+                                <HiOutlineExclamationCircle className="w-8 h-8 text-red-600" />
                             </div>
                         </Card>
                         <Card>
@@ -110,14 +110,14 @@ const Expired = ({ auth, expired_lots, flash }) => {
                                         )}
                                     </h5>
                                 </div>
-                                <HiCalendar className="h-8 w-8 text-red-600" />
+                                <HiCalendar className="w-8 h-8 text-red-600" />
                             </div>
                         </Card>
                     </div>
 
                     <Card>
                         <div className="flex items-center mb-4">
-                            <HiOutlineExclamationCircle className="h-6 w-6 text-red-600 mr-2" />
+                            <HiOutlineExclamationCircle className="mr-2 w-6 h-6 text-red-600" />
                             <h5 className="text-xl font-bold">
                                 รายการวัตถุดิบหมดอายุ
                             </h5>
@@ -146,13 +146,13 @@ const Expired = ({ auth, expired_lots, flash }) => {
                                                     <div className="flex justify-between items-center">
                                                         <span>Lot #{lot.lot_number || '-'}</span>
                                                         <span className="text-sm text-gray-500">
-                                                            บันทึกโดย: {lot.user?.name || '-'} | 
+                                                            บันทึกโดย: {lot.user?.name || '-'} |
                                                             วันที่: {format(new Date(lot.created_at), "dd/MM/yyyy")}
                                                         </span>
                                                     </div>
                                                 </Table.Cell>
                                             </Table.Row>
-                                            
+
                                             {/* Expired items */}
                                             {lot.details.map((detail) => (
                                                 <Table.Row
@@ -170,7 +170,7 @@ const Expired = ({ auth, expired_lots, flash }) => {
                                                                     : '/images/no-image.png'
                                                             }
                                                             alt={detail.ingredient.name}
-                                                            className="w-12 h-12 object-cover rounded-lg"
+                                                            className="object-cover w-12 h-12 rounded-lg"
                                                         />
                                                     </Table.Cell>
                                                     <Table.Cell>
@@ -194,7 +194,7 @@ const Expired = ({ auth, expired_lots, flash }) => {
                                                         </div>
                                                     </Table.Cell>
                                                     <Table.Cell>
-                                                        <div className="text-red-600 font-medium">
+                                                        <div className="font-medium text-red-600">
                                                             {detail.expiration_status}
                                                         </div>
                                                     </Table.Cell>
@@ -210,7 +210,7 @@ const Expired = ({ auth, expired_lots, flash }) => {
                                                                 setOpenModal(true);
                                                             }}
                                                         >
-                                                            <HiTrash className="mr-2 h-4 w-4" />
+                                                            <HiTrash className="mr-2 w-4 h-4" />
                                                             จำหน่าย
                                                         </Button>
                                                     </Table.Cell>
@@ -232,7 +232,7 @@ const Expired = ({ auth, expired_lots, flash }) => {
                         <Modal.Header />
                         <Modal.Body>
                             <div className="text-center">
-                                <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-red-600" />
+                                <HiOutlineExclamationCircle className="mx-auto mb-4 w-14 h-14 text-red-600" />
                                 <h3 className="mb-5 text-lg font-normal text-gray-500">
                                     คุณแน่ใจหรือไม่ที่จะจำหน่ายวัตถุดิบนี้ออก?
                                     {selectedItem && (
@@ -248,7 +248,7 @@ const Expired = ({ auth, expired_lots, flash }) => {
                                         </div>
                                     )}
                                 </h3>
-                                <div className="flex justify-center gap-4">
+                                <div className="flex gap-4 justify-center">
                                     <Button
                                         color="failure"
                                         onClick={handleDispose}

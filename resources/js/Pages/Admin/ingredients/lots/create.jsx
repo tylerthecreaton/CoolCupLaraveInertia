@@ -311,14 +311,11 @@ export default function Create({ auth, ingredients }) {
                                                         </InputLabel>
                                                         <select
                                                             id={`ingredient-${index}`}
-                                                            value={
-                                                                item.ingredient_id
-                                                            }
+                                                            value={item.ingredient_id}
                                                             onChange={(e) =>
                                                                 handleIngredientChange(
                                                                     index,
-                                                                    e.target
-                                                                        .value
+                                                                    e.target.value
                                                                 )
                                                             }
                                                             className="mt-1 block w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
@@ -326,33 +323,22 @@ export default function Create({ auth, ingredients }) {
                                                             <option value="">
                                                                 เลือกวัตถุดิบ
                                                             </option>
-                                                            {getAvailableIngredients(
-                                                                index
-                                                            ).map(
-                                                                (
-                                                                    ingredient
-                                                                ) => (
+                                                            {getAvailableIngredients(index).map(
+                                                                (ingredient) => (
                                                                     <option
-                                                                        key={
-                                                                            ingredient.id
-                                                                        }
-                                                                        value={
-                                                                            ingredient.id
-                                                                        }
+                                                                        key={ingredient.id}
+                                                                        value={ingredient.id}
                                                                     >
-                                                                        {
-                                                                            ingredient.name
-                                                                        }
+                                                                        {ingredient.name}
                                                                     </option>
                                                                 )
                                                             )}
                                                         </select>
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            เลือกวัตถุดิบที่ต้องการเพิ่มในล็อต
+                                                        </p>
                                                         <InputError
-                                                            message={
-                                                                errors[
-                                                                    `${index}.ingredient_id`
-                                                                ]
-                                                            }
+                                                            message={errors[`${index}.ingredient_id`]}
                                                             className="mt-2"
                                                         />
                                                     </div>
@@ -398,6 +384,11 @@ export default function Create({ auth, ingredients }) {
                                                                         )
                                                                     )}
                                                             </select>
+                                                            <p className="mt-2 text-sm text-gray-500">
+                                                                เลือกยี่ห้อหรือขนาดของวัตถุดิบที่ต้องการ
+                                                                <br />
+                                                                <p className="text-red-500">(*จะแสดงเฉพาะยี่ห้อ/ขนาดที่ตั้งค่าไว้กับวัตถุดิบที่เลือก)</p>
+                                                            </p>
                                                             <InputError
                                                                 message={
                                                                     errors[
@@ -435,6 +426,9 @@ export default function Create({ auth, ingredients }) {
                                                                 )
                                                             }
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ระบุจำนวนที่ต้องการเพิ่มใน Lot
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -468,6 +462,9 @@ export default function Create({ auth, ingredients }) {
                                                                 )
                                                             }
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ราคาของวัตถุดิบต่อชิ้น
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -506,6 +503,9 @@ export default function Create({ auth, ingredients }) {
                                                                 )
                                                             }
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ปริมาณของวัตถุดิบต่อชิ้น
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -541,6 +541,13 @@ export default function Create({ auth, ingredients }) {
                                                                 )
                                                             }
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ราคาที่ซื้อมาต่อแพ็คเกจจิ้ง
+                                                            <br />
+                                                            <p className="text-red-500">
+                                                                (*หากมีอาจอ้างอิงราคาส่งของวัตถุดิบจากใบเสร็จ)
+                                                            </p>
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -576,6 +583,9 @@ export default function Create({ auth, ingredients }) {
                                                                 );
                                                             }}
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ระบุผู้จำหน่าย
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -611,6 +621,9 @@ export default function Create({ auth, ingredients }) {
                                                                 );
                                                             }}
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ระบุวันหมดอายุของวัตถุดิบตามที่ระบุบนบรรจุภัณฑ์
+                                                        </p>
                                                         <InputError
                                                             message={
                                                                 errors[
@@ -641,6 +654,7 @@ export default function Create({ auth, ingredients }) {
                                                                     newData
                                                                 );
                                                             }}
+
                                                             className="mt-1 block w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
                                                             rows="3"
                                                         />
@@ -652,6 +666,9 @@ export default function Create({ auth, ingredients }) {
                                                             }
                                                             className="mt-2"
                                                         />
+                                                        <p className="mt-2 text-sm text-gray-500">
+                                                            ระบุหมายเหตุของรายการหากมี
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
