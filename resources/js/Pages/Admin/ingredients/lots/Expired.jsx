@@ -12,7 +12,7 @@ import { isAbsoluteUrl } from "@/helpers";
 import Swal from "sweetalert2";
 
 const Expired = ({ auth, expired_lots, flash }) => {
-    const { error } = flash;
+    const { error, success } = flash;
     const { delete: destroy } = useForm();
     const [openModal, setOpenModal] = React.useState(false);
     const [selectedItem, setSelectedItem] = React.useState(null);
@@ -22,6 +22,13 @@ const Expired = ({ auth, expired_lots, flash }) => {
             destroy(route("admin.ingredient-lots.expired.dispose", selectedItem.id), {
                 onSuccess: () => {
                     setOpenModal(false);
+                    Swal.fire({
+                        title: "สำเร็จ!",
+                        text: "จำหน่ายวัตถุดิบหมดอายุเรียบร้อยแล้ว",
+                        icon: "success",
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                 },
             });
         }

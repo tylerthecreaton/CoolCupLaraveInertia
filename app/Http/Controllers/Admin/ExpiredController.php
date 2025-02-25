@@ -72,32 +72,42 @@ class ExpiredController extends Controller
 
     public function dispose(Request $request, $id)
     {
+        Log::info('Starting disposal process', ['detail_id' => $id]);
+        
         $ingredientLotDetail = IngredientLotDetail::findOrFail($id);
+        Log::info('Found ingredient lot detail', [
+            'detail_id' => $id,
+            'ingredient_id' => $ingredientLotDetail->ingredient_id,
+            'lot_id' => $ingredientLotDetail->ingredient_lot_id
+        ]);
 
-
-        // dd($ingredientLotDetail->ingredient);
         try {
             DB::beginTransaction();
+            Log::info('Started database transaction');
 
+            // Calculate multiplier safely
+            $multiplier = $ingredientLotDetail->transformer ? $ingredientLotDetail->transformer->multiplier : 1;
+            $totalQuantity = $ingredientLotDetail->quantity * $multiplier;
 
-
-            // Log the disposal
+            // Log the disposal details
             Log::info('Disposing expired ingredient lot', [
-                'lot_id' => $ingredientLotDetail->id,
+                'lot_detail_id' => $ingredientLotDetail->id,
                 'ingredient_name' => $ingredientLotDetail->ingredient->name,
                 'quantity' => $ingredientLotDetail->quantity,
+                'transformer_multiplier' => $multiplier,
+                'total_quantity' => $totalQuantity,
                 'expiration_date' => $ingredientLotDetail->expiration_date,
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
+                'disposed_at' => now()->toDateTimeString()
             ]);
 
             $ingredient = Ingredient::findOrFail($ingredientLotDetail->ingredient_id);
             // $ingredient->quantity -= $ingredientLotDetail->quantity * $ingredientLotDetail->transformer->multiplier;
             // $ingredient->save();
 
-
             $productIngredientUsage = new ProductIngredientUsage();
             $productIngredientUsage->ingredient_id = $ingredient->id;
-            $productIngredientUsage->amount = $ingredientLotDetail->quantity * $ingredientLotDetail->transformer->multiplier;
+            $productIngredientUsage->amount = $ingredientLotDetail->quantity * $multiplier;
             $productIngredientUsage->usage_type = 'DISPOSE';
             $productIngredientUsage->created_by = auth()->id();
             $productIngredientUsage->note = "จำหน่ายวัตถุดิบหมดอายุ (" . $ingredient->name . ") จาก Lot วัตถุดิบที่ " . $ingredientLotDetail->id;
@@ -105,10 +115,11 @@ class ExpiredController extends Controller
             $ingredientLotDetail->delete();
 
             DB::commit();
+            Log::info('Disposal process completed successfully', ['detail_id' => $id]);
             return redirect()->back()->with('success', 'วัตถุดิบถูกจำหน่ายออกเรียบร้อยแล้ว');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error disposing expired ingredient: ' . $e->getMessage());
+            Log::error('Error disposing expired ingredient: ' . $e->getMessage(), ['detail_id' => $id]);
             return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการจำหน่ายวัตถุดิบ');
         }
     }
