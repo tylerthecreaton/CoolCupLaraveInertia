@@ -2,11 +2,13 @@ import React from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, useForm } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import { Breadcrumb, Button } from "flowbite-react";
 import { HiHome, HiPlus, HiTrash } from "react-icons/hi2";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
+import Swal from "sweetalert2";
 
 export default function Create({ auth, ingredients }) {
     const { data, setData, post, processing, errors } = useForm([
@@ -53,7 +55,11 @@ export default function Create({ auth, ingredients }) {
 
     const handleRemoveRow = (index) => {
         if (data.length === 1) {
-            alert("ต้องมีอย่างน้อย 1 รายการ");
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่สามารถลบได้',
+                text: 'ต้องมีอย่างน้อย 1 รายการ',
+            });
             return;
         }
         const newData = [...data];
@@ -67,7 +73,11 @@ export default function Create({ auth, ingredients }) {
                 (item, i) => i !== index && item.ingredient_id === value
             );
             if (isAlreadySelected) {
-                alert("วัตถุดิบนี้ถูกเลือกไปแล้ว");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'วัตถุดิบถูกเลือกแล้ว',
+                    text: 'วัตถุดิบนี้ถูกเลือกไปแล้ว กรุณาเลือกวัตถุดิบอื่น',
+                });
                 const newData = [...data];
                 newData[index].ingredient_id = "";
                 newData[index].transformer_id = "";
@@ -153,20 +163,47 @@ export default function Create({ auth, ingredients }) {
                 errors.push(`รายการที่ ${index + 1}: กรุณาระบุวันหมดอายุ`);
         });
 
-        return errors;
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'กรุณาตรวจสอบข้อมูล',
+                html: errors.join('<br>'),
+            });
+            return false;
+        }
+
+        return true;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (data.length === 0) {
-            alert("กรุณาเพิ่มวัตถุดิบอย่างน้อย 1 รายการ");
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่สามารถบันทึกได้',
+                text: 'กรุณาเพิ่มวัตถุดิบอย่างน้อย 1 รายการ',
+            });
             return;
         }
 
-        const formErrors = validateForm();
-        if (formErrors.length > 0) {
-            alert(formErrors.join("\n"));
+        if (!validateForm()) {
+            return;
+        }
+
+        // Show confirmation dialog
+        const result = await Swal.fire({
+            title: 'ยืนยันการเพิ่มล็อตวัตถุดิบ?',
+            text: 'คุณต้องการบันทึกข้อมูลล็อตวัตถุดิบใหม่ใช่หรือไม่?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'ยกเลิก'
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
@@ -180,23 +217,26 @@ export default function Create({ auth, ingredients }) {
             supplier: item.supplier.trim(),
         }));
 
-        post(route("admin.ingredient-lots.store"), {
-            ...sanitizedData,
+        router.post(route("admin.ingredient-lots.store"), sanitizedData, {
             onSuccess: () => {
-                setData([
-                    {
-                        ingredient_id: "",
-                        transformer_id: "",
-                        cost_per_unit: "",
-                        quantity: "",
-                        per_pack: "",
-                        price: "",
-                        supplier: "",
-                        expiration_date: "",
-                        notes: "",
-                    },
-                ]);
+                Swal.fire({
+                    title: 'สำเร็จ!',
+                    text: 'บันทึกข้อมูลล็อตวัตถุดิบเรียบร้อยแล้ว',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    router.visit(route("admin.ingredient-lots.index"));
+                });
             },
+            onError: (errors) => {
+                console.log('Submission Errors:', errors);
+                Swal.fire({
+                    title: 'เกิดข้อผิดพลาด!',
+                    text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+                    icon: 'error'
+                });
+            }
         });
     };
 

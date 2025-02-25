@@ -2,11 +2,13 @@ import React from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, useForm } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import { Breadcrumb, Button } from "flowbite-react";
 import { HiHome, HiPlus, HiTrash } from "react-icons/hi2";
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
+import Swal from "sweetalert2";
 
 export default function Create({ consumables }) {
     console.log(consumables);
@@ -51,7 +53,11 @@ export default function Create({ consumables }) {
 
     const handleRemoveRow = (index) => {
         if (data.length === 1) {
-            alert("ต้องมีอย่างน้อย 1 รายการ");
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่สามารถลบได้',
+                text: 'ต้องมีอย่างน้อย 1 รายการ',
+            });
             return;
         }
         const newData = [...data];
@@ -65,7 +71,11 @@ export default function Create({ consumables }) {
                 (item, i) => i !== index && item.consumable_id === value
             );
             if (isAlreadySelected) {
-                alert("วัตถุดิบนี้ถูกเลือกไปแล้ว");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'วัสดุสิ้นเปลืองถูกเลือกแล้ว',
+                    text: 'วัสดุสิ้นเปลืองนี้ถูกเลือกไปแล้ว กรุณาเลือกรายการอื่น',
+                });
                 const newData = [...data];
                 newData[index].consumable_id = "";
                 setData(newData);
@@ -129,7 +139,7 @@ export default function Create({ consumables }) {
 
         data.forEach((item, index) => {
             if (!item.consumable_id)
-                errors.push(`รายการที่ ${index + 1}: กรุณาเลือกวัตถุดิบ`);
+                errors.push(`รายการที่ ${index + 1}: กรุณาเลือกวัสดุสิ้นเปลือง`);
             if (!item.transformer_id)
                 errors.push(`รายการที่ ${index + 1}: กรุณาเลือกยี่ห้อ/ขนาด`);
             if (!item.supplier)
@@ -150,20 +160,47 @@ export default function Create({ consumables }) {
                 );
         });
 
-        return errors;
+        if (errors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'กรุณาตรวจสอบข้อมูล',
+                html: errors.join('<br>'),
+            });
+            return false;
+        }
+
+        return true;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (data.length === 0) {
-            alert("กรุณาเพิ่มวัตถุดิบอย่างน้อย 1 รายการ");
+            Swal.fire({
+                icon: 'error',
+                title: 'ไม่สามารถบันทึกได้',
+                text: 'กรุณาเพิ่มวัสดุสิ้นเปลืองอย่างน้อย 1 รายการ',
+            });
             return;
         }
 
-        const formErrors = validateForm();
-        if (formErrors.length > 0) {
-            alert(formErrors.join("\n"));
+        if (!validateForm()) {
+            return;
+        }
+
+        // Show confirmation dialog
+        const result = await Swal.fire({
+            title: 'ยืนยันการเพิ่มล็อตวัสดุสิ้นเปลือง?',
+            text: 'คุณต้องการบันทึกข้อมูลล็อตวัสดุสิ้นเปลืองใหม่ใช่หรือไม่?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ยืนยัน',
+            cancelButtonText: 'ยกเลิก'
+        });
+
+        if (!result.isConfirmed) {
             return;
         }
 
@@ -177,21 +214,26 @@ export default function Create({ consumables }) {
             per_pack: parseInt(item.per_pack),
         }));
 
-        post(route("admin.consumables.lots.store"), {
-            data: sanitizedData,
+        router.post(route("admin.consumables.lots.store"), sanitizedData, {
             onSuccess: () => {
-                setData([
-                    {
-                        consumable_id: "",
-                        cost_per_unit: "",
-                        quantity: "",
-                        note: "",
-                        per_pack: "",
-                        price: "",
-                        supplier: "",
-                    },
-                ]);
+                Swal.fire({
+                    title: 'สำเร็จ!',
+                    text: 'บันทึกข้อมูลล็อตวัสดุสิ้นเปลืองเรียบร้อยแล้ว',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    router.visit(route("admin.consumables.lots.index"));
+                });
             },
+            onError: (errors) => {
+                console.log('Submission Errors:', errors);
+                Swal.fire({
+                    title: 'เกิดข้อผิดพลาด!',
+                    text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง',
+                    icon: 'error'
+                });
+            }
         });
     };
 
@@ -199,12 +241,12 @@ export default function Create({ consumables }) {
         <AuthenticatedLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    เพิ่ม Lot วัตถุดิบสิ้นเปลือง
+                    เพิ่ม Lot วัสดุสิ้นเปลือง
                 </h2>
             }
         >
             <AdminLayout>
-                <Head title="เพิ่ม Lot วัตถุดิบสิ้นเปลือง" />
+                <Head title="เพิ่ม Lot วัสดุสิ้นเปลือง" />
 
                 <div className="py-12">
                     <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -218,7 +260,7 @@ export default function Create({ consumables }) {
                             <Breadcrumb.Item
                                 href={route("admin.consumables.lots.index")}
                             >
-                                วัตถุดิบสิ้นเปลือง
+                                วัสดุสิ้นเปลือง
                             </Breadcrumb.Item>
                             <Breadcrumb.Item>เพิ่ม Lot ใหม่</Breadcrumb.Item>
                         </Breadcrumb>
@@ -261,7 +303,7 @@ export default function Create({ consumables }) {
                                                         <InputLabel
                                                             htmlFor={`consumable-${index}`}
                                                         >
-                                                            ชื่อวัตถุดิบ *
+                                                            ชื่อวัสดุสิ้นเปลือง *
                                                         </InputLabel>
                                                         <select
                                                             id={`consumable-${index}`}
@@ -278,7 +320,7 @@ export default function Create({ consumables }) {
                                                             className="mt-1 block w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
                                                         >
                                                             <option value="">
-                                                                เลือกวัตถุดิบ
+                                                                เลือกวัสดุสิ้นเปลือง
                                                             </option>
                                                             {getAvailableConsumables(
                                                                 index
@@ -429,7 +471,7 @@ export default function Create({ consumables }) {
                                                         <InputLabel
                                                             htmlFor={`per_pack-${index}`}
                                                         >
-                                                            จำนวนต่อแพค *
+                                                            จำนวนต่อแพ็ก *
                                                         </InputLabel>
                                                         <TextInput
                                                             id={`per_pack-${index}`}
