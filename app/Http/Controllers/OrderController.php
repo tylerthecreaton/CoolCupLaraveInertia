@@ -252,75 +252,6 @@ class OrderController extends Controller
         return $point ?? 0;
     }
 
-    private function calculateIngredients(array $item, $orderDetailId, string $sweetness)
-    {
-        Log::debug('calculateIngredients: Start');
-        Log::debug('calculateIngredients: item = ' . json_encode($item));
-        Log::debug('calculateIngredients: orderDetailId = ' . $orderDetailId);
-        Log::debug('calculateIngredients: sweetness = ' . $sweetness);
-
-        $product = Product::find($item['id']);
-        if ($product) {
-            try {
-                $productIngredients = ProductIngredients::where('product_id', $product->id)->get();
-                foreach ($productIngredients as $productIngredient) {
-                    Log::debug('calculateIngredients: productIngredient = ' . json_encode($productIngredient));
-                    $ingredient = Ingredient::find($productIngredient->ingredient_id);
-                    if ($ingredient) {
-                        Log::debug('calculateIngredients: ingredient = ' . json_encode($ingredient));
-                        // Get size-specific quantity based on item size
-                        $size = $item['size'] ?? 's';
-                        $quantityField = match($size) {
-                            's' => 'quantity_size_s',
-                            'm' => 'quantity_size_m',
-                            'l' => 'quantity_size_l',
-                            default => 'quantity_size_s'
-                        };
-
-                        $usedQuantity = $item['quantity'] * $productIngredient->$quantityField;
-
-                        // Calculate sweetness usage for sweetness ingredients
-                        if ($ingredient->is_sweetness) {
-                            $sweetnessRate = $this->calculateSweetnessUsage($usedQuantity, $sweetness);
-                            $requiredQuantity = abs($sweetnessRate);
-                        } else {
-                            $requiredQuantity = $usedQuantity;
-                        }
-
-                        // บันทึกการใช้วัตถุดิบ
-                        $usage = new ProductIngredientUsage();
-                        Log::debug('calculateIngredients: usage = ' . json_encode($usage));
-                        $usage->order_detail_id = $orderDetailId;
-                        $usage->ingredient_id = $ingredient->id;
-                        $usage->amount = -$requiredQuantity;
-                        $usage->usage_type = 'USE';
-                        $usage->created_by = Auth::user()->id;
-                        $usage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId;
-                        $usage->save();
-                        Log::debug('calculateIngredients: usage saved');
-
-                        // อัพเดทจำนวนวัตถุดิบ
-                        $ingredient->quantity = max(0, $ingredient->quantity + $usage->amount);
-                        $ingredient->save();
-                        Log::debug('calculateIngredients: ingredient saved');
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::debug('calculateIngredients: Exception = ' . $e->getMessage());
-                throw new \Exception("Error calculating ingredients: " . $e->getMessage());
-            }
-        }
-        Log::debug('calculateIngredients: End');
-    }
-
-    private function calculateSweetnessUsage($usedQuantity, $sweetness): float
-    {
-        $sweetnessRate = (int) preg_replace('/[^0-9]/', '', $sweetness);
-        $result = $usedQuantity * $sweetnessRate / 100;
-
-        return $result;
-    }
-
     public function saveToIngredientUsageTable($detail)
     {
         $ingredientUsage = new ProductIngredientUsage();
@@ -376,6 +307,79 @@ class OrderController extends Controller
         }
     }
 
+    private function calculateIngredients(array $item, $orderDetailId, string $sweetness)
+    {
+        Log::debug('calculateIngredients: Start');
+        Log::debug('calculateIngredients: item = ' . json_encode($item));
+        Log::debug('calculateIngredients: orderDetailId = ' . $orderDetailId);
+        Log::debug('calculateIngredients: sweetness = ' . $sweetness);
+
+        $product = Product::find($item['id']);
+        if ($product) {
+            try {
+                $productIngredients = ProductIngredients::where('product_id', $product->id)->get();
+                foreach ($productIngredients as $productIngredient) {
+                    Log::debug('calculateIngredients: productIngredient = ' . json_encode($productIngredient));
+                    $ingredient = Ingredient::find($productIngredient->ingredient_id);
+                    if ($ingredient) {
+                        Log::debug('calculateIngredients: ingredient = ' . json_encode($ingredient));
+                        // Get size-specific quantity based on item size
+                        $size = strtolower($item['size'] ?? 's');
+                        Log::debug('calculateIngredients: Using size = ' . $size);
+
+                        $quantityField = match($size) {
+                            's' => 'quantity_size_s',
+                            'm' => 'quantity_size_m',
+                            'l' => 'quantity_size_l',
+                            default => 'quantity_size_s'
+                        };
+                        Log::debug('calculateIngredients: Using quantity field = ' . $quantityField);
+
+                        $usedQuantity = $item['quantity'] * $productIngredient->$quantityField;
+                        Log::debug('calculateIngredients: Calculated usedQuantity = ' . $usedQuantity);
+
+                        // Calculate sweetness usage for sweetness ingredients
+                        if ($ingredient->is_sweetness) {
+                            $sweetnessRate = $this->calculateSweetnessUsage($usedQuantity, $sweetness);
+                            $requiredQuantity = abs($sweetnessRate);
+                        } else {
+                            $requiredQuantity = $usedQuantity;
+                        }
+
+                        // บันทึกการใช้วัตถุดิบ
+                        $usage = new ProductIngredientUsage();
+                        Log::debug('calculateIngredients: usage = ' . json_encode($usage));
+                        $usage->order_detail_id = $orderDetailId;
+                        $usage->ingredient_id = $ingredient->id;
+                        $usage->amount = -$requiredQuantity;
+                        $usage->usage_type = 'USE';
+                        $usage->created_by = Auth::user()->id;
+                        $usage->note = "ใช้ในออเดอร์ดีเทล #" . $orderDetailId;
+                        $usage->save();
+                        Log::debug('calculateIngredients: usage saved');
+
+                        // อัพเดทจำนวนวัตถุดิบ
+                        $ingredient->quantity = max(0, $ingredient->quantity + $usage->amount);
+                        $ingredient->save();
+                        Log::debug('calculateIngredients: ingredient saved');
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::debug('calculateIngredients: Exception = ' . $e->getMessage());
+                throw new \Exception("Error calculating ingredients: " . $e->getMessage());
+            }
+        }
+        Log::debug('calculateIngredients: End');
+    }
+
+    private function calculateSweetnessUsage($usedQuantity, $sweetness): float
+    {
+        $sweetnessRate = (int) preg_replace('/[^0-9]/', '', $sweetness);
+        $result = $usedQuantity * $sweetnessRate / 100;
+
+        return $result;
+    }
+
     private function calculateConsumable(array $item, int $orderDetailId)
     {
         Log::info('calculateConsumable: Start');
@@ -388,7 +392,7 @@ class OrderController extends Controller
                 // Get consumables based on product size
                 Log::info('calculateConsumable: product = ' . json_encode($product));
                 $consumables = ProductConsumables::where('product_id', $product->id)
-                    ->where('size', $item['size'] ?? 's')
+                    ->where('size', strtolower($item['size'] ?? 's'))
                     ->get();
 
                 if (!$consumables->count()) {
@@ -444,7 +448,7 @@ class OrderController extends Controller
                     'id' => $topping['id'],
                     'quantity' => $item['quantity'],
                     'sweetness' => '100%', // topping ใช้ความหวานปกติ
-                    'size' => $item['size'] ?? 's' // ใช้ size เดียวกับ parent item หรือ default เป็น s
+                    'size' => strtolower($item['size'] ?? 's') // ใช้ size เดียวกับ parent item หรือ default เป็น s
                 ],
                 $orderDetailId,
                 '100%'
@@ -455,7 +459,7 @@ class OrderController extends Controller
                 [
                     'id' => $topping['id'],
                     'quantity' => $item['quantity'],
-                    'size' => $item['size'] ?? 's' // Use parent item's size or default to 'S'
+                    'size' => strtolower($item['size'] ?? 's') // Use parent item's size or default to 'S'
                 ],
                 $orderDetailId
             );
@@ -561,7 +565,7 @@ class OrderController extends Controller
                 $ingredient = Ingredient::find($productIngredient->ingredient_id);
                 if ($ingredient) {
                     // Get size-specific quantity based on item size
-                    $size = $item['size'] ?? 's';
+                    $size = strtolower($item['size'] ?? 's');
                     $quantityField = match($size) {
                         's' => 'quantity_size_s',
                         'm' => 'quantity_size_m',
@@ -593,7 +597,7 @@ class OrderController extends Controller
 
             // Check consumables stock
             $consumables = ProductConsumables::where('product_id', $product->id)
-                ->where('size', $item['size'] ?? 's')
+                ->where('size', strtolower($item['size'] ?? 's'))
                 ->get();
 
             foreach ($consumables as $consumable) {
@@ -628,7 +632,7 @@ class OrderController extends Controller
                         foreach ($toppingIngredients as $toppingIngredient) {
                             $ingredient = Ingredient::find($toppingIngredient->ingredient_id);
                             if ($ingredient) {
-                                $size = $item['size'] ?? 's';
+                                $size = strtolower($item['size'] ?? 's');
                                 $quantityField = match($size) {
                                     's' => 'quantity_size_s',
                                     'm' => 'quantity_size_m',
@@ -658,7 +662,7 @@ class OrderController extends Controller
 
                         // Check topping consumables
                         $toppingConsumables = ProductConsumables::where('product_id', $topping['id'])
-                            ->where('size', $item['size'] ?? 's')  // Use parent item's size or default to 'S'
+                            ->where('size', strtolower($item['size'] ?? 's'))  // Use parent item's size or default to 'S'
                             ->get();
 
                         foreach ($toppingConsumables as $consumable) {
