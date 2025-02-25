@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $dateRange = $request->input('dateRange', 'today');
         $startDate = $this->getStartDate($dateRange, $request->input('startDate'));
         $endDate = $this->getEndDate($dateRange, $request->input('endDate'));
-        
+
         // Sales Summary
         $salesData = Order::whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'completed')
@@ -47,9 +47,26 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Ingredient Usage Data
+        $ingredientUsage = DB::table('product_ingredient_usages')
+            ->join('ingredients', 'product_ingredient_usages.ingredient_id', '=', 'ingredients.id')
+            ->join('units', 'ingredients.unit_id', '=', 'units.id')
+            ->whereBetween('product_ingredient_usages.created_at', [$startDate, $endDate])
+            ->where('product_ingredient_usages.usage_type', 'USE')
+            ->select(
+                'ingredients.name',
+                DB::raw('SUM(product_ingredient_usages.amount) as total_amount'),
+                'units.name as unit'
+            )
+            ->groupBy('ingredients.id', 'ingredients.name', 'units.name')
+            ->orderBy('total_amount', 'desc')
+            ->limit(10)
+            ->get()
+            ->toArray();
+
         // Inventory Status
         Log::info('Starting inventory status calculation');
-        
+
         $ingredients = Ingredient::with('unit')
             ->select('ingredients.*')
             ->get()
@@ -97,16 +114,17 @@ class DashboardController extends Controller
             ->get();
 
         return Inertia::render('Dashboard', [
+            'filters' => [
+                'dateRange' => $dateRange,
+                'startDate' => $startDate->format('Y-m-d'),
+                'endDate' => $endDate->format('Y-m-d'),
+            ],
             'salesData' => $salesData,
             'topProducts' => $topProducts,
             'ingredients' => $ingredients,
+            'ingredientUsage' => $ingredientUsage,
             'expenses' => $expenses,
             'hourlySales' => $hourlySales,
-            'filters' => [
-                'dateRange' => $dateRange,
-                'startDate' => $startDate,
-                'endDate' => $endDate
-            ]
         ]);
     }
 

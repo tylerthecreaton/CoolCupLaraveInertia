@@ -7,8 +7,9 @@ import SalesChart from '../Components/Dashboard/SalesChart';
 import InventoryStatus from '../Components/Dashboard/InventoryStatus';
 import TopProducts from '../Components/Dashboard/TopProducts';
 import ExpensesChart from '../Components/Dashboard/ExpensesChart';
+import IngredientUsage from '../Components/Dashboard/IngredientUsage';
 
-export default function Dashboard({ auth, salesData, topProducts, ingredients, expenses, hourlySales, filters }) {
+export default function Dashboard({ auth, salesData, topProducts, ingredients, expenses, hourlySales, filters, ingredientUsage }) {
     const [dateRange, setDateRange] = useState(filters.dateRange);
     const [startDate, setStartDate] = useState(filters.startDate);
     const [endDate, setEndDate] = useState(filters.endDate);
@@ -96,7 +97,12 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
                         {/* Top Products */}
                         <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                             <div className="p-6">
-                                <TopProducts products={topProducts} />
+                                <div className="grid grid-cols-1 gap-4 mb-4">
+                                    <TopProducts products={topProducts} />
+                                </div>
+                                <div className="grid grid-cols-1 gap-4 mb-4">
+                                    <IngredientUsage ingredientUsage={ingredientUsage} />
+                                </div>
                             </div>
                         </div>
 
