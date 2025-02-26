@@ -39,6 +39,15 @@ export default function Index({ auth, withdraws }) {
         return `${day}/${month}/${thaiYear}`;
     };
 
+    const getStatusColor = (status) => {
+        const colors = {
+            'completed': 'success',
+            'pending': 'warning',
+            'cancelled': 'failure'
+        };
+        return colors[status] || 'info';
+    };
+
     const getStatusBadge = (status) => {
         const statusColors = {
             pending: "warning",
@@ -76,17 +85,17 @@ export default function Index({ auth, withdraws }) {
                     <div className="mb-6">
                         <Breadcrumb aria-label="Default breadcrumb example">
                             <Breadcrumb.Item href="/dashboard" icon={HiHome}>
-                                <p className="text-gray-700 hover:text-blue-600 transition-colors">หน้าแรก</p>
+                                <p className="text-gray-700 transition-colors hover:text-blue-600">หน้าแรก</p>
                             </Breadcrumb.Item>
                             <Breadcrumb.Item href={route("admin.withdraw.index")}>
-                                <p className="text-gray-700 hover:text-blue-600 transition-colors">การเบิก</p>
+                                <p className="text-gray-700 transition-colors hover:text-blue-600">การเบิก</p>
                             </Breadcrumb.Item>
                         </Breadcrumb>
                     </div>
 
-                    <Card className="shadow-lg max-w-full">
-                        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-                            <div className="flex items-center gap-3">
+                    <Card className="max-w-full shadow-lg">
+                        <div className="flex flex-col gap-4 justify-between items-start mb-6 lg:flex-row lg:items-center">
+                            <div className="flex gap-3 items-center">
                                 <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md">
                                     <FaBoxes className="w-5 h-5 text-white" />
                                 </div>
@@ -96,21 +105,21 @@ export default function Index({ auth, withdraws }) {
                                 </div>
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                            <div className="flex flex-col gap-4 w-full sm:flex-row lg:w-auto">
                                 <div className="relative flex-1 lg:w-64">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
                                         <FaSearch className="w-4 h-4 text-gray-400" />
                                     </div>
                                     <input
                                         type="text"
-                                        className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm"
+                                        className="block py-2 pr-3 pl-10 w-full text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
                                         placeholder="ค้นหาการเบิก..."
                                         value={search}
                                         onChange={handleSearch}
                                     />
                                 </div>
                                 <Link href={route("admin.withdraw.create")}>
-                                    <Button gradientDuoTone="greenToBlue" size="sm" className="w-full sm:w-auto shadow-sm hover:shadow-md transition-all duration-200">
+                                    <Button gradientDuoTone="greenToBlue" size="sm" className="w-full shadow-sm transition-all duration-200 sm:w-auto hover:shadow-md">
                                         <FaPlus className="mr-2 w-4 h-4" />
                                         เพิ่มการเบิก
                                     </Button>
@@ -121,25 +130,25 @@ export default function Index({ auth, withdraws }) {
                         <div className="overflow-x-auto">
                             <Table hoverable className="shadow-sm">
                                 <Table.Head className="bg-gradient-to-r from-gray-50 to-gray-100">
-                                    <Table.HeadCell className="font-semibold text-gray-700 w-16">รหัส</Table.HeadCell>
+                                    <Table.HeadCell className="w-16 font-semibold text-gray-700">รหัส</Table.HeadCell>
                                     <Table.HeadCell className="font-semibold text-gray-700">ผู้เบิก</Table.HeadCell>
                                     <Table.HeadCell className="font-semibold text-gray-700">รายการ</Table.HeadCell>
-                                    <Table.HeadCell className="font-semibold text-gray-700 w-32">สถานะ</Table.HeadCell>
-                                    <Table.HeadCell className="font-semibold text-gray-700 w-32">วันที่</Table.HeadCell>
-                                    <Table.HeadCell className="font-semibold text-gray-700 w-32 text-right">จัดการ</Table.HeadCell>
+                                    <Table.HeadCell className="w-32 font-semibold text-gray-700">สถานะ</Table.HeadCell>
+                                    <Table.HeadCell className="w-32 font-semibold text-gray-700">วันที่</Table.HeadCell>
+                                    <Table.HeadCell className="w-32 font-semibold text-right text-gray-700">จัดการ</Table.HeadCell>
                                 </Table.Head>
                                 <Table.Body className="divide-y">
                                     {withdraws.data.map((withdraw) => (
                                         <Table.Row
                                             key={withdraw.id}
-                                            className="bg-white hover:bg-gray-50 transition-colors"
+                                            className="bg-white transition-colors hover:bg-gray-50"
                                         >
                                             <Table.Cell className="font-medium text-gray-900 whitespace-nowrap">
                                                 #{withdraw.id}
                                             </Table.Cell>
                                             <Table.Cell>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-600 font-medium">
+                                                <div className="flex gap-2 items-center">
+                                                    <div className="flex justify-center items-center w-8 h-8 font-medium text-blue-600 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full">
                                                         {withdraw.user?.name?.charAt(0).toUpperCase()}
                                                     </div>
                                                     <span className="font-medium">{withdraw.user?.name}</span>
@@ -172,15 +181,21 @@ export default function Index({ auth, withdraws }) {
                                                 </div>
                                             </Table.Cell>
                                             <Table.Cell>
-                                                {getStatusBadge(withdraw.status)}
+                                                <Badge color={getStatusColor(withdraw.status)} className="w-fit">
+                                                    {getStatusColor(withdraw.status) === 'warning' ? 'รอดำเนินการ' :
+                                                    getStatusColor(withdraw.status) === 'info' ? 'กําลังดำเนินการ' :
+                                                    getStatusColor(withdraw.status) === 'success' ? 'สําเร็จ' :
+                                                    getStatusColor(withdraw.status) === 'failure' ? 'ยกเลิก' : ''}
+                                                </Badge>
                                             </Table.Cell>
                                             <Table.Cell>
                                                 <div className="text-sm text-gray-900">
                                                     {formatThaiDate(withdraw.created_at)}
+
                                                 </div>
                                             </Table.Cell>
                                             <Table.Cell>
-                                                <div className="flex justify-end gap-2">
+                                                <div className="flex gap-2 justify-end">
                                                     <Button
                                                         gradientDuoTone="purpleToBlue"
                                                         size="sm"
@@ -254,13 +269,13 @@ export default function Index({ auth, withdraws }) {
                     dismissible
                 >
                     <Modal.Header className="border-b border-gray-200 !p-6 bg-gradient-to-r from-blue-50 to-white">
-                        <div className="flex items-center gap-3">
+                        <div className="flex gap-3 items-center">
                             <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md">
                                 <FaBoxes className="w-6 h-6 text-white" />
                             </div>
                             <div>
                                 <h3 className="text-2xl font-bold text-gray-900">รายละเอียดการเบิก</h3>
-                                <p className="text-sm text-gray-500 mt-1">ข้อมูลเพิ่มเติมเกี่ยวกับการเบิก</p>
+                                <p className="mt-1 text-sm text-gray-500">ข้อมูลเพิ่มเติมเกี่ยวกับการเบิก</p>
                             </div>
                         </div>
                     </Modal.Header>
@@ -269,7 +284,7 @@ export default function Index({ auth, withdraws }) {
                             <div className="space-y-6">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div>
-                                        <div className="flex items-center gap-3 mb-4">
+                                        <div className="flex gap-3 items-center mb-4">
                                             <div className="p-2 bg-blue-100 rounded-lg">
                                                 <FaUser className="w-5 h-5 text-blue-600" />
                                             </div>
@@ -277,9 +292,9 @@ export default function Index({ auth, withdraws }) {
                                         </div>
                                         <div className="space-y-4">
                                             <div>
-                                                <p className="text-sm font-medium text-gray-500 mb-1">ผู้เบิก</p>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-600 font-medium">
+                                                <p className="mb-1 text-sm font-medium text-gray-500">ผู้เบิก</p>
+                                                <div className="flex gap-2 items-center">
+                                                    <div className="flex justify-center items-center w-8 h-8 font-medium text-blue-600 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full">
                                                         {selectedWithdraw.user?.name?.charAt(0).toUpperCase()}
                                                     </div>
                                                     <Badge color="gray" size="md" className="w-fit">
@@ -291,7 +306,7 @@ export default function Index({ auth, withdraws }) {
                                     </div>
 
                                     <div>
-                                        <div className="flex items-center gap-3 mb-4">
+                                        <div className="flex gap-3 items-center mb-4">
                                             <div className="p-2 bg-blue-100 rounded-lg">
                                                 <FaCalendarAlt className="w-5 h-5 text-blue-600" />
                                             </div>
@@ -299,7 +314,7 @@ export default function Index({ auth, withdraws }) {
                                         </div>
                                         <div className="space-y-4">
                                             <div className="bg-white px-4 py-2.5 rounded-lg border border-gray-200 text-gray-700">
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex gap-2 items-center">
                                                     <FaCalendarAlt className="w-4 h-4 text-gray-400" />
                                                     <span>{formatThaiDate(selectedWithdraw.created_at)}</span>
                                                 </div>
@@ -308,15 +323,15 @@ export default function Index({ auth, withdraws }) {
                                     </div>
                                 </div>
 
-                                <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 space-y-5 border border-gray-100 shadow-sm">
-                                    <div className="flex items-center gap-3">
+                                <div className="p-5 space-y-5 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100 shadow-sm">
+                                    <div className="flex gap-3 items-center">
                                         <div className="p-2 bg-blue-100 rounded-lg">
                                             <FaBoxes className="w-5 h-5 text-blue-600" />
                                         </div>
                                         <h4 className="font-semibold text-gray-900">รายการที่เบิก</h4>
                                     </div>
                                     <div className="space-y-3">
-                                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                                        <div className="p-4 bg-white rounded-lg border border-gray-200">
                                             <Table>
                                                 <Table.Head>
                                                     <Table.HeadCell>รายการ</Table.HeadCell>
@@ -327,7 +342,7 @@ export default function Index({ auth, withdraws }) {
                                                     {selectedWithdraw.items.map((item, index) => (
                                                         <Table.Row key={index}>
                                                             <Table.Cell>
-                                                                <div className="flex items-center gap-2">
+                                                                <div className="flex gap-2 items-center">
                                                                     <Badge
                                                                         color={item.type === "ingredient" ? "info" : "warning"}
                                                                         className="mr-2"
@@ -360,7 +375,7 @@ export default function Index({ auth, withdraws }) {
                         )}
                     </Modal.Body>
                     <Modal.Footer className="border-t border-gray-200 !p-6 bg-gradient-to-r from-gray-50 to-white">
-                        <div className="flex justify-end w-full gap-3">
+                        <div className="flex gap-3 justify-end w-full">
                             <Button
                                 color="gray"
                                 size="sm"
