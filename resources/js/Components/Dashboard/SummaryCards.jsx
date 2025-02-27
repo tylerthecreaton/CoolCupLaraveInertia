@@ -115,10 +115,15 @@ export default function SummaryCards({ data }) {
                                         card.trend < 0 ? "bg-red-100 text-red-800" : 
                                         "bg-gray-100 text-gray-800"
                                     )}>
-                                        {card.trend !== 0 && (card.trend > 0 ? "+" : "-")}
+                                        {card.trend !== 0 && (card.trend > 0 ? "+" : "")}
                                         {Math.abs(card.trend)}%
                                     </span>
-                                    <span className="text-sm text-gray-500">เทียบกับเมื่อวาน</span>
+                                    <span className="text-sm text-gray-500">
+                                        {data.dateRange === 'today' && 'เทียบกับเมื่อวาน'}
+                                        {data.dateRange === 'thisWeek' && 'เทียบกับสัปดาห์ที่แล้ว'}
+                                        {data.dateRange === 'thisMonth' && 'เทียบกับเดือนที่แล้ว'}
+                                        {!['today', 'thisWeek', 'thisMonth'].includes(data.dateRange) && 'เทียบกับช่วงก่อนหน้า'}
+                                    </span>
                                 </div>
                             </div>
                         </div>

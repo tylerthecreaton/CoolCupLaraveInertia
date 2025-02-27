@@ -23,9 +23,32 @@ class DashboardController extends Controller
         $startDate = $this->getStartDate($dateRange, $request->input('startDate'));
         $endDate = $this->getEndDate($dateRange, $request->input('endDate'));
 
-        // คำนวณช่วงเวลาของเมื่อวาน (ทั้งวัน)
-        $previousStartDate = now()->subDay()->startOfDay();
-        $previousEndDate = now()->subDay()->endOfDay();
+        // คำนวณช่วงเวลาเปรียบเทียบตาม dateRange
+        switch ($dateRange) {
+            case 'today':
+                // เปรียบเทียบกับเมื่อวาน
+                $previousStartDate = now()->subDay()->startOfDay();
+                $previousEndDate = now()->subDay()->endOfDay();
+                break;
+            
+            case 'thisWeek':
+                // เปรียบเทียบกับสัปดาห์ที่แล้ว
+                $previousStartDate = now()->subWeek()->startOfWeek();
+                $previousEndDate = now()->subWeek()->endOfWeek();
+                break;
+            
+            case 'thisMonth':
+                // เปรียบเทียบกับเดือนที่แล้ว
+                $previousStartDate = now()->subMonth()->startOfMonth();
+                $previousEndDate = now()->subMonth()->endOfMonth();
+                break;
+            
+            default:
+                // สำหรับช่วงเวลาที่กำหนดเอง ใช้ช่วงเวลาเท่ากันย้อนหลังไป
+                $periodDiff = $endDate->diffInSeconds($startDate);
+                $previousEndDate = (clone $startDate)->subSecond();
+                $previousStartDate = (clone $previousEndDate)->subSeconds($periodDiff);
+        }
 
         // Get VAT rate from settings
         $vatRate = Setting::where('key', 'vat_rate')->value('value') ?? 7;
@@ -40,7 +63,7 @@ class DashboardController extends Controller
             )
             ->first();
 
-        // Previous day sales data (ข้อมูลยอดขายของเมื่อวานทั้งวัน)
+        // Previous period sales data
         $previousSalesData = Order::whereBetween('created_at', [$previousStartDate, $previousEndDate])
             ->where('status', 'completed')
             ->select(
