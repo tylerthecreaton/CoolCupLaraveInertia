@@ -4,15 +4,15 @@ import SidebarMenu from "@/Components/home/SidebarMenu";
 import StorefrontLayout from "@/Layouts/StorefrontLayout";
 import { Head } from "@inertiajs/react";
 import React from "react";
-export default function RegisterMember() {
+export default function RegisterMember(errors) {
     return (
         <StorefrontLayout>
             <main className="flex">
                 <SidebarMenu />
-                <div className="flex-1 relative">
+                <div className="relative flex-1">
                     <HeaderPanel />
                     <Head title="Register Member" />
-                    <MainContent />
+                    <MainContent errors={errors} />
                 </div>
             </main>
         </StorefrontLayout>

@@ -27,7 +27,7 @@ class MemberController extends Controller
 
             // Determine which pagination to apply based on type
             $type = request()->get('type', 'orders');
-            
+
             // Use different page parameters for each type
             $ordersPage = $type === 'orders' ? request()->get('orders_page', 1) : 1;
             $pointUsagesPage = $type === 'point_usages' ? request()->get('point_usages_page', 1) : 1;
@@ -136,11 +136,24 @@ class MemberController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
+        $rules = [
+            'name' => 'required|alpha|max:255|min:3',
             'phone_number' => 'required|string|size:10',
             'birthdate' => 'required|date',
-        ]);
+        ];
+
+        $messages = [
+            'name.required' => 'กรุณากรอกชื่อ',
+            'name.alpha' => 'ชื่อต้องเป็นตัวอักษรเท่านั้น',
+            'name.max' => 'ชื่อต้องมีความยาวอย่างน้อย 255 ตัวอักษร',
+            'name.min' => 'ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร',
+            'phone_number.required' => 'กรุณากรอกหมายเลขโทรศัพท์',
+            'phone_number.size' => 'หมายเลขโทรศัพท์ต้องมี 10 ตัว',
+            'birthdate.required' => 'กรุณากรอกวันเกิด',
+            'birthdate.date' => 'กรุณากรอกวันเกิดให้ถูกต้อง',
+        ];
+
+        $request->validate($rules, $messages);
 
         $data = $request->all();
         $data['birthdate'] = Carbon::parse($request->birthdate)->format('Y-m-d');
