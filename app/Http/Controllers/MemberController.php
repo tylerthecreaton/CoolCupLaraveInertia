@@ -15,14 +15,36 @@ class MemberController extends Controller
     {
         if (request()->has('id')) {
             $customer = Customer::with([
-                'orders' => function ($query) {
-                    $query->latest()->limit(10);
-                },
                 'orders.orderDetails',
-                'pointUsages' => function ($query) {
-                    $query->latest()->limit(10);
-                }
+                'pointUsages'
             ])->findOrFail(request()->id);
+
+            // Get date filters
+            $startDate = request()->get('startDate');
+            $endDate = request()->get('endDate');
+            $pointStartDate = request()->get('pointStartDate');
+            $pointEndDate = request()->get('pointEndDate');
+
+            // Determine which pagination to apply based on type
+            $type = request()->get('type', 'orders');
+            
+            // Use different page parameters for each type
+            $ordersPage = $type === 'orders' ? request()->get('orders_page', 1) : 1;
+            $pointUsagesPage = $type === 'point_usages' ? request()->get('point_usages_page', 1) : 1;
+
+            // Query for orders with date filter
+            $ordersQuery = $customer->orders()->with('orderDetails')->latest();
+            if ($startDate && $endDate) {
+                $ordersQuery->whereBetween('created_at', [$startDate, $endDate]);
+            }
+            $orders = $ordersQuery->paginate(10, ['*'], 'orders_page', $ordersPage);
+
+            // Query for point usages with date filter
+            $pointUsagesQuery = $customer->pointUsages()->latest();
+            if ($pointStartDate && $pointEndDate) {
+                $pointUsagesQuery->whereBetween('created_at', [$pointStartDate, $pointEndDate]);
+            }
+            $pointUsages = $pointUsagesQuery->paginate(10, ['*'], 'point_usages_page', $pointUsagesPage);
 
             return Inertia::render('Member', [
                 'customer' => [
@@ -33,40 +55,51 @@ class MemberController extends Controller
                     'loyalty_points' => $customer->loyalty_points,
                     'created_at' => $customer->created_at,
                     'updated_at' => $customer->updated_at,
-                    'orders' => $customer->orders->map(function ($order) {
-                        return [
-                            'id' => $order->id,
-                            'total' => $order->orderDetails->sum('subtotal'),
-                            'status' => $order->status,
-                            'created_at' => $order->created_at,
-                            'receipt_path' => $order->receipt_path,
-                            'invoice_number' => $order->invoice_number,
-                            'items' => $order->orderDetails->map(function ($detail) {
-                                return [
-                                    'product_name' => $detail->product_name,
-                                    'quantity' => $detail->quantity,
-                                    'price' => $detail->price,
-                                    'subtotal' => $detail->subtotal
-                                ];
-                            })
-                        ];
-                    }),
-                    'point_usages' => $customer->pointUsages->map(function ($usage) {
-                        $description = $usage->type === 'plus'
-                            ? 'รับคะแนนจากการสั่งซื้อ #' . $usage->order_id
-                            : 'ใช้คะแนนส่วนลด #' . $usage->order_id;
+                    'orders' => [
+                        'data' => $orders->map(function ($order) {
+                            return [
+                                'id' => $order->id,
+                                'total' => $order->orderDetails->sum('subtotal'),
+                                'status' => $order->status,
+                                'created_at' => $order->created_at,
+                                'receipt_path' => $order->receipt_path,
+                                'invoice_number' => $order->invoice_number,
+                                'items' => $order->orderDetails->map(function ($detail) {
+                                    return [
+                                        'product_name' => $detail->product_name,
+                                        'quantity' => $detail->quantity,
+                                        'price' => $detail->price,
+                                        'subtotal' => $detail->subtotal
+                                    ];
+                                })
+                            ];
+                        }),
+                        'current_page' => $orders->currentPage(),
+                        'per_page' => $orders->perPage(),
+                        'total' => $orders->total()
+                    ],
+                    'point_usages' => [
+                        'data' => $pointUsages->map(function ($usage) {
+                            $description = $usage->type === 'plus'
+                                ? 'รับคะแนนจากการสั่งซื้อ #' . $usage->order_id
+                                : 'ใช้คะแนนส่วนลด #' . $usage->order_id;
 
-                        return [
-                            'id' => $usage->id,
-                            'points' => $usage->type === 'plus' ? $usage->point_amount : $usage->point_discount_amount,
-                            'type' => $usage->type,
-                            'description' => $description,
-                            'created_at' => $usage->created_at
-                        ];
-                    })
+                            return [
+                                'id' => $usage->id,
+                                'points' => $usage->type === 'plus' ? $usage->point_amount : $usage->point_discount_amount,
+                                'type' => $usage->type,
+                                'description' => $description,
+                                'created_at' => $usage->created_at
+                            ];
+                        }),
+                        'current_page' => $pointUsages->currentPage(),
+                        'per_page' => $pointUsages->perPage(),
+                        'total' => $pointUsages->total()
+                    ]
                 ]
             ]);
         }
+
         return Inertia::render('Member');
     }
 

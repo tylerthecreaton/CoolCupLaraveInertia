@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
     Button,
     Datepicker,
@@ -7,8 +7,9 @@ import {
     Card,
     Badge,
     Table,
+    Pagination
 } from "flowbite-react";
-import { router } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import axios from "axios";
 import debounce from "lodash/debounce";
 import dayjs from "dayjs";
@@ -35,13 +36,12 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 dayjs.locale("th");
 
-export default function MainContent({ member }) {
-    console.log(member);
+export default function MainContent({ customer }) {
     const [formData, setFormData] = useState({
-        name: member?.name || "",
-        phone_number: member?.phone_number || "",
-        birthdate: member?.birthdate ? new Date(member.birthdate) : "",
-        created_at: member?.created_at || "",
+        name: customer?.name || "",
+        phone_number: customer?.phone_number || "",
+        birthdate: customer?.birthdate ? new Date(customer.birthdate) : "",
+        created_at: customer?.created_at || "",
         search: "",
     });
 
@@ -55,13 +55,14 @@ export default function MainContent({ member }) {
         endDate: null,
     });
 
-    const [filteredOrders, setFilteredOrders] = useState(member?.orders || []);
+    const [filteredOrders, setFilteredOrders] = useState(customer?.orders?.data || []);
     const [filteredPointUsages, setFilteredPointUsages] = useState(
-        member?.point_usages || []
+        customer?.point_usages?.data || []
     );
 
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const suggestionsRef = useRef(null);
 
     const [selectedReceipt, setSelectedReceipt] = useState(null);
     const [showReceiptModal, setShowReceiptModal] = useState(false);
@@ -84,6 +85,40 @@ export default function MainContent({ member }) {
 
     const formatPoints = (points) => {
         return points ? formatNumber(parseFloat(points).toFixed(2)) : "0.00";
+    };
+
+    const renderPagination = (paginationData, type) => {
+        if (!paginationData?.total) return null;
+
+        const onPageChange = (page) => {
+            const customerId = customer?.id;
+            if (!customerId) return;
+
+            const pageParam = type === 'orders' ? 'orders_page' : 'point_usages_page';
+
+            router.get(
+                `/member?id=${customerId}&${pageParam}=${page}&type=${type}`,
+                {},
+                { preserveState: true, preserveScroll: true }
+            );
+        };
+
+        return (
+            <div className="flex flex-col gap-4 items-center mt-4">
+                <Pagination
+                    currentPage={paginationData.current_page}
+                    totalPages={Math.ceil(paginationData.total / paginationData.per_page)}
+                    onPageChange={onPageChange}
+                    showIcons={true}
+                    layout="pagination"
+                    previousLabel="ย้อนกลับ"
+                    nextLabel="ถัดไป"
+                />
+                <div className="text-sm text-gray-700">
+                    แสดง {((paginationData.current_page - 1) * paginationData.per_page) + 1} ถึง {Math.min(paginationData.current_page * paginationData.per_page, paginationData.total)} จากทั้งหมด {paginationData.total} รายการ
+                </div>
+            </div>
+        );
     };
 
     // Create a debounced search function for auto-suggestion
@@ -168,7 +203,7 @@ export default function MainContent({ member }) {
 
         // Remove any leading slash if present
         const cleanPath = receiptPath.startsWith('/') ? receiptPath.slice(1) : receiptPath;
-        
+
         fetch(`/images/receipt/${cleanPath}`)
             .then((response) => {
                 if (!response.ok) {
@@ -186,77 +221,109 @@ export default function MainContent({ member }) {
             });
     };
 
-    useEffect(() => {
-        if (member?.orders) {
-            let filtered = [...member.orders];
-
-            if (dateRange.startDate && dateRange.endDate) {
-                filtered = filtered.filter((order) => {
-                    const orderDate = dayjs(order.created_at).startOf("day");
-                    const start = dayjs(dateRange.startDate).startOf("day");
-                    const end = dayjs(dateRange.endDate).endOf("day");
-                    return (
-                        orderDate.isSameOrAfter(start) &&
-                        orderDate.isSameOrBefore(end)
-                    );
-                });
-            }
-
-            setFilteredOrders(filtered);
-        }
-    }, [member?.orders, dateRange]);
-
-    useEffect(() => {
-        if (member?.point_usages) {
-            let filtered = [...member.point_usages];
-
-            if (pointDateRange.startDate && pointDateRange.endDate) {
-                filtered = filtered.filter((usage) => {
-                    const usageDate = dayjs(usage.created_at).startOf("day");
-                    const start = dayjs(pointDateRange.startDate).startOf(
-                        "day"
-                    );
-                    const end = dayjs(pointDateRange.endDate).endOf("day");
-                    return (
-                        usageDate.isSameOrAfter(start) &&
-                        usageDate.isSameOrBefore(end)
-                    );
-                });
-            }
-
-            setFilteredPointUsages(filtered);
-        }
-    }, [member?.point_usages, pointDateRange]);
-
     const handleDateChange = (type, date) => {
-        setDateRange((prev) => ({
-            ...prev,
-            [type]: date,
-        }));
+        const customerId = customer?.id;
+        if (!customerId) return;
+
+        if (type === 'start') {
+            setDateRange(prev => ({ ...prev, startDate: date }));
+            if (dateRange.endDate) {
+                router.get(
+                    `/member?id=${customerId}&startDate=${dayjs(date).format('YYYY-MM-DD')}&endDate=${dayjs(dateRange.endDate).format('YYYY-MM-DD')}&type=orders`,
+                    {},
+                    { preserveState: true, preserveScroll: true }
+                );
+            }
+        } else {
+            setDateRange(prev => ({ ...prev, endDate: date }));
+            if (dateRange.startDate) {
+                router.get(
+                    `/member?id=${customerId}&startDate=${dayjs(dateRange.startDate).format('YYYY-MM-DD')}&endDate=${dayjs(date).format('YYYY-MM-DD')}&type=orders`,
+                    {},
+                    { preserveState: true, preserveScroll: true }
+                );
+            }
+        }
     };
 
     const handlePointDateChange = (type, date) => {
-        setPointDateRange((prev) => ({
-            ...prev,
-            [type]: date,
-        }));
+        const customerId = customer?.id;
+        if (!customerId) return;
+
+        if (type === 'start') {
+            setPointDateRange(prev => ({ ...prev, startDate: date }));
+            if (pointDateRange.endDate) {
+                router.get(
+                    `/member?id=${customerId}&pointStartDate=${dayjs(date).format('YYYY-MM-DD')}&pointEndDate=${dayjs(pointDateRange.endDate).format('YYYY-MM-DD')}&type=point_usages`,
+                    {},
+                    { preserveState: true, preserveScroll: true }
+                );
+            }
+        } else {
+            setPointDateRange(prev => ({ ...prev, endDate: date }));
+            if (pointDateRange.startDate) {
+                router.get(
+                    `/member?id=${customerId}&pointStartDate=${dayjs(pointDateRange.startDate).format('YYYY-MM-DD')}&pointEndDate=${dayjs(date).format('YYYY-MM-DD')}&type=point_usages`,
+                    {},
+                    { preserveState: true, preserveScroll: true }
+                );
+            }
+        }
     };
 
     const clearDateFilter = () => {
+        const customerId = customer?.id;
+        if (!customerId) return;
+
+        // Reset orders date range
         setDateRange({
             startDate: null,
             endDate: null,
         });
+
+        // Reset filtered data
+        setFilteredOrders(customer?.orders?.data || []);
+
+        // Reset date picker values
+        const startDatePicker = document.getElementById('startDate');
+        const endDatePicker = document.getElementById('endDate');
+        if (startDatePicker) startDatePicker.value = '';
+        if (endDatePicker) endDatePicker.value = '';
+
+        router.get(
+            `/member?id=${customerId}&type=orders`,
+            {},
+            { preserveState: true, preserveScroll: true }
+        );
     };
 
     const clearPointDateFilter = () => {
+        const customerId = customer?.id;
+        if (!customerId) return;
+
+        // Reset point usages date range
         setPointDateRange({
             startDate: null,
             endDate: null,
         });
+
+        // Reset filtered data
+        setFilteredPointUsages(customer?.point_usages?.data || []);
+
+        // Reset date picker values
+        const startDatePicker = document.getElementById('pointStartDate');
+        const endDatePicker = document.getElementById('pointEndDate');
+        if (startDatePicker) startDatePicker.value = '';
+        if (endDatePicker) endDatePicker.value = '';
+
+        router.get(
+            `/member?id=${customerId}&type=point_usages`,
+            {},
+            { preserveState: true, preserveScroll: true }
+        );
     };
 
-    const clearMemberData = () => {
+    const clearCustomerData = () => {
         setFormData({
             name: "",
             phone_number: "",
@@ -264,15 +331,28 @@ export default function MainContent({ member }) {
             created_at: "",
             search: "",
         });
-        setSuggestions([]);
-        setShowSuggestions(false);
+
+        // Reset date filters
+        setDateRange({
+            startDate: null,
+            endDate: null,
+        });
+        setPointDateRange({
+            startDate: null,
+            endDate: null,
+        });
+
+        // Reset filtered data
+        setFilteredOrders([]);
+        setFilteredPointUsages([]);
+
         router.get("/member");
     };
 
     return (
         <main className="relative flex-1 px-6 py-8 bg-gradient-to-b from-gray-50 to-white">
             <div className="mx-auto space-y-8 max-w-screen-2xl">
-                {!member && (
+                {!customer && (
                     <div className="p-6 bg-white rounded-xl border border-gray-100 shadow-lg">
                         <div className="relative mb-6 search-container">
                             <Label
@@ -324,7 +404,7 @@ export default function MainContent({ member }) {
                     </div>
                 )}
 
-                {member && (
+                {customer && (
                     <>
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                             {/* ข้อมูลสมาชิก */}
@@ -336,7 +416,7 @@ export default function MainContent({ member }) {
                                     </h2>
                                     <div className="ml-auto">
                                         <Button
-                                            onClick={clearMemberData}
+                                            onClick={clearCustomerData}
                                             color="warning"
                                             className="flex gap-2 items-center mb-2"
                                         >
@@ -433,7 +513,7 @@ export default function MainContent({ member }) {
                                     <div className="mt-6">
                                         <p className="text-5xl font-bold tracking-tight text-blue-600">
                                             {formatPoints(
-                                                member.loyalty_points
+                                                customer.loyalty_points
                                             )}
                                         </p>
                                         <p className="mt-2 text-sm font-medium text-gray-600">
@@ -469,10 +549,16 @@ export default function MainContent({ member }) {
                                             value={pointDateRange.startDate}
                                             onChange={(date) =>
                                                 handlePointDateChange(
-                                                    "startDate",
+                                                    "start",
                                                     date
                                                 )
                                             }
+                                            onSelectedDateClear={() => {
+                                                setPointDateRange(prev => ({
+                                                    ...prev,
+                                                    startDate: null
+                                                }));
+                                            }}
                                             className="w-full md:w-48"
                                         />
                                     </div>
@@ -490,10 +576,16 @@ export default function MainContent({ member }) {
                                             value={pointDateRange.endDate}
                                             onChange={(date) =>
                                                 handlePointDateChange(
-                                                    "endDate",
+                                                    "end",
                                                     date
                                                 )
                                             }
+                                            onSelectedDateClear={() => {
+                                                setPointDateRange(prev => ({
+                                                    ...prev,
+                                                    endDate: null
+                                                }));
+                                            }}
                                             className="w-full md:w-48"
                                         />
                                     </div>
@@ -526,7 +618,7 @@ export default function MainContent({ member }) {
                                         </Table.HeadCell>
                                     </Table.Head>
                                     <Table.Body>
-                                        {filteredPointUsages.map((usage) => (
+                                        {customer?.point_usages?.data?.map((usage) => (
                                             <Table.Row
                                                 key={usage.id}
                                                 className="transition-colors duration-150 hover:bg-blue-50"
@@ -565,7 +657,7 @@ export default function MainContent({ member }) {
                                                 </Table.Cell>
                                             </Table.Row>
                                         ))}
-                                        {filteredPointUsages.length === 0 && (
+                                        {(!customer?.point_usages?.data || customer.point_usages.data.length === 0) && (
                                             <Table.Row>
                                                 <Table.Cell
                                                     colSpan={4}
@@ -577,6 +669,8 @@ export default function MainContent({ member }) {
                                         )}
                                     </Table.Body>
                                 </Table>
+                                {/* Point Usage Pagination */}
+                                {renderPagination(customer?.point_usages, 'point_usages')}
                             </div>
                         </Card>
 
@@ -605,7 +699,7 @@ export default function MainContent({ member }) {
                                             value={dateRange.startDate}
                                             onChange={(date) =>
                                                 handleDateChange(
-                                                    "startDate",
+                                                    "start",
                                                     date
                                                 )
                                             }
@@ -626,7 +720,7 @@ export default function MainContent({ member }) {
                                             value={dateRange.endDate}
                                             onChange={(date) =>
                                                 handleDateChange(
-                                                    "endDate",
+                                                    "end",
                                                     date
                                                 )
                                             }
@@ -665,7 +759,7 @@ export default function MainContent({ member }) {
                                         </Table.HeadCell>
                                     </Table.Head>
                                     <Table.Body>
-                                        {filteredOrders.map((order) => (
+                                        {customer?.orders?.data?.map((order) => (
                                             <Table.Row
                                                 key={order.id}
                                                 className="transition-colors duration-150 hover:bg-blue-50"
@@ -738,10 +832,10 @@ export default function MainContent({ member }) {
                                                 </Table.Cell>
                                             </Table.Row>
                                         ))}
-                                        {filteredOrders.length === 0 && (
+                                        {(!customer?.orders?.data || customer.orders.data.length === 0) && (
                                             <Table.Row>
                                                 <Table.Cell
-                                                    colSpan={4}
+                                                    colSpan={5}
                                                     className="py-8 text-center text-gray-500"
                                                 >
                                                     ไม่พบรายการในช่วงเวลาที่เลือก
@@ -750,12 +844,14 @@ export default function MainContent({ member }) {
                                         )}
                                     </Table.Body>
                                 </Table>
+                                {/* Orders Pagination */}
+                                {renderPagination(customer?.orders, 'orders')}
                             </div>
                         </Card>
                     </>
                 )}
             </div>
-            
+
             {/* Receipt Modal */}
             <ViewReceiptModal
                 show={showReceiptModal}

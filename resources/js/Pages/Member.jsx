@@ -12,7 +12,7 @@ export default function Member({ customer }) {
                 <div className="flex-1 relative">
                     <HeaderPanel />
                     <Head title="Member" />
-                    <MainContent member={customer} />
+                    <MainContent customer={customer} />
                 </div>
             </main>
         </StorefrontLayout>
