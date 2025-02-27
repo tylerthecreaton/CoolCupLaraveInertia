@@ -76,6 +76,13 @@ export default function Index({ settings, types }) {
                         type: 'general',
                         comment: ''
                     });
+                    Swal.fire({
+                        title: "บันทึกสำเร็จ!",
+                        text: "การตั้งค่าถูกอัพเดทเรียบร้อยแล้ว",
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false,
+                    });
                 },
                 onError: (errors) => {
                     setErrors(errors);
