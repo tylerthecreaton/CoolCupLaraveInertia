@@ -44,7 +44,7 @@ const IngredientUsage = ({ ingredientUsage = [] }) => {
         datasets: [
             {
                 label: 'ปริมาณการใช้',
-                data: ingredientUsage.map(item => item.total_amount),
+                data: ingredientUsage.map(item => Math.abs(item.total_amount)),
                 backgroundColor: ingredientUsage.map((_, index) => colorPalette[index % colorPalette.length].end),
                 borderColor: ingredientUsage.map((_, index) => colorPalette[index % colorPalette.length].start),
                 borderWidth: 1,
@@ -91,7 +91,6 @@ const IngredientUsage = ({ ingredientUsage = [] }) => {
         },
         scales: {
             y: {
-                beginAtZero: true,
                 grid: {
                     color: 'rgba(0, 0, 0, 0.05)',
                     drawBorder: false
@@ -100,60 +99,20 @@ const IngredientUsage = ({ ingredientUsage = [] }) => {
                     font: {
                         family: 'IBM Plex Sans Thai',
                         size: 12
-                    },
-                    padding: 10
-                },
-                title: {
-                    display: true,
-                    text: 'ปริมาณ',
-                    font: {
-                        family: 'IBM Plex Sans Thai',
-                        size: 14,
-                        weight: 'medium'
-                    },
-                    padding: {
-                        top: 10,
-                        bottom: 10
                     }
                 }
             },
             x: {
                 grid: {
-                    display: false
+                    display: false,
+                    drawBorder: false
                 },
                 ticks: {
                     font: {
                         family: 'IBM Plex Sans Thai',
                         size: 12
-                    },
-                    padding: 10,
-                    color: (context) => colorPalette[context.index % colorPalette.length].start
-                },
-                title: {
-                    display: true,
-                    text: 'วัตถุดิบ',
-                    font: {
-                        family: 'IBM Plex Sans Thai',
-                        size: 14,
-                        weight: 'medium'
-                    },
-                    padding: {
-                        top: 10,
-                        bottom: 10
                     }
                 }
-            }
-        },
-        animation: {
-            duration: 1000,
-            easing: 'easeInOutQuart'
-        },
-        layout: {
-            padding: {
-                left: 20,
-                right: 20,
-                top: 0,
-                bottom: 20
             }
         }
     };

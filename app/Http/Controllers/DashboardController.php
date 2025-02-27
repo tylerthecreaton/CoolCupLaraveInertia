@@ -8,6 +8,7 @@ use App\Models\Ingredient;
 use App\Models\Consumable;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Carbon\Carbon;
@@ -22,15 +23,103 @@ class DashboardController extends Controller
         $startDate = $this->getStartDate($dateRange, $request->input('startDate'));
         $endDate = $this->getEndDate($dateRange, $request->input('endDate'));
 
-        // Sales Summary
-        $salesData = Order::whereBetween('created_at', [$startDate, $endDate])
+        // คำนวณช่วงเวลาของเมื่อวาน (ทั้งวัน)
+        $previousStartDate = now()->subDay()->startOfDay();
+        $previousEndDate = now()->subDay()->endOfDay();
+
+        // Get VAT rate from settings
+        $vatRate = Setting::where('key', 'vat_rate')->value('value') ?? 7;
+
+        // Current period sales data
+        $currentSalesData = Order::whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'completed')
             ->select(
-                DB::raw('SUM(total_amount) as total_sales'),
+                DB::raw('COALESCE(SUM(total_amount), 0) as total_sales'),
                 DB::raw('COUNT(*) as total_orders'),
-                DB::raw('AVG(total_amount) as average_order_value')
+                DB::raw('COALESCE(AVG(total_amount), 0) as average_order_value')
             )
             ->first();
+
+        // Previous day sales data (ข้อมูลยอดขายของเมื่อวานทั้งวัน)
+        $previousSalesData = Order::whereBetween('created_at', [$previousStartDate, $previousEndDate])
+            ->where('status', 'completed')
+            ->select(
+                DB::raw('COALESCE(SUM(total_amount), 0) as total_sales'),
+                DB::raw('COUNT(*) as total_orders'),
+                DB::raw('COALESCE(AVG(total_amount), 0) as average_order_value')
+            )
+            ->first();
+
+        // แปลงค่าให้เป็นตัวเลขและป้องกันค่า null
+        $currentSales = (float) $currentSalesData->total_sales;
+        $previousSales = (float) $previousSalesData->total_sales;
+        $currentOrders = (int) $currentSalesData->total_orders;
+        $previousOrders = (int) $previousSalesData->total_orders;
+        $currentAvg = (float) $currentSalesData->average_order_value;
+        $previousAvg = (float) $previousSalesData->average_order_value;
+
+        // Debug logging
+        Log::info('Sales Trend Calculation', [
+            'Current Sales' => $currentSales,
+            'Previous Sales' => $previousSales,
+            'Date Range' => $dateRange,
+            'Current Date' => [
+                'Start' => $startDate->format('Y-m-d H:i:s'),
+                'End' => $endDate->format('Y-m-d H:i:s')
+            ],
+            'Previous Date' => [
+                'Start' => $previousStartDate->format('Y-m-d H:i:s'),
+                'End' => $previousEndDate->format('Y-m-d H:i:s')
+            ]
+        ]);
+
+        // Calculate trends
+        $calculateTrend = function($current, $previous) {
+            if ($current == 0 && $previous == 0) return 0;
+            
+            // ใช้ค่าที่มากกว่าเป็นฐานในการคำนวณ
+            $baseValue = max($current, $previous);
+            
+            // คำนวณความแตกต่าง
+            $difference = $current - $previous;
+            
+            // คำนวณ % ความแตกต่าง
+            $percentDiff = ($difference / $baseValue) * 100;
+
+            // Debug logging
+            Log::info('Trend Calculation', [
+                'Current' => $current,
+                'Previous' => $previous,
+                'Base Value' => $baseValue,
+                'Difference' => $difference,
+                'Percent Diff' => $percentDiff
+            ]);
+            
+            return round($percentDiff, 1);
+        };
+
+        $salesTrend = $calculateTrend($currentSales, $previousSales);
+        $ordersTrend = $calculateTrend($currentOrders, $previousOrders);
+        $avgTrend = $calculateTrend($currentAvg, $previousAvg);
+
+        // Debug logging
+        Log::info('Final Trends', [
+            'Sales Trend' => $salesTrend,
+            'Orders Trend' => $ordersTrend,
+            'Average Trend' => $avgTrend
+        ]);
+
+        $salesData = [
+            'total_sales' => $currentSales,
+            'total_orders' => $currentOrders,
+            'average_order_value' => $currentAvg,
+            'sales_trend' => $salesTrend,
+            'orders_trend' => $ordersTrend,
+            'avg_order_trend' => $avgTrend,
+            'settings' => [
+                'vat_rate' => $vatRate
+            ]
+        ];
 
         // Top Products
         $topProducts = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
