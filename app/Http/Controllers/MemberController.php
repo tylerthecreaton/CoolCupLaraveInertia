@@ -39,6 +39,8 @@ class MemberController extends Controller
                             'total' => $order->orderDetails->sum('subtotal'),
                             'status' => $order->status,
                             'created_at' => $order->created_at,
+                            'receipt_path' => $order->receipt_path,
+                            'invoice_number' => $order->invoice_number,
                             'items' => $order->orderDetails->map(function ($detail) {
                                 return [
                                     'product_name' => $detail->product_name,

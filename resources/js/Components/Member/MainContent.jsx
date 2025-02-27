@@ -26,7 +26,10 @@ import {
     FaCreditCard,
     FaFilter,
     FaUndo,
+    FaFileInvoice,
 } from "react-icons/fa";
+import ViewReceiptModal from "@/Components/home/ViewReceiptModal";
+import Swal from 'sweetalert2';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -59,6 +62,9 @@ export default function MainContent({ member }) {
 
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+
+    const [selectedReceipt, setSelectedReceipt] = useState(null);
+    const [showReceiptModal, setShowReceiptModal] = useState(false);
 
     const formatDate = (date) => {
         return dayjs(date).format("DD/MM/YYYY HH:mm");
@@ -150,6 +156,36 @@ export default function MainContent({ member }) {
         return colors[status] || "info";
     };
 
+    const handleViewReceipt = (receiptPath) => {
+        if (!receiptPath) {
+            Swal.fire({
+                icon: "error",
+                title: "ไม่สามารถแสดงใบเสร็จได้",
+                text: "ไม่พบไฟล์ใบเสร็จในระบบ",
+            });
+            return;
+        }
+
+        // Remove any leading slash if present
+        const cleanPath = receiptPath.startsWith('/') ? receiptPath.slice(1) : receiptPath;
+        
+        fetch(`/images/receipt/${cleanPath}`)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('ไม่พบไฟล์ใบเสร็จ');
+                }
+                setSelectedReceipt(`/images/receipt/${cleanPath}`);
+                setShowReceiptModal(true);
+            })
+            .catch(() => {
+                Swal.fire({
+                    icon: "error",
+                    title: "ไม่สามารถแสดงใบเสร็จได้",
+                    text: "ไม่พบไฟล์ใบเสร็จในระบบ",
+                });
+            });
+    };
+
     useEffect(() => {
         if (member?.orders) {
             let filtered = [...member.orders];
@@ -220,6 +256,19 @@ export default function MainContent({ member }) {
         });
     };
 
+    const clearMemberData = () => {
+        setFormData({
+            name: "",
+            phone_number: "",
+            birthdate: "",
+            created_at: "",
+            search: "",
+        });
+        setSuggestions([]);
+        setShowSuggestions(false);
+        router.get("/member");
+    };
+
     return (
         <main className="relative flex-1 px-6 py-8 bg-gradient-to-b from-gray-50 to-white">
             <div className="mx-auto space-y-8 max-w-screen-2xl">
@@ -287,7 +336,7 @@ export default function MainContent({ member }) {
                                     </h2>
                                     <div className="ml-auto">
                                         <Button
-                                            onClick={() => setEditMember(true)}
+                                            onClick={clearMemberData}
                                             color="warning"
                                             className="flex gap-2 items-center mb-2"
                                         >
@@ -648,7 +697,22 @@ export default function MainContent({ member }) {
                                                     </div>
                                                 </Table.Cell>
                                                 <Table.Cell>
-                                                    {order.invoice_number}
+                                                    <div className="flex items-center space-x-2">
+                                                        <span>{order.invoice_number}</span>
+                                                        <Button
+                                                            size="xs"
+                                                            color="light"
+                                                            onClick={() =>
+                                                                handleViewReceipt(
+                                                                    order.receipt_path
+                                                                )
+                                                            }
+                                                            className="ml-2"
+                                                        >
+                                                            <FaFileInvoice className="w-4 h-4" />
+                                                            <span className="ml-1">ดูใบเสร็จ</span>
+                                                        </Button>
+                                                    </div>
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     <Badge
@@ -691,6 +755,13 @@ export default function MainContent({ member }) {
                     </>
                 )}
             </div>
+            
+            {/* Receipt Modal */}
+            <ViewReceiptModal
+                show={showReceiptModal}
+                onClose={() => setShowReceiptModal(false)}
+                receiptUrl={selectedReceipt}
+            />
         </main>
     );
 }
