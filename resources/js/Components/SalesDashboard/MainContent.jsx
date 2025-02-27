@@ -167,42 +167,42 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
     return (
         <div className="p-6 bg-gray-50">
             {/* Metric Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2 lg:grid-cols-4">
                 {/* Total Sales Card */}
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 transform transition-all hover:scale-105">
-                    <h3 className="text-blue-100 text-sm font-medium">ยอดขายรายเดือน</h3>
+                <div className="p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg transition-all transform hover:scale-105">
+                    <h3 className="text-sm font-medium text-blue-100">ยอดขายรายเดือน</h3>
                     <p className="text-3xl font-bold text-white">฿{formatCurrency(statistics.totalSales || 0)}</p>
-                    <p className="text-sm text-blue-100 flex items-center">
+                    <p className="flex items-center text-sm text-blue-100">
                         <span className="mr-1">{statistics.salesChange >= 0 ? '↑' : '↓'}</span>
                         {statistics.salesChange >= 0 ? '+' : ''}{statistics.salesChange || 0}% จากเดือนที่แล้ว
                     </p>
                 </div>
 
                 {/* Orders Card */}
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg p-6 transform transition-all hover:scale-105">
-                    <h3 className="text-purple-100 text-sm font-medium">รายการสั่งซื้อรายเดือน</h3>
+                <div className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg transition-all transform hover:scale-105">
+                    <h3 className="text-sm font-medium text-purple-100">รายการสั่งซื้อรายเดือน</h3>
                     <p className="text-3xl font-bold text-white">{statistics.totalOrders || 0}</p>
-                    <p className="text-sm text-purple-100 flex items-center">
+                    <p className="flex items-center text-sm text-purple-100">
                         <span className="mr-1">{statistics.ordersChange >= 0 ? '↑' : '↓'}</span>
                         {statistics.ordersChange >= 0 ? '+' : ''}{statistics.ordersChange || 0}% จากเดือนที่แล้ว
                     </p>
                 </div>
 
                 {/* Average Order Value */}
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg p-6 transform transition-all hover:scale-105">
-                    <h3 className="text-green-100 text-sm font-medium">ค่าสินค้ารายเดือน</h3>
+                <div className="p-6 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg transition-all transform hover:scale-105">
+                    <h3 className="text-sm font-medium text-green-100">ยอดเฉลี่ยต่อออเดอร์</h3>
                     <p className="text-3xl font-bold text-white">฿{formatCurrency(statistics.averageOrderValue || 0)}</p>
-                    <p className="text-sm text-green-100 flex items-center">
+                    <p className="flex items-center text-sm text-green-100">
                         <span className="mr-1">{statistics.averageOrderChange >= 0 ? '↑' : '↓'}</span>
                         {statistics.averageOrderChange >= 0 ? '+' : ''}{statistics.averageOrderChange || 0}% จากเดือนที่แล้ว
                     </p>
                 </div>
 
                 {/* Customers */}
-                <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-lg p-6 transform transition-all hover:scale-105">
-                    <h3 className="text-red-100 text-sm font-medium">จำนวนลูกค้ารายเดือน</h3>
+                <div className="p-6 bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-lg transition-all transform hover:scale-105">
+                    <h3 className="text-sm font-medium text-red-100">จำนวนลูกค้ารายเดือน</h3>
                     <p className="text-3xl font-bold text-white">{statistics.totalCustomers || 0}</p>
-                    <p className="text-sm text-red-100 flex items-center">
+                    <p className="flex items-center text-sm text-red-100">
                         <span className="mr-1">{statistics.customersChange >= 0 ? '↑' : '↓'}</span>
                         {statistics.customersChange >= 0 ? '+' : ''}{statistics.customersChange || 0}% จากเดือนที่แล้ว
                     </p>
@@ -210,11 +210,11 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
             </div>
 
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {/* Sales Chart */}
-                <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                        <span className="w-2 h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full mr-2"></span>
+                <div className="p-6 bg-white rounded-lg border border-gray-100 shadow-lg">
+                    <h3 className="flex items-center mb-4 text-lg font-medium text-gray-900">
+                        <span className="mr-2 w-2 h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full"></span>
                         กราฟข้อมูลการขาย
                     </h3>
                     <div className="h-80">
@@ -223,16 +223,16 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
                 </div>
 
                 {/* Top Products */}
-                <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                        <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                <div className="p-6 bg-white rounded-lg border border-gray-100 shadow-lg">
+                    <h3 className="flex items-center mb-4 text-lg font-medium text-gray-900">
+                        <span className="mr-2 w-2 h-2 bg-purple-500 rounded-full"></span>
                         สินค้ายอดนิยม
                     </h3>
                     <div className="space-y-4">
                         {Array.isArray(topProducts) && topProducts.map((product) => (
-                            <div key={product.id} className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div key={product.id} className="flex justify-between items-center p-4 rounded-lg transition-colors hover:bg-gray-50">
                                 <div className="flex items-center">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                                    <div className="flex overflow-hidden justify-center items-center w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg">
                                         {product.image ? (
                                             <img
                                                 src={isAbsoluteUrl(product.image)
@@ -240,14 +240,14 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
                                                     : `/images/products/${product.image}`
                                             }
                                                 alt={product.name}
-                                                className="w-full h-full object-cover"
+                                                className="object-cover w-full h-full"
                                                 onError={(e) => {
                                                     e.target.onerror = null;
                                                     e.target.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItaW1hZ2UiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiIHJ5PSIyIj48L3JlY3Q+PGNpcmNsZSBjeD0iOC41IiBjeT0iOC41IiByPSIxLjUiPjwvY2lyY2xlPjxwb2x5bGluZSBwb2ludHM9IjIxIDE1IDE2IDEwIDUgMjEiPjwvcG9seWxpbmU+PC9zdmc+';
                                                 }}
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                            <div className="flex justify-center items-center w-full h-full bg-gray-100">
                                                 <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
@@ -268,7 +268,7 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
                         ))}
 
                         {(!Array.isArray(topProducts) || topProducts.length === 0) && (
-                            <div className="text-center py-8 text-gray-500">
+                            <div className="py-8 text-center text-gray-500">
                                 No products found
                             </div>
                         )}

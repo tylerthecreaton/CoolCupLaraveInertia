@@ -32,7 +32,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            "name" => "required|min:3",
+            "name" => "required|min:3|alpha",
             'role' => 'required|in:admin,manager,employee',
             "email" => "required|email|unique:users",
             'username' => 'required|min:3|unique:users',
@@ -41,6 +41,7 @@ class UserController extends Controller
         ];
         $message = [
             "name.required" => "กรุณากรอกชื่อ",
+            "name.alpha" => "ชื่อต้องเป็นตัวอักษรเท่านั้น",
             "role.required" => "กรุณาเลือกบทบาท",
             "name.min" => "ชื่อต้องมีความยาวอย่างน้อย :min ตัวอักษร",
             "email.required" => "กรุณากรอกอีเมล",
@@ -92,13 +93,15 @@ class UserController extends Controller
     public function update(Request $request, string $id)
     {
         $rules = [
-            "name" => "required|min:3",
+            "name" => "required|min:3|alpha",
             'role' => 'required|in:admin,manager,employee',
             "email" => "required|email",
             'username' => 'required|min:3',
         ];
         $message = [
             "name.required" => "กรุณากรอกชื่อ",
+            "name.alpha" => "ชื่อต้องเป็นตัวอักษรเท่านั้น",
+            'name.min' => 'ชื่อต้องมีความยาวอย่างน้อย :min ตัวอักษร',
             "role.required" => "กรุณาเลือกบทบาท",
             "name.min" => "ชื่อต้องมีความยาวอย่างน้อย :min ตัวอักษร",
             "email.required" => "กรุณากรอกอีเมล",

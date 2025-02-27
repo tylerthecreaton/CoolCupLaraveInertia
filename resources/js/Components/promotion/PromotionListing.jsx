@@ -3,13 +3,13 @@ import { isAbsoluteUrl } from "@/helpers";
 
 export default function PromotionListing({ promotions }) {
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-6 2xl:grid-cols-6 gap-8 p-8">
+        <div className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-5">
             {promotions?.map((promotion) => (
                 <div
                     key={promotion.id}
-                    className="group cursor-pointer transform transition-all duration-300 hover:-translate-y-1"
+                    className="transition-all duration-300 transform cursor-pointer group hover:-translate-y-1"
                 >
-                    <div className="bg-white rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl border border-gray-100 h-full flex flex-col">
+                    <div className="flex overflow-hidden flex-col h-full bg-white rounded-2xl border border-gray-100 transition-all duration-300 hover:shadow-xl">
                         <div className="relative aspect-[4/3] overflow-hidden">
                             <img
                                 src={
@@ -41,13 +41,13 @@ export default function PromotionListing({ promotions }) {
                                     }).format(new Date(promotion.end_date))}
                                 </div>
                             )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            <div className="absolute inset-0 bg-gradient-to-t to-transparent opacity-0 transition-opacity duration-300 from-black/20 group-hover:opacity-100" />
                         </div>
-                        <div className="p-6 flex-1 flex flex-col">
-                            <h3 className="text-xl font-bold text-gray-800 mb-3 line-clamp-2 min-h-[3.5rem]">
+                        <div className="flex flex-col flex-1 p-6">
+                            <h3 className="text-lg font-bold text-gray-800 mb-3 line-clamp-2 min-h-[3.5rem]">
                                 {promotion.name}
                             </h3>
-                            <p className="text-base text-gray-600 line-clamp-3 mb-4 flex-1">
+                            <p className="flex-1 mb-4 text-base text-gray-600 line-clamp-3">
                                 {promotion.description}
                             </p>
                         </div>

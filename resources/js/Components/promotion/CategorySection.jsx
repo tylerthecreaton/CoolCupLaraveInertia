@@ -3,6 +3,13 @@ import { useState } from "react";
 import { HiUserCircle, HiPlus } from "react-icons/hi";
 import PromotionListing from "./PromotionListing";
 
+const typeNameMapping = {
+    CATEGORY_DISCOUNT: "ส่วนลดตามหมวดหมู่",
+    PERCENTAGE: "ส่วนลดเปอร์เซ็นต์",
+    BUY_X_GET_Y: "ซื้อ X แถม Y",
+    FIXED: "ส่วนลดแบบตายตัว"
+};
+
 export default function CategorySection({ promotions, types, onTypeChange }) {
     const [currentTab, setCurrentTab] = useState(0);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -35,7 +42,7 @@ export default function CategorySection({ promotions, types, onTypeChange }) {
                         </Tabs.Item>
                         {types?.map((type, index) => {
                             const typeKey = Object.keys(type)[0];
-                            const typeValue = type[typeKey];
+                            const typeValue = typeNameMapping[typeKey] || type[typeKey];
                             return (
                                 <Tabs.Item
                                     key={`type-${typeKey}`}
@@ -58,7 +65,7 @@ export default function CategorySection({ promotions, types, onTypeChange }) {
                         className="absolute top-2 right-4"
                         onClick={() => setShowAddModal(true)}
                     >
-                        <HiPlus className="mr-2 h-4 w-4" />
+                        <HiPlus className="mr-2 w-4 h-4" />
                         เพิ่มโปรโมชั่น
                     </Button> */}
                 </div>
