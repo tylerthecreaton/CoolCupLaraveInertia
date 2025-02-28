@@ -52,7 +52,17 @@ const CartComponent = () => {
         const fetchPromotions = async () => {
             try {
                 const response = await axios.get("/api/promotions");
-                setPromotions(response.data);
+                const currentDate = new Date();
+                // Filter only valid promotions
+                const validPromotions = response.data.filter(promotion => {
+                    const startDate = promotion.start_date ? new Date(promotion.start_date) : null;
+                    const endDate = promotion.end_date ? new Date(promotion.end_date) : null;
+                    
+                    return (!startDate || currentDate >= startDate) && 
+                           (!endDate || currentDate <= endDate) &&
+                           promotion.is_active;
+                });
+                setPromotions(validPromotions);
             } catch (error) {
                 console.error("Error fetching promotions:", error);
                 Swal.fire({

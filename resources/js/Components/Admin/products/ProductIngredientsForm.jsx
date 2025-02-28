@@ -85,7 +85,16 @@ export default function ProductIngredientsForm({
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (isSubmitting) return;
+
+        if (!product?.id) {
+            MySwal.fire({
+                title: "แจ้งเตือน",
+                text: "กรุณาบันทึกข้อมูลสินค้าก่อนเพิ่มวัตถุดิบ",
+                icon: "warning",
+                confirmButtonText: "ตกลง",
+            });
+            return;
+        }
 
         if (localIngredients.length === 0) {
             MySwal.fire({
