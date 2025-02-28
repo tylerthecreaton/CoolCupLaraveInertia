@@ -108,8 +108,8 @@ class PromotionController extends Controller
         $promotion->name = $validated['name'];
         $promotion->description = $validated['description'];
         $promotion->type = $validated['type'];
-        $promotion->start_date = $validated['start_date'];
-        $promotion->end_date = $validated['end_date'];
+        $promotion->start_date = \Carbon\Carbon::parse($validated['start_date'])->startOfDay();
+        $promotion->end_date = \Carbon\Carbon::parse($validated['end_date'])->setTime(23, 59, 59);
 
         if ($request->hasFile('image')) {
             $promotion->image = $imageName;
@@ -200,8 +200,8 @@ class PromotionController extends Controller
         $promotion->name = $validated['name'];
         $promotion->description = $validated['description'];
         $promotion->type = $validated['type'];
-        $promotion->start_date = $validated['start_date'];
-        $promotion->end_date = $validated['end_date'];
+        $promotion->start_date = \Carbon\Carbon::parse($validated['start_date'])->startOfDay();
+        $promotion->end_date = \Carbon\Carbon::parse($validated['end_date'])->setTime(23, 59, 59);
 
         // Reset all discount fields with default values
         $promotion->percentage = 0;

@@ -12,8 +12,8 @@ class Promotion extends Model
     protected $casts = [
         'buy_x_get_y' => 'json',
         'category' => 'json',
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
         'is_active' => 'boolean',
         'percentage' => 'decimal:2',
         'fixed' => 'decimal:2'
