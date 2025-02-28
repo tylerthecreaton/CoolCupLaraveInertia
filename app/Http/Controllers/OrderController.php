@@ -150,6 +150,7 @@ class OrderController extends Controller
             $file->move(public_path('storage/slips'), $filename);
 
             $order->payment_slip = '/storage/slips/' . $filename;
+            $order->payment_confirmed_at = now();
             $order->save();
 
             try {
