@@ -7,6 +7,7 @@ use App\Models\Transformer;
 use App\Models\Ingredient;
 use App\Models\Consumable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +19,7 @@ class TransformerController extends Controller
             'ingredient.unit:id,name',
             'consumable.unit:id,name'
         ])->latest()->paginate(10);
-        
+
         return Inertia::render('Admin/transformer/Index', [
             'transformers' => $transformers
         ]);
@@ -85,45 +86,56 @@ class TransformerController extends Controller
         ]);
     }
 
-    public function update(Request $request, Transformer $transformer)
+    public function update(Request $request, $id)
     {
-        $rules = [
-            'name' => 'required|string|max:255|min:3',
-            'description' => 'nullable|string',
-            'type' => 'required|in:ingredient,consumable',
-            'multiplier' => 'required|numeric',
-            'ingredient_id' => [
-                'nullable',
-                'exists:ingredients,id',
-                Rule::requiredIf(function () use ($request) {
-                    return $request->type === 'ingredient';
-                }),
-            ],
-            'consumable_id' => [
-                'nullable',
-                'exists:consumables,id',
-                Rule::requiredIf(function () use ($request) {
-                    return $request->type === 'consumable';
-                }),
-            ],
-        ];
-        $messages = [
-            'name.required' => 'กรุณากรอกชื่อ',
-            'name.max' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :max ตัวอักษร',
-            'name.min' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :min ตัวอักษร',
-            'type.required' => 'กรุณาเลือกประเภทวัตถุดิบ',
-            'type.in' => 'กรุณาเลือกประเภทวัตถุดิบ',
-            'multiplier.required' => 'กรุณากรอกค่าคูณ',
-            'multiplier.numeric' => 'กรุณากรอกค่าคูณ',
-            'ingredient_id.required_if' => 'กรุณาเลือกวัตถุดิบที่จะแปรรูป',
-            'consumable_id.required_if' => 'กรุณาเลือกวัตถุดิบสิ้นเปลืองที่จะแปรรูป',
-        ];
-        $request->validate($rules, $messages);
-        $validated = $request->validate($rules);
-        $transformer->update($validated);
+        try {
+            $transformer = Transformer::findOrFail($id);
 
-        return redirect()->route('admin.transformers.index')
+            Log::info('Update request data:', $request->all());
+            Log::info('Current transformer state:', $transformer->toArray());
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|min:3',
+                'description' => 'nullable|string',
+                'type' => 'required|in:ingredient,consumable',
+                'multiplier' => 'required|numeric',
+                'ingredient_id' => [
+                    'nullable',
+                    'exists:ingredients,id',
+                    Rule::requiredIf(fn() => $request->type === 'ingredient'),
+                ],
+                'consumable_id' => [
+                    'nullable',
+                    'exists:consumables,id',
+                    Rule::requiredIf(fn() => $request->type === 'consumable'),
+                ],
+            ], [
+                'name.required' => 'กรุณากรอกชื่อ',
+                'name.max' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :max ตัวอักษร',
+                'name.min' => 'ชื่อสินค้าต้องมีความยาวอย่างน้อย :min ตัวอักษร',
+                'type.required' => 'กรุณาเลือกประเภทวัตถุดิบ',
+                'type.in' => 'กรุณาเลือกประเภทวัตถุดิบ',
+                'multiplier.required' => 'กรุณากรอกค่าคูณ',
+                'multiplier.numeric' => 'กรุณากรอกค่าคูณ',
+                'ingredient_id.required_if' => 'กรุณาเลือกวัตถุดิบที่จะแปรรูป',
+                'consumable_id.required_if' => 'กรุณาเลือกวัตถุดิบสิ้นเปลืองที่จะแปรรูป',
+            ]);
+
+            Log::info('Validated data:', $validated);
+
+            $transformer->update($validated);
+
+            Log::info('Updated transformer state:', $transformer->fresh()->toArray());
+
+            return redirect()->route('admin.transformers.index')
             ->with('message', 'Transformer updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error updating transformer: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return back()->withErrors(['error' => 'เกิดข้อผิดพลาดในการอัพเดทสูตรแปรรูป']);
+
+        }
     }
 
     public function destroy($id)

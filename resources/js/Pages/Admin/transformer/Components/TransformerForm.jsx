@@ -25,48 +25,63 @@ export default function TransformerForm({
         type: isEditing ? transformer?.type : "",
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const action = isEditing ? put : post;
-        const url = isEditing
-            ? route("admin.transformers.update", transformer.id)
-            : route("admin.transformers.store");
-
-        Swal.fire({
-            title: isEditing ? "ยืนยันการแก้ไข?" : "ยืนยันการเพิ่ม?",
-            text: isEditing
-                ? "คุณต้องการแก้ไขสูตรแปรรูปนี้ใช่หรือไม่?"
-                : "คุณต้องการเพิ่มสูตรแปรรูปนี้ใช่หรือไม่?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "ยืนยัน",
-            cancelButtonText: "ยกเลิก"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                action(url, {
-                    onSuccess: () => {
-                        Swal.fire({
-                            title: "สำเร็จ!",
-                            text: isEditing
-                                ? "แก้ไขสูตรแปรรูปเรียบร้อยแล้ว"
-                                : "เพิ่มสูตรแปรรูปเรียบร้อยแล้ว",
-                            icon: "success",
-                            timer: 1500
-                        });
-                    },
-                    onError: () => {
-                        Swal.fire({
-                            title: "เกิดข้อผิดพลาด!",
-                            text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
-                            icon: "error"
-                        });
-                    }
-                });
-            }
-        });
+        if (isEditing) {
+            Swal.fire({
+                title: "ยืนยันการแก้ไข?",
+                text: "คุณต้องการแก้ไขสูตรแปรรูปนี้ใช่หรือไม่?",
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "ยืนยัน",
+                cancelButtonText: "ยกเลิก"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    put(route("admin.transformers.update", transformer.id), data, {
+                        preserveScroll: true,
+                        preserveState: true,
+                        onSuccess: () => {
+                            Swal.fire({
+                                title: "สำเร็จ!",
+                                text: "แก้ไขสูตรแปรรูปเรียบร้อยแล้ว",
+                                icon: "success",
+                                timer: 1500
+                            });
+                        },
+                        onError: (errors) => {
+                            console.error(errors);
+                            Swal.fire({
+                                title: "เกิดข้อผิดพลาด!",
+                                text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                                icon: "error"
+                            });
+                        }
+                    });
+                }
+            });
+        } else {
+            post(route("admin.transformers.store"), data, {
+                onSuccess: () => {
+                    Swal.fire({
+                        title: "สำเร็จ!",
+                        text: "เพิ่มสูตรแปรรูปเรียบร้อยแล้ว",
+                        icon: "success",
+                        timer: 1500
+                    });
+                },
+                onError: (errors) => {
+                    console.error(errors);
+                    Swal.fire({
+                        title: "เกิดข้อผิดพลาด!",
+                        text: "กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง",
+                        icon: "error"
+                    });
+                }
+            });
+        }
     };
 
     return (
