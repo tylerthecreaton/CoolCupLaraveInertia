@@ -26,7 +26,7 @@ export default function UploadSlip({ order }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('orders.uploadSlip', { id: order.id }), {
+        post(route('order.uploadSlip', { id: order.id }), {
             preserveScroll: true,
             onSuccess: () => {
                 reset();
