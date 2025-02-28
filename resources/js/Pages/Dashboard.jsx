@@ -8,8 +8,9 @@ import InventoryStatus from '../Components/Dashboard/InventoryStatus';
 import TopProducts from '../Components/Dashboard/TopProducts';
 import ExpensesChart from '../Components/Dashboard/ExpensesChart';
 import IngredientUsage from '../Components/Dashboard/IngredientUsage';
+import ProductSalesBarChart from '../Components/Dashboard/ProductSalesBarChart';
 
-export default function Dashboard({ auth, salesData, topProducts, ingredients, expenses, hourlySales, filters, ingredientUsage }) {
+export default function Dashboard({ auth, salesData, topProducts, ingredients, expenses, hourlySales, filters, ingredientUsage, productSales }) {
     const [dateRange, setDateRange] = useState(filters.dateRange);
     const [startDate, setStartDate] = useState(filters.startDate);
     const [endDate, setEndDate] = useState(filters.endDate);
@@ -73,6 +74,14 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
                     {/* Summary Cards */}
                     <div className="mb-6">
                         <SummaryCards data={salesData} />
+                    </div>
+
+                    {/* Product Sales Bar Chart */}
+                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                        <div className="p-6">
+                            <h3 className="text-lg font-semibold mb-4">กราฟการขายสินค้า</h3>
+                            <ProductSalesBarChart data={productSales} />
+                        </div>
                     </div>
 
                     {/* Two Column Layout */}

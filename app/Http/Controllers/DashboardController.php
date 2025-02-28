@@ -159,6 +159,21 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Product Sales Data for Bar Chart
+        $productSales = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->join('products', 'order_details.product_id', '=', 'products.id')
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->where('orders.status', 'completed')
+            ->select(
+                'products.id',
+                'products.name as product_name',
+                DB::raw('COALESCE(SUM(order_details.quantity), 0) as quantity_sold')
+            )
+            ->groupBy('products.id', 'products.name')
+            ->orderBy('quantity_sold', 'asc') // เรียงจากน้อยไปมาก
+            ->get()
+            ->toArray();
+
         // Ingredient Usage Data
         $ingredientUsage = DB::table('product_ingredient_usages')
             ->join('ingredients', 'product_ingredient_usages.ingredient_id', '=', 'ingredients.id')
@@ -226,17 +241,21 @@ class DashboardController extends Controller
             ->get();
 
         return Inertia::render('Dashboard', [
+            'auth' => [
+                'user' => $request->user(),
+            ],
+            'salesData' => $salesData,
+            'topProducts' => $topProducts,
+            'ingredients' => $ingredients,
+            'expenses' => $expenses,
+            'hourlySales' => $hourlySales,
             'filters' => [
                 'dateRange' => $dateRange,
                 'startDate' => $startDate->format('Y-m-d'),
                 'endDate' => $endDate->format('Y-m-d'),
             ],
-            'salesData' => $salesData,
-            'topProducts' => $topProducts,
-            'ingredients' => $ingredients,
             'ingredientUsage' => $ingredientUsage,
-            'expenses' => $expenses,
-            'hourlySales' => $hourlySales,
+            'productSales' => $productSales,
         ]);
     }
 
