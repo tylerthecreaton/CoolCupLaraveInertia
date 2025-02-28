@@ -133,7 +133,7 @@ export default function Index({ auth, transformers }) {
                             <Table.Head className="bg-gradient-to-r from-gray-50 to-gray-100">
                                 <Table.HeadCell className="font-semibold text-gray-700">ชื่อสูตรแปรรูป</Table.HeadCell>
                                 <Table.HeadCell className="font-semibold text-gray-700">ประเภท</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700">คำอธิบาย</Table.HeadCell>
+                                {/* <Table.HeadCell className="font-semibold text-gray-700">คำอธิบาย</Table.HeadCell> */}
                                 <Table.HeadCell className="font-semibold text-gray-700">วัตถุดิบที่ใช้</Table.HeadCell>
                                 <Table.HeadCell className="font-semibold text-gray-700">วัตถุดิบสิ้นเปลือง</Table.HeadCell>
                                 <Table.HeadCell className="font-semibold text-gray-700">ปริมาณสุทธิของวัตถุดิบ</Table.HeadCell>
@@ -183,10 +183,16 @@ export default function Index({ auth, transformers }) {
                                         <Table.Cell>
                                             {transformer.type === "ingredient" ? "วัตถุดิบ" : "วัตถุดิบสิ้นเปลือง"}
                                         </Table.Cell>
-                                        <Table.Cell>{transformer.description}</Table.Cell>
+                                        {/* <Table.Cell>{transformer.description}</Table.Cell> */}
                                         <Table.Cell>{transformer.ingredient?.name || "-"}</Table.Cell>
                                         <Table.Cell>{transformer.consumable?.name || "-"}</Table.Cell>
-                                        <Table.Cell>{transformer.multiplier}</Table.Cell>
+                                        <Table.Cell>
+                                            {transformer.multiplier}
+                                            {" "}
+                                            {transformer.type === "ingredient"
+                                                ? transformer.ingredient?.unit?.name
+                                                : transformer.consumable?.unit?.name}
+                                        </Table.Cell>
                                         <Table.Cell>
                                             <div className="flex gap-2 justify-end">
                                                 <Link href={route("admin.transformers.edit", transformer.id)}>

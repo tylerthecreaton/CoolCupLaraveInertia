@@ -278,11 +278,20 @@ export default function TransformerForm({
                         <div>
                             <Label
                                 htmlFor="multiplier"
-                                value="ปริมาณสุทธิของวัตถุดิบ"
                                 className="inline-flex items-center mb-2"
                             >
                                 <HiCalculator className="mr-2 w-5 h-5 text-gray-500" />
-                                <span>ตัวคูณ</span>
+                                <span className="flex items-center gap-2">
+                                    ปริมาณสุทธิของวัตถุดิบ
+                                    <span className="text-gray-500">
+                                        {data.type === "ingredient" && data.ingredient_id
+                                            ? `(${ingredients.find(i => i.id === parseInt(data.ingredient_id))?.unit?.name})`
+                                            : data.type === "consumable" && data.consumable_id
+                                                ? `(${consumables.find(c => c.id === parseInt(data.consumable_id))?.unit?.name})`
+                                                : ""
+                                        }
+                                    </span>
+                                </span>
                             </Label>
                             <TextInput
                                 id="multiplier"

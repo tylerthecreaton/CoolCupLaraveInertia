@@ -14,7 +14,11 @@ class TransformerController extends Controller
 {
     public function index()
     {
-        $transformers = Transformer::with(['ingredient', 'consumable'])->latest()->paginate(10);
+        $transformers = Transformer::with([
+            'ingredient.unit:id,name',
+            'consumable.unit:id,name'
+        ])->latest()->paginate(10);
+        
         return Inertia::render('Admin/transformer/Index', [
             'transformers' => $transformers
         ]);
@@ -23,8 +27,8 @@ class TransformerController extends Controller
     public function create()
     {
         return Inertia::render('Admin/transformer/Create', [
-            'ingredients' => Ingredient::select('id', 'name')->get(),
-            'consumables' => Consumable::select('id', 'name')->get()
+            'ingredients' => Ingredient::with('unit:id,name')->select('id', 'name', 'unit_id')->get(),
+            'consumables' => Consumable::with('unit:id,name')->select('id', 'name', 'unit_id')->get()
         ]);
     }
 
@@ -76,8 +80,8 @@ class TransformerController extends Controller
         $transformer = Transformer::findOrFail($id);
         return Inertia::render('Admin/transformer/Edit', [
             'transformer' => $transformer->load(['ingredient', 'consumable']),
-            'ingredients' => Ingredient::select('id', 'name')->get(),
-            'consumables' => Consumable::select('id', 'name')->get()
+            'ingredients' => Ingredient::with('unit:id,name')->select('id', 'name', 'unit_id')->get(),
+            'consumables' => Consumable::with('unit:id,name')->select('id', 'name', 'unit_id')->get()
         ]);
     }
 
