@@ -228,6 +228,18 @@ class DashboardController extends Controller
             ->groupBy('expense_categories.id', 'expense_categories.name')
             ->get();
 
+        // Calculate total expenses
+        $totalExpenses = $expenses->sum('total_amount');
+        
+        // Calculate percentages
+        $expenses = $expenses->map(function($expense) use ($totalExpenses) {
+            return [
+                'category' => $expense->category,
+                'total_amount' => $expense->total_amount,
+                'percentage' => $totalExpenses > 0 ? round(($expense->total_amount / $totalExpenses) * 100, 2) : 0
+            ];
+        });
+
         // Hourly Sales Distribution
         $hourlySales = Order::whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'completed')
