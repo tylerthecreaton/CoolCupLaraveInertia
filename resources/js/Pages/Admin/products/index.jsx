@@ -2,6 +2,7 @@ import { isAbsoluteUrl } from "@/helpers";
 import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router } from "@inertiajs/react";
+import { Listbox, Transition } from '@headlessui/react';
 import {
     Breadcrumb,
     Pagination,
@@ -15,6 +16,7 @@ import { useEffect, useState } from "react";
 import {
     HiHome,
     HiSearch,
+    HiFilter,
 } from "react-icons/hi";
 import { FaList, FaPlus, FaEdit, FaTrash, FaBox, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -26,6 +28,7 @@ export default function Index({ productsPaginate }) {
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [showIngredientsModal, setShowIngredientsModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState("all");
 
     const onPageChange = (page) => {
         page > current_page
@@ -39,8 +42,8 @@ export default function Index({ productsPaginate }) {
     }, [productsPaginate]);
 
     useEffect(() => {
-        const results = products.filter((product) =>
-            Object.values({
+        const results = products.filter((product) => {
+            const matchesSearch = Object.values({
                 name: product.name,
                 description: product.description,
                 category: product.category?.name,
@@ -49,10 +52,14 @@ export default function Index({ productsPaginate }) {
                     ?.toString()
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase())
-            )
-        );
+            );
+
+            const matchesCategory = selectedCategory === "all" || product.category?.name === selectedCategory;
+
+            return matchesSearch && matchesCategory;
+        });
         setFilteredProducts(results);
-    }, [searchTerm, products]);
+    }, [searchTerm, selectedCategory, products]);
 
     const handleDelete = (id) => {
         Swal.fire({
@@ -86,6 +93,9 @@ export default function Index({ productsPaginate }) {
         setSelectedProduct(product);
         setShowIngredientsModal(true);
     };
+
+    // Get unique categories
+    const categories = [...new Set(products.map(product => product.category?.name).filter(Boolean))];
 
     return (
         <AuthenticatedLayout
@@ -156,7 +166,59 @@ export default function Index({ productsPaginate }) {
                                     ชื่อสินค้า
                                 </Table.HeadCell>
                                 <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    หมวดหมู่
+                                    <Listbox value={selectedCategory} onChange={setSelectedCategory}>
+                                        <div className="relative">
+                                            <Listbox.Button className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-150 font-medium">
+                                                <span>หมวดหมู่</span>
+                                                <HiFilter className="w-4 h-4" />
+                                                {selectedCategory !== "all" && (
+                                                    <span className="text-sm font-medium text-blue-600">
+                                                        ({selectedCategory})
+                                                    </span>
+                                                )}
+                                            </Listbox.Button>
+                                            <Transition
+                                                enter="transition duration-100 ease-out"
+                                                enterFrom="transform scale-95 opacity-0"
+                                                enterTo="transform scale-100 opacity-100"
+                                                leave="transition duration-75 ease-out"
+                                                leaveFrom="transform scale-100 opacity-100"
+                                                leaveTo="transform scale-95 opacity-0"
+                                            >
+                                                <Listbox.Options className="absolute z-10 mt-1 w-56 bg-gray-50 shadow-lg max-h-60 overflow-auto focus:outline-none">
+                                                    <Listbox.Option
+                                                        value="all"
+                                                        className={({ active, selected }) =>
+                                                            `relative cursor-pointer select-none py-2 px-4 ${
+                                                                selected ? 'text-blue-600' : 'text-gray-700'
+                                                            } ${active ? 'bg-gray-100' : ''}`
+                                                        }
+                                                    >
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                                            ทั้งหมด
+                                                        </div>
+                                                    </Listbox.Option>
+                                                    {categories.map((category) => (
+                                                        <Listbox.Option
+                                                            key={category}
+                                                            value={category}
+                                                            className={({ active, selected }) =>
+                                                                `relative cursor-pointer select-none py-2 px-4 ${
+                                                                    selected ? 'text-blue-600' : 'text-gray-700'
+                                                                } ${active ? 'bg-gray-100' : ''}`
+                                                            }
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                                                {category}
+                                                            </div>
+                                                        </Listbox.Option>
+                                                    ))}
+                                                </Listbox.Options>
+                                            </Transition>
+                                        </div>
+                                    </Listbox>
                                 </Table.HeadCell>
                                 <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
                                     ราคาขาย
