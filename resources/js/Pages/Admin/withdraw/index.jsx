@@ -171,11 +171,19 @@ export default function Index({ auth, withdraws }) {
                                                                 {item.transformer?.name}
                                                             </span>
                                                             <span className="mx-1">-</span>
-                                                            <Badge color="success" className="px-2 py-1">
-                                                                {item.quantity} {item.type === "ingredient" ?
-                                                                    item.ingredientLot?.details?.ingredient?.unit?.name :
-                                                                    item.consumableLot?.details?.consumable?.unit?.name}
-                                                            </Badge>
+                                                            <div className="flex items-center space-x-1">
+                                                                <Badge
+                                                                    color="success"
+                                                                    className="px-2 py-1"
+                                                                >
+                                                                    {Math.floor(item.quantity)} ชิ้น
+                                                                </Badge>
+                                                                <span className="text-sm">
+                                                                    {item.type === "ingredient" ?
+                                                                        item.ingredientLot?.details?.ingredient?.unit?.name :
+                                                                        item.consumableLot?.details?.consumable?.unit?.name}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>

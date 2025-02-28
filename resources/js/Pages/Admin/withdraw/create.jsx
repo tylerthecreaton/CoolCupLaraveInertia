@@ -205,7 +205,7 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                         <div className="hidden sm:block">
                                             <span className="inline-flex items-center px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-full">
                                                 <HiCalculator className="w-4 h-4 mr-2" />
-                                                คงเหลือ: {maxQuantity || 0}
+                                                คงเหลือ: {maxQuantity || 0} ชิ้น
                                             </span>
                                         </div>
                                     </div>
@@ -372,7 +372,7 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                             <div className="col-span-2 sm:col-span-1">
                                                 <Label
                                                     htmlFor="quantity"
-                                                    value="จำนวน"
+                                                    value="จำนวน (ชิ้น)"
                                                     className="inline-flex items-center mb-2 text-gray-700"
                                                 >
                                                     <HiCalculator className="mr-2 w-5 h-5 text-blue-500" />
@@ -460,7 +460,7 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                                             </span>
                                                             <span className="mx-2 text-gray-300">•</span>
                                                             <span className="text-xs font-medium text-blue-600">
-                                                                จำนวน: {item.quantity}
+                                                                จำนวน: {item.quantity} ชิ้น
                                                             </span>
                                                         </div>
                                                     </div>
