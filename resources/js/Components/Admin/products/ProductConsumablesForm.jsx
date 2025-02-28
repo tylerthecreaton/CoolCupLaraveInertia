@@ -21,7 +21,7 @@ export default function ProductConsumablesForm({
     const { data, setData } = useForm({
         product_id: product?.id,
         consumable_id: "",
-        quantity_used: "",
+        quantity_used: "1",
         size: "s",
     });
 
@@ -190,14 +190,14 @@ export default function ProductConsumablesForm({
     };
 
     return (
-        <Card className="max-w-5xl mx-auto p-6">
+        <Card className="max-w-6xl mx-auto p-6">
             <div className="space-y-8">
                 <div className="border-b border-gray-200 dark:border-gray-700 pb-5">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
                         <span className="bg-purple-100 dark:bg-purple-900 p-2.5 rounded-lg">
                             📦
                         </span>
-                        จัดการวัตถุดิบสิ้นเปลืองสำหรับ{" "}
+                        จัดการวัตถุดิบสิ้นเปลืองสำหรับ{` `}
                         <span className="text-purple-600 dark:text-purple-400">
                             {product?.name}
                         </span>
@@ -242,8 +242,8 @@ export default function ProductConsumablesForm({
                                     ))}
                                 </Select>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
+                            <div className="flex gap-4">
+                                <div className="flex-1 ">
                                     <div className="mb-2.5">
                                         <Label
                                             htmlFor="quantity_used"
@@ -255,15 +255,15 @@ export default function ProductConsumablesForm({
                                         id="quantity_used"
                                         name="quantity_used"
                                         type="number"
-                                        min="0.01"
-                                        step="0.01"
+                                        min="0"
+                                        step="1"
                                         value={data.quantity_used}
                                         onChange={(e) => setData('quantity_used', e.target.value)}
                                         required
-                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500"
+                                        className="w-16 rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500"
                                     />
                                 </div>
-                                <div>
+                                <div className="flex-1 ">
                                     <div className="mb-2.5">
                                         <Label
                                             htmlFor="size"
@@ -277,7 +277,7 @@ export default function ProductConsumablesForm({
                                         value={data.size}
                                         onChange={(e) => setData('size', e.target.value)}
                                         required
-                                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500"
+                                        className="w-16 rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500"
                                     >
                                         <option value="s">S</option>
                                         <option value="m">M</option>
@@ -322,12 +322,12 @@ export default function ProductConsumablesForm({
                         )}
                     </div>
                     <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-                        <Table hoverable>
+                        <Table hoverable className="min-w-full">
                             <Table.Head className="bg-gray-50 dark:bg-gray-800">
-                                <Table.HeadCell className="py-4 px-6 font-semibold">วัตถุดิบสิ้นเปลือง</Table.HeadCell>
-                                <Table.HeadCell className="py-4 px-6 font-semibold">ปริมาณ</Table.HeadCell>
-                                <Table.HeadCell className="py-4 px-6 font-semibold">หน่วย</Table.HeadCell>
-                                <Table.HeadCell className="py-4 px-6 font-semibold">จัดการ</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold w-1/3">วัตถุดิบสิ้นเปลือง</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold w-1/6">ปริมาณ</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold w-1/6">หน่วย</Table.HeadCell>
+                                <Table.HeadCell className="py-4 px-6 font-semibold w-1/6">จัดการ</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {localConsumables.map((item) => (
@@ -335,10 +335,10 @@ export default function ProductConsumablesForm({
                                         key={item.id}
                                         className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800"
                                     >
-                                        <Table.Cell className="py-4 px-6 font-medium">
+                                        <Table.Cell className="py-4 px-6 font-medium text-gray-900 dark:text-white whitespace-nowrap">
                                             {item.consumable.name}
                                         </Table.Cell>
-                                        <Table.Cell className="py-4 px-6">
+                                        <Table.Cell className="py-4 px-6 whitespace-nowrap">
                                             {editingId === item.id ? (
                                                 <div className="flex items-center gap-3">
                                                     <TextInput
@@ -347,32 +347,32 @@ export default function ProductConsumablesForm({
                                                         step="0.01"
                                                         value={editQuantity}
                                                         onChange={(e) => setEditQuantity(e.target.value)}
-                                                        className="w-24 text-center rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500"
+                                                        className="w-28 text-center rounded-lg border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500"
                                                     />
-                                                    <span className="text-gray-600 dark:text-gray-400">
-                                                        {item.consumable.unit?.name || ''}
-                                                    </span>
                                                 </div>
                                             ) : (
-                                                <span className="px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg inline-block min-w-[60px] text-center">
-                                                    {item.quantity_used}
-                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg inline-block min-w-[70px] text-center font-medium">
+                                                        {item.quantity_used}
+                                                    </span>
+                                                    <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                                        {item.size.toUpperCase()}
+                                                    </span>
+                                                </div>
                                             )}
                                         </Table.Cell>
-                                        <Table.Cell className="py-4 px-6">
-                                            <span className="text-gray-600 dark:text-gray-400">
-                                                {item.consumable.unit?.name || '-'}
-                                            </span>
+                                        <Table.Cell className="py-4 px-6 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                            {item.consumable.unit?.name || '-'}
                                         </Table.Cell>
                                         <Table.Cell className="py-4 px-6">
-                                            <div className="flex gap-2">
+                                            <div className="flex items-center gap-3">
                                                 {editingId === item.id ? (
                                                     <>
                                                         <Button
                                                             color="success"
                                                             size="xs"
                                                             onClick={() => handleUpdate(item)}
-                                                            className="transition-transform hover:scale-110 active:scale-95"
+                                                            className="transition-transform hover:scale-110 active:scale-95 px-3 py-2"
                                                         >
                                                             <HiCheck className="h-4 w-4" />
                                                         </Button>
@@ -380,7 +380,7 @@ export default function ProductConsumablesForm({
                                                             color="gray"
                                                             size="xs"
                                                             onClick={cancelEditing}
-                                                            className="transition-transform hover:scale-110 active:scale-95"
+                                                            className="transition-transform hover:scale-110 active:scale-95 px-3 py-2"
                                                         >
                                                             <HiX className="h-4 w-4" />
                                                         </Button>
@@ -391,7 +391,7 @@ export default function ProductConsumablesForm({
                                                             color="info"
                                                             size="xs"
                                                             onClick={() => startEditing(item)}
-                                                            className="transition-transform hover:scale-110 active:scale-95"
+                                                            className="transition-transform hover:scale-110 active:scale-95 px-3 py-2"
                                                         >
                                                             <HiPencil className="h-4 w-4" />
                                                         </Button>
@@ -399,7 +399,7 @@ export default function ProductConsumablesForm({
                                                             color="failure"
                                                             size="xs"
                                                             onClick={() => handleDelete(item)}
-                                                            className="transition-transform hover:scale-110 active:scale-95"
+                                                            className="transition-transform hover:scale-110 active:scale-95 px-3 py-2"
                                                         >
                                                             <HiTrash className="h-4 w-4" />
                                                         </Button>
@@ -411,7 +411,7 @@ export default function ProductConsumablesForm({
                                 ))}
                                 {localConsumables.length === 0 && (
                                     <Table.Row>
-                                        <Table.Cell colSpan={4} className="text-center py-8 text-gray-500">
+                                        <Table.Cell colSpan={4} className="text-center py-12 text-gray-500">
                                             ยังไม่มีวัตถุดิบสิ้นเปลืองในสูตรนี้
                                         </Table.Cell>
                                     </Table.Row>

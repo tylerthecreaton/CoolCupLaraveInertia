@@ -253,7 +253,7 @@ export default function ProductIngredientsForm({
                                 <TextInput
                                     id="quantity_size_s"
                                     type="number"
-                                    step="0.01"
+                                    step="1"
                                     min="0"
                                     value={data.quantity_size_s}
                                     onChange={(e) => setData("quantity_size_s", e.target.value)}
@@ -265,7 +265,7 @@ export default function ProductIngredientsForm({
                                 <TextInput
                                     id="quantity_size_m"
                                     type="number"
-                                    step="0.01"
+                                    step="1"
                                     min="0"
                                     value={data.quantity_size_m}
                                     onChange={(e) => setData("quantity_size_m", e.target.value)}
@@ -277,7 +277,7 @@ export default function ProductIngredientsForm({
                                 <TextInput
                                     id="quantity_size_l"
                                     type="number"
-                                    step="0.01"
+                                    step="1"
                                     min="0"
                                     value={data.quantity_size_l}
                                     onChange={(e) => setData("quantity_size_l", e.target.value)}
@@ -331,7 +331,7 @@ export default function ProductIngredientsForm({
                             </Table.Head>
                             <Table.Body className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {localIngredients.map((item) => (
-                                    <Table.Row 
+                                    <Table.Row
                                         key={item.id}
                                         className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800"
                                     >
