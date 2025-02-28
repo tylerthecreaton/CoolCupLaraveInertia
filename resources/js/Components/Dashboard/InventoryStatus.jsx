@@ -3,7 +3,7 @@ import { CircleStackIcon, ExclamationTriangleIcon } from '@heroicons/react/24/ou
 
 const Tooltip = ({ children, content, show }) => {
     if (!show) return null;
-    
+
     return (
         <div style={{ zIndex: 9999 }} className="fixed w-64 p-4 text-sm transform -translate-x-1/2 -translate-y-full bg-gray-900 rounded-xl shadow-xl pointer-events-none">
             {content}
@@ -73,13 +73,13 @@ export default function InventoryStatus({ ingredients }) {
                                             </div>
                                         )}
                                     </div>
-                                    {isLow && (
+                                    {/* {isLow && (
                                         <div className="mt-3 px-3 py-2 bg-red-100 rounded-lg">
                                             <p className="text-sm font-medium text-red-600">
                                                 ⚠️ วัตถุดิบใกล้หมด กรุณาเติมสต็อก
                                             </p>
                                         </div>
-                                    )}
+                                    )} */}
                                 </div>
                             );
                         })}
@@ -87,12 +87,12 @@ export default function InventoryStatus({ ingredients }) {
                 </div>
             </div>
             {tooltipIndex !== null && (
-                <div style={{ 
+                <div style={{
                     position: 'fixed',
                     left: tooltipPosition.x,
                     top: tooltipPosition.y,
                 }}>
-                    <Tooltip 
+                    <Tooltip
                         show={true}
                         content={
                             <div className="space-y-3">
