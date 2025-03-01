@@ -57,6 +57,17 @@ export default function DateRangePicker({ dateRange, startDate, endDate, onDateR
                 >
                     เดือนนี้
                 </button>
+                <button
+                    type="button"
+                    className={`px-4 py-2 text-sm font-medium rounded-md ${
+                        dateRange === 'thisYear'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                    }`}
+                    onClick={() => handleQuickSelect('thisYear')}
+                >
+                    ปีนี้
+                </button>
             </div>
 
             <div className="flex-1 sm:text-right">

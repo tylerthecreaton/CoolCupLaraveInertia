@@ -43,6 +43,12 @@ class DashboardController extends Controller
                 $previousEndDate = now()->subMonth()->endOfMonth();
                 break;
             
+            case 'thisYear':
+                // เปรียบเทียบกับปีที่แล้ว
+                $previousStartDate = now()->subYear()->startOfYear();
+                $previousEndDate = now()->subYear()->endOfYear();
+                break;
+            
             default:
                 // สำหรับช่วงเวลาที่กำหนดเอง ใช้ช่วงเวลาเท่ากันย้อนหลังไป
                 $periodDiff = $endDate->diffInSeconds($startDate);
@@ -284,6 +290,7 @@ class DashboardController extends Controller
             'yesterday' => Carbon::yesterday(),
             'thisWeek' => Carbon::now()->startOfWeek(),
             'thisMonth' => Carbon::now()->startOfMonth(),
+            'thisYear' => Carbon::now()->startOfYear(),
             default => Carbon::today(),
         };
     }
@@ -299,6 +306,7 @@ class DashboardController extends Controller
             'yesterday' => Carbon::yesterday()->endOfDay(),
             'thisWeek' => Carbon::now()->endOfWeek(),
             'thisMonth' => Carbon::now()->endOfMonth(),
+            'thisYear' => Carbon::now()->endOfYear(),
             default => Carbon::today()->endOfDay(),
         };
     }
