@@ -1,4 +1,5 @@
 import { isAbsoluteUrl } from "@/helpers";
+import { UnitConverter } from "@/helpers/UnitConverter";
 import AdminLayout from "@/Layouts/AdminLayout";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router } from "@inertiajs/react";
@@ -358,7 +359,7 @@ export default function Index({ productsPaginate }) {
             <Modal
                 show={showIngredientsModal}
                 onClose={() => setShowIngredientsModal(false)}
-                size="3xl"
+                size="5xl"
             >
                 <Modal.Header className="border-b border-gray-200 !p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
                     <div className="flex items-center space-x-2">
@@ -385,10 +386,21 @@ export default function Index({ productsPaginate }) {
                                     <Table>
                                         <Table.Head>
                                             <Table.HeadCell className="bg-gray-50/80">ชื่อวัตถุดิบ</Table.HeadCell>
-                                            <Table.HeadCell className="bg-gray-50/80 text-center">ไซส์ S</Table.HeadCell>
-                                            <Table.HeadCell className="bg-gray-50/80 text-center">ไซส์ M</Table.HeadCell>
-                                            <Table.HeadCell className="bg-gray-50/80 text-center">ไซส์ L</Table.HeadCell>
+
+                                            <Table.HeadCell className="bg-gray-50/80 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <span>ปริมาณ</span>
+                                                    <span className="text-xs text-gray-500 font-normal">(กรัม/มิลลิลิตร)</span>
+                                                </div>
+                                            </Table.HeadCell>
                                             <Table.HeadCell className="bg-gray-50/80">หน่วย</Table.HeadCell>
+                                            <Table.HeadCell className="bg-gray-50/80 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <span>ปริมาณที่ใช้จริง</span>
+                                                    <span className="text-xs text-gray-500 font-normal">(ช้อนชา/ช้อนโต๊ะ)</span>
+                                                </div>
+                                            </Table.HeadCell>
+                                            {/* <Table.HeadCell className="bg-gray-50/80 w-24 text-center">จัดการ</Table.HeadCell> */}
                                         </Table.Head>
                                         <Table.Body className="divide-y divide-gray-200">
                                             {selectedProduct?.ingredients?.map((item) => (
@@ -397,25 +409,90 @@ export default function Index({ productsPaginate }) {
                                                         {item.ingredient?.name || 'ไม่ระบุชื่อ'}
                                                     </Table.Cell>
                                                     <Table.Cell className="text-center">
-                                                        <Badge color={item.quantity_size_s ? "info" : "gray"} className="w-16 bg-opacity-90">
-                                                            {item.quantity_size_s || '-'}
-                                                        </Badge>
-                                                    </Table.Cell>
-                                                    <Table.Cell className="text-center">
-                                                        <Badge color={item.quantity_size_m ? "info" : "gray"} className="w-16 bg-opacity-90">
-                                                            {item.quantity_size_m || '-'}
-                                                        </Badge>
-                                                    </Table.Cell>
-                                                    <Table.Cell className="text-center">
-                                                        <Badge color={item.quantity_size_l ? "info" : "gray"} className="w-16 bg-opacity-90">
-                                                            {item.quantity_size_l || '-'}
-                                                        </Badge>
+                                                        <div className="flex flex-col items-center gap-3">
+                                                            {[
+                                                                { size: 'S', value: item.quantity_size_s },
+                                                                { size: 'M', value: item.quantity_size_m },
+                                                                { size: 'L', value: item.quantity_size_l }
+                                                            ].map((sizeData, index) => sizeData.value && (
+                                                                <div key={sizeData.size} className={`flex items-center justify-center w-full ${index > 0 ? 'border-t border-gray-100 pt-2' : ''}`}>
+                                                                    <div className="flex items-center gap-2 bg-gray-50/80 px-4 py-2 rounded-lg min-w-[120px]">
+                                                                        <div className={`flex items-center justify-center w-6 h-6 rounded-full ${
+                                                                            sizeData.size === 'S' ? 'bg-blue-100 text-blue-600' :
+                                                                            sizeData.size === 'M' ? 'bg-green-100 text-green-600' :
+                                                                            'bg-purple-100 text-purple-600'
+                                                                        }`}>
+                                                                            <span className="text-xs font-semibold">{sizeData.size}</span>
+                                                                        </div>
+                                                                        <span className="font-medium text-gray-900">{sizeData.value}</span>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </Table.Cell>
                                                     <Table.Cell>
                                                         <span className="text-sm text-gray-600">
                                                             {item.ingredient?.unit?.name || 'ไม่ระบุหน่วย'}
                                                         </span>
                                                     </Table.Cell>
+
+                                                    <Table.Cell className="text-center">
+                                                        {(item.ingredient?.unit?.name === 'กรัม' || item.ingredient?.unit?.name === 'มิลลิลิตร') && (
+                                                            <div className="flex flex-col items-center gap-2">
+                                                                {item.quantity_size_s && (
+                                                                    <div className="flex flex-col items-start gap-0.5 bg-gray-50/50 px-3 py-1.5 rounded-lg">
+                                                                        <span className="text-xs font-semibold text-blue-600">ไซส์ S:</span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <Badge color="blue" className="text-xs w-24">
+                                                                                {UnitConverter.convert(item.quantity_size_s, item.ingredient.unit.name === 'กรัม' ? 'gram' : 'ml', 'teaspoon').toFixed(1)} ช้อนชา
+                                                                            </Badge>
+                                                                            <span className="text-xs text-gray-400">หรือ</span>
+                                                                            <Badge color="purple" className="text-xs w-24">
+                                                                                {UnitConverter.convert(item.quantity_size_s, item.ingredient.unit.name === 'กรัม' ? 'gram' : 'ml', 'tablespoon').toFixed(1)} ช้อนโต๊ะ
+                                                                            </Badge>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                {item.quantity_size_m && (
+                                                                    <div className="flex flex-col items-start gap-0.5 bg-gray-50/50 px-3 py-1.5 rounded-lg">
+                                                                        <span className="text-xs font-semibold text-blue-600">ไซส์ M:</span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <Badge color="blue" className="text-xs w-24">
+                                                                                {UnitConverter.convert(item.quantity_size_m, item.ingredient.unit.name === 'กรัม' ? 'gram' : 'ml', 'teaspoon').toFixed(1)} ช้อนชา
+                                                                            </Badge>
+                                                                            <span className="text-xs text-gray-400">หรือ</span>
+                                                                            <Badge color="purple" className="text-xs w-24">
+                                                                                {UnitConverter.convert(item.quantity_size_m, item.ingredient.unit.name === 'กรัม' ? 'gram' : 'ml', 'tablespoon').toFixed(1)} ช้อนโต๊ะ
+                                                                            </Badge>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                                {item.quantity_size_l && (
+                                                                    <div className="flex flex-col items-start gap-0.5 bg-gray-50/50 px-3 py-1.5 rounded-lg">
+                                                                        <span className="text-xs font-semibold text-blue-600">ไซส์ L:</span>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <Badge color="blue" className="text-xs w-24">
+                                                                                {UnitConverter.convert(item.quantity_size_l, item.ingredient.unit.name === 'กรัม' ? 'gram' : 'ml', 'teaspoon').toFixed(1)} ช้อนชา
+                                                                            </Badge>
+                                                                            <span className="text-xs text-gray-400">หรือ</span>
+                                                                            <Badge color="purple" className="text-xs w-24">
+                                                                                {UnitConverter.convert(item.quantity_size_l, item.ingredient.unit.name === 'กรัม' ? 'gram' : 'ml', 'tablespoon').toFixed(1)} ช้อนโต๊ะ
+                                                                            </Badge>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </Table.Cell>
+                                                    {/* <Table.Cell className="text-center">
+                                                        <Link
+                                                            href={route("admin.ingredients.edit", item.id)}
+                                                            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-700 bg-primary-50 rounded-md hover:bg-primary-100 transition-colors duration-150"
+                                                        >
+                                                            <FaEdit className="w-4 h-4 mr-1.5" />
+                                                            แก้ไข
+                                                        </Link>
+                                                    </Table.Cell> */}
                                                 </Table.Row>
                                             ))}
                                             {(!selectedProduct?.ingredients || selectedProduct.ingredients.length === 0) && (
