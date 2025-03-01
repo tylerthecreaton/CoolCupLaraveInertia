@@ -128,7 +128,9 @@ class NotificationController extends Controller
     {
         $minimumStock = $this->setting->where('key', 'minimum_ingredient_stock_alert')->first()?->value ?? 1000;
         return Ingredient::with('unit')
-            ->where('quantity', '<=', $minimumStock)
+            ->where('quantity', '<=', function ($query) use ($minimumStock) {
+                $query->selectRaw('IF(lower_stock_alert = 0, ?, lower_stock_alert)', [$minimumStock]);
+            })
             ->orderBy('quantity', 'asc')
             ->get();
     }
