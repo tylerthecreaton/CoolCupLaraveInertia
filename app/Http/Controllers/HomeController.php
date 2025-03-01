@@ -13,7 +13,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $products = Product::with(['ingredients' => function($query) {
+        $products = Product::with(['ingredients' => function ($query) {
             $query->join('ingredients', 'product_ingredients.ingredient_id', '=', 'ingredients.id')
                 ->join('units', 'ingredients.unit_id', '=', 'units.id')
                 ->select(
@@ -23,10 +23,29 @@ class HomeController extends Controller
                     'product_ingredients.ingredient_id',
                     'units.name as unit_name'
                 );
-        }])->limit(10)->get();
+        }])
+            ->leftJoin('order_details', 'products.id', '=', 'order_details.product_id')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->where('categories.name', '!=', 'ท๊อปปิ้ง')
+            ->select('products.*')
+            ->selectRaw('COALESCE(SUM(order_details.quantity), 0) as total_sales')
+            ->groupBy(
+                'products.id',
+                'products.name',
+                'products.description',
+                'products.cost_price',
+                'products.sale_price',
+                'products.image',
+                'products.category_id',
+                'products.created_at',
+                'products.updated_at'
+            )
+            ->orderBy('total_sales', 'desc')
+            ->limit(10)
+            ->get();
 
-        $categories = Category::with(['products' => function($query) {
-            $query->with(['ingredients' => function($query) {
+        $categories = Category::with(['products' => function ($query) {
+            $query->with(['ingredients' => function ($query) {
                 $query->join('ingredients', 'product_ingredients.ingredient_id', '=', 'ingredients.id')
                     ->join('units', 'ingredients.unit_id', '=', 'units.id')
                     ->select(
@@ -36,7 +55,24 @@ class HomeController extends Controller
                         'product_ingredients.ingredient_id',
                         'units.name as unit_name'
                     );
-            }]);
+            }])
+                ->leftJoin('order_details', 'products.id', '=', 'order_details.product_id')
+                ->join('categories', 'products.category_id', '=', 'categories.id')
+                ->where('categories.name', '!=', 'Topping')
+                ->select('products.*')
+                ->selectRaw('COALESCE(SUM(order_details.quantity), 0) as total_sales')
+                ->groupBy(
+                    'products.id',
+                    'products.name',
+                    'products.description',
+                    'products.cost_price',
+                    'products.sale_price',
+                    'products.image',
+                    'products.category_id',
+                    'products.created_at',
+                    'products.updated_at'
+                )
+                ->orderBy('total_sales', 'desc');
         }])->get();
 
         // Log sample product data for debugging

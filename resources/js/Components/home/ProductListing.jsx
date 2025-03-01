@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Tooltip } from "flowbite-react";
 import { isAbsoluteUrl } from "@/helpers";
-import { XCircle, AlertCircle, PackageOpen } from "lucide-react";
+import { XCircle, AlertCircle, PackageOpen, Trophy } from "lucide-react";
 
 export default function ProductListing({
     products,
@@ -34,7 +34,7 @@ export default function ProductListing({
             console.log('Checking ingredient:', ingredient.name, {
                 quantity: ingredient.quantity,
                 quantity_size_s: ingredient.quantity_size_s
-            });
+            }); 
 
             // ถ้าไม่มีข้อมูลวัตถุดิบ ให้ข้ามการตรวจสอบ
             if (!ingredient || !ingredient.quantity) {
@@ -137,13 +137,35 @@ export default function ProductListing({
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-5 gap-4 p-6">
-            {products.map((product) => {
+            {products.map((product, index) => {
                 const outOfStock = isOutOfStock(product);
                 console.log('Product status:', {
                     name: product.name,
                     outOfStock,
                     ingredients: product.ingredients
                 });
+
+                // สร้าง badge สำหรับ 3 อันดับแรก
+                const getBestSellerBadge = () => {
+                    if (index > 2) return null;
+                    
+                    const badges = [
+                        { text: "อันดับ 1", color: "bg-yellow-500", icon: "🏆" },
+                        { text: "อันดับ 2", color: "bg-gray-400", icon: "🥈" },
+                        { text: "อันดับ 3", color: "bg-amber-600", icon: "🥉" }
+                    ];
+
+                    return (
+                        <div className={`absolute top-2 right-2 ${badges[index].color} text-white px-3 py-1 rounded-full 
+                            shadow-lg border border-white/20 backdrop-blur-sm 
+                            animate-pulse-slow transform hover:scale-110 transition-transform duration-300
+                            flex items-center gap-1.5 font-medium text-sm z-10`}>
+                            <span className="text-lg">{badges[index].icon}</span>
+                            <span>{badges[index].text}</span>
+                        </div>
+                    );
+                };
+
                 return (
                     <div
                         key={product.id}
@@ -156,6 +178,9 @@ export default function ProductListing({
                         }}
                     >
                         <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg border border-gray-100 relative">
+                            {/* เพิ่ม Best Seller Badge */}
+                            {!outOfStock && getBestSellerBadge()}
+                            
                             <div className="relative aspect-square p-4 bg-gray-50">
                                 <img
                                     src={

@@ -45,4 +45,9 @@ class Product extends Model
             ->withPivot('quantity_used')
             ->withTimestamps();
     }
+
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
 }
