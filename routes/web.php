@@ -284,9 +284,9 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Telegram Routes (Admin & Manager)
-Route::middleware('permission:view dashboard')->group(function () {
-    Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook']);
-    Route::get('/telegram/send-message/{message}', [TelegramController::class, 'sendMessage']);
-});
+
+Route::post('/telegram/webhook', [TelegramController::class, 'handleWebhook']);
+Route::get('/telegram/send-message/{message}', [TelegramController::class, 'sendMessage']);
+
 
 require __DIR__ . '/auth.php';
