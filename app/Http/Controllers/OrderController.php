@@ -112,7 +112,7 @@ class OrderController extends Controller
 
         try {
             // สร้าง URL สำหรับอัพโหลดสลิป
-            $uploadUrl = env('APP_URL') . '/orders/' . $order->id . '/upload-slip';
+            $uploadUrl = env('APP_URL') ? env('APP_URL') . '/orders/' . $order->id . '/upload-slip' : 'https://coolcup.natakrit.me/orders/' . $order->id . '/upload-slip';
 
             // สร้างข้อความแจ้งเตือน
             $message = "🔔 *แจ้งเตือน: รอการอัพโหลดสลิปการชำระเงิน*\n\n";
