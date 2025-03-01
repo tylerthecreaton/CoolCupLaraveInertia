@@ -9,8 +9,10 @@ import {
     HiScale,
     HiCube,
     HiTag,
+    HiBell,
 } from "react-icons/hi";
 import { router } from "@inertiajs/react";
+import { Input } from "postcss";
 
 export default function IngredientsForm({
     ingredient,
@@ -28,6 +30,7 @@ export default function IngredientsForm({
         image: null,
         is_sweetness: isEditing ? ingredient.is_sweetness : false,
         expiration_date: isEditing ? ingredient.expiration_date : "",
+        lower_stock_alert: isEditing ? ingredient.lower_stock_alert : 0,
     });
 
     const handleFileChange = (e) => {
@@ -54,6 +57,7 @@ export default function IngredientsForm({
                 quantity: data.quantity,
                 is_sweetness: data.is_sweetness,
                 expiration_date: data.expiration_date,
+                lower_stock_alert: data.lower_stock_alert,
                 ...(data.image && { image: data.image })
             }, {
                 forceFormData: true,
@@ -191,11 +195,10 @@ export default function IngredientsForm({
                                         setData("unit_id", e.target.value)
                                     }
                                     required
-                                    className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${
-                                        errors.unit_id
-                                            ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-red-500"
-                                            : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-                                    } bg-white shadow-sm`}
+                                    className={`block w-full px-4 py-2.5 text-sm rounded-lg border ${errors.unit_id
+                                        ? "border-red-500 text-red-900 focus:border-red-500 focus:ring-red-500"
+                                        : "border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                                        } bg-white shadow-sm`}
                                 >
                                     <option value="">เลือกหน่วยวัด</option>
                                     {units
@@ -299,6 +302,33 @@ export default function IngredientsForm({
                                     />
                                 </div>
                             )}
+                        </div>
+
+                        {/* Lower Stock Alert Field */}
+                        <div>
+                            <Label
+                                htmlFor="lower_stock_alert"
+                                value="แจ้งเตือนเมื่อวัตถุดิบหมด"
+                                className="inline-flex items-center mb-2"
+                            >
+                                <HiBell className="mr-2 w-5 h-5 text-gray-500" />
+                                <span>แจ้งเตือนเมื่อเหลืองในคัลงน้อยกว่า</span>
+                            </Label>
+                            <TextInput
+                                type="number"
+                                name="lower_stock_alert"
+                                value={data.lower_stock_alert}
+                                className="mt-1 w-full"
+                                onChange={(e) =>
+                                    setData("lower_stock_alert", e.target.value)
+                                }
+                                color={errors.lower_stock_alert ? "failure" : "gray"}
+                                helperText={
+                                    <span className="text-sm text-red-500">
+                                        {errors.lower_stock_alert}
+                                    </span>
+                                }
+                            />
                         </div>
 
                         {/* Form Actions */}

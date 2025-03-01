@@ -14,6 +14,7 @@ class Ingredient extends Model
         'expiration_date',
         'is_sweetness',
         'image',
+        'lower_stock_alert',
     ];
 
     public function unit()

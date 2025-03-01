@@ -33,6 +33,7 @@ class IngredientsController extends Controller
             "image" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048",
             'is_sweetness' => 'required|boolean',
             'expiration_date' => 'nullable|date',
+            'lower_stock_alert' => 'nullable|numeric',
         ];
         $message = [
             "name.required" => "กรุณากรอกชื่อ",
@@ -49,6 +50,7 @@ class IngredientsController extends Controller
             'is_sweetness.required' => 'กรุณาเลือกรูปแบบวัตถุดิบ',
             'is_sweetness.boolean' => 'กรุณาเลือกรูปแบบวัตถุดิบให้ถูกต้อง',
             'expiration_date.date' => 'รูปแบบวันที่ไม่ถูกต้อง',
+            'lower_stock_alert.numeric' => 'กรุณากรอกจำนวนให้ถูกต้อง',
         ];
 
         $request->validate($rules, $message);
@@ -68,6 +70,7 @@ class IngredientsController extends Controller
             'is_sweetness' => $request->is_sweetness,
             'image' => $imageName == '' ? '' : $imageName,
             'expiration_date' => $request->expiration_date,
+            'lower_stock_alert' => $request->lower_stock_alert,
         ]);
 
         $ingredient->save();
@@ -99,6 +102,7 @@ class IngredientsController extends Controller
             'unit_id' => 'required|numeric|exists:units,id',
             'is_sweetness' => 'required|boolean',
             'expiration_date' => 'nullable|date',
+            'lower_stock_alert' => 'nullable|numeric',
         ];
 
         if ($request->hasFile('image')) {
@@ -120,6 +124,7 @@ class IngredientsController extends Controller
             'image.image' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
             'image.mimes' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
             'image.max' => 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง',
+            'lower_stock_alert.numeric' => 'กรุณากรอกจำนวนให้ถูกต้อง',
         ];
 
         $request->validate($rules, $message);
@@ -145,6 +150,7 @@ class IngredientsController extends Controller
         $ingredient->unit_id = $request->unit_id;
         $ingredient->is_sweetness = $request->is_sweetness;
         $ingredient->expiration_date = $request->expiration_date;
+        $ingredient->lower_stock_alert = $request->lower_stock_alert;
         $ingredient->save();
         return redirect()->route('admin.ingredients.index')->with('success', '');
     }
@@ -168,6 +174,7 @@ class IngredientsController extends Controller
             $usage->amount = $request->quantity;
             $usage->usage_type = 'ADD';
             $usage->created_by = Auth::user()->id;
+            $usage->lower_stock_alert = $ingredient->lower_stock_alert;
             $usage->note = "เพิ่มจำนวนวัตถุดิบจากการแจ้งเตือน";
             $usage->save();
 
