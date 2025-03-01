@@ -528,7 +528,12 @@ export default function Index({ productsPaginate }) {
                                     <Table>
                                         <Table.Head>
                                             <Table.HeadCell className="bg-gray-50/80">ชื่อวัตถุดิบสิ้นเปลือง</Table.HeadCell>
-                                            <Table.HeadCell className="bg-gray-50/80 text-center">ปริมาณที่ใช้</Table.HeadCell>
+                                            <Table.HeadCell className="bg-gray-50/80 text-center">
+                                                <div className="flex flex-col items-center">
+                                                    <span>ปริมาณที่ใช้</span>
+                                                    <span className="text-xs text-gray-500 font-normal">ต่อ 1 ชิ้น</span>
+                                                </div>
+                                            </Table.HeadCell>
                                             <Table.HeadCell className="bg-gray-50/80">หน่วย</Table.HeadCell>
                                         </Table.Head>
                                         <Table.Body className="divide-y divide-gray-200">
@@ -538,12 +543,19 @@ export default function Index({ productsPaginate }) {
                                                         {item.consumable?.name || 'ไม่ระบุชื่อ'}
                                                     </Table.Cell>
                                                     <Table.Cell className="text-center">
-                                                        <Badge color="purple" className="w-20 bg-opacity-90">
-                                                            {item.quantity_used || '-'}
-                                                        </Badge>
+                                                        <div className="flex justify-center">
+                                                            <div className="flex items-center gap-2 bg-purple-50/80 px-4 py-2 rounded-lg min-w-[120px]">
+                                                                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-100">
+                                                                    <svg className="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                                                    </svg>
+                                                                </div>
+                                                                <span className="font-medium text-gray-900">{item.quantity_used || '-'}</span>
+                                                            </div>
+                                                        </div>
                                                     </Table.Cell>
                                                     <Table.Cell>
-                                                        <span className="text-sm text-gray-600">
+                                                        <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-100 text-sm text-gray-700">
                                                             {item.consumable?.unit?.name || 'ไม่ระบุหน่วย'}
                                                         </span>
                                                     </Table.Cell>
@@ -552,10 +564,12 @@ export default function Index({ productsPaginate }) {
                                             {(!selectedProduct?.consumables || selectedProduct.consumables.length === 0) && (
                                                 <Table.Row>
                                                     <Table.Cell colSpan={3}>
-                                                        <div className="flex items-center justify-center py-8 text-gray-500">
-                                                            <svg className="w-6 h-6 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
+                                                        <div className="flex flex-col items-center justify-center py-8 text-gray-500 gap-2">
+                                                            <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center">
+                                                                <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                            </div>
                                                             <span className="text-sm">ไม่มีวัตถุดิบสิ้นเปลืองที่ใช้ในสินค้านี้</span>
                                                         </div>
                                                     </Table.Cell>
