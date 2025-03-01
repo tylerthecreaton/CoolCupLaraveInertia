@@ -2,12 +2,16 @@ import React from "react";
 import { Button, Tooltip } from "flowbite-react";
 import { isAbsoluteUrl } from "@/helpers";
 import { XCircle, AlertCircle, PackageOpen, Trophy } from "lucide-react";
+import { useGlobalState } from "@/Store/state";
 
 export default function ProductListing({
     products,
     setShowSaleModal,
     setCurrentProduct,
 }) {
+    const { state } = useGlobalState();
+    const { isCartOpen } = state.app;
+
     const formatPrice = (price) => {
         return new Intl.NumberFormat('th-TH', {
             style: 'currency',
@@ -34,7 +38,7 @@ export default function ProductListing({
             console.log('Checking ingredient:', ingredient.name, {
                 quantity: ingredient.quantity,
                 quantity_size_s: ingredient.quantity_size_s
-            }); 
+            });
 
             // ถ้าไม่มีข้อมูลวัตถุดิบ ให้ข้ามการตรวจสอบ
             if (!ingredient || !ingredient.quantity) {
@@ -135,8 +139,13 @@ export default function ProductListing({
         );
     };
 
+    // Dynamically adjust grid columns based on cart state
+    const gridClasses = isCartOpen
+        ? "grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4 p-2 sm:p-4 md:p-6"
+        : "grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2 sm:gap-3 md:gap-4 p-2 sm:p-4 md:p-6";
+
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-5 gap-4 p-6">
+        <div className={gridClasses}>
             {products.map((product, index) => {
                 const outOfStock = isOutOfStock(product);
                 console.log('Product status:', {
@@ -148,7 +157,7 @@ export default function ProductListing({
                 // สร้าง badge สำหรับ 3 อันดับแรก
                 const getBestSellerBadge = () => {
                     if (index > 2) return null;
-                    
+
                     const badges = [
                         { text: "อันดับ 1", color: "bg-yellow-500", icon: "🏆" },
                         { text: "อันดับ 2", color: "bg-gray-400", icon: "🥈" },
@@ -156,12 +165,12 @@ export default function ProductListing({
                     ];
 
                     return (
-                        <div className={`absolute top-2 right-2 ${badges[index].color} text-white px-3 py-1 rounded-full 
-                            shadow-lg border border-white/20 backdrop-blur-sm 
+                        <div className={`absolute top-2 right-2 ${badges[index].color} text-white px-2 sm:px-3 py-0.5 sm:py-1 rounded-full
+                            shadow-lg border border-white/20 backdrop-blur-sm
                             animate-pulse-slow transform hover:scale-110 transition-transform duration-300
-                            flex items-center gap-1.5 font-medium text-sm z-10`}>
-                            <span className="text-lg">{badges[index].icon}</span>
-                            <span>{badges[index].text}</span>
+                            flex items-center gap-1 sm:gap-1.5 font-medium text-xs sm:text-sm z-10`}>
+                            <span className="text-sm sm:text-lg">{badges[index].icon}</span>
+                            <span className="hidden xs:inline">{badges[index].text}</span>
                         </div>
                     );
                 };
@@ -177,11 +186,11 @@ export default function ProductListing({
                             }
                         }}
                     >
-                        <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg border border-gray-100 relative">
+                        <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg border border-gray-100 relative h-full flex flex-col">
                             {/* เพิ่ม Best Seller Badge */}
                             {!outOfStock && getBestSellerBadge()}
-                            
-                            <div className="relative aspect-square p-4 bg-gray-50">
+
+                            <div className="relative aspect-square p-2 sm:p-4 bg-gray-50">
                                 <img
                                     src={
                                         isAbsoluteUrl(product.image)
@@ -204,9 +213,9 @@ export default function ProductListing({
                                             <div className="flex flex-col items-center">
                                                 <div className="relative">
                                                     <div className="absolute -inset-1 bg-red-500/20 rounded-full animate-ping"></div>
-                                                    <XCircle className="w-12 h-12 text-red-500/90 drop-shadow-glow animate-pulse relative" />
+                                                    <XCircle className="w-8 sm:w-12 h-8 sm:h-12 text-red-500/90 drop-shadow-glow animate-pulse relative" />
                                                 </div>
-                                                <span className="text-white font-medium px-6 py-2.5 bg-red-500/80 backdrop-blur-sm rounded-full shadow-lg border border-red-400/30 mt-3">
+                                                <span className="text-white text-xs sm:text-sm font-medium px-3 sm:px-6 py-1.5 sm:py-2.5 bg-red-500/80 backdrop-blur-sm rounded-full shadow-lg border border-red-400/30 mt-2 sm:mt-3">
                                                     สินค้าหมด
                                                 </span>
                                             </div>
@@ -214,17 +223,17 @@ export default function ProductListing({
                                     </Tooltip>
                                 )}
                             </div>
-                            <div className="p-4">
-                                <h3 className="text-gray-900 font-medium mb-2 line-clamp-2 min-h-[48px]">
+                            <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col">
+                                <h3 className="text-gray-900 text-sm sm:text-base font-medium mb-1 sm:mb-2 line-clamp-2 min-h-[2.5rem] sm:min-h-[3rem]">
                                     {product.name}
                                 </h3>
-                                <div className="space-y-1">
+                                <div className="space-y-0.5 sm:space-y-1 mt-auto">
                                     {product.sale_price && product.sale_price < product.price && (
-                                        <p className="text-sm text-gray-400 line-through">
+                                        <p className="text-xs sm:text-sm text-gray-400 line-through">
                                             {formatPrice(product.price)}
                                         </p>
                                     )}
-                                    <p className="text-xl font-semibold text-blue-600">
+                                    <p className="text-base sm:text-lg md:text-xl font-semibold text-blue-600">
                                         {formatPrice(product.sale_price || product.price)}
                                     </p>
                                 </div>

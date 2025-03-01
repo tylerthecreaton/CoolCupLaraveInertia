@@ -57,8 +57,8 @@ const CartComponent = () => {
                 const validPromotions = response.data.filter(promotion => {
                     const startDate = promotion.start_date ? new Date(promotion.start_date) : null;
                     const endDate = promotion.end_date ? new Date(promotion.end_date) : null;
-                    
-                    return (!startDate || currentDate >= startDate) && 
+
+                    return (!startDate || currentDate >= startDate) &&
                            (!endDate || currentDate <= endDate) &&
                            promotion.is_active;
                 });

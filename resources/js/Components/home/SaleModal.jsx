@@ -113,39 +113,40 @@ const ProductModal = ({ show, onClose, product }) => {
     if (!show || !product) return null;
 
     return (
-        <div className="flex fixed inset-0 z-50 justify-center items-center bg-black/50">
-            <Card className="overflow-hidden w-full max-w-lg bg-white rounded-lg">
-                <div className="flex justify-between items-center p-4 border-b">
-                    <h2 className="text-xl font-semibold">{product.name}</h2>
+        <div className="flex fixed inset-0 z-50 justify-center items-center bg-black/50 p-4 md:p-0">
+            <Card className="overflow-hidden w-full max-w-xs sm:max-w-md md:max-w-lg bg-white rounded-lg">
+                <div className="flex justify-between items-center p-3 md:p-4 border-b">
+                    <h2 className="text-lg md:text-xl font-semibold truncate">{product.name}</h2>
                     <Button
                         color="gray"
                         size="sm"
                         onClick={handleClose}
-                        className="!p-2"
+                        className="!p-1.5 md:!p-2"
                     >
-                        <X className="w-4 h-4" />
+                        <X className="w-3 h-3 md:w-4 md:h-4" />
                     </Button>
                 </div>
 
-                <div className="p-6 space-y-6">
+                <div className="p-4 md:p-6 space-y-4 md:space-y-6 overflow-y-auto max-h-[calc(100vh-200px)] md:max-h-[calc(100vh-220px)]">
                     <div className="flex justify-center">
                         <img
                             src={`/images/products/${product.image}`}
                             alt={product.name}
-                            className="object-cover w-40 h-40 rounded-lg"
+                            className="object-cover w-32 h-32 md:w-40 md:h-40 rounded-lg"
                         />
                     </div>
 
-                    <div className="flex justify-center items-center space-x-4">
+                    <div className="flex justify-center items-center space-x-3 md:space-x-4">
                         <Button
                             color="light"
                             size="sm"
                             onClick={() => handleQuantityChange(-1)}
                             disabled={quantity <= 1}
+                            className="!p-1 md:!p-2"
                         >
-                            <Minus className="w-4 h-4" />
+                            <Minus className="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
-                        <span className="w-12 text-xl font-semibold text-center">
+                        <span className="w-8 md:w-12 text-lg md:text-xl font-semibold text-center">
                             {quantity}
                         </span>
                         <Button
@@ -153,16 +154,17 @@ const ProductModal = ({ show, onClose, product }) => {
                             size="sm"
                             onClick={() => handleQuantityChange(1)}
                             disabled={quantity >= 99}
+                            className="!p-1 md:!p-2"
                         >
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-3 h-3 md:w-4 md:h-4" />
                         </Button>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium">
+                    <div className="space-y-1 md:space-y-2">
+                        <label className="block text-xs md:text-sm font-medium">
                             ขนาด
                         </label>
-                        <div className="flex gap-2 justify-between">
+                        <div className="flex gap-1 md:gap-2 justify-between">
                             {sizes.map((sizeOption) => (
                                 <Button
                                     key={sizeOption.label}
@@ -171,15 +173,15 @@ const ProductModal = ({ show, onClose, product }) => {
                                             ? "blue"
                                             : "light"
                                     }
-                                    className="flex-1"
+                                    className="flex-1 !p-1 md:!p-2"
                                     onClick={() => setSize(sizeOption.label)}
                                 >
                                     <div className="text-center">
-                                        <div>{sizeOption.label}</div>
-                                        <div className="text-xs opacity-70">
+                                        <div className="text-sm md:text-base">{sizeOption.label}</div>
+                                        <div className="text-[10px] md:text-xs opacity-70">
                                             {sizeOption.ml}
                                         </div>
-                                        <div className="text-xs">
+                                        <div className="text-[10px] md:text-xs">
                                             +฿{sizeOption.price}
                                         </div>
                                     </div>
@@ -188,11 +190,11 @@ const ProductModal = ({ show, onClose, product }) => {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium">
+                    <div className="space-y-1 md:space-y-2">
+                        <label className="block text-xs md:text-sm font-medium">
                             ความหวาน
                         </label>
-                        <div className="grid grid-cols-5 gap-2">
+                        <div className="grid grid-cols-5 gap-1 md:gap-2">
                             {sweetnessLevels.map((level) => (
                                 <Button
                                     key={level}
@@ -200,7 +202,7 @@ const ProductModal = ({ show, onClose, product }) => {
                                         sweetness === level ? "blue" : "light"
                                     }
                                     onClick={() => setSweetness(level)}
-                                    className="text-sm"
+                                    className="text-xs md:text-sm !p-1 md:!p-2"
                                 >
                                     {level}
                                 </Button>
@@ -208,15 +210,15 @@ const ProductModal = ({ show, onClose, product }) => {
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium">
+                    <div className="space-y-1 md:space-y-2">
+                        <label className="block text-xs md:text-sm font-medium">
                             ท็อปปิ้ง (เลือกได้หลายอย่าง)
                         </label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 md:gap-2">
                             {toppings.map((toppingOption) => (
                                 <label
                                     key={toppingOption.id}
-                                    className="flex items-center p-2 space-x-2 rounded border cursor-pointer hover:bg-gray-50"
+                                    className="flex items-center p-1.5 md:p-2 space-x-1 md:space-x-2 rounded border cursor-pointer hover:bg-gray-50 text-xs md:text-sm"
                                 >
                                     <Checkbox
                                         checked={selectedToppings.includes(
@@ -227,9 +229,10 @@ const ProductModal = ({ show, onClose, product }) => {
                                                 toppingOption.id
                                             )
                                         }
+                                        className="scale-75 md:scale-100"
                                     />
-                                    <span>{toppingOption.name}</span>
-                                    <span className="text-blue-600">
+                                    <span className="truncate">{toppingOption.name}</span>
+                                    <span className="text-blue-600 whitespace-nowrap">
                                         +฿{toppingOption.price}
                                     </span>
                                 </label>
@@ -238,23 +241,26 @@ const ProductModal = ({ show, onClose, product }) => {
                     </div>
                 </div>
 
-                <div className="p-4 space-y-4 border-t">
+                <div className="p-3 md:p-4 space-y-3 md:space-y-4 border-t">
                     <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold">ราคารวม</span>
-                        <span className="text-2xl font-bold">
+                        <span className="text-base md:text-lg font-semibold">ราคารวม</span>
+                        <span className="text-xl md:text-2xl font-bold">
                             ฿{totalPrice}
                         </span>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-2 md:gap-3">
                         <Button
                             color="gray"
                             onClick={handleClose}
-                            className="flex-1"
+                            className="flex-1 !py-1 md:!py-2 text-sm md:text-base"
                         >
                             ยกเลิก
                         </Button>
-                        <Button className="flex-1" onClick={handleAddToCart}>
+                        <Button 
+                            className="flex-1 !py-1 md:!py-2 text-sm md:text-base" 
+                            onClick={handleAddToCart}
+                        >
                             เพิ่มในตะกร้า
                         </Button>
                     </div>
