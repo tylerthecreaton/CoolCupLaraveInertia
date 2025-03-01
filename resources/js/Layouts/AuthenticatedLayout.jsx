@@ -8,8 +8,15 @@ import Swal from "sweetalert2";
 import { hasPermissions, hasRole, hasRoles } from "@/helpers";
 
 export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
-    const { roles = [], permissions = [] } = usePage().props.auth;
+    const auth = usePage().props.auth;
+    const user = auth.user;
+    const roles = auth.roles ?? [];
+    const permissions = auth.permissions ?? [];
+
+    console.log('Auth:', auth);
+    console.log('Roles:', roles);
+    console.log('Permissions:', permissions);
+
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [time, setTime] = useState(new Date().toLocaleTimeString());
     const [notifications, setNotifications] = useState([]);
@@ -50,7 +57,6 @@ export default function AuthenticatedLayout({ header, children }) {
             clearInterval(notificationTimer);
         };
     }, []);
-
     const getNotificationIcon = (type) => {
         switch (type) {
             case "low_stock":
@@ -267,7 +273,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
                                                 <Link href="/admin/consumables" className="flex items-center space-x-2 w-full">
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                                     </svg>
                                                     <span>วัตถุดิบสิ้นเปลือง</span>
                                                 </Link>
@@ -275,7 +281,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
                                                 <Link href="/admin/transformers" className="flex items-center space-x-2 w-full">
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                                                     </svg>
                                                     <span>ตัวแปรรูปปริมาณวัตถุดิบ</span>
                                                 </Link>
@@ -337,7 +343,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                         <Dropdown.Item className="rounded-lg transition-colors duration-150 hover:bg-gray-50">
                                             <Link href="/admin/users" className="flex items-center space-x-2 w-full">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M7 20H6v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                                 </svg>
                                                 <span>ผู้ใช้งาน</span>
                                             </Link>
@@ -426,7 +432,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                     <div className="flex items-center space-x-3">
                                         <div className="relative">
                                             <Avatar
-                                                img={user.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`}
+                                                img={user?.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name)}&background=6366f1&color=fff`}
                                                 rounded
                                                 bordered
                                                 className="!w-10 !h-10"
@@ -434,7 +440,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-400 border-2 border-white"></div>
                                         </div>
                                         <div className="hidden text-left md:block">
-                                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                            <div className="text-sm font-medium text-gray-900">{user?.name}</div>
                                             <div className="text-xs text-gray-500">{time}</div>
                                         </div>
                                     </div>
@@ -514,13 +520,13 @@ export default function AuthenticatedLayout({ header, children }) {
                             <div className="relative">
                                 <img
                                     className="object-cover w-10 h-10 rounded-full ring-2 ring-offset-2 ring-primary-500"
-                                    src={user.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=6366f1&color=fff`}
-                                    alt={user.name}
+                                    src={user?.profile_photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name)}&background=6366f1&color=fff`}
+                                    alt={user?.name}
                                 />
                                 <div className="absolute -right-1 -bottom-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
                             </div>
                             <div>
-                                <div className="text-base font-medium text-gray-800">{user.name}</div>
+                                <div className="text-base font-medium text-gray-800">{user?.name}</div>
                                 <div className="text-sm text-primary-600">{time}</div>
                             </div>
                         </div>

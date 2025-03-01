@@ -255,6 +255,8 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard', [
             'auth' => [
                 'user' => $request->user(),
+                'roles' => $request->user() ? $request->user()->roles->pluck('name')->toArray() : [],
+                'permissions' => $request->user() ? $request->user()->getAllPermissions()->pluck('name')->toArray() : [],
             ],
             'salesData' => $salesData,
             'topProducts' => $topProducts,

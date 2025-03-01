@@ -11,6 +11,7 @@ import IngredientUsage from '../Components/Dashboard/IngredientUsage';
 import ProductSalesBarChart from '../Components/Dashboard/ProductSalesBarChart';
 
 export default function Dashboard({ auth, salesData, topProducts, ingredients, expenses, hourlySales, filters, ingredientUsage, productSales }) {
+    console.log('Dashboard Auth:', auth);
     const [dateRange, setDateRange] = useState(filters.dateRange);
     const [startDate, setStartDate] = useState(filters.startDate);
     const [endDate, setEndDate] = useState(filters.endDate);
@@ -42,7 +43,7 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
 
     return (
         <AuthenticatedLayout
-            user={auth.user}
+            auth={auth}
             header={
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800">
