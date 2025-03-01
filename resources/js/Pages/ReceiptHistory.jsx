@@ -154,7 +154,7 @@ export default function ReceiptHistory({ orders, filters }) {
                         />
 
                         {/* Pagination */}
-                        {/* <div className="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0 mt-4">
+                        <div className="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0 mt-4">
                             <div className="flex items-center gap-2">
                                 {orders.links.map((link, index) => (
                                     <Link
@@ -168,19 +168,15 @@ export default function ReceiptHistory({ orders, filters }) {
                                             }`}
                                         preserveScroll
                                         preserveState
+                                        dangerouslySetInnerHTML={{ __html: link.label }}
                                     >
-                                        {link.label === 'pagination.previous'
-                                            ? 'ย้อนกลับ'
-                                            : link.label === 'pagination.next'
-                                                ? 'ถัดไป'
-                                                : link.label}
                                     </Link>
                                 ))}
                             </div>
                             <div className="text-sm text-gray-700">
                                 แสดง {orders.from} ถึง {orders.to} จากทั้งหมด {orders.total} รายการ
                             </div>
-                        </div> */}
+                        </div>
                     </Card>
                 </div>
             </div>
