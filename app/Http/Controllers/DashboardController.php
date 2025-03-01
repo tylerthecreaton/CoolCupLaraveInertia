@@ -31,6 +31,12 @@ class DashboardController extends Controller
                 $previousEndDate = now()->subDay()->endOfDay();
                 break;
             
+            case 'yesterday':
+                // เปรียบเทียบกับเมื่อวานซืน
+                $previousStartDate = now()->subDays(2)->startOfDay();
+                $previousEndDate = now()->subDays(2)->endOfDay();
+                break;
+            
             case 'thisWeek':
                 // เปรียบเทียบกับสัปดาห์ที่แล้ว
                 $previousStartDate = now()->subWeek()->startOfWeek();
@@ -282,10 +288,10 @@ class DashboardController extends Controller
     private function getStartDate($dateRange, $customStartDate = null)
     {
         if ($customStartDate) {
-            return Carbon::parse($customStartDate)->startOfDay();
+            return Carbon::parse($customStartDate);
         }
 
-        return match($dateRange) {
+        return match ($dateRange) {
             'today' => Carbon::today(),
             'yesterday' => Carbon::yesterday(),
             'thisWeek' => Carbon::now()->startOfWeek(),
@@ -298,10 +304,10 @@ class DashboardController extends Controller
     private function getEndDate($dateRange, $customEndDate = null)
     {
         if ($customEndDate) {
-            return Carbon::parse($customEndDate)->endOfDay();
+            return Carbon::parse($customEndDate);
         }
 
-        return match($dateRange) {
+        return match ($dateRange) {
             'today' => Carbon::today()->endOfDay(),
             'yesterday' => Carbon::yesterday()->endOfDay(),
             'thisWeek' => Carbon::now()->endOfWeek(),
