@@ -280,7 +280,7 @@ const CartComponent = () => {
 
     // Handle manual discount
     const handleManualDiscount = async () => {
-        const amount = parseFloat(discountInput);
+        const amount = Math.ceil(parseFloat(discountInput)); // Round up manual discount
         if (!amount || amount <= 0) {
             await Swal.fire({
                 title: "ไม่สามารถใช้ส่วนลดได้",

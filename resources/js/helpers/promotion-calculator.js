@@ -6,6 +6,9 @@ const DISCOUNT_TYPES = {
     CATEGORY_DISCOUNT: "CATEGORY_DISCOUNT",
 };
 
+// Round up any decimal number
+const roundUpDecimal = (number) => Math.ceil(number);
+
 /**
  * Calculate subtotal for given items
  * @param {Array} items - Array of cart items
@@ -26,7 +29,7 @@ const calculateSubtotal = (items, filterFn = null) => {
  * @returns {number} - Calculated discount
  */
 export const calculateFixedDiscount = (_, fixedAmount) => {
-    return Number(fixedAmount);
+    return roundUpDecimal(Number(fixedAmount));
 };
 
 /**
@@ -37,7 +40,7 @@ export const calculateFixedDiscount = (_, fixedAmount) => {
  */
 export const calculatePercentageDiscount = (items, percentage) => {
     const subtotal = calculateSubtotal(items);
-    return (subtotal * Number(percentage)) / 100;
+    return roundUpDecimal((subtotal * Number(percentage)) / 100);
 };
 
 /**
@@ -78,7 +81,7 @@ export const calculateBuyXGetYDiscount = (items, buyQty, freeQty) => {
         totalDiscount += sortedItems[i].price;
     }
 
-    return totalDiscount;
+    return roundUpDecimal(totalDiscount);
 };
 
 /**
@@ -97,10 +100,10 @@ export const calculateCategoryDiscount = (
     if (categoryItems.length === 0) return 0;
 
     const discountCalculators = {
-        [DISCOUNT_TYPES.FIXED]: () => Number(discountValue),
+        [DISCOUNT_TYPES.FIXED]: () => roundUpDecimal(Number(discountValue)),
         [DISCOUNT_TYPES.PERCENTAGE]: () => {
             const categorySubtotal = calculateSubtotal(categoryItems);
-            return (categorySubtotal * Number(discountValue)) / 100;
+            return roundUpDecimal((categorySubtotal * Number(discountValue)) / 100);
         },
     };
 
