@@ -13,9 +13,9 @@ export default function AuthenticatedLayout({ header, children }) {
     const roles = auth.roles ?? [];
     const permissions = auth.permissions ?? [];
 
-    console.log('Auth:', auth);
-    console.log('Roles:', roles);
-    console.log('Permissions:', permissions);
+    // console.log('Auth:', auth);
+    // console.log('Roles:', roles);
+    // console.log('Permissions:', permissions);
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const [time, setTime] = useState(new Date().toLocaleTimeString());

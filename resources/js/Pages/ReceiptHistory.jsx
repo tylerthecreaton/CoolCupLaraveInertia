@@ -1,17 +1,14 @@
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, router } from "@inertiajs/react";
-import { Link } from "@inertiajs/react";
-import Swal from 'sweetalert2';
-import { Receipt, Home } from "lucide-react";
 import ViewReceiptModal from "@/Components/home/ViewReceiptModal";
-import { useState } from "react";
-import { Breadcrumb, Card, Select } from 'flowbite-react';
-import SearchBar from "@/Components/receipt/SearchBar";
-import ReceiptTable from "@/Components/receipt/ReceiptTable";
-import OrderDetailsModal from "../Components/receipt/OrderDetailsModal";
 import CancelOrderModal from "@/Components/receipt/CancelOrderModal";
-import { format, subDays, startOfWeek, endOfWeek } from 'date-fns';
-import { th } from 'date-fns/locale';
+import ReceiptTable from "@/Components/receipt/ReceiptTable";
+import SearchBar from "@/Components/receipt/SearchBar";
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { Head, Link, router } from "@inertiajs/react";
+import { Breadcrumb, Card, Select } from 'flowbite-react';
+import { Home, Receipt } from "lucide-react";
+import { useState } from "react";
+import Swal from 'sweetalert2';
+import OrderDetailsModal from "../Components/receipt/OrderDetailsModal";
 
 export default function ReceiptHistory({ orders, filters }) {
     const [selectedReceipt, setSelectedReceipt] = useState(null);
@@ -157,7 +154,7 @@ export default function ReceiptHistory({ orders, filters }) {
                         />
 
                         {/* Pagination */}
-                        <div className="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0 mt-4">
+                        {/* <div className="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0 mt-4">
                             <div className="flex items-center gap-2">
                                 {orders.links.map((link, index) => (
                                     <Link
@@ -183,7 +180,7 @@ export default function ReceiptHistory({ orders, filters }) {
                             <div className="text-sm text-gray-700">
                                 แสดง {orders.from} ถึง {orders.to} จากทั้งหมด {orders.total} รายการ
                             </div>
-                        </div>
+                        </div> */}
                     </Card>
                 </div>
             </div>
