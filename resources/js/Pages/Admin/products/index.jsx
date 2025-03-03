@@ -13,7 +13,7 @@ import {
     Modal,
     Card,
 } from "flowbite-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback, Fragment, memo } from "react";
 import {
     HiHome,
     HiSearch,
@@ -22,45 +22,118 @@ import {
 import { FaList, FaPlus, FaEdit, FaTrash, FaBox, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
 
+// CategoryFilter component
+const CategoryFilter = memo(({ value, onChange, categories }) => {
+    return (
+        <div className="relative">
+            <Listbox value={value} onChange={onChange}>
+                <Listbox.Button className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-150 font-medium">
+                    <span>หมวดหมู่</span>
+                    <HiFilter className="w-4 h-4" />
+                    {value !== "all" && (
+                        <span className="text-sm font-medium text-blue-600">
+                            ({value})
+                        </span>
+                    )}
+                </Listbox.Button>
+                <Transition
+                    as={Fragment}
+                    enter="transition duration-100 ease-out"
+                    enterFrom="transform scale-95 opacity-0"
+                    enterTo="transform scale-100 opacity-100"
+                    leave="transition duration-75 ease-out"
+                    leaveFrom="transform scale-100 opacity-100"
+                    leaveTo="transform scale-95 opacity-0"
+                >
+                    <Listbox.Options className="absolute z-10 mt-1 w-56 bg-white rounded-md shadow-lg max-h-60 py-1 overflow-auto focus:outline-none">
+                        <Listbox.Option
+                            key="all"
+                            value="all"
+                            className={({ active, selected }) =>
+                                `relative cursor-pointer select-none py-2 px-4 ${
+                                    selected ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                                } ${active ? 'bg-gray-50' : ''}`
+                            }
+                        >
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                ทั้งหมด
+                            </div>
+                        </Listbox.Option>
+                        {categories.map((category) => (
+                            <Listbox.Option
+                                key={category}
+                                value={category}
+                                className={({ active, selected }) =>
+                                    `relative cursor-pointer select-none py-2 px-4 ${
+                                        selected ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                                    } ${active ? 'bg-gray-50' : ''}`
+                                }
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                    {category}
+                                </div>
+                            </Listbox.Option>
+                        ))}
+                    </Listbox.Options>
+                </Transition>
+            </Listbox>
+        </div>
+    );
+});
+
+CategoryFilter.displayName = 'CategoryFilter';
+
 export default function Index({ productsPaginate }) {
     const { current_page, next_page_url, prev_page_url } = productsPaginate;
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState(productsPaginate.data);
     const [searchTerm, setSearchTerm] = useState("");
-    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState("all");
     const [showIngredientsModal, setShowIngredientsModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [selectedCategory, setSelectedCategory] = useState("all");
+
+    // Get unique categories with memoization
+    const categories = useMemo(() => 
+        [...new Set(productsPaginate.data.map(product => product.category?.name).filter(Boolean))],
+        [productsPaginate.data]
+    );
+
+    // Memoize filtered products
+    const filteredProducts = useMemo(() => {
+        return productsPaginate.data.filter((product) => {
+            const matchesSearch = searchTerm === "" || 
+                Object.values({
+                    name: product.name,
+                    description: product.description,
+                    category: product.category?.name,
+                })
+                .some((value) =>
+                    value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+            const matchesCategory = 
+                selectedCategory === "all" || 
+                (product.category && product.category.name === selectedCategory);
+
+            return matchesSearch && matchesCategory;
+        });
+    }, [productsPaginate.data, searchTerm, selectedCategory]);
+
+    const handleCategoryChange = useCallback((category) => {
+        setSelectedCategory(category);
+    }, []);
+
+    // Update products when paginate data changes
+    useEffect(() => {
+        setProducts(productsPaginate.data);
+    }, [productsPaginate]);
 
     const onPageChange = (page) => {
         page > current_page
             ? router.get(next_page_url)
             : router.get(prev_page_url);
     };
-
-    useEffect(() => {
-        setProducts(productsPaginate.data);
-        setFilteredProducts(productsPaginate.data);
-    }, [productsPaginate]);
-
-    useEffect(() => {
-        const results = products.filter((product) => {
-            const matchesSearch = Object.values({
-                name: product.name,
-                description: product.description,
-                category: product.category?.name,
-            }).some((value) =>
-                value
-                    ?.toString()
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase())
-            );
-
-            const matchesCategory = selectedCategory === "all" || product.category?.name === selectedCategory;
-
-            return matchesSearch && matchesCategory;
-        });
-        setFilteredProducts(results);
-    }, [searchTerm, selectedCategory, products]);
 
     const handleDelete = (id) => {
         Swal.fire({
@@ -94,9 +167,6 @@ export default function Index({ productsPaginate }) {
         setSelectedProduct(product);
         setShowIngredientsModal(true);
     };
-
-    // Get unique categories
-    const categories = [...new Set(products.map(product => product.category?.name).filter(Boolean))];
 
     return (
         <AuthenticatedLayout
@@ -167,59 +237,11 @@ export default function Index({ productsPaginate }) {
                                     ชื่อสินค้า
                                 </Table.HeadCell>
                                 <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
-                                    <Listbox value={selectedCategory} onChange={setSelectedCategory}>
-                                        <div className="relative">
-                                            <Listbox.Button className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors duration-150 font-medium">
-                                                <span>หมวดหมู่</span>
-                                                <HiFilter className="w-4 h-4" />
-                                                {selectedCategory !== "all" && (
-                                                    <span className="text-sm font-medium text-blue-600">
-                                                        ({selectedCategory})
-                                                    </span>
-                                                )}
-                                            </Listbox.Button>
-                                            <Transition
-                                                enter="transition duration-100 ease-out"
-                                                enterFrom="transform scale-95 opacity-0"
-                                                enterTo="transform scale-100 opacity-100"
-                                                leave="transition duration-75 ease-out"
-                                                leaveFrom="transform scale-100 opacity-100"
-                                                leaveTo="transform scale-95 opacity-0"
-                                            >
-                                                <Listbox.Options className="absolute z-10 mt-1 w-56 bg-gray-50 shadow-lg max-h-60 overflow-auto focus:outline-none">
-                                                    <Listbox.Option
-                                                        value="all"
-                                                        className={({ active, selected }) =>
-                                                            `relative cursor-pointer select-none py-2 px-4 ${
-                                                                selected ? 'text-blue-600' : 'text-gray-700'
-                                                            } ${active ? 'bg-gray-100' : ''}`
-                                                        }
-                                                    >
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                                                            ทั้งหมด
-                                                        </div>
-                                                    </Listbox.Option>
-                                                    {categories.map((category) => (
-                                                        <Listbox.Option
-                                                            key={category}
-                                                            value={category}
-                                                            className={({ active, selected }) =>
-                                                                `relative cursor-pointer select-none py-2 px-4 ${
-                                                                    selected ? 'text-blue-600' : 'text-gray-700'
-                                                                } ${active ? 'bg-gray-100' : ''}`
-                                                            }
-                                                        >
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                                                                {category}
-                                                            </div>
-                                                        </Listbox.Option>
-                                                    ))}
-                                                </Listbox.Options>
-                                            </Transition>
-                                        </div>
-                                    </Listbox>
+                                    <CategoryFilter 
+                                        value={selectedCategory}
+                                        onChange={handleCategoryChange}
+                                        categories={categories}
+                                    />
                                 </Table.HeadCell>
                                 <Table.HeadCell className="px-6 py-4 font-medium text-gray-700 bg-gray-50">
                                     ราคาขาย
