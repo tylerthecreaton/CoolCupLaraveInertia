@@ -26,7 +26,7 @@ export default function IngredientsForm({
     const { data, setData, post, put, processing, errors } = useForm({
         name: isEditing ? ingredient.name : "",
         unit_id: isEditing ? ingredient.unit_id : "",
-        quantity: isEditing ? ingredient.quantity : "",
+        quantity: isEditing ? ingredient.quantity : 0,
         image: null,
         is_sweetness: isEditing ? ingredient.is_sweetness : false,
         expiration_date: isEditing ? ingredient.expiration_date : "",
@@ -308,11 +308,11 @@ export default function IngredientsForm({
                         <div>
                             <Label
                                 htmlFor="lower_stock_alert"
-                                value="แจ้งเตือนเมื่อวัตถุดิบหมด"
+                                value="แจ้งเตือนเมื่อเหลือในคลังเหลือน้อยกว่า"
                                 className="inline-flex items-center mb-2"
                             >
                                 <HiBell className="mr-2 w-5 h-5 text-gray-500" />
-                                <span>แจ้งเตือนเมื่อเหลืองในคัลงน้อยกว่า</span>
+                                <span>แจ้งเตือนเมื่อเหลือในคลังเหลือน้อยกว่า</span>
                             </Label>
                             <TextInput
                                 type="number"
@@ -329,6 +329,9 @@ export default function IngredientsForm({
                                     </span>
                                 }
                             />
+                            <p className="mt-3 text-sm text-red-500">
+                                * ระบุปริมาณวัตถุดิบขั้นต่ำที่จะให้ระบบแจ้งเตือนเมื่อเหลือในคลังเหลือน้อยกว่า <br /> ⚠️ ถ้าหากไม่ตั้งค่าขั้นต่ำของวัตถุดิบจะใช้ค่าเริ่มต้นจากการตั้งค่าในระบบ !!
+                            </p>
                         </div>
 
                         {/* Form Actions */}

@@ -23,8 +23,8 @@ export default function UserForm({ isEditing = false, user = null, errors = {} }
 
         Swal.fire({
             title: isEditing ? "ยืนยันการแก้ไข?" : "ยืนยันการเพิ่ม?",
-            text: isEditing 
-                ? "คุณต้องการแก้ไขข้อมูลผู้ใช้นี้ใช่หรือไม่?" 
+            text: isEditing
+                ? "คุณต้องการแก้ไขข้อมูลผู้ใช้นี้ใช่หรือไม่?"
                 : "คุณต้องการเพิ่มผู้ใช้ใหม่ใช่หรือไม่?",
             icon: "question",
             showCancelButton: true,
@@ -132,7 +132,7 @@ export default function UserForm({ isEditing = false, user = null, errors = {} }
                     <div>
                         <Label
                             htmlFor="file-upload-helper-text"
-                            value="Upload file"
+                            value="อัปโหลดรูปภาพ"
                         />
                     </div>
                     <FileInput
