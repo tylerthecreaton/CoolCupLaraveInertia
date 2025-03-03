@@ -81,8 +81,8 @@ export default function SidebarMenu() {
     const MenuText = ({ children }) => (
         <span
             className={`ml-3 whitespace-nowrap transition-all duration-300 ${isOpen
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 -translate-x-10"
+                ? "opacity-100 translate-x-0"
+                : "opacity-0 -translate-x-10"
                 }`}
         >
             {children}
@@ -182,12 +182,14 @@ export default function SidebarMenu() {
                         </Link>
                     </li>
                     <li>
-                        <Link
+                        <a
                             className="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-300 hover:bg-cyan-50 hover:text-cyan-600 group"
+                            href="/manual/manual.pdf"
+                            target="_blank"
                         >
                             <MdBook className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
                             {isOpen && <MenuText>แมนนวล</MenuText>}
-                        </Link>
+                        </a>
                     </li>
                     <li>
                         <button
