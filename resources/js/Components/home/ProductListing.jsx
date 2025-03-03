@@ -83,7 +83,7 @@ export default function ProductListing({
             <div className="min-w-[280px] max-w-sm bg-gray-900/95 rounded-lg shadow-xl border border-gray-700/50">
                 {/* Header */}
                 <div className="p-3 border-b border-gray-700/50">
-                    <div className="flex items-center gap-2 text-red-300">
+                    <div className="flex gap-2 items-center text-red-300">
                         <AlertCircle className="w-5 h-5" />
                         <span className="font-medium">วัตถุดิบไม่เพียงพอ</span>
                     </div>
@@ -104,7 +104,7 @@ export default function ProductListing({
                                     <PackageOpen className={`w-4 h-4 ${isLow ? 'text-red-400' : 'text-green-400'}`} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-baseline justify-between gap-2">
+                                    <div className="flex gap-2 justify-between items-baseline">
                                         <span className="font-medium text-gray-200 truncate">
                                             {ingredient.name}
                                         </span>
@@ -178,7 +178,7 @@ export default function ProductListing({
                 return (
                     <div
                         key={product.id}
-                        className={`group ${outOfStock ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}
+                        className={`group ${outOfStock ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}`}
                         onClick={() => {
                             if (!outOfStock) {
                                 setCurrentProduct(product);
@@ -186,11 +186,11 @@ export default function ProductListing({
                             }
                         }}
                     >
-                        <div className="bg-white rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg border border-gray-100 relative h-full flex flex-col">
+                        <div className="flex overflow-hidden relative flex-col h-full bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-lg">
                             {/* เพิ่ม Best Seller Badge */}
                             {!outOfStock && getBestSellerBadge()}
 
-                            <div className="relative aspect-square p-2 sm:p-4 bg-gray-50">
+                            <div className="relative p-2 bg-gray-50 aspect-square sm:p-4">
                                 <img
                                     src={
                                         isAbsoluteUrl(product.image)
@@ -201,39 +201,117 @@ export default function ProductListing({
                                     alt={product.name}
                                 />
                                 {outOfStock && (
-                                    <Tooltip
-                                        content={getIngredientStatus(product)}
-                                        placement="top"
-                                        style="dark"
-                                        animation="duration-300"
-                                        className="!w-auto"
-                                        trigger="hover"
-                                    >
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black/70 backdrop-blur-[2px]">
-                                            <div className="flex flex-col items-center">
-                                                <div className="relative">
-                                                    <div className="absolute -inset-1 bg-red-500/20 rounded-full animate-ping"></div>
-                                                    <XCircle className="w-8 sm:w-12 h-8 sm:h-12 text-red-500/90 drop-shadow-glow animate-pulse relative" />
-                                                </div>
-                                                <span className="text-white text-xs sm:text-sm font-medium px-3 sm:px-6 py-1.5 sm:py-2.5 bg-red-500/80 backdrop-blur-sm rounded-full shadow-lg border border-red-400/30 mt-2 sm:mt-3">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                                        <div className="flex flex-col items-center space-y-4">
+                                            <div className="relative">
+                                                <div className="absolute -inset-1 rounded-full animate-ping bg-red-500/30"></div>
+                                                <XCircle className="relative w-8 h-8 animate-pulse sm:w-12 sm:h-12 text-red-500 drop-shadow-glow" />
+                                            </div>
+                                            <div
+                                                onMouseEnter={(e) => {
+                                                    const rect = e.currentTarget.getBoundingClientRect();
+                                                    const tooltipContent = document.createElement('div');
+                                                    tooltipContent.className = 'fixed z-50 transform -translate-x-1/2 -translate-y-full';
+                                                    tooltipContent.style.left = `${rect.left + rect.width / 2}px`;
+                                                    tooltipContent.style.top = `${rect.top - 10}px`;
+
+                                                    const ingredients = product.ingredients || [];
+                                                    const ingredientsHtml = ingredients.map((ingredient, index) => {
+                                                        if (!ingredient) return '';
+                                                        const remaining = parseFloat(ingredient.quantity) || 0;
+                                                        const required = parseFloat(ingredient.quantity_size_s) || 0;
+                                                        const isLow = remaining < required;
+
+                                                        return `
+                                                            <div class="flex items-start gap-2.5">
+                                                                <div class="mt-0.5">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 ${isLow ? 'text-red-400' : 'text-green-400'}">
+                                                                        <path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path>
+                                                                        <path d="M16.5 9.4 7.55 4.24"></path>
+                                                                        <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                                                                        <line x1="12" y1="22" x2="12" y2="12"></line>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="flex-1 min-w-0">
+                                                                    <div class="flex gap-2 justify-between items-baseline">
+                                                                        <span class="font-medium text-gray-200 truncate">
+                                                                            ${ingredient.name}
+                                                                        </span>
+                                                                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                                                                            <span class="${isLow ? 'text-red-300' : 'text-gray-400'} text-sm tabular-nums">
+                                                                                ${remaining.toFixed(2)} ${ingredient.unit_name || ''}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    ${isLow ? `
+                                                                        <div class="mt-1">
+                                                                            <span class="inline-flex items-center px-1.5 py-0.5 text-xs bg-red-500/20 text-red-300 rounded border border-red-500/30">
+                                                                                ต้องการ ${required.toFixed(2)} ${ingredient.unit_name || ''}
+                                                                            </span>
+                                                                        </div>
+                                                                    ` : ''}
+                                                                    <div class="mt-1.5 h-1 bg-gray-700/50 rounded-full overflow-hidden">
+                                                                        <div
+                                                                            class="h-full rounded-full transition-all duration-500 ${
+                                                                                isLow ? 'bg-red-500/50' : 'bg-green-500/50'
+                                                                            }"
+                                                                            style="width: ${Math.min(100, Math.round((remaining / required) * 100))}%"
+                                                                        ></div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        `;
+                                                    }).join('');
+
+                                                    tooltipContent.innerHTML = `
+                                                        <div class="min-w-[280px] max-w-sm bg-gray-900/95 rounded-lg shadow-xl border border-gray-700/50">
+                                                            <div class="p-3 border-b border-gray-700/50">
+                                                                <div class="flex gap-2 items-center text-red-300">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                                                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                                                                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                                                    </svg>
+                                                                    <span class="font-medium">วัตถุดิบไม่เพียงพอ</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="p-3 space-y-2.5">
+                                                                ${ingredientsHtml}
+                                                            </div>
+                                                        </div>
+                                                        <div class="absolute w-3 h-3 bg-gray-900 rotate-45 -translate-x-1/2 left-1/2 -bottom-1.5"></div>
+                                                    `;
+
+                                                    document.body.appendChild(tooltipContent);
+
+                                                    const handleMouseLeave = () => {
+                                                        document.body.removeChild(tooltipContent);
+                                                        e.currentTarget.removeEventListener('mouseleave', handleMouseLeave);
+                                                    };
+
+                                                    e.currentTarget.addEventListener('mouseleave', handleMouseLeave);
+                                                }}
+                                                className="cursor-help"
+                                            >
+                                                <span className="text-white text-xs sm:text-sm font-medium px-4 sm:px-6 py-2 sm:py-2.5 bg-red-500/90 backdrop-blur-sm rounded-full shadow-lg border border-red-400/50 mt-3 sm:mt-4 transition-all duration-300 hover:bg-red-500/95 hover:border-red-400/60">
                                                     สินค้าหมด
                                                 </span>
                                             </div>
                                         </div>
-                                    </Tooltip>
+                                    </div>
                                 )}
                             </div>
-                            <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col">
+                            <div className="flex flex-col flex-1 p-2 sm:p-3 md:p-4">
                                 <h3 className="text-gray-900 text-sm sm:text-base font-medium mb-1 sm:mb-2 line-clamp-2 min-h-[2.5rem] sm:min-h-[3rem]">
                                     {product.name}
                                 </h3>
                                 <div className="space-y-0.5 sm:space-y-1 mt-auto">
                                     {product.sale_price && product.sale_price < product.price && (
-                                        <p className="text-xs sm:text-sm text-gray-400 line-through">
+                                        <p className="text-xs text-gray-400 line-through sm:text-sm">
                                             {formatPrice(product.price)}
                                         </p>
                                     )}
-                                    <p className="text-base sm:text-lg md:text-xl font-semibold text-blue-600">
+                                    <p className="text-base font-semibold text-blue-600 sm:text-lg md:text-xl">
                                         {formatPrice(product.sale_price || product.price)}
                                     </p>
                                 </div>

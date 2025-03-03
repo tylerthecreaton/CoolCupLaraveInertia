@@ -69,7 +69,7 @@ class IngredientsController extends Controller
             'unit_id' => $request->unit_id,
             'is_sweetness' => $request->is_sweetness,
             'image' => $imageName == '' ? '' : $imageName,
-            'expiration_date' => $request->expiration_date,
+            'expiration_date' => $request->expiration_date ?? now()->addYears(10),
             'lower_stock_alert' => $request->lower_stock_alert,
         ]);
 
