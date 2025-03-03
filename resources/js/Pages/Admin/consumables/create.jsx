@@ -11,7 +11,7 @@ export default function Create({ auth, units, errors }) {
     return (
         <AuthenticatedLayout user={auth.user}>
             <AdminLayout>
-                <Head title="Create Consumable" />
+                <Head title="เพิ่มวัตถุดิบสิ้นเปลือง" />
                 <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
                     <Breadcrumb aria-label="Default breadcrumb example">
                         <Breadcrumb.Item

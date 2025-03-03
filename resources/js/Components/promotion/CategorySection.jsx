@@ -2,7 +2,7 @@ import { Button, Tabs } from "flowbite-react";
 import { useState } from "react";
 import { HiUserCircle, HiPlus } from "react-icons/hi";
 import PromotionListing from "./PromotionListing";
-
+import { BiSolidDiscount } from "react-icons/bi";
 const typeNameMapping = {
     CATEGORY_DISCOUNT: "ส่วนลดตามหมวดหมู่",
     PERCENTAGE: "ส่วนลดเปอร์เซ็นต์",
@@ -32,7 +32,7 @@ export default function CategorySection({ promotions, types, onTypeChange }) {
                         <Tabs.Item
                             active={currentTab === 0}
                             title="โปรโมชั่นทั้งหมด"
-                            icon={HiUserCircle}
+                            icon={BiSolidDiscount}
                         >
                             <div className="bg-gray-50/50">
                                 <PromotionListing
@@ -48,7 +48,7 @@ export default function CategorySection({ promotions, types, onTypeChange }) {
                                     key={`type-${typeKey}`}
                                     active={currentTab === index + 1}
                                     title={typeValue}
-                                    icon={HiUserCircle}
+                                    icon={BiSolidDiscount}
                                     onClick={() => handleTabChange(index + 1)}
                                 >
                                     <div className="bg-gray-50/50">

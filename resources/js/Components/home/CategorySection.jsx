@@ -3,7 +3,7 @@ import { useState } from "react";
 import { HiUserCircle } from "react-icons/hi";
 import AddMenuModal from "./AddMenuModal";
 import ProductListing from "./ProductListing";
-
+import { FcIcons8Cup } from "react-icons/fc";
 export default function CategorySection({
     products,
     categories,
@@ -25,7 +25,7 @@ export default function CategorySection({
                         <Tabs.Item
                             active={currentTab === 0}
                             title="สินค้าขายดี"
-                            icon={HiUserCircle}
+                            icon={FcIcons8Cup}
                         >
                             <ProductListing
                                 products={products}
@@ -38,7 +38,7 @@ export default function CategorySection({
                                 key={category.id}
                                 active={currentTab === category.id}
                                 title={category.name}
-                                icon={HiUserCircle}
+                                icon={FcIcons8Cup}
                                 onClick={() => handleTabClick(category.id)}
                             >
                                 <ProductListing
@@ -51,7 +51,7 @@ export default function CategorySection({
                     </Tabs>
                     {/* <Button
                         type="button"
-                        className="absolute top-2 right-0"
+                        className="absolute right-0 top-2"
                         onClick={() => setShowAddMenuModal(true)}
                     >
                         เพิ่มเมนู

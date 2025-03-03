@@ -55,12 +55,12 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
                 </div>
             }
         >
-            <Head title="Dashboard" />
+            <Head title="หน้าหลัก | แดชบอร์ด" />
 
             <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     {/* Date Range Filters */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div className="overflow-hidden mb-6 bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6">
                             <DateRangePicker
                                 dateRange={dateRange}
@@ -78,24 +78,24 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
                     </div>
 
                     {/* Product Sales Bar Chart */}
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div className="overflow-hidden mb-6 bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6">
-                            <h3 className="text-lg font-semibold mb-4">กราฟการขายสินค้า</h3>
+                            <h3 className="mb-4 text-lg font-semibold">กราฟการขายสินค้า</h3>
                             <ProductSalesBarChart data={productSales} />
                         </div>
                     </div>
 
                     {/* Two Column Layout */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div className="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-2">
                         {/* Sales Chart */}
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                             <div className="p-6">
                                 <SalesChart data={hourlySales} />
                             </div>
                         </div>
 
                         {/* Expenses Chart */}
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                             <div className="p-6">
                                 <ExpensesChart data={expenses} />
                             </div>
@@ -103,9 +103,9 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
                     </div>
 
                     {/* Two Column Layout */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                         {/* Top Products */}
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                             <div className="p-6">
                                 <div className="grid grid-cols-1 gap-4 mb-4">
                                     <TopProducts products={topProducts} />
@@ -117,7 +117,7 @@ export default function Dashboard({ auth, salesData, topProducts, ingredients, e
                         </div>
 
                         {/* Inventory Status */}
-                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                             <div className="p-6">
                                 <InventoryStatus ingredients={ingredients} />
                             </div>

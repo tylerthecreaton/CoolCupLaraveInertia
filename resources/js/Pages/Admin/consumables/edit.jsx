@@ -16,7 +16,7 @@ export default function Edit({ auth, consumable, units ,errors}) {
             }
         >
             <AdminLayout>
-                <Head title="Edit Consumable" />
+                <Head title="แก้ไขวัตถุดิบสิ้นเปลือง" />
                 <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
                     <Breadcrumb aria-label="Default breadcrumb example">
                         <Breadcrumb.Item

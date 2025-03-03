@@ -15,7 +15,9 @@ import {
 import Swal from "sweetalert2";
 import { Link, router } from "@inertiajs/react";
 import { TbSlideshow } from "react-icons/tb";
-
+import { RiDashboard2Fill } from "react-icons/ri";
+import { IoStorefront } from "react-icons/io5";
+import { GiCarousel } from "react-icons/gi";
 export default function SidebarMenu() {
     const [isOpen, setIsOpen] = useState(() => {
         // Check if we're on a different page (not home)
@@ -96,14 +98,14 @@ export default function SidebarMenu() {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-cyan-500 to-cyan-600"></div>
 
             <div>
-                <div className="flex justify-center items-center h-20 bg-gradient-to-r from-cyan-600 to-cyan-700 relative overflow-hidden">
+                <div className="flex overflow-hidden relative justify-center items-center h-20 bg-gradient-to-r from-cyan-600 to-cyan-700">
                     {/* Animated background effect */}
                     <div className="absolute inset-0 opacity-20">
                         <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:200%_200%] animate-shimmer"></div>
                     </div>
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className="p-2 rounded-full hover:bg-white/20 transition-all duration-300 transform hover:scale-110 active:scale-95"
+                        className="p-2 rounded-full transition-all duration-300 transform hover:bg-white/20 hover:scale-110 active:scale-95"
                     >
                         <MdMenu
                             className={`text-3xl text-white transition-transform duration-500 ease-in-out ${isOpen ? "rotate-180" : "rotate-0"}`}
@@ -111,29 +113,29 @@ export default function SidebarMenu() {
                     </button>
                 </div>
 
-                <ul className="flex flex-col gap-1 py-4 px-2">
+                <ul className="flex flex-col gap-1 px-2 py-4">
                     <li>
                         <Link
                             href="/"
-                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
+                            className="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-300 hover:bg-cyan-50 hover:text-cyan-600 group"
                         >
-                            <MdApps className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            <IoStorefront className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
                             {isOpen && <MenuText>หน้าขาย</MenuText>}
                         </Link>
                     </li>
                     <li>
                         <Link
                             href={route("sale.dashboard")}
-                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
+                            className="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-300 hover:bg-cyan-50 hover:text-cyan-600 group"
                         >
-                            <MdDashboard className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            <RiDashboard2Fill className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
                             {isOpen && <MenuText>แดชบอร์ด</MenuText>}
                         </Link>
                     </li>
                     <li>
                         <Link
                             href={route("promotion.index")}
-                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
+                            className="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-300 hover:bg-cyan-50 hover:text-cyan-600 group"
                         >
                             <MdLocalOffer className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
                             {isOpen && <MenuText>โปรโมชั่น</MenuText>}
@@ -142,7 +144,7 @@ export default function SidebarMenu() {
                     <li>
                         <Link
                             href="/receipt-history"
-                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
+                            className="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-300 hover:bg-cyan-50 hover:text-cyan-600 group"
                         >
                             <MdHistory className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
                             {isOpen && <MenuText>ประวัติใบเสร็จ</MenuText>}
@@ -151,20 +153,20 @@ export default function SidebarMenu() {
                 </ul>
             </div>
             <div>
-                <ul className="flex flex-col gap-1 py-4 px-2">
+                <ul className="flex flex-col gap-1 px-2 py-4">
                     <li>
                         <Link
                             href="/client"
-                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
+                            className="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-300 hover:bg-cyan-50 hover:text-cyan-600 group"
                         >
-                            <TbSlideshow className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            <GiCarousel className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
                             {isOpen && <MenuText>Carousal</MenuText>}
                         </Link>
                     </li>
                     <li>
                         <Link
                             href="/member"
-                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
+                            className="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-300 hover:bg-cyan-50 hover:text-cyan-600 group"
                         >
                             <MdPerson className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
                             {isOpen && <MenuText>สมาชิก</MenuText>}
@@ -173,7 +175,7 @@ export default function SidebarMenu() {
                     <li>
                         <Link
                             href="/registermember"
-                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
+                            className="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-300 hover:bg-cyan-50 hover:text-cyan-600 group"
                         >
                             <MdPersonAdd className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
                             {isOpen && <MenuText>สมัครสมาชิก</MenuText>}
@@ -181,7 +183,7 @@ export default function SidebarMenu() {
                     </li>
                     <li>
                         <Link
-                            className="flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-cyan-50 text-gray-700 hover:text-cyan-600 group"
+                            className="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-300 hover:bg-cyan-50 hover:text-cyan-600 group"
                         >
                             <MdBook className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
                             {isOpen && <MenuText>แมนนวล</MenuText>}
@@ -191,9 +193,9 @@ export default function SidebarMenu() {
                         <button
                             type="button"
                             onClick={handleLogout}
-                            className="w-full flex items-center px-4 py-3 rounded-lg transition-all duration-300 hover:bg-red-50 text-gray-700 hover:text-red-600 group"
+                            className="flex items-center px-4 py-3 w-full text-gray-700 rounded-lg transition-all duration-300 hover:bg-red-50 hover:text-red-600 group"
                         >
-                            <MdExitToApp className={`text-2xl transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
+                            <MdExitToApp className={`text-2xl text-red-600 transition-transform duration-300 group-hover:scale-110 ${!isOpen && 'mx-auto'}`} />
                             {isOpen && <MenuText>ออกจากระบบ</MenuText>}
                         </button>
                     </li>

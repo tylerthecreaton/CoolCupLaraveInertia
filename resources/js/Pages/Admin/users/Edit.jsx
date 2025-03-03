@@ -14,7 +14,7 @@ export default function EditUser({ user, errors }) {
                 </h2>
             }
         >
-            <Head title="เพิ่มผู้ใช้งาน" />
+            <Head title="แก้ไขผู้ใช้งาน" />
             <div className="container px-2 py-3 mx-auto mt-5 sm:px-8">
                 <Breadcrumb aria-label="Default breadcrumb example">
                     <Breadcrumb.Item href="/dashboard" icon={HiHome}>
