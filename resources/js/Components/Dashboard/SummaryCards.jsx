@@ -81,14 +81,14 @@ export default function SummaryCards({ data }) {
             {cards.map((card, index) => {
                 const TrendIcon = getTrendIcon(card.trend);
                 const trendColor = getTrendColor(card.trend);
-                
+
                 return (
-                    <div 
-                        key={index} 
+                    <div
+                        key={index}
                         className="overflow-hidden relative bg-white rounded-xl shadow-sm transition-all duration-300 hover:shadow-lg hover:translate-y-[-2px]"
                     >
                         <div className="p-6">
-                            <div className="flex items-start justify-between">
+                            <div className="flex justify-between items-start">
                                 <div className={`flex-shrink-0 p-3 rounded-lg ${card.bgColor}`}>
                                     <card.icon className={`w-6 h-6 ${card.color}`} />
                                 </div>
@@ -111,11 +111,11 @@ export default function SummaryCards({ data }) {
                                 <div className="flex items-center">
                                     <span className={clsx(
                                         "text-xs font-medium mr-2 px-2.5 py-0.5 rounded",
-                                        card.trend > 0 ? "bg-green-100 text-green-800" : 
-                                        card.trend < 0 ? "bg-red-100 text-red-800" : 
+                                        card.trend > 0 ? "bg-green-100 text-green-800" :
+                                        card.trend < 0 ? "bg-red-100 text-red-800" :
                                         "bg-gray-100 text-gray-800"
                                     )}>
-                                        {card.trend !== 0 && (card.trend > 0 ? "+" : "")}
+                                        {card.trend !== 0 && (card.trend > 0 ? "+" : "-") }
                                         {Math.abs(card.trend)}%
                                     </span>
                                     <span className="text-sm text-gray-500">
