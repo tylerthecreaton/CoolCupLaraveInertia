@@ -2,9 +2,12 @@ import HeaderPanel from "@/Components/RegisterMember/HeaderPanel";
 import MainContent from "@/Components/RegisterMember/MainContent";
 import SidebarMenu from "@/Components/home/SidebarMenu";
 import StorefrontLayout from "@/Layouts/StorefrontLayout";
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import React from "react";
-export default function RegisterMember(errors) {
+
+export default function RegisterMember() {
+    const { errors } = usePage().props;
+    
     return (
         <StorefrontLayout>
             <main className="flex">

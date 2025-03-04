@@ -34,13 +34,13 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            "name" => "required|min:3|max:255|alpha",
+            "name" => "required|min:3|max:255|regex:/^[a-zA-Zก-๙\s\'\-\.]+$/",
             "phone_number" => "required|min:10",
             "birthdate" => "required",
         ];
         $message = [
             "name.required" => "กรุณากรอกชื่อ",
-            "name.alpha" => "ชื่อต้องเป็นตัวอักษรเท่านั้น",
+            "name.regex" => "ชื่อต้องเป็นตัวอักษรเท่านั้น",
             "name.min" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
             "name.max" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
             "phone_number.required" => "กรุณากรอกเบอร์โทร",
@@ -89,13 +89,13 @@ class CustomerController extends Controller
     public function update(Request $request, string $id)
     {
         $rules = [
-            "name" => "required|min:3|max:255|alpha",
+            "name" => "required|min:3|max:255|regex:/^[a-zA-Zก-๙\s\'\-\.]+$/",
             "phone_number" => "required|min:10",
             "birthdate" => "required",
         ];
         $message = [
             "name.required" => "กรุณากรอกชื่อ",
-            "name.alpha" => "ชื่อต้องเป็นตัวอักษรเท่านั้น",
+            "name.regex" => "ชื่อต้องเป็นตัวอักษรเท่านั้น",
             "name.min" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
             "name.max" => "ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร",
             "phone_number.required" => "กรุณากรอกเบอร์โทร",

@@ -97,8 +97,8 @@ const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
 CustomInput.displayName = 'CustomInput';
 
 export default function MainContent() {
-    const { flash } = usePage().props;
-    const { data, setData, post, processing, errors } = useForm({
+    const { flash, errors } = usePage().props;
+    const { data, setData, post, processing } = useForm({
         name: "",
         phone_number: "",
         birthdate: null,
@@ -282,7 +282,7 @@ export default function MainContent() {
                             />
                             {errors.name && (
                                 <span className="block mt-2 text-base text-red-500">
-                                    Oop!! {errors.name}
+                                    {errors.name}
                                 </span>
                             )}
                         </div>
@@ -323,7 +323,7 @@ export default function MainContent() {
                             </div>
                             {errors.phone_number && (
                                 <span className="block mt-2 text-base text-red-500">
-                                    Oop!! {errors.phone_number}
+                                    {errors.phone_number}
                                 </span>
                             )}
                         </div>

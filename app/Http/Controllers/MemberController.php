@@ -137,14 +137,14 @@ class MemberController extends Controller
     public function store(Request $request)
     {
         $rules = [
-            'name' => 'required|alpha|max:255|min:3',
+            'name' => 'required|min:3|max:255|regex:/^[a-zA-Zก-๙\s\'\-\.]+$/',
             'phone_number' => 'required|string|size:10',
             'birthdate' => 'required|date',
         ];
 
         $messages = [
             'name.required' => 'กรุณากรอกชื่อ',
-            'name.alpha' => 'ชื่อต้องเป็นตัวอักษรเท่านั้น',
+            'name.regex' => 'ชื่อต้องเป็นตัวอักษรเท่านั้น',
             'name.max' => 'ชื่อต้องมีความยาวอย่างน้อย 255 ตัวอักษร',
             'name.min' => 'ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร',
             'phone_number.required' => 'กรุณากรอกหมายเลขโทรศัพท์',
@@ -170,11 +170,23 @@ class MemberController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
+        $rules = [
+            'name' => 'required|regex:/^[a-zA-Zก-๙\s\'\-\.]+$/|max:255',
             'phone_number' => 'required|string|size:10',
             'birthdate' => 'required|date',
-        ]);
+        ];
+
+        $messages = [
+            'name.required' => 'กรุณากรอกชื่อ',
+            'name.regex' => 'ชื่อต้องเป็นตัวอักษรเท่านั้น',
+            'name.max' => 'ชื่อต้องมีความยาวอย่างน้อย 255 ตัวอักษร',
+            'name.min' => 'ชื่อต้องมีความยาวอย่างน้อย 3 ตัวอักษร',
+            'phone_number.required' => 'กรุณากรอกหมายเลขโทรศัพท์',
+            'phone_number.size' => 'หมายเลขโทรศัพท์ต้องมี 10 ตัว',
+            'birthdate.required' => 'กรุณากรอกวันเกิด',
+            'birthdate.date' => 'กรุณากรอกวันเกิดให้ถูกต้อง',
+        ];
+        $request->validate($rules, $messages);
 
         $customer = Customer::findOrFail($id);
 
