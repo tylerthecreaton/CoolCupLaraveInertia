@@ -272,7 +272,7 @@ export default function Create({ consumables }) {
                                         {data.map((item, index) => (
                                             <div
                                                 key={index}
-                                                className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm transition-shadow duration-200 hover:shadow"
+                                                className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm"
                                             >
                                                 <div className="flex justify-between items-center mb-4">
                                                     <h3 className="flex items-center text-lg font-semibold text-gray-900">
@@ -635,6 +635,17 @@ export default function Create({ consumables }) {
                                                 </div>
                                             </div>
                                         ))}
+                                    </div>
+
+                                    <div className="flex justify-center mt-6">
+                                        <button
+                                            type="button"
+                                            onClick={handleAddRow}
+                                            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg"
+                                        >
+                                            <HiPlus className="w-5 h-5" />
+                                            เพิ่มรายการ
+                                        </button>
                                     </div>
 
                                     <div className="flex gap-2 justify-end mt-4">

@@ -25,6 +25,11 @@ class ConsumableLotDetail extends Model
         return $this->belongsTo(ConsumableLot::class);
     }
 
+    public function consumable_lot()
+    {
+        return $this->belongsTo(ConsumableLot::class);
+    }
+
     public function consumable()
     {
         return $this->belongsTo(Consumable::class);
