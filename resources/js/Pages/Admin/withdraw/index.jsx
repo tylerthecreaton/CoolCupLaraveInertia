@@ -178,11 +178,6 @@ export default function Index({ auth, withdraws }) {
                                                                 >
                                                                     {Math.floor(item.quantity)} ชิ้น
                                                                 </Badge>
-                                                                <span className="text-sm">
-                                                                    {item.type === "ingredient" ?
-                                                                        item.ingredientLot?.details?.ingredient?.unit?.name :
-                                                                        item.consumableLot?.details?.consumable?.unit?.name}
-                                                                </span>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -278,8 +273,8 @@ export default function Index({ auth, withdraws }) {
                 >
                     <Modal.Header className="border-b border-gray-200 !p-6 bg-gradient-to-r from-blue-50 to-white">
                         <div className="flex gap-3 items-center">
-                            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md">
-                                <FaBoxes className="w-6 h-6 text-white" />
+                            <div className="p-2 bg-blue-100 rounded-lg">
+                                <FaBoxes className="w-6 h-6 text-blue-600" />
                             </div>
                             <div>
                                 <h3 className="text-2xl font-bold text-gray-900">รายละเอียดการเบิก</h3>
@@ -339,44 +334,44 @@ export default function Index({ auth, withdraws }) {
                                         <h4 className="font-semibold text-gray-900">รายการที่เบิก</h4>
                                     </div>
                                     <div className="space-y-3">
-                                        <div className="p-4 bg-white rounded-lg border border-gray-200">
-                                            <Table>
-                                                <Table.Head>
-                                                    <Table.HeadCell>รายการ</Table.HeadCell>
-                                                    <Table.HeadCell>จำนวน</Table.HeadCell>
-                                                    {/* <Table.HeadCell>หน่วย</Table.HeadCell> */}
-                                                </Table.Head>
-                                                <Table.Body>
-                                                    {selectedWithdraw.items.map((item, index) => (
-                                                        <Table.Row key={index}>
-                                                            <Table.Cell>
-                                                                <div className="flex gap-2 items-center">
-                                                                    <Badge
-                                                                        color={item.type === "ingredient" ? "info" : "warning"}
-                                                                        className="mr-2"
-                                                                    >
-                                                                        {item.type === "ingredient" ? "วัตถุดิบ" : "วัตถุดิบสิ้นเปลือง"}
-                                                                    </Badge>
-                                                                    <span className="font-medium">
-                                                                        {item.transformer?.name}
-                                                                    </span>
-                                                                </div>
-                                                            </Table.Cell>
-                                                            <Table.Cell>
-                                                                <Badge color="success" className="px-2 py-1">
-                                                                    {item.quantity}
-                                                                </Badge>
-                                                            </Table.Cell>
-                                                            <Table.Cell>
-                                                                {item.type === "ingredient" ?
-                                                                    item.ingredientLot?.details?.ingredient?.unit?.name :
-                                                                    item.consumableLot?.details?.consumable?.unit?.name}
-                                                            </Table.Cell>
-                                                        </Table.Row>
-                                                    ))}
-                                                </Table.Body>
-                                            </Table>
-                                        </div>
+                                        {selectedWithdraw.items.map((item, index) => (
+                                            <div key={index} className="p-4 bg-white rounded-lg border border-gray-200">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="space-y-2">
+                                                        <div className="flex gap-2 items-center">
+                                                            <Badge
+                                                                color={item.type === "ingredient" ? "info" : "warning"}
+                                                                className="px-2.5 py-0.5"
+                                                            >
+                                                                {item.type === "ingredient" ? "วัตถุดิบ" : "วัตถุดิบสิ้นเปลือง"}
+                                                            </Badge>
+                                                            <span className="font-medium text-gray-900">
+                                                                {item.transformer?.name}
+                                                            </span>
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <p className="text-sm text-gray-600">
+                                                                จำนวน: {item.quantity} ชิ้น{item.transformer?.unit?.name}
+                                                            </p>
+                                                            <div className="text-sm text-gray-600">
+                                                                <p>ชื่อวัตถุดิบ: {item.type === "ingredient"
+                                                                    ? item.ingredient_lot?.details?.[0]?.ingredient?.name
+                                                                    : item.consumable_lot?.details?.[0]?.consumable?.name || "-"}
+                                                                </p>
+                                                                <p>Lot ID: #{item.type === "ingredient"
+                                                                    ? item.ingredient_lot?.id
+                                                                    : item.consumable_lot?.id || "-"}
+                                                                </p>
+                                                                <p>วันที่เบิก: {formatThaiDate(selectedWithdraw.created_at)}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <Badge color={getStatusColor(item.status)}>
+                                                        {item.status}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>

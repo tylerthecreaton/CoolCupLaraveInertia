@@ -474,12 +474,12 @@ export default function Index({ auth, lots }) {
                                                     {detail.ingredient?.unit?.name || ""}
                                                 </Table.Cell>
                                                 <Table.Cell>
-                                                    {detail.cost_per_unit.toLocaleString()}{" "}
+                                                    {detail.price.toLocaleString()}{" "}
                                                     บาท
                                                 </Table.Cell>
                                                 <Table.Cell>
                                                     {(
-                                                        detail.cost_per_unit *
+                                                        detail.price *
                                                         detail.quantity
                                                     ).toLocaleString()}{" "}
                                                     บาท

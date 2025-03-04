@@ -19,6 +19,8 @@ class WithdrawController extends Controller
     public function index()
     {
         $withdraws = Withdraw::with([
+            'items.ingredientLotDetail.ingredient_lot',
+            'items.consumableLotDetail.consumable_lot',
             'items.ingredientLot.details.ingredient',
             'items.consumableLot.details.consumable',
             'items.transformer',
@@ -140,7 +142,15 @@ class WithdrawController extends Controller
 
     public function show($id)
     {
-        $withdraw = Withdraw::findOrFail($id);
+        $withdraw = Withdraw::with([
+            'items.ingredientLotDetail.ingredient_lot',
+            'items.consumableLotDetail.consumable_lot',
+            'items.ingredientLot.details.ingredient',
+            'items.consumableLot.details.consumable',
+            'items.transformer',
+            'user'
+        ])
+            ->findOrFail($id);
         return Inertia::render('Admin/withdraw/show', compact('withdraw'));
     }
 
@@ -247,6 +257,14 @@ class WithdrawController extends Controller
                                     'note' => "เบิกวัตถุดิบจาก Lot #{$lot->id}" . ($transformer ? " แปลงหน่วยด้วย {$transformer->name}" : "")
                                 ]);
 
+                                $withdrawItem = new WithdrawItem([
+                                    'type' => $item['type'],
+                                    'quantity' => $item['quantity'],
+                                    'transformer_id' => $item['transformer_id'] ?? null,
+                                    'ingredient_lot_detail_id' => $item['item_id']
+                                ]);
+
+                                $withdrawItem->ingredient_lot_id = $lot->id;
                                 $withdrawItem->unit = optional($ingredient->unit)->name;
 
                                 // Save withdraw item
@@ -254,7 +272,8 @@ class WithdrawController extends Controller
                                     $withdraw->items()->save($withdrawItem);
                                     Log::info('Saved ingredient withdraw item successfully:', [
                                         'withdraw_id' => $withdraw->id,
-                                        'withdraw_item_id' => $withdrawItem->id
+                                        'withdraw_item_id' => $withdrawItem->id,
+                                        'ingredient_lot_detail_id' => $item['item_id']
                                     ]);
                                 } catch (\Exception $e) {
                                     Log::error('Failed to save ingredient withdraw item:', [
@@ -321,7 +340,8 @@ class WithdrawController extends Controller
                                 $withdrawItem = new WithdrawItem([
                                     'type' => $item['type'],
                                     'quantity' => $item['quantity'],
-                                    'transformer_id' => $item['transformer_id'] ?? null
+                                    'transformer_id' => $item['transformer_id'] ?? null,
+                                    'consumable_lot_detail_id' => $item['item_id']
                                 ]);
 
                                 $withdrawItem->consumable_lot_id = $lot->id;
@@ -332,7 +352,8 @@ class WithdrawController extends Controller
                                     $withdraw->items()->save($withdrawItem);
                                     Log::info('Saved consumable withdraw item successfully:', [
                                         'withdraw_id' => $withdraw->id,
-                                        'withdraw_item_id' => $withdrawItem->id
+                                        'withdraw_item_id' => $withdrawItem->id,
+                                        'consumable_lot_detail_id' => $item['item_id']
                                     ]);
                                 } catch (\Exception $e) {
                                     Log::error('Failed to save consumable withdraw item:', [
@@ -371,6 +392,8 @@ class WithdrawController extends Controller
         try {
             DB::transaction(function () use ($id) {
                 $withdraw = Withdraw::with([
+                    'items.ingredientLotDetail.ingredient_lot',
+                    'items.consumableLotDetail.consumable_lot',
                     'items.ingredientLot.details.ingredient',
                     'items.consumableLot.details.consumable'
                 ])

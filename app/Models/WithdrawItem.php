@@ -8,6 +8,8 @@ use App\Models\Withdraw;
 use App\Models\IngredientLot;
 use App\Models\ConsumableLot;
 use App\Models\Transformer;
+use App\Models\IngredientLotDetail;
+use App\Models\ConsumableLotDetail;
 
 class WithdrawItem extends Model
 {
@@ -20,7 +22,9 @@ class WithdrawItem extends Model
         'consumable_lot_id',
         'transformer_id',
         'quantity',
-        'unit'
+        'unit',
+        'ingredient_lot_detail_id',
+        'consumable_lot_detail_id'
     ];
 
     public function withdraw()
@@ -41,5 +45,15 @@ class WithdrawItem extends Model
     public function transformer()
     {
         return $this->belongsTo(Transformer::class);
+    }
+
+    public function ingredientLotDetail()
+    {
+        return $this->hasOne(IngredientLotDetail::class, 'id', 'ingredient_lot_detail_id');
+    }
+
+    public function consumableLotDetail()
+    {
+        return $this->hasOne(ConsumableLotDetail::class, 'id', 'consumable_lot_detail_id');
     }
 }

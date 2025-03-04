@@ -26,7 +26,7 @@ export default function ConsumableLotDetail({ lot }) {
                             ราคาต่อหน่วย
                         </Table.HeadCell>
                         <Table.HeadCell className="bg-gray-50">
-                            จำนวนต่อแพค
+                            ปริมาณต่อแพค
                         </Table.HeadCell>
                         <Table.HeadCell className="bg-gray-50">
                             ราคา(แพคเกจจิ้ง)
@@ -34,9 +34,9 @@ export default function ConsumableLotDetail({ lot }) {
                         <Table.HeadCell className="bg-gray-50">
                             ผู้จำหน่าย
                         </Table.HeadCell>
-                        <Table.HeadCell className="bg-gray-50">
+                        {/* <Table.HeadCell className="bg-gray-50">
                             หมายเหตุ
-                        </Table.HeadCell>
+                        </Table.HeadCell> */}
                     </Table.Head>
                     <Table.Body className="divide-y">
                         {lot.details?.map((detail) => (
@@ -56,7 +56,7 @@ export default function ConsumableLotDetail({ lot }) {
                                 </Table.Cell>
                                 <Table.Cell>
                                     <span className="font-medium">
-                                        {formatNumber(detail.quantity * detail.per_pack)}{" "}
+                                        {formatNumber(detail.quantity)}{" "}
                                         {detail.consumable?.unit || '-'}
                                     </span>
                                 </Table.Cell>
@@ -79,9 +79,9 @@ export default function ConsumableLotDetail({ lot }) {
                                 <Table.Cell>
                                     {detail.supplier || '-'}
                                 </Table.Cell>
-                                <Table.Cell>
+                                {/* <Table.Cell>
                                     {detail.note || '-'}
-                                </Table.Cell>
+                                </Table.Cell> */}
                             </Table.Row>
                         ))}
                     </Table.Body>
