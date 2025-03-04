@@ -137,11 +137,16 @@ class OrderController extends Controller
     public function uploadSlip(Request $request)
     {
         $rules = [
-            'slip_image' => 'required|image|mimes:jpeg,png,jpg|max:4096',
+            'slip_image' => 'required|image|max:4096',
             'order_id' => 'required|exists:orders,id'
         ];
+        $messages = [
+            'slip_image.required' => 'กรุณาอัพโหลดสลิปการชำระเงิน',
+            'slip_image.image' => 'ไฟล์ที่อัพโหลดต้องเป็นไฟล์รูปภาพ',
+            'slip_image.max' => 'ไฟล์รูปภาพต้องมีขนาดไม่เกิน 4MB',
+        ];
 
-        $request->validate($rules);
+        $request->validate($rules, $messages);
 
     $order = Order::findOrFail($request->order_id);
 

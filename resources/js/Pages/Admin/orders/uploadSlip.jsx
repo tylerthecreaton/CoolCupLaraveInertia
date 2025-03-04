@@ -127,7 +127,7 @@ export default function UploadSlip({ order }) {
                                                 <p className="pl-1">หรือลากไฟล์มาวาง</p>
                                             </div>
                                             <p className="text-xs text-gray-500">
-                                                PNG, JPG, JPEG ขนาดไม่เกิน 2MB
+                                                PNG, JPG, JPEG ขนาดไม่เกิน 4MB
                                             </p>
                                         </div>
                                     </div>
