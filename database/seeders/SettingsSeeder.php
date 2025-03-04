@@ -62,6 +62,13 @@ class SettingsSeeder extends Seeder
                 'type' => 'system',
                 'comment' => 'เลขประจำตัวผู้เสียภาษี'
             ],
+            [
+                'key'=> 'minimum_consumable_stock_alert',
+                'value'=> '100',
+                'description' => 'จำนวนขั้นต่ำของวัตถุดิบสิ้นเปลืองที่จะแจ้งเตือน',
+                'type' => 'system',
+                'comment' => 'Default minimum stock level for consumables alerts'
+            ]
         ];
         Setting::insert($settings);
     }

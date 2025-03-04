@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ingredient;
 use App\Models\IngredientLot;
 use App\Models\Setting;
+use App\Models\Consumable;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,7 +19,7 @@ class NotificationController extends Controller
 
     public function index()
     {
-        $notifications = $this->getIngredientsNotifications();
+        $notifications = $this->getAllNotifications();
 
         return Inertia::render('Notifications/Index', [
             'auth' => [
@@ -44,8 +45,24 @@ class NotificationController extends Controller
 
     public function getNotifications()
     {
-        $notifications = $this->getIngredientsNotifications();
+        $notifications = $this->getAllNotifications();
         return response()->json($notifications);
+    }
+
+    private function getAllNotifications(): array
+    {
+        $notifications = [
+            ...$this->getIngredientsNotifications()['data'],
+            ...$this->getConsumablesNotifications()['data']
+        ];
+
+        // Sort notifications by id to maintain consistent order
+        usort($notifications, fn($a, $b) => $a->id - $b->id);
+
+        return [
+            'data' => $notifications,
+            'total' => count($notifications)
+        ];
     }
 
     private function getIngredientsNotifications(): array
@@ -62,6 +79,43 @@ class NotificationController extends Controller
             'data' => $notifications,
             'total' => count($notifications)
         ];
+    }
+
+    private function getConsumablesNotifications(): array
+    {
+        $notifications = [
+            ...$this->createLessStockConsumablesNotifications()
+        ];
+
+        return [
+            'data' => $notifications,
+            'total' => count($notifications)
+        ];
+    }
+
+    private function createLessStockConsumablesNotifications(): array
+    {
+        $consumables = $this->getLessStockConsumables();
+        $notifications = [];
+        $minimumStock = $this->setting->where('key', 'minimum_consumable_stock_alert')->first()?->value ?? 100;
+
+        foreach ($consumables as $index => $consumable) {
+            $notifications[] = new Notification(
+                type: "low_stock_consumable",
+                title: 'แจ้งเตือนวัตถุดิบสิ้นเปลืองใกล้หมด',
+                message: "วัตถุดิบสิ้นเปลือง {$consumable->name} เหลือน้อยกว่าจำนวนขั้นต่ำ ({$consumable->quantity} {$consumable->unit?->abbreviation}) กรุณาเบิกวัตถุดิบที่หน้าเบิกวัตถุดิบสิ้นเปลือง",
+                data: array_merge($consumable->toArray(), [
+                    'minimum_stock' => $minimumStock,
+                    'current_stock' => $consumable->quantity,
+                    'unit' => $consumable->unit?->abbreviation
+                ]),
+                url: route('admin.consumables.index'),
+                color: 'warning',
+                id: $this->generateNotificationId('low_stock_consumable', $index)
+            );
+        }
+
+        return $notifications;
     }
 
     private function createLessStockNotifications(): array
@@ -82,7 +136,7 @@ class NotificationController extends Controller
                 ]),
                 url: route('admin.withdraw.create'),
                 color: 'warning',
-                id: $index + 1
+                id: $this->generateNotificationId('low_stock', $index)
             );
         }
 
@@ -116,12 +170,21 @@ class NotificationController extends Controller
                         ? route('admin.ingredient-lots.expired.index', $detail->ingredient_id)
                         : route('admin.ingredient-lots.create', ['ingredient_id' => $detail->ingredient_id]),
                     color: $isExpired ? 'error' : 'danger',
-                    id: count($notifications) + $index + 1
+                    id: $this->generateNotificationId($isExpired ? 'expired' : 'expiring', $index)
                 );
             }
         }
 
         return $notifications;
+    }
+
+    private function getLessStockConsumables()
+    {
+        $minimumStock = $this->setting->where('key', 'minimum_consumable_stock_alert')->first()?->value ?? 100;
+        return Consumable::with('unit')
+            ->where('quantity', '<=', $minimumStock)
+            ->orderBy('quantity', 'asc')
+            ->get();
     }
 
     private function getLessStockIngredients()
@@ -156,7 +219,8 @@ class NotificationController extends Controller
         $typeMultiplier = match ($type) {
             'low_stock' => 1000,
             'expired' => 2000,
-            'expiring_soon' => 3000,
+            'expiring' => 3000,
+            'low_stock_consumable' => 4000,
             default => 0
         };
 
