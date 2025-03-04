@@ -1,5 +1,5 @@
 import React from 'react';
-import { CurrencyDollarIcon, ShoppingCartIcon, ArrowTrendingUpIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { CurrencyDollarIcon, ShoppingCartIcon, ArrowTrendingUpIcon, InformationCircleIcon, BanknotesIcon } from '@heroicons/react/24/outline';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/20/solid';
 import { Tooltip } from 'flowbite-react';
 import clsx from 'clsx';
@@ -57,6 +57,16 @@ export default function SummaryCards({ data }) {
             tooltip: 'แสดง % ความแตกต่างเทียบกับช่วงก่อนหน้า โดยใช้ค่าที่มากกว่าเป็นฐานในการคำนวณ'
         },
         {
+            title: 'กำไรสุทธิ',
+            value: formatCurrency(data?.net_profit || 0),
+            subText: `(VAT ${data?.settings?.tax_rate || 7}%)`,
+            icon: BanknotesIcon,
+            color: 'text-green-600',
+            bgColor: 'bg-green-100',
+            trend: data?.profit_trend,
+            tooltip: 'กำไรสุทธิ = (รายได้จากการขาย - ต้นทุนสินค้าที่ขาย - ค่าใช้จ่ายอื่น) × (1 - อัตราภาษี)'
+        },
+        {
             title: 'จำนวนออเดอร์',
             value: data?.total_orders || 0,
             icon: ShoppingCartIcon,
@@ -77,7 +87,7 @@ export default function SummaryCards({ data }) {
     ];
 
     return (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {cards.map((card, index) => {
                 const TrendIcon = getTrendIcon(card.trend);
                 const trendColor = getTrendColor(card.trend);

@@ -30,31 +30,31 @@ class DashboardController extends Controller
                 $previousStartDate = now()->subDay()->startOfDay();
                 $previousEndDate = now()->subDay()->endOfDay();
                 break;
-            
+
             case 'yesterday':
                 // เปรียบเทียบกับเมื่อวานซืน
                 $previousStartDate = now()->subDays(2)->startOfDay();
                 $previousEndDate = now()->subDays(2)->endOfDay();
                 break;
-            
+
             case 'thisWeek':
                 // เปรียบเทียบกับสัปดาห์ที่แล้ว
                 $previousStartDate = now()->subWeek()->startOfWeek();
                 $previousEndDate = now()->subWeek()->endOfWeek();
                 break;
-            
+
             case 'thisMonth':
                 // เปรียบเทียบกับเดือนที่แล้ว
                 $previousStartDate = now()->subMonth()->startOfMonth();
                 $previousEndDate = now()->subMonth()->endOfMonth();
                 break;
-            
+
             case 'thisYear':
                 // เปรียบเทียบกับปีที่แล้ว
                 $previousStartDate = now()->subYear()->startOfYear();
                 $previousEndDate = now()->subYear()->endOfYear();
                 break;
-            
+
             default:
                 // สำหรับช่วงเวลาที่กำหนดเอง ใช้ช่วงเวลาเท่ากันย้อนหลังไป
                 $periodDiff = $endDate->diffInSeconds($startDate);
@@ -62,28 +62,45 @@ class DashboardController extends Controller
                 $previousStartDate = (clone $previousEndDate)->subSeconds($periodDiff);
         }
 
-        // Get VAT rate from settings
-        $vatRate = Setting::where('key', 'vat_rate')->value('value') ?? 7;
+        // Get VAT rate and tax rate from settings with proper type casting
+        $vatRate = (float) (Setting::where('key', 'vat_rate')->value('value') ?? 7);
+        $taxRate = (float) (Setting::where('key', 'tax_rate')->value('value') ?? 7);
 
-        // Current period sales data
-        $currentSalesData = Order::whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'completed')
+        // Validate tax rate is within reasonable bounds
+        $taxRate = max(0, min(100, $taxRate));
+
+        // Current period sales data with cost of goods sold
+        $currentSalesData = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->join('products', 'order_details.product_id', '=', 'products.id')
+            ->whereBetween('orders.created_at', [$startDate, $endDate])
+            ->where('orders.status', 'completed')
             ->select(
-                DB::raw('COALESCE(SUM(total_amount), 0) as total_sales'),
-                DB::raw('COUNT(*) as total_orders'),
-                DB::raw('COALESCE(AVG(total_amount), 0) as average_order_value')
+                DB::raw('COALESCE(SUM(order_details.price * order_details.quantity), 0) as total_sales'),
+                DB::raw('COALESCE(SUM(products.cost_price * order_details.quantity), 0) as cost_of_goods_sold'),
+                DB::raw('COUNT(DISTINCT orders.id) as total_orders'),
+                DB::raw('COALESCE(AVG(order_details.price * order_details.quantity), 0) as average_order_value')
             )
             ->first();
 
-        // Previous period sales data
-        $previousSalesData = Order::whereBetween('created_at', [$previousStartDate, $previousEndDate])
-            ->where('status', 'completed')
+        // Previous period sales data with cost of goods sold
+        $previousSalesData = Order::join('order_details', 'orders.id', '=', 'order_details.order_id')
+            ->join('products', 'order_details.product_id', '=', 'products.id')
+            ->whereBetween('orders.created_at', [$previousStartDate, $previousEndDate])
+            ->where('orders.status', 'completed')
             ->select(
-                DB::raw('COALESCE(SUM(total_amount), 0) as total_sales'),
-                DB::raw('COUNT(*) as total_orders'),
-                DB::raw('COALESCE(AVG(total_amount), 0) as average_order_value')
+                DB::raw('COALESCE(SUM(order_details.price * order_details.quantity), 0) as total_sales'),
+                DB::raw('COALESCE(SUM(products.cost_price * order_details.quantity), 0) as cost_of_goods_sold'),
+                DB::raw('COUNT(DISTINCT orders.id) as total_orders'),
+                DB::raw('COALESCE(AVG(order_details.price * order_details.quantity), 0) as average_order_value')
             )
             ->first();
+
+        // Get other expenses for the period
+        $currentExpenses = Expense::whereBetween('created_at', [$startDate, $endDate])
+            ->sum('amount') ?? 0;
+
+        $previousExpenses = Expense::whereBetween('created_at', [$previousStartDate, $previousEndDate])
+            ->sum('amount') ?? 0;
 
         // แปลงค่าให้เป็นตัวเลขและป้องกันค่า null
         $currentSales = (float) $currentSalesData->total_sales;
@@ -92,67 +109,103 @@ class DashboardController extends Controller
         $previousOrders = (int) $previousSalesData->total_orders;
         $currentAvg = (float) $currentSalesData->average_order_value;
         $previousAvg = (float) $previousSalesData->average_order_value;
+        $currentCostOfGoodsSold = (float) $currentSalesData->cost_of_goods_sold;
+        $previousCostOfGoodsSold = (float) $previousSalesData->cost_of_goods_sold;
 
-        // Debug logging
-        Log::info('Sales Trend Calculation', [
-            'Current Sales' => $currentSales,
-            'Previous Sales' => $previousSales,
-            'Date Range' => $dateRange,
-            'Current Date' => [
-                'Start' => $startDate->format('Y-m-d H:i:s'),
-                'End' => $endDate->format('Y-m-d H:i:s')
+        // Cast expenses to float to ensure proper calculation
+        $currentExpenses = (float) $currentExpenses;
+        $previousExpenses = (float) $previousExpenses;
+
+        // Calculate current and previous net profit
+        // กำไรสุทธิ = (รายได้จากการขาย - ต้นทุนสินค้าที่ขาย - ค่าใช้จ่ายอื่น) × (1 - อัตราภาษี/100)
+        $currentGrossProfit = $currentSales - $currentCostOfGoodsSold;
+        $currentProfitBeforeTax = $currentGrossProfit - $currentExpenses;
+        $currentNetProfit = $currentProfitBeforeTax > 0 
+            ? $currentProfitBeforeTax * (1 - ($taxRate / 100))
+            : $currentProfitBeforeTax;
+
+        $previousGrossProfit = $previousSales - $previousCostOfGoodsSold;
+        $previousProfitBeforeTax = $previousGrossProfit - $previousExpenses;
+        $previousNetProfit = $previousProfitBeforeTax > 0
+            ? $previousProfitBeforeTax * (1 - ($taxRate / 100))
+            : $previousProfitBeforeTax;
+
+        // Debug logging for profit calculation with more detail
+        Log::info('Net Profit Calculation', [
+            'Current Period' => [
+                'Sales' => $currentSales,
+                'Cost of Goods' => $currentCostOfGoodsSold,
+                'Gross Profit' => $currentGrossProfit,
+                'Expenses' => $currentExpenses,
+                'Profit Before Tax' => $currentProfitBeforeTax,
+                'Tax Rate' => $taxRate,
+                'Net Profit' => $currentNetProfit
             ],
-            'Previous Date' => [
-                'Start' => $previousStartDate->format('Y-m-d H:i:s'),
-                'End' => $previousEndDate->format('Y-m-d H:i:s')
+            'Previous Period' => [
+                'Sales' => $previousSales,
+                'Cost of Goods' => $previousCostOfGoodsSold,
+                'Gross Profit' => $previousGrossProfit,
+                'Expenses' => $previousExpenses,
+                'Profit Before Tax' => $previousProfitBeforeTax,
+                'Net Profit' => $previousNetProfit
             ]
         ]);
 
         // Calculate trends
         $calculateTrend = function($current, $previous) {
+            // ถ้าทั้งค่าปัจจุบันและค่าก่อนหน้าเป็น 0 ให้คืนค่า 0
             if ($current == 0 && $previous == 0) return 0;
             
-            // ใช้ค่าที่มากกว่าเป็นฐานในการคำนวณ
-            $baseValue = max($current, $previous);
-            
-            // คำนวณความแตกต่าง
-            $difference = $current - $previous;
-            
-            // คำนวณ % ความแตกต่าง
-            $percentDiff = ($difference / $baseValue) * 100;
+            // คำนวณเปอร์เซ็นต์การเปลี่ยนแปลง
+            if ($previous != 0) {
+                // ถ้าค่าก่อนหน้าไม่เป็น 0 ใช้สูตรปกติ
+                $percentDiff = (($current - $previous) / abs($previous)) * 100;
+            } else {
+                // ถ้าค่าก่อนหน้าเป็น 0
+                if ($current > 0) {
+                    $percentDiff = 100; // เพิ่มขึ้น 100%
+                } else {
+                    $percentDiff = 0; // ไม่มีการเปลี่ยนแปลง
+                }
+            }
 
             // Debug logging
             Log::info('Trend Calculation', [
                 'Current' => $current,
                 'Previous' => $previous,
-                'Base Value' => $baseValue,
-                'Difference' => $difference,
                 'Percent Diff' => $percentDiff
             ]);
-            
+
             return round($percentDiff, 1);
         };
 
         $salesTrend = $calculateTrend($currentSales, $previousSales);
         $ordersTrend = $calculateTrend($currentOrders, $previousOrders);
         $avgTrend = $calculateTrend($currentAvg, $previousAvg);
+        $profitTrend = $calculateTrend($currentNetProfit, $previousNetProfit);
 
         // Debug logging
         Log::info('Final Trends', [
             'Sales Trend' => $salesTrend,
             'Orders Trend' => $ordersTrend,
-            'Average Trend' => $avgTrend
+            'Average Trend' => $avgTrend,
+            'Profit Trend' => $profitTrend
         ]);
 
         $salesData = [
             'total_sales' => $currentSales,
             'total_orders' => $currentOrders,
             'average_order_value' => $currentAvg,
+            'cost_of_goods_sold' => $currentCostOfGoodsSold,
+            'other_expenses' => $currentExpenses,
+            'net_profit' => $currentNetProfit,
             'sales_trend' => $salesTrend,
             'orders_trend' => $ordersTrend,
             'avg_order_trend' => $avgTrend,
+            'profit_trend' => $profitTrend,
             'settings' => [
-                'vat_rate' => $vatRate
+                'vat_rate' => $vatRate,
+                'tax_rate' => $taxRate
             ]
         ];
 
@@ -242,7 +295,7 @@ class DashboardController extends Controller
 
         // Calculate total expenses
         $totalExpenses = $expenses->sum('total_amount');
-        
+
         // Calculate percentages
         $expenses = $expenses->map(function($expense) use ($totalExpenses) {
             return [
