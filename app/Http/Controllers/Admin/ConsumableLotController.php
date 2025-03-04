@@ -213,10 +213,10 @@ class ConsumableLotController extends Controller
                 $lot->delete();
             });
 
-            return response()->json(['message' => 'ลบ Lot เรียบร้อยแล้ว']);
+            return redirect()->back()->with('success', 'ลบ Lot เรียบร้อยแล้ว');
         } catch (\Exception $e) {
             Log::error('Error deleting lot: ' . $e->getMessage());
-            return response()->json(['error' => 'ไม่สามารถลบ Lot ได้'], 500);
+            return redirect()->back()->with('error', 'ไม่สามารถลบ Lot ได้');
         }
     }
 
@@ -242,10 +242,10 @@ class ConsumableLotController extends Controller
                 $lot->delete();
             });
 
-            return response()->json(['message' => 'คืนค่า Lot เรียบร้อยแล้ว']);
+            return redirect()->back()->with('success', 'คืนค่า Lot เรียบร้อยแล้ว');
         } catch (\Exception $e) {
             Log::error('Error reverting lot: ' . $e->getMessage());
-            return response()->json(['error' => 'ไม่สามารถคืนค่า Lot ได้'], 500);
+            return redirect()->back()->with('error', 'ไม่สามารถคืนค่า Lot ได้');
         }
     }
 }

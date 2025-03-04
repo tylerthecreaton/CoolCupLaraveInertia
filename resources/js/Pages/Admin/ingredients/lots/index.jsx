@@ -61,26 +61,33 @@ export default function Index({ auth, lots }) {
             cancelButtonText: "ยกเลิก",
         }).then((result) => {
             if (result.isConfirmed) {
+                Swal.fire({
+                    title: "กำลังดำเนินการ...",
+                    text: "กรุณารอสักครู่",
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+                
                 router.delete(route("admin.ingredient-lots.revert", lotId), {
                     preserveScroll: true,
-                    onBefore: () => {
-                        Swal.fire({
-                            title: "กำลังดำเนินการ...",
-                            text: "กรุณารอสักครู่",
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            },
-                        });
-                    },
-                    onSuccess: () => {
-                        Swal.fire({
-                            title: "สำเร็จ!",
-                            text: "คืนค่า Lot เรียบร้อยแล้ว",
-                            icon: "success",
-                            timer: 1500,
-                        });
+                    onSuccess: (page) => {
+                        if (page.props.flash.success) {
+                            Swal.fire({
+                                title: "สำเร็จ!",
+                                text: page.props.flash.success,
+                                icon: "success",
+                                timer: 1500,
+                            });
+                        } else if (page.props.flash.error) {
+                            Swal.fire({
+                                title: "เกิดข้อผิดพลาด!",
+                                text: page.props.flash.error,
+                                icon: "error",
+                            });
+                        }
                     },
                     onError: (errors) => {
                         Swal.fire({
@@ -151,26 +158,33 @@ export default function Index({ auth, lots }) {
             cancelButtonText: "ยกเลิก",
         }).then((result) => {
             if (result.isConfirmed) {
+                Swal.fire({
+                    title: "กำลังดำเนินการ...",
+                    text: "กรุณารอสักครู่",
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+                
                 router.delete(route("admin.ingredient-lots.destroy", lotId), {
                     preserveScroll: true,
-                    onBefore: () => {
-                        Swal.fire({
-                            title: "กำลังดำเนินการ...",
-                            text: "กรุณารอสักครู่",
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            },
-                        });
-                    },
-                    onSuccess: () => {
-                        Swal.fire({
-                            title: "สำเร็จ!",
-                            text: "ลบ Lot เรียบร้อยแล้ว",
-                            icon: "success",
-                            timer: 1500,
-                        });
+                    onSuccess: (page) => {
+                        if (page.props.flash.success) {
+                            Swal.fire({
+                                title: "สำเร็จ!",
+                                text: page.props.flash.success,
+                                icon: "success",
+                                timer: 1500,
+                            });
+                        } else if (page.props.flash.error) {
+                            Swal.fire({
+                                title: "เกิดข้อผิดพลาด!",
+                                text: page.props.flash.error,
+                                icon: "error",
+                            });
+                        }
                     },
                     onError: (errors) => {
                         Swal.fire({

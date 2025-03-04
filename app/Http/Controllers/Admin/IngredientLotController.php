@@ -218,10 +218,10 @@ class IngredientLotController extends Controller
                 $lot->delete();
             });
 
-            return response()->json(['message' => 'ลบ Lot เรียบร้อยแล้ว']);
+            return redirect()->back()->with('success', 'ลบ Lot เรียบร้อยแล้ว');
         } catch (\Exception $e) {
             Log::error('Error deleting lot: ' . $e->getMessage());
-            return response()->json(['error' => 'ไม่สามารถลบ Lot ได้'], 500);
+            return redirect()->back()->with('error', 'ไม่สามารถลบ Lot ได้');
         }
     }
 
@@ -229,15 +229,21 @@ class IngredientLotController extends Controller
     {
         try {
             DB::transaction(function () use ($id) {
-                $lot = IngredientLot::findOrFail($id);
+                $lot = IngredientLot::with('details.ingredient')->findOrFail($id);
 
-                // คืนค่าจำนวน Ingredient กลับไปยังค่าก่อนหน้า
+                // คืนค่าจำนวนวัตถุดิบกลับไปยังค่าก่อนหน้า
                 foreach ($lot->details as $detail) {
+                    $ingredient = $detail->ingredient;
                     $quantity = $detail->quantity * $detail->per_pack;
-                    $detail->ingredient->decrement('quantity', $quantity);
 
+                    // คืนค่าจำนวนวัตถุดิบ
+                    $ingredient->update([
+                        'quantity' => $ingredient->quantity + $quantity
+                    ]);
+
+                    // บันทึกการคืนค่าจำนวนวัตถุดิบ
                     Log::info('Reverted ingredient quantity', [
-                        'ingredient_id' => $detail->ingredient_id,
+                        'ingredient_id' => $ingredient->id,
                         'quantity' => $quantity,
                         'lot_id' => $lot->id
                     ]);
@@ -247,10 +253,10 @@ class IngredientLotController extends Controller
                 $lot->delete();
             });
 
-            return response()->json(['message' => 'คืนค่า Lot เรียบร้อยแล้ว']);
+            return redirect()->back()->with('success', 'คืนค่า Lot เรียบร้อยแล้ว');
         } catch (\Exception $e) {
             Log::error('Error reverting lot: ' . $e->getMessage());
-            return response()->json(['error' => 'ไม่สามารถคืนค่า Lot ได้'], 500);
+            return redirect()->back()->with('error', 'ไม่สามารถคืนค่า Lot ได้');
         }
     }
 
