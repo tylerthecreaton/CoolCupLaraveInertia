@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ConsumableLot;
 use App\Models\IngredientLot;
+use App\Models\Transformer;
 use App\Models\Withdraw;
 use App\Models\WithdrawItem;
 use App\Models\ProductIngredientUsage;
@@ -33,7 +34,7 @@ class WithdrawController extends Controller
 
     public function create()
     {
-        $ingredientLots = IngredientLot::with(['details.ingredient.unit', 'details.ingredient.transformers'])
+        $ingredientLots = IngredientLot::with(['details.ingredient.unit'])
             ->whereHas('details', function ($query) {
                 $query->where('quantity', '>', 0);
             })
@@ -58,19 +59,24 @@ class WithdrawController extends Controller
                     'created_at' => $lots->created_at,
                     'items_count' => $lotsDetails->count(),
                     'items' => $filteredItems->map(function ($detail) {
+                        // ดึง transformer จาก transformer_id โดยตรง
+                        $transformer = null;
+                        if ($detail->transformer_id) {
+                            $transformer = Transformer::find($detail->transformer_id);
+                        }
+                        
                         return [
                             'id' => $detail->id,
                             'name' => $detail->ingredient->name,
                             'quantity' => $detail->quantity,
                             'unit' => $detail->ingredient->unit ? $detail->ingredient->unit->name : null,
-                            'transformers' => $detail->ingredient->transformers->map(function ($transformer) {
-                                return [
-                                    'id' => $transformer->id,
-                                    'name' => $transformer->name,
-                                    'description' => $transformer->description,
-                                    'multiplier' => $transformer->multiplier,
-                                ];
-                            }),
+                            'transformer_id' => $detail->transformer_id,
+                            'transformer' => $transformer ? [
+                                'id' => $transformer->id,
+                                'name' => $transformer->name,
+                                'description' => $transformer->description,
+                                'multiplier' => $transformer->multiplier,
+                            ] : null,
                         ];
                     }),
                 ];
@@ -78,8 +84,8 @@ class WithdrawController extends Controller
             ->filter()
             ->values();
 
-        // ดึง lots พร้อมข้อมูล consumable และ transformers
-        $consumableLots = ConsumableLot::with(['details.consumable.transformers'])
+        // ดึง lots พร้อมข้อมูล consumable
+        $consumableLots = ConsumableLot::with(['details.consumable'])
             ->whereHas('details', function ($query) {
                 $query->where('quantity', '>', 0);
             })
@@ -100,20 +106,25 @@ class WithdrawController extends Controller
                     'id' => $lots->id,
                     'created_at' => $lots->created_at,
                     'items' => $filteredItems->map(function ($detail) use ($lots) {
+                        // ดึง transformer จาก transformer_id โดยตรง
+                        $transformer = null;
+                        if ($detail->transformer_id) {
+                            $transformer = Transformer::find($detail->transformer_id);
+                        }
+
                         return [
                             'lot_id' => $lots->id,
                             'lot_created_at' => $lots->created_at,
                             'id' => $detail->id,
                             'name' => $detail->consumable->name,
                             'quantity' => $detail->quantity,
-                            'transformers' => $detail->consumable->transformers->map(function ($transformer) {
-                                return [
-                                    'id' => $transformer->id,
-                                    'name' => $transformer->name,
-                                    'description' => $transformer->description,
-                                    'multiplier' => $transformer->multiplier,
-                                ];
-                            }),
+                            'transformer_id' => $detail->transformer_id,
+                            'transformer' => $transformer ? [
+                                'id' => $transformer->id,
+                                'name' => $transformer->name,
+                                'description' => $transformer->description,
+                                'multiplier' => $transformer->multiplier,
+                            ] : null,
                         ];
                     }),
                 ];
@@ -210,7 +221,7 @@ class WithdrawController extends Controller
                                 $addAmount = $withdrawAmount;
 
                                 if (!empty($item['transformer_id'])) {
-                                    $transformer = $ingredient->transformers()->find($item['transformer_id']);
+                                    $transformer = Transformer::find($item['transformer_id']);
                                     if ($transformer) {
                                         $addAmount *= floatval($transformer->multiplier);
                                         Log::info('Applied transformer:', [
@@ -304,7 +315,7 @@ class WithdrawController extends Controller
                                 $addAmount = $withdrawAmount;
 
                                 if (!empty($item['transformer_id'])) {
-                                    $transformer = $consumable->transformers()->find($item['transformer_id']);
+                                    $transformer = Transformer::find($item['transformer_id']);
                                     if ($transformer) {
                                         $addAmount *= floatval($transformer->multiplier);
                                         Log::info('Applied transformer:', [
@@ -412,7 +423,7 @@ class WithdrawController extends Controller
                             $subtractAmount = $returnAmount;
 
                             if ($item->transformer_id) {
-                                $transformer = $ingredient->transformers()->find($item->transformer_id);
+                                $transformer = Transformer::find($item->transformer_id);
                                 if ($transformer) {
                                     $subtractAmount *= $transformer->multiplier;
                                 }
@@ -437,7 +448,7 @@ class WithdrawController extends Controller
                             $subtractAmount = $returnAmount;
 
                             if ($item->transformer_id) {
-                                $transformer = $consumable->transformers()->find($item->transformer_id);
+                                $transformer = Transformer::find($item->transformer_id);
                                 if ($transformer) {
                                     $subtractAmount *= $transformer->multiplier;
                                 }

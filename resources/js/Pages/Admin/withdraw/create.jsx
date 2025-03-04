@@ -65,24 +65,27 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
         }
 
         let newMaxQuantity = 0;
+        let selectedItemData;
+
         if (selectedType === "consumable") {
             const [groupIndex, itemIndex] = value.split("-").map(Number);
             const group = availableItems[groupIndex];
-            const item = group.items[itemIndex];
-            newMaxQuantity = item.quantity;
+            selectedItemData = group.items[itemIndex];
+            newMaxQuantity = selectedItemData.quantity;
         } else {
             const [lotId, itemId] = value.split("-").map(Number);
             const lot = availableItems.find((l) => l.id === lotId);
             if (lot) {
-                const item = lot.items.find((i) => i.id === itemId);
-                if (item) {
-                    newMaxQuantity = item.quantity;
+                selectedItemData = lot.items.find((i) => i.id === itemId);
+                if (selectedItemData) {
+                    newMaxQuantity = selectedItemData.quantity;
                 }
             }
         }
 
+        console.log('Selected Item Data:', selectedItemData); // For debugging
+
         setMaxQuantity(newMaxQuantity);
-        // Reset quantity to 1 or max if 1 is too high
         setQuantity(Math.min(1, newMaxQuantity));
     };
 
@@ -132,11 +135,12 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
             lotCreatedAt = lot.created_at;
         }
 
+        // ใช้ transformer object แทน transformers array
         let selectedTransformerData = null;
-        if (selectedTransformer) {
-            selectedTransformerData = selectedItemData.transformers?.find(
-                (t) => t.id.toString() === selectedTransformer.toString()
-            );
+        if (selectedTransformer && selectedItemData.transformer) {
+            if (selectedItemData.transformer.id.toString() === selectedTransformer.toString()) {
+                selectedTransformerData = selectedItemData.transformer;
+            }
         }
 
         const newItem = {
@@ -159,7 +163,6 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
             ...prev,
             items: newItems
         }));
-        console.log('Updated form data:', data);
 
         // Reset form
         setSelectedItem("");
@@ -341,29 +344,29 @@ export default function CreateWithdraw({ auth, ingredientLots, consumables }) {
                                                                     const [groupIndex, itemIndex] = selectedItem.split("-").map(Number);
                                                                     const group = availableItems[groupIndex];
                                                                     const item = group.items[itemIndex];
-                                                                    return item.transformers.map((transformer) => (
+                                                                    return item.transformer ? (
                                                                         <option
-                                                                            key={transformer.id}
-                                                                            value={transformer.id}
+                                                                            key={item.transformer.id}
+                                                                            value={item.transformer.id}
                                                                         >
-                                                                            {transformer.name} (x{transformer.multiplier})
+                                                                            {item.transformer.name} (x{item.transformer.multiplier})
                                                                         </option>
-                                                                    ));
+                                                                    ) : null;
                                                                 } else {
                                                                     const [lotId, itemId] = selectedItem.split("-").map(Number);
                                                                     const lot = availableItems.find((l) => l.id === lotId);
                                                                     const item = lot.items.find((i) => i.id === itemId);
-                                                                    return item.transformers?.map((transformer) => (
-                                                                    <option
-                                                                        key={transformer.id}
-                                                                        value={transformer.id}
-                                                                    >
-                                                                        {transformer.name} (x{transformer.multiplier})
-                                                                    </option>
-                                                                )) || [];
+                                                                    return item.transformer ? (
+                                                                        <option
+                                                                            key={item.transformer.id}
+                                                                            value={item.transformer.id}
+                                                                        >
+                                                                            {item.transformer.name} (x{item.transformer.multiplier})
+                                                                        </option>
+                                                                    ) : null;
+                                                                }
                                                             }
-                                                            }
-                                                            return [];
+                                                            return null;
                                                         })()}
                                                     </Select>
                                                 </div>
