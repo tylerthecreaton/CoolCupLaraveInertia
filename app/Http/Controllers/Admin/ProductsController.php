@@ -55,7 +55,7 @@ class ProductsController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            $rules['image'] = 'image|mimes:jpeg,png,jpg,svg|max:2048';
+            $rules['image'] = 'image|mimes:jpeg,png,jpg,svg|max:4096';
             $message['image.image'] = 'กรุณาอัปโหลดรูปภาพสินค้าให้ถูกต้อง';
             $message['image.mimes'] = 'กรุณาอัปโหลดรูปภาพสินค้าให้ถูกต้อง';
             $message['image.max'] = 'กรุณาอัปโหลดรูปภาพสินค้าให้ถูกต้อง';
@@ -137,7 +137,7 @@ class ProductsController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            $rules['image'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:2048';
+            $rules['image'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:4096';
             $message['image.image'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
             $message['image.mimes'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';
             $message['image.max'] = 'กรุณาอัปโหลดรูปภาพให้ถูกต้อง';

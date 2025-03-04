@@ -54,8 +54,8 @@ export default function ProductsForm({
 
         Swal.fire({
             title: isEditing ? "ยืนยันการแก้ไข?" : "ยืนยันการเพิ่ม?",
-            text: isEditing 
-                ? "คุณต้องการแก้ไขข้อมูลสินค้านี้ใช่หรือไม่?" 
+            text: isEditing
+                ? "คุณต้องการแก้ไขข้อมูลสินค้านี้ใช่หรือไม่?"
                 : "คุณต้องการเพิ่มสินค้าใหม่ใช่หรือไม่?",
             icon: "question",
             showCancelButton: true,
