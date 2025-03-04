@@ -686,11 +686,15 @@ export default function Create({ auth, ingredients }) {
                                             </Button>
                                         </div>
 
-                                        <div className="flex justify-end space-x-4">
+                                        <div className="flex gap-2 justify-end mt-4">
+                                            <Button
+                                                color="failure"
+                                                onClick={() => router.get(route('admin.ingredient-lots.index'))}
+                                            >
+                                                ยกเลิก
+                                            </Button>
                                             <Button
                                                 type="submit"
-                                                gradientDuoTone="purpleToBlue"
-                                                size="lg"
                                                 disabled={processing}
                                             >
                                                 {processing

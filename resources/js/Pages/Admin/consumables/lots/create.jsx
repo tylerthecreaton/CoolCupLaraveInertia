@@ -637,25 +637,19 @@ export default function Create({ consumables }) {
                                         ))}
                                     </div>
 
-                                    <div className="flex justify-between items-center mt-6">
+                                    <div className="flex gap-2 justify-end mt-4">
                                         <Button
-                                            type="button"
-                                            gradientDuoTone="purpleToBlue"
-                                            onClick={handleAddRow}
+                                            color="failure"
+                                            onClick={() => router.get(route('admin.consumables.lots.index'))}
                                         >
-                                            <HiPlus className="mr-2 w-4 h-4" />
-                                            เพิ่มรายการ
+                                            ยกเลิก
                                         </Button>
-
-                                        <div className="flex gap-4">
-                                            <Button
-                                                type="submit"
-                                                gradientDuoTone="greenToBlue"
-                                                disabled={processing}
-                                            >
-                                                บันทึก
-                                            </Button>
-                                        </div>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            บันทึก
+                                        </Button>
                                     </div>
                                 </form>
                             </div>
