@@ -19,7 +19,7 @@ class WithdrawController extends Controller
     public function index()
     {
         $withdraws = Withdraw::with([
-            'items.ingredientLotDetail.ingredient_lot',
+            'items.ingredientLotDetail.lot',
             'items.consumableLotDetail.consumable_lot',
             'items.ingredientLot.details.ingredient',
             'items.consumableLot.details.consumable',
@@ -143,7 +143,7 @@ class WithdrawController extends Controller
     public function show($id)
     {
         $withdraw = Withdraw::with([
-            'items.ingredientLotDetail.ingredient_lot',
+            'items.ingredientLotDetail.lot',
             'items.consumableLotDetail.consumable_lot',
             'items.ingredientLot.details.ingredient',
             'items.consumableLot.details.consumable',
@@ -392,7 +392,7 @@ class WithdrawController extends Controller
         try {
             DB::transaction(function () use ($id) {
                 $withdraw = Withdraw::with([
-                    'items.ingredientLotDetail.ingredient_lot',
+                    'items.ingredientLotDetail.lot',
                     'items.consumableLotDetail.consumable_lot',
                     'items.ingredientLot.details.ingredient',
                     'items.consumableLot.details.consumable'
