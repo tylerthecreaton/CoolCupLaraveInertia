@@ -20,6 +20,24 @@ export default function ReceiptHistory({ orders, filters }) {
     const [filterType, setFilterType] = useState(filters?.type || "today");
     const [customStartDate, setCustomStartDate] = useState(filters?.startDate || "");
     const [customEndDate, setCustomEndDate] = useState(filters?.endDate || "");
+    const [selectedYear, setSelectedYear] = useState(filters?.year || new Date().getFullYear());
+    const [selectedMonth, setSelectedMonth] = useState(filters?.month || new Date().getMonth() + 1);
+
+    const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
+    const months = [
+        { value: 1, label: "มกราคม" },
+        { value: 2, label: "กุมภาพันธ์" },
+        { value: 3, label: "มีนาคม" },
+        { value: 4, label: "เมษายน" },
+        { value: 5, label: "พฤษภาคม" },
+        { value: 6, label: "มิถุนายน" },
+        { value: 7, label: "กรกฎาคม" },
+        { value: 8, label: "สิงหาคม" },
+        { value: 9, label: "กันยายน" },
+        { value: 10, label: "ตุลาคม" },
+        { value: 11, label: "พฤศจิกายน" },
+        { value: 12, label: "ธันวาคม" }
+    ];
 
     const handleViewReceipt = (receiptPath) => {
         fetch(`/images/receipt/${receiptPath}`)
@@ -51,13 +69,23 @@ export default function ReceiptHistory({ orders, filters }) {
 
     // ฟังก์ชันสำหรับ submit ตัวกรอง
     const handleFilterSubmit = () => {
+        const params = {
+            filterType: filterType,
+        };
+
+        if (filterType === 'custom' && customStartDate && customEndDate) {
+            params.startDate = customStartDate;
+            params.endDate = customEndDate;
+        } else if (filterType === 'month') {
+            params.year = parseInt(selectedYear);
+            params.month = parseInt(selectedMonth);
+        } else if (filterType === 'year') {
+            params.year = parseInt(selectedYear);
+        }
+
         router.get(
             route('receipt.history'),
-            {
-                filterType: filterType,
-                startDate: filterType === 'custom' ? customStartDate : null,
-                endDate: filterType === 'custom' ? customEndDate : null,
-            },
+            params,
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -118,9 +146,46 @@ export default function ReceiptHistory({ orders, filters }) {
                                 >
                                     <option value="today">วันนี้</option>
                                     <option value="week">สัปดาห์นี้</option>
+                                    <option value="month">รายเดือน</option>
+                                    <option value="year">รายปี</option>
                                     <option value="custom">กำหนดเอง</option>
                                     <option value="all">ทั้งหมด</option>
                                 </Select>
+                                {filterType === "month" && (
+                                    <>
+                                        <Select
+                                            className="w-full md:w-1/3"
+                                            value={selectedYear}
+                                            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                                        >
+                                            {years.map(year => (
+                                                <option key={year} value={year}>{year}</option>
+                                            ))}
+                                        </Select>
+                                        <Select
+                                            className="w-full md:w-1/3"
+                                            value={selectedMonth}
+                                            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                                        >
+                                            {months.map(month => (
+                                                <option key={month.value} value={month.value}>
+                                                    {month.label}
+                                                </option>
+                                            ))}
+                                        </Select>
+                                    </>
+                                )}
+                                {filterType === "year" && (
+                                    <Select
+                                        className="w-full md:w-1/3"
+                                        value={selectedYear}
+                                        onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                                    >
+                                        {years.map(year => (
+                                            <option key={year} value={year}>{year}</option>
+                                        ))}
+                                    </Select>
+                                )}
                                 {filterType === "custom" && (
                                     <>
                                         <input
@@ -159,7 +224,16 @@ export default function ReceiptHistory({ orders, filters }) {
                                 {orders.links.map((link, index) => (
                                     <Link
                                         key={index}
-                                        href={link.url ? `${link.url}&filterType=${filterType}${filterType === 'custom' ? `&startDate=${customStartDate}&endDate=${customEndDate}` : ''}` : '#'}
+                                        href={link.url ? `${link.url}${link.url.includes('?') ? '&' : '?'}filterType=${filterType}${
+                                            filterType === 'custom' && customStartDate && customEndDate ? 
+                                                `&startDate=${customStartDate}&endDate=${customEndDate}` : ''
+                                        }${
+                                            filterType === 'month' ? 
+                                                `&year=${selectedYear}&month=${selectedMonth}` : ''
+                                        }${
+                                            filterType === 'year' ? 
+                                                `&year=${selectedYear}` : ''
+                                        }` : '#'}
                                         className={`px-3 py-1 rounded-lg border ${link.active
                                             ? 'bg-blue-500 text-white border-blue-500'
                                             : link.url

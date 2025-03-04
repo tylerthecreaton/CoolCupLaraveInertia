@@ -192,9 +192,8 @@ class OrderController extends Controller
 
         // Apply date filters
         $filterType = $request->get('filterType', 'today');
+        
         switch ($filterType) {
-            case 'all':
-                break;
             case 'today':
                 $query->whereDate('created_at', now());
                 break;
@@ -203,6 +202,16 @@ class OrderController extends Controller
                     now()->startOfWeek(),
                     now()->endOfWeek()
                 ]);
+                break;
+            case 'month':
+                $year = (int)$request->get('year', now()->year);
+                $month = (int)$request->get('month', now()->month);
+                $query->whereYear('created_at', $year)
+                      ->whereMonth('created_at', $month);
+                break;
+            case 'year':
+                $year = (int)$request->get('year', now()->year);
+                $query->whereYear('created_at', $year);
                 break;
             case 'custom':
                 $startDate = $request->get('startDate');
@@ -214,6 +223,9 @@ class OrderController extends Controller
                     ]);
                 }
                 break;
+            case 'all':
+                // ไม่ต้องใส่เงื่อนไขเพิ่มเติม แสดงทั้งหมด
+                break;
         }
 
         $orders = $query->paginate(10);
@@ -222,6 +234,8 @@ class OrderController extends Controller
             'orders' => $orders,
             'filters' => [
                 'type' => $filterType,
+                'year' => (int)$request->get('year', now()->year),
+                'month' => (int)$request->get('month', now()->month),
                 'startDate' => $request->get('startDate'),
                 'endDate' => $request->get('endDate'),
             ]

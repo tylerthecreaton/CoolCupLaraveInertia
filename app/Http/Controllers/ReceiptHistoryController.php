@@ -9,12 +9,43 @@ use Illuminate\Support\Facades\Storage;
 
 class ReceiptHistoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with(['customer', 'order_details'])
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($order) {
+        $query = Order::with(['customer', 'order_details']);
+
+        // Apply date filters
+        $filterType = $request->input('filterType', 'today');
+        
+        switch ($filterType) {
+            case 'today':
+                $query->whereDate('created_at', now());
+                break;
+            case 'week':
+                $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+                break;
+            case 'month':
+                $year = (int)$request->input('year', now()->year);
+                $month = (int)$request->input('month', now()->month);
+                $query->whereYear('created_at', $year)
+                      ->whereMonth('created_at', $month);
+                break;
+            case 'year':
+                $year = (int)$request->input('year', now()->year);
+                $query->whereYear('created_at', $year);
+                break;
+            case 'custom':
+                if ($request->input('startDate') && $request->input('endDate')) {
+                    $query->whereBetween('created_at', [$request->input('startDate'), $request->input('endDate')]);
+                }
+                break;
+            case 'all':
+                // ไม่ต้องใส่เงื่อนไขเพิ่มเติม แสดงทั้งหมด
+                break;
+        }
+
+        $orders = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->through(function ($order) {
                 $orderDetails = $order->order_details->map(function ($detail) {
                     return [
                         'id' => $detail->id,
@@ -51,7 +82,14 @@ class ReceiptHistoryController extends Controller
             });
 
         return Inertia::render('ReceiptHistory', [
-            'orders' => $orders
+            'orders' => $orders,
+            'filters' => [
+                'type' => $filterType,
+                'year' => (int)$request->input('year', now()->year),
+                'month' => (int)$request->input('month', now()->month),
+                'startDate' => $request->input('startDate'),
+                'endDate' => $request->input('endDate'),
+            ]
         ]);
     }
 }
