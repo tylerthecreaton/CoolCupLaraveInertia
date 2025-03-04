@@ -59,8 +59,8 @@ export default function Index({ auth, transactions, filters }) {
         switch (type) {
             case "ADD":
                 return (
-                    <Badge color="success" className="w-24 justify-center">
-                        <div className="flex items-center gap-1">
+                    <Badge color="success" className="justify-center w-24">
+                        <div className="flex gap-1 items-center">
                             <FaPlus className="w-3 h-3" />
                             <span>เพิ่มวัตถุดิบ</span>
                         </div>
@@ -68,8 +68,8 @@ export default function Index({ auth, transactions, filters }) {
                 );
             case "USE":
                 return (
-                    <Badge color="warning" className="w-24 justify-center">
-                        <div className="flex items-center gap-1">
+                    <Badge color="warning" className="justify-center w-24">
+                        <div className="flex gap-1 items-center">
                             <FaMinus className="w-3 h-3" />
                             <span>ใช้วัตถุดิบ</span>
                         </div>
@@ -77,8 +77,8 @@ export default function Index({ auth, transactions, filters }) {
                 );
             case "DISPOSE":
                 return (
-                    <Badge color="failure" className="w-24 justify-center">
-                        <div className="flex items-center gap-1">
+                    <Badge color="failure" className="justify-center w-24">
+                        <div className="flex gap-1 items-center">
                             <HiTrash className="w-3 h-3" />
                             <span>จำหน่าย</span>
                         </div>
@@ -136,17 +136,17 @@ export default function Index({ auth, transactions, filters }) {
                 <div className="mb-6">
                     <Breadcrumb aria-label="Default breadcrumb example">
                         <Breadcrumb.Item href="/dashboard" icon={HiHome}>
-                            <p className="text-gray-700 hover:text-blue-600 transition-colors">หน้าแรก</p>
+                            <p className="text-gray-700 transition-colors hover:text-blue-600">หน้าแรก</p>
                         </Breadcrumb.Item>
                         <Breadcrumb.Item>
-                            <p className="text-gray-700 hover:text-blue-600 transition-colors">ประวัติการเคลื่อนไหว</p>
+                            <p className="text-gray-700 transition-colors hover:text-blue-600">ประวัติการเคลื่อนไหว</p>
                         </Breadcrumb.Item>
                     </Breadcrumb>
                 </div>
 
                 <Card className="shadow-lg">
-                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-                        <div className="flex items-center gap-3">
+                    <div className="flex flex-col gap-4 justify-between items-start mb-6 lg:flex-row lg:items-center">
+                        <div className="flex gap-3 items-center">
                             <div className="p-2 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-md">
                                 <FaExchangeAlt className="w-5 h-5 text-white" />
                             </div>
@@ -156,15 +156,15 @@ export default function Index({ auth, transactions, filters }) {
                             </div>
                         </div>
 
-                        <div className="flex flex-col lg:flex-row gap-4 w-full lg:w-auto">
-                            <div className="flex flex-col sm:flex-row gap-2 w-full">
+                        <div className="flex flex-col gap-4 w-full lg:flex-row lg:w-auto">
+                            <div className="flex flex-col gap-2 w-full sm:flex-row">
                                 <div className="relative flex-1">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
                                         <FaSearch className="w-4 h-4 text-gray-400" />
                                     </div>
                                     <input
                                         type="text"
-                                        className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 text-sm"
+                                        className="block py-2 pr-3 pl-10 w-full text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500"
                                         placeholder="ค้นหาประวัติ..."
                                         value={searchTerm}
                                         onChange={(e) => handleSearch(e.target.value)}
@@ -184,13 +184,13 @@ export default function Index({ auth, transactions, filters }) {
                                     <>
                                         <input
                                             type="date"
-                                            className="w-full sm:w-40 rounded-lg border-gray-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 text-sm"
+                                            className="w-full text-sm rounded-lg border-gray-200 sm:w-40 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500"
                                             value={customStartDate}
                                             onChange={(e) => setCustomStartDate(e.target.value)}
                                         />
                                         <input
                                             type="date"
-                                            className="w-full sm:w-40 rounded-lg border-gray-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 text-sm"
+                                            className="w-full text-sm rounded-lg border-gray-200 sm:w-40 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500"
                                             value={customEndDate}
                                             onChange={(e) => setCustomEndDate(e.target.value)}
                                         />
@@ -198,7 +198,7 @@ export default function Index({ auth, transactions, filters }) {
                                 )}
                                 <button
                                     onClick={handleFilterSubmit}
-                                    className="w-full sm:w-auto px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+                                    className="flex gap-2 justify-center items-center px-4 py-2 w-full text-white bg-indigo-600 rounded-lg transition-colors sm:w-auto hover:bg-indigo-700"
                                 >
                                     <FaFilter className="w-4 h-4" />
                                     กรอง
@@ -210,28 +210,28 @@ export default function Index({ auth, transactions, filters }) {
                     <div className="overflow-x-auto">
                         <Table hoverable className="shadow-sm">
                             <Table.Head className="bg-gradient-to-r from-gray-50 to-gray-100">
-                                <Table.HeadCell className="font-semibold text-gray-700 w-24">ลำดับ</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700 w-52">วัตถุดิบ</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700 w-32">ประเภท</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700 w-24">จำนวน</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700 w-96">หมายเหตุ</Table.HeadCell>
-                                <Table.HeadCell className="font-semibold text-gray-700 w-64">วันที่</Table.HeadCell>
+                                <Table.HeadCell className="w-24 font-semibold text-gray-700">ลำดับ</Table.HeadCell>
+                                <Table.HeadCell className="w-48 font-semibold text-gray-700">วัตถุดิบ</Table.HeadCell>
+                                <Table.HeadCell className="w-32 font-semibold text-gray-700">ประเภท</Table.HeadCell>
+                                <Table.HeadCell className="w-32 font-semibold text-gray-700">จำนวน</Table.HeadCell>
+                                <Table.HeadCell className="w-80 font-semibold text-gray-700">หมายเหตุ</Table.HeadCell>
+                                <Table.HeadCell className="w-52 font-semibold text-gray-700">วันที่</Table.HeadCell>
                             </Table.Head>
                             <Table.Body className="divide-y">
                                 {transactions.data?.map((transaction, index) => (
                                     <Table.Row
                                         key={transaction.id}
-                                        className="bg-white hover:bg-gray-50 transition-colors"
+                                        className="bg-white transition-colors hover:bg-gray-50"
                                     >
-                                        <Table.Cell className="font-medium text-gray-900 whitespace-nowrap w-24">
+                                        <Table.Cell className="w-24 font-medium text-gray-900 whitespace-nowrap">
                                             #{transactions.from + index}
                                         </Table.Cell>
-                                        <Table.Cell className="w-52">
+                                        <Table.Cell className="w-48">
                                             <Tooltip
                                                 content={
                                                     <div className="p-2 max-w-xs">
                                                         <div className="space-y-2">
-                                                            <div className="flex items-center gap-2">
+                                                            <div className="flex gap-2 items-center">
                                                                 <FaExchangeAlt className="w-4 h-4 text-indigo-400" />
                                                                 <span className="font-medium">{transaction.ingredient.name}</span>
                                                             </div>
@@ -245,7 +245,7 @@ export default function Index({ auth, transactions, filters }) {
                                                                 <div>
                                                                     <p className="text-gray-500">จำนวน:</p>
                                                                     <p className={`font-medium ${transaction.usage_type === 'USE' ? 'text-red-600' : 'text-green-600'}`}>
-                                                                        {transaction.usage_type === 'USE' ? '-' : '+'}{formatAmount(transaction.amount)}
+                                                                        {transaction.usage_type === 'USE' ? '-' : '+'}{formatAmount(transaction.amount)} {transaction.ingredient.unit?.abbreviation || transaction.ingredient.unit?.name}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -257,25 +257,25 @@ export default function Index({ auth, transactions, filters }) {
                                                     </div>
                                                 }
                                             >
-                                                <div className="flex items-center gap-2 cursor-pointer">
+                                                <div className="flex gap-2 items-center cursor-pointer">
                                                     <span className="font-medium text-gray-900">{transaction.ingredient.name}</span>
                                                     <FaInfoCircle className="w-4 h-4 text-gray-400" />
                                                 </div>
                                             </Tooltip>
                                         </Table.Cell>
-                                        <Table.Cell className="w-24">{getTypeLabel(transaction.usage_type)}</Table.Cell>
-                                        <Table.Cell className={`font-medium w-24 ${transaction.usage_type === 'USE' ? 'text-red-600' : 'text-green-600'}`}>
-                                            {transaction.usage_type === 'USE' ? '-' : '+'}{formatAmount(transaction.amount)}
+                                        <Table.Cell className="w-32">{getTypeLabel(transaction.usage_type)}</Table.Cell>
+                                        <Table.Cell className={`text-right font-medium w-32 ${transaction.usage_type === 'USE' ? 'text-red-600' : 'text-green-600'}`}>
+                                            {transaction.usage_type === 'USE' ? '-' : '+'}{formatAmount(transaction.amount)} {transaction.ingredient.unit?.abbreviation || transaction.ingredient.unit?.name}
                                         </Table.Cell>
-                                        <Table.Cell className="w-96">{transaction.note || '-'}</Table.Cell>
-                                        <Table.Cell className="w-64">{formatDate(transaction.created_at)}</Table.Cell>
+                                        <Table.Cell className="w-80">{transaction.note || '-'}</Table.Cell>
+                                        <Table.Cell className="w-52">{formatDate(transaction.created_at)}</Table.Cell>
                                     </Table.Row>
                                 ))}
                             </Table.Body>
                         </Table>
                     </div>
 
-                    <div className="flex items-center justify-center text-center mt-4">
+                    <div className="flex justify-center items-center mt-4 text-center">
                         <Pagination
                             currentPage={transactions.current_page}
                             totalPages={transactions.last_page}

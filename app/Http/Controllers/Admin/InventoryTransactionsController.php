@@ -14,7 +14,7 @@ class InventoryTransactionsController extends Controller
     // Display all inventory transactions
     public function index(Request $request)
     {
-        $query = ProductIngredientUsage::with(['ingredient'])->orderBy('created_at', 'desc');
+        $query = ProductIngredientUsage::with(['ingredient.unit'])->orderBy('created_at', 'desc');
 
         // Apply search filter if provided
         if ($request->has('search') && !empty($request->search)) {
