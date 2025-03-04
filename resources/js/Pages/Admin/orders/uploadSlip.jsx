@@ -63,11 +63,11 @@ export default function UploadSlip({ order }) {
     return (
         <AuthenticatedLayout>
             <Head title="อัพโหลดหลักฐานการชำระเงิน" />
-            <div className="p-4 bg-gray-50 min-h-screen">
-                <Breadcrumb className="mb-4 bg-white p-3 rounded-lg shadow-sm">
+            <div className="p-4 min-h-screen bg-gray-50">
+                <Breadcrumb className="p-3 mb-4 bg-white rounded-lg shadow-sm">
                     <Breadcrumb.Item>
                         <Link href={route('dashboard')} className="text-blue-600 hover:text-blue-800">
-                            <HiHome className="mr-2 inline-block" />
+                            <HiHome className="inline-block mr-2" />
                             หน้าหลัก
                         </Link>
                     </Breadcrumb.Item>
@@ -81,19 +81,19 @@ export default function UploadSlip({ order }) {
                     </Breadcrumb.Item>
                 </Breadcrumb>
 
-                <div className="max-w-2xl mx-auto">
-                    <div className="bg-white overflow-hidden shadow-lg rounded-lg">
+                <div className="mx-auto max-w-2xl">
+                    <div className="overflow-hidden bg-white rounded-lg shadow-lg">
                         <div className="p-6">
-                            <div className="flex items-center justify-between mb-6">
+                            <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-2xl font-semibold text-gray-800">
                                     อัพโหลดหลักฐานการชำระเงิน
                                 </h2>
-                                <HiDocumentText className="h-8 w-8 text-blue-500" />
+                                <HiDocumentText className="w-8 h-8 text-blue-500" />
                             </div>
 
                             {order && (
-                                <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                                    <h3 className="font-medium text-lg text-blue-800 mb-2">ข้อมูลคำสั่งซื้อ</h3>
+                                <div className="p-4 mb-6 bg-blue-50 rounded-lg border border-blue-100">
+                                    <h3 className="mb-2 text-lg font-medium text-blue-800">ข้อมูลคำสั่งซื้อ</h3>
                                     <div className="space-y-2 text-gray-600">
                                         <p className="flex justify-between">
                                             <span>หมายเลขคำสั่งซื้อ:</span>
@@ -101,7 +101,7 @@ export default function UploadSlip({ order }) {
                                         </p>
                                         <p className="flex justify-between">
                                             <span>ยอดชำระ:</span>
-                                            <span className="font-medium text-green-600">{formatPrice(order.total_amount)}</span>
+                                            <span className="font-medium text-green-600">{formatPrice(order.final_amount)}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -109,12 +109,12 @@ export default function UploadSlip({ order }) {
 
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div>
-                                    <Label htmlFor="slip_image" value="อัพโหลดสลิปการโอนเงิน" className="mb-2 block text-gray-700" />
-                                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors duration-200">
+                                    <Label htmlFor="slip_image" value="อัพโหลดสลิปการโอนเงิน" className="block mb-2 text-gray-700" />
+                                    <div className="flex justify-center px-6 pt-5 pb-6 mt-1 rounded-lg border-2 border-gray-300 border-dashed transition-colors duration-200 hover:border-blue-400">
                                         <div className="space-y-1 text-center">
-                                            <HiUpload className="mx-auto h-12 w-12 text-gray-400" />
+                                            <HiUpload className="mx-auto w-12 h-12 text-gray-400" />
                                             <div className="flex text-sm text-gray-600">
-                                                <label htmlFor="slip_image" className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-700 focus-within:outline-none">
+                                                <label htmlFor="slip_image" className="relative font-medium text-blue-600 rounded-md cursor-pointer hover:text-blue-700 focus-within:outline-none">
                                                     <span>อัพโหลดรูปภาพ</span>
                                                     <input
                                                         id="slip_image"
@@ -138,12 +138,12 @@ export default function UploadSlip({ order }) {
 
                                 {preview && (
                                     <div className="mt-4">
-                                        <p className="text-sm text-gray-600 mb-2">ตัวอย่างรูปภาพ:</p>
-                                        <div className="relative rounded-lg overflow-hidden border border-gray-200">
+                                        <p className="mb-2 text-sm text-gray-600">ตัวอย่างรูปภาพ:</p>
+                                        <div className="overflow-hidden relative rounded-lg border border-gray-200">
                                             <img
                                                 src={preview}
                                                 alt="ตัวอย่างสลิป"
-                                                className="max-w-full h-auto max-h-96 mx-auto"
+                                                className="mx-auto max-w-full h-auto max-h-96"
                                             />
                                         </div>
                                     </div>
@@ -155,7 +155,7 @@ export default function UploadSlip({ order }) {
                                     className="w-full"
                                     gradientDuoTone="greenToBlue"
                                 >
-                                    <HiUpload className="mr-2 h-5 w-5" />
+                                    <HiUpload className="mr-2 w-5 h-5" />
                                     {processing ? 'กำลังอัพโหลด...' : 'ยืนยันการอัพโหลด'}
                                 </Button>
                             </form>

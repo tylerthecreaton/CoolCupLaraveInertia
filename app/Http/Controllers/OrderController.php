@@ -120,7 +120,7 @@ class OrderController extends Controller
             if ($order->customer) {
                 $message .= "👤 ลูกค้า: " . $order->customer->name . "\n";
             }
-            $message .= "💰 ยอดชำระ: ฿" . number_format($order->total_amount, 2) . "\n";
+            $message .= "💰 ยอดชำระ: ฿" . number_format($order->final_amount, 2) . "\n";
             $message .= "⏰ เวลาสั่งซื้อ: " . $order->created_at->format('d/m/Y H:i') . "\n\n";
             $message .= "[📎 คลิกที่นี่เพื่ออัพโหลดสลิป](" . $uploadUrl . ")";
 
@@ -158,7 +158,7 @@ class OrderController extends Controller
                 $user_id = Auth::user()->id;
 
                 $chat_id = TelegramUser::where('user_id', $user_id)->first()->chat_id;
-                $telegram->sendTelegramMessage($chat_id, "🧾 มีการอัพโหลดสลิปการชำระเงินใหม่!\nหมายเลขคำสั่งซื้อ: #{$order->order_number}\nยอดเงิน: ฿{$order->total_amount}");
+                $telegram->sendTelegramMessage($chat_id, "🧾 มีการอัพโหลดสลิปการชำระเงินใหม่!\nหมายเลขคำสั่งซื้อ: #{$order->order_number}\nยอดเงิน: ฿{$order->final_amount}");
             } catch (Exception $e) {
                 Log::error('Telegram notification failed: ' . $e->getMessage());
             }

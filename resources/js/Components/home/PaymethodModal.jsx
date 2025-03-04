@@ -467,47 +467,49 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                         </div>
                         {!isSummary && (
                             <>
-                                <div className="grid grid-cols-1 gap-4">
-                                    {paymentMethods.map((method) => (
-                                        <div
-                                            key={method.id}
-                                            className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${data.selectedMethod ===
-                                                method.id
-                                                ? "border-blue-500 bg-blue-50"
-                                                : "hover:bg-gray-50"
-                                                }`}
-                                            onClick={() =>
-                                                handleMethodSelect(method.id)
-                                            }
-                                        >
-                                            <div className="flex flex-1 items-center space-x-4">
-                                                {method.icon === "banknotes" ? (
-                                                    <Banknote className="w-8 h-8 text-gray-600" />
-                                                ) : (
-                                                    <QrCode className="w-8 h-8 text-gray-600" />
-                                                )}
-                                                <div>
-                                                    <h3 className="font-medium">
-                                                        {method.name}
-                                                    </h3>
-                                                    <p className="text-sm text-gray-500">
-                                                        {method.description}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <Radio
-                                                checked={
-                                                    data.selectedMethod ===
+                                <div className="p-4 border rounded-lg bg-white shadow-sm">
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {paymentMethods.map((method) => (
+                                            <div
+                                                key={method.id}
+                                                className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${data.selectedMethod ===
                                                     method.id
+                                                    ? "border-blue-500 bg-blue-50"
+                                                    : "hover:bg-gray-50"
+                                                    }`}
+                                                onClick={() =>
+                                                    handleMethodSelect(method.id)
                                                 }
-                                                onChange={() =>
-                                                    handleMethodSelect(
+                                            >
+                                                <div className="flex flex-1 items-center space-x-4">
+                                                    {method.icon === "banknotes" ? (
+                                                        <Banknote className="w-8 h-8 text-gray-600" />
+                                                    ) : (
+                                                        <QrCode className="w-8 h-8 text-gray-600" />
+                                                    )}
+                                                    <div>
+                                                        <h3 className="font-medium">
+                                                            {method.name}
+                                                        </h3>
+                                                        <p className="text-sm text-gray-500">
+                                                            {method.description}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <Radio
+                                                    checked={
+                                                        data.selectedMethod ===
                                                         method.id
-                                                    )
-                                                }
-                                            />
-                                        </div>
-                                    ))}
+                                                    }
+                                                    onChange={() =>
+                                                        handleMethodSelect(
+                                                            method.id
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                                 <div className="p-4 space-y-4 rounded-lg border">
                                     <Label

@@ -58,9 +58,20 @@ const CartComponent = () => {
                     const startDate = promotion.start_date ? new Date(promotion.start_date) : null;
                     const endDate = promotion.end_date ? new Date(promotion.end_date) : null;
 
-                    return (!startDate || currentDate >= startDate) &&
+                    // Check if promotion is valid for current date and is active
+                    const isValidDate = (!startDate || currentDate >= startDate) &&
                            (!endDate || currentDate <= endDate) &&
                            promotion.is_active;
+
+                    // For category promotions, check if we have relevant items in cart
+                    if (promotion.type === "CATEGORY_DISCOUNT") {
+                        const hasRelevantItems = items.some(item => 
+                            item.categoryId === Number(promotion.category?.category_id)
+                        );
+                        return isValidDate && hasRelevantItems;
+                    }
+
+                    return isValidDate;
                 });
                 setPromotions(validPromotions);
             } catch (error) {
@@ -73,7 +84,7 @@ const CartComponent = () => {
             }
         };
         fetchPromotions();
-    }, []);
+    }, [items]); // Added items as dependency to re-fetch when cart changes
 
     // Handle click outside cart
     useEffect(() => {

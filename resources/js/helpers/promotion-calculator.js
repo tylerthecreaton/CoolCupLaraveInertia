@@ -127,6 +127,22 @@ const isPromotionActive = (promotion, currentTime) => {
 };
 
 /**
+ * Check if promotion is applicable for current cart items
+ * @param {Array} items - Cart items
+ * @param {Object} promotion - Promotion object
+ * @returns {boolean} - Whether promotion is applicable
+ */
+export const isPromotionApplicable = (items, promotion) => {
+    if (promotion.type !== DISCOUNT_TYPES.CATEGORY_DISCOUNT) {
+        return true;
+    }
+
+    // For category discounts, check if there are any items in the cart from that category
+    const categoryId = promotion.category?.category_id;
+    return items.some(item => item.categoryId === Number(categoryId));
+};
+
+/**
  * Calculate discount for a specific promotion
  * @param {Array} items - Cart items
  * @param {Object} promotion - Promotion object
@@ -171,7 +187,7 @@ const calculatePromotionDiscount = (items, promotion) => {
  */
 export const calculateTotalDiscount = (items, promotions, currentTime) => {
     return promotions
-        .filter((promotion) => isPromotionActive(promotion, currentTime))
+        .filter((promotion) => isPromotionActive(promotion, currentTime) && isPromotionApplicable(items, promotion))
         .reduce((maxDiscount, promotion) => {
             const currentDiscount = calculatePromotionDiscount(
                 items,
