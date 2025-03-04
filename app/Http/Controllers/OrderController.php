@@ -135,11 +135,13 @@ class OrderController extends Controller
     }
 
     public function uploadSlip(Request $request)
-{
-    $request->validate([
-        'slip_image' => 'required|image|mimes:jpeg,png,jpg|max:4096',
-        'order_id' => 'required|exists:orders,id'
-    ]);
+    {
+        $rules = [
+            'slip_image' => 'required|image|mimes:jpeg,png,jpg|max:4096',
+            'order_id' => 'required|exists:orders,id'
+        ];
+
+        $request->validate($rules);
 
     $order = Order::findOrFail($request->order_id);
 
