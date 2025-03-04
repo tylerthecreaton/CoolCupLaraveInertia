@@ -135,39 +135,54 @@ class OrderController extends Controller
     }
 
     public function uploadSlip(Request $request)
-    {
-        $request->validate([
-            'slip_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'order_id' => 'required|exists:orders,id'
-        ]);
+{
+    $request->validate([
+        'slip_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        'order_id' => 'required|exists:orders,id'
+    ]);
 
-        $order = Order::findOrFail($request->order_id);
+    $order = Order::findOrFail($request->order_id);
 
-        if ($request->hasFile('slip_image')) {
-            $file = $request->file('slip_image');
-            $filename = time() . '_' . $file->getClientOriginalName();
+    if ($request->hasFile('slip_image')) {
+        $file = $request->file('slip_image');
+        $filename = time() . '_' . $file->getClientOriginalName();
 
-            $file->move(public_path('storage/slips'), $filename);
-
-            $order->payment_slip = '/storage/slips/' . $filename;
-            $order->payment_confirmed_at = now();
-            $order->save();
-
-            try {
-                $telegram = new TelegramController(new Api());
-                $user_id = Auth::user()->id;
-
-                $chat_id = TelegramUser::where('user_id', $user_id)->first()->chat_id;
-                $telegram->sendTelegramMessage($chat_id, "🧾 มีการอัพโหลดสลิปการชำระเงินใหม่!\nหมายเลขคำสั่งซื้อ: #{$order->order_number}\nยอดเงิน: ฿{$order->final_amount}");
-            } catch (Exception $e) {
-                Log::error('Telegram notification failed: ' . $e->getMessage());
-            }
-
-            return redirect()->back()->with('success', 'อัพโหลดสลิปการชำระเงินเรียบร้อยแล้ว');
+        // ตรวจสอบว่าโฟลเดอร์มีอยู่หรือไม่ ถ้าไม่มีให้สร้าง
+        $directory = public_path('storage/slips');
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
         }
 
-        return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการอัพโหลดสลิป กรุณาลองใหม่อีกครั้ง');
+        $file->move($directory, $filename);
+
+        $order->payment_slip = '/storage/slips/' . $filename;
+        $order->payment_confirmed_at = now();
+        $order->save();
+
+        try {
+            // สร้าง TelegramController พร้อม Token
+            $telegram = new TelegramController(new Api(config('services.telegram.bot_token')));
+
+            // หา chat_id จากตาราง TelegramUser หรือกำหนดค่าแบบคงที่เพื่อทดสอบ
+            $user_id = Auth::user()->id;
+            $telegramUser = TelegramUser::where('user_id', $user_id)->first();
+
+            if ($telegramUser && $telegramUser->chat_id) {
+                $chat_id = $telegramUser->chat_id;
+                $message = "🧾 มีการอัพโหลดสลิปการชำระเงินใหม่!\nหมายเลขคำสั่งซื้อ: #{$order->order_number}\nยอดเงิน: ฿{$order->final_amount}";
+                $telegram->sendTelegramMessage($chat_id, $message);
+            } else {
+                Log::warning('ไม่พบ chat_id สำหรับ user_id: ' . $user_id);
+            }
+        } catch (Exception $e) {
+            Log::error('Telegram notification failed: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'อัพโหลดสลิปการชำระเงินเรียบร้อยแล้ว');
     }
+
+    return redirect()->back()->with('error', 'เกิดข้อผิดพลาดในการอัพโหลดสลิป กรุณาลองใหม่อีกครั้ง');
+}
 
     public function showUploadSlip($id)
     {
@@ -192,7 +207,7 @@ class OrderController extends Controller
 
         // Apply date filters
         $filterType = $request->get('filterType', 'today');
-        
+
         switch ($filterType) {
             case 'today':
                 $query->whereDate('created_at', now());
