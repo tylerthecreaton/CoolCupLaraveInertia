@@ -146,6 +146,17 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     // เมื่อใส่จำนวนเงินที่รับ
     const handleCashReceived = (value) => {
         const amount = parseFloat(value) || 0;
+        
+        if (amount <= 0) {
+            Swal.fire({
+                title: "กรุณากรอกจำนวนเงินให้ถูกต้อง",
+                text: "จำนวนเงินต้องมากกว่า 0",
+                icon: "warning",
+            });
+            setData("cashReceived", "");
+            return;
+        }
+        
         setData("cashReceived", amount);
 
         // ถ้าเป็นการชำระด้วย QR และเงินที่รับมาน้อยกว่ายอดที่ต้องชำระ ให้ยังแสดง QR code
@@ -271,7 +282,7 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                 cashReceived:
                     data.selectedMethod === "cash"
                         ? data.cashReceived
-                        : data.cashReceived,
+                        : finalTotal, // Set cashReceived to finalTotal for QR payments
                 paymentNote: data.paymentNote || "",
             });
 
@@ -342,23 +353,24 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
             return;
         }
 
-        if (data.selectedMethod === "cash") {
-            const received = parseFloat(data.cashReceived);
-            if (!received && finalTotal > 0) {
-                Swal.fire({
-                    title: "กรุณากรอกจำนวนเงินที่รับมา",
-                    icon: "warning",
-                });
-                return;
-            }
-            if (received < finalTotal) {
-                Swal.fire({
-                    title: "จำนวนเงินไม่เพียงพอ",
-                    text: "กรุณาตรวจสอบจำนวนเงินอีกครั้ง",
-                    icon: "error",
-                });
-                return;
-            }
+        // ตรวจสอบการกรอกจำนวนเงินสำหรับทั้งการชำระด้วยเงินสดและ QR Code
+        const received = parseFloat(data.cashReceived);
+        if (!received && finalTotal > 0) {
+            Swal.fire({
+                title: "กรุณากรอกจำนวนเงินที่รับมา",
+                text: data.selectedMethod === "cash" ? "กรุณากรอกจำนวนเงินสดที่รับ" : "กรุณากรอกจำนวนเงินที่โอน",
+                icon: "warning",
+            });
+            return;
+        }
+
+        if (received < finalTotal) {
+            Swal.fire({
+                title: "จำนวนเงินไม่เพียงพอ",
+                text: "กรุณาตรวจสอบจำนวนเงินอีกครั้ง",
+                icon: "error",
+            });
+            return;
         }
 
         Swal.fire({
