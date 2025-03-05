@@ -8,7 +8,7 @@ import { HiCube, HiScale, HiTag, HiShoppingCart } from "react-icons/hi";
 export default function ConsumablesForm({ consumable, units = [], isEditing = false }) {
     const { data, setData, post, put, processing, errors } = useForm({
         name: isEditing ? consumable?.name : "",
-        quantity: isEditing ? consumable?.quantity : "",
+        quantity: isEditing ? consumable?.quantity : 0,
         unit_id: isEditing ? consumable?.unit_id : "",
         is_depend_on_sale: isEditing ? consumable?.is_depend_on_sale : false,
     });
@@ -160,7 +160,7 @@ export default function ConsumablesForm({ consumable, units = [], isEditing = fa
                                 type="checkbox"
                                 checked={data.is_depend_on_sale}
                                 onChange={(e) => setData("is_depend_on_sale", e.target.checked)}
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                className="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 focus:ring-2"
                             />
                             <Label
                                 htmlFor="is_depend_on_sale"

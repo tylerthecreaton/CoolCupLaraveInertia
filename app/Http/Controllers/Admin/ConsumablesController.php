@@ -13,7 +13,7 @@ class ConsumablesController extends Controller
 
     public function index()
     {
-        $consumables = Consumable::with('unit')->orderBy('created_at', 'desc')->paginate(10);
+        $consumables = Consumable::with('unit')->orderBy('created_at')->paginate(10);
         return Inertia::render('Admin/consumables/index', compact('consumables'));
     }
 
