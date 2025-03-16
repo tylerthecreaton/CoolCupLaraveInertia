@@ -94,6 +94,11 @@ const CashPaymentModal = ({ paymentInfo, onClose, localState }) => {
     const received = paymentInfo?.received || 0;
     const change = received - total;
 
+    // Get VAT information
+    const vatRate = localState?.cart?.vatRate || 7;
+    const vatAmount = localState?.cart?.vatAmount || (total - (total / (1 + (vatRate / 100))));
+    const subtotalBeforeVat = localState?.cart?.subtotalBeforeVat || (total / (1 + (vatRate / 100)));
+
     const formatPrice = (amount) => {
         return amount.toLocaleString();
     };
@@ -117,6 +122,17 @@ const CashPaymentModal = ({ paymentInfo, onClose, localState }) => {
                                         ฿{(localState?.cart?.total || 0).toFixed(2)}
                                     </p>
                                 </div>
+
+                                {/* VAT Information */}
+                                <div className="flex justify-between text-sm text-blue-600 border-t border-blue-200 pt-2 mt-2">
+                                    <span>ราคาก่อนภาษี:</span>
+                                    <span>฿{subtotalBeforeVat.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-blue-600">
+                                    <span>ภาษีมูลค่าเพิ่ม ({vatRate}%):</span>
+                                    <span>฿{vatAmount.toFixed(2)}</span>
+                                </div>
+
                                 <div>
                                     <p className="text-lg text-blue-600 mb-1">รับเงิน</p>
                                     <p className="text-4xl font-bold text-blue-700">
@@ -409,12 +425,25 @@ export default function ClientPage() {
                                             <span>ส่วนลดจากคะแนน</span>
                                             <span className="font-medium">
                                                 -฿
-                                                {localState.cart.pointDiscountAmount?.toFixed(
-                                                    2
-                                                )}
+                                                {(localState.cart.pointDiscountAmount || 0).toFixed(2)}
                                             </span>
                                         </div>
                                     )}
+                                {/* VAT Information */}
+                                <div className="flex justify-between text-gray-600">
+                                    <span>ราคาก่อนภาษี:</span>
+                                    <span>
+                                        ฿{localState.cart.subtotalBeforeVat?.toFixed(2) || 
+                                          (localState.cart.total / 1.07).toFixed(2)}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between text-gray-600">
+                                    <span>ภาษีมูลค่าเพิ่ม ({localState.cart.vatRate || 7}%):</span>
+                                    <span>
+                                        ฿{localState.cart.vatAmount?.toFixed(2) || 
+                                          (localState.cart.total - (localState.cart.total / 1.07)).toFixed(2)}
+                                    </span>
+                                </div>
                                 <div className="flex justify-between pt-4 text-xl font-semibold text-blue-600 border-t">
                                     <span>ยอดสุทธิ</span>
                                     <span>
@@ -490,12 +519,27 @@ export default function ClientPage() {
                                                 </span>
                                                 <span className="text-lg font-semibold text-blue-600">
                                                     ฿
-                                                    {localState.cart.pointDiscountAmount.toFixed(
-                                                        2
-                                                    )}
+                                                    {(localState.cart.pointDiscountAmount || 0).toFixed(2)}
                                                 </span>
                                             </div>
                                         )}
+                                    {/* VAT Information in QR Code Display */}
+                                    <div className="mt-4 pt-3 border-t border-gray-200">
+                                        <div className="flex justify-between items-center px-4 text-sm text-gray-600">
+                                            <span>ราคาก่อนภาษี:</span>
+                                            <span>
+                                                ฿{localState.cart.subtotalBeforeVat?.toFixed(2) || 
+                                                  (localState.cart.total / 1.07).toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center px-4 text-sm text-gray-600">
+                                            <span>ภาษีมูลค่าเพิ่ม ({localState.cart.vatRate || 7}%):</span>
+                                            <span>
+                                                ฿{localState.cart.vatAmount?.toFixed(2) || 
+                                                  (localState.cart.total - (localState.cart.total / 1.07)).toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </div>
                                     <div className="flex justify-between items-center px-4 pt-3 border-t">
                                         <span className="font-medium text-gray-800">
                                             ยอดชำระ:
