@@ -2,10 +2,11 @@ import MainContent from "@/Components/clientpage/MainContent";
 import StorefrontLayout from "@/Layouts/StorefrontLayout";
 import { useGlobalState } from "@/Store/state";
 import { Head } from "@inertiajs/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import ReactQrCode from "react-qr-code";
 import "@/../../resources/css/client-page.css";
 import { isAbsoluteUrl } from "@/helpers";
+import { ChevronUp, ChevronDown, ShoppingBag } from "lucide-react";
 
 const ShowThankYouModal = ({ localState, isShowing = false }) => {
     return (
@@ -126,11 +127,11 @@ const CashPaymentModal = ({ paymentInfo, onClose, localState }) => {
                                 {/* VAT Information */}
                                 <div className="flex justify-between text-sm text-blue-600 border-t border-blue-200 pt-2 mt-2">
                                     <span>ราคาก่อนภาษี:</span>
-                                    <span>฿{subtotalBeforeVat.toFixed(2)}</span>
+                                    <span>฿{(localState?.cart?.subtotalBeforeVat || (localState?.cart?.total / 1.07)).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm text-blue-600">
                                     <span>ภาษีมูลค่าเพิ่ม ({vatRate}%):</span>
-                                    <span>฿{vatAmount.toFixed(2)}</span>
+                                    <span>฿{(localState?.cart?.vatAmount || (localState?.cart?.total - (localState?.cart?.total / 1.07))).toFixed(2)}</span>
                                 </div>
 
                                 <div>
@@ -167,6 +168,32 @@ export default function ClientPage() {
         },
         isShowingThankYouModal: false,
     });
+    const [isCartExpanded, setIsCartExpanded] = useState(false);
+    const cartDrawerRef = useRef(null);
+    const prevCartItemsLength = useRef(0);
+
+    // Auto-open drawer when items are added to cart
+    useEffect(() => {
+        if (localState.cart.items?.length > 0 && localState.cart.items?.length > prevCartItemsLength.current) {
+            setIsCartExpanded(true);
+        }
+        
+        prevCartItemsLength.current = localState.cart.items?.length || 0;
+    }, [localState.cart.items?.length]);
+
+    // Handle clicks outside the cart drawer to close it
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (cartDrawerRef.current && !cartDrawerRef.current.contains(event.target) && isCartExpanded) {
+                setIsCartExpanded(false);
+            }
+        }
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isCartExpanded]);
 
     // Setup broadcast channel listeners
     useEffect(() => {
@@ -329,131 +356,164 @@ export default function ClientPage() {
                     </div>
                 )}
 
-                {/* Cart Items */}
+                {/* Cart Items - Flutter-style Drawer */}
                 {localState.cart.items?.length > 0 && (
-                    <div className="p-6 mb-8 bg-white rounded-xl shadow-lg transition-all duration-300 transform hover:shadow-xl">
-                        <h3 className="pb-4 mb-6 text-2xl font-semibold text-gray-800 border-b">
-                            รายการสินค้า
-                        </h3>
-                        <div className="space-y-4">
-                            {localState.cart.items.map(
-                                (item, index) => (
-                                    <div
-                                        key={item.id}
-                                        className="flex items-start p-4 space-x-4 bg-gray-50 rounded-lg transition-colors duration-200 hover:bg-gray-100"
-                                        style={{
-                                            animationDelay: `${index * 100
-                                                }ms`,
-                                        }}
-                                    >
-                                        <img
-                                            src={
-                                                isAbsoluteUrl(item.image)
-                                                    ? item.image
-                                                    : `/images/products/${item.image}`
-                                            }
-                                            alt={item.name}
-                                            className="object-cover w-20 h-20 rounded-lg shadow-sm"
-
-                                        />
-                                        <div className="flex-1">
-                                            <div className="text-lg font-semibold text-gray-800">
-                                                {item.name}
+                    <>
+                        {/* Cart Drawer Content - Right Side */}
+                        <div 
+                            ref={cartDrawerRef}
+                            className={`fixed top-0 right-0 bottom-0 z-30 bg-white border-l border-gray-200 shadow-2xl transition-transform duration-300 ease-in-out transform right-drawer ${
+                                isCartExpanded ? 'translate-x-0 drawer-enter' : 'translate-x-full drawer-exit'
+                            }`}
+                            style={{ 
+                                width: '350px',
+                                maxWidth: '90vw'
+                            }}
+                        >
+                            <div className="relative h-full overflow-hidden right-drawer-content">
+                                {/* Drawer Handle */}
+                                <div className="absolute top-0 left-0 right-0 flex justify-center pt-2 pb-4">
+                                    <div className="drawer-handle-indicator"></div>
+                                </div>
+                                
+                                {/* Close Button */}
+                                <button 
+                                    className="absolute top-4 left-4 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full"
+                                    onClick={() => setIsCartExpanded(false)}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                                
+                                {/* Drawer Content */}
+                                <div className="h-full overflow-y-auto pt-14 pb-24 right-drawer-body">
+                                    <div className="px-4">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-2xl font-semibold text-gray-800">
+                                                รายการสินค้า
+                                            </h3>
+                                            <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                                {localState.cart.items.length} รายการ
                                             </div>
-                                            <div className="mt-1 text-gray-600">
-                                                <span className="inline-block px-3 py-1 mr-2 text-sm text-blue-800 bg-blue-100 rounded-full">
-                                                    {item.size}
-                                                </span>
-                                                <span className="inline-block px-3 py-1 text-sm text-green-800 bg-green-100 rounded-full">
-                                                    ความหวาน:{" "}
-                                                    {item.sweetness}
-                                                </span>
-                                            </div>
-                                            {item.toppings && item.toppings.map((topping, idx) => (
-                                                <div className="mt-2 text-sm text-gray-600" key={idx}>
-                                                    <span className="font-medium">
-                                                        ท็อปปิ้ง:{" "}
-                                                    </span>
-                                                    <span className="inline-block px-2 py-1 mr-1 mb-1 text-xs text-yellow-800 bg-yellow-100 rounded-full">
-                                                        {topping.name} (฿{topping.price})
-                                                    </span>
+                                        </div>
+                                        
+                                        {/* Cart Items */}
+                                        <div className="space-y-4 mb-6">
+                                            {localState.cart.items.map((item, index) => (
+                                                <div
+                                                    key={item.id}
+                                                    className="flex items-start p-4 space-x-4 bg-gray-50 rounded-xl transition-all duration-200 hover:bg-gray-100 hover:shadow-md cart-item"
+                                                    style={{
+                                                        animationDelay: `${index * 100}ms`,
+                                                    }}
+                                                >
+                                                    <div className="relative flex-shrink-0">
+                                                        <img
+                                                            src={
+                                                                isAbsoluteUrl(item.image)
+                                                                    ? item.image
+                                                                    : `/images/products/${item.image}`
+                                                            }
+                                                            alt={item.name}
+                                                            className="object-cover w-20 h-20 rounded-lg shadow-sm"
+                                                        />
+                                                        <div className="absolute -top-2 -right-2 flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-blue-600 rounded-full">
+                                                            {item.quantity}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="flex justify-between">
+                                                            <div className="text-lg font-semibold text-gray-800">
+                                                                {item.name}
+                                                            </div>
+                                                            <div className="text-lg font-bold text-blue-600">
+                                                                ฿{(item.subtotal || (item.price * item.quantity) || 0).toFixed(2)}
+                                                            </div>
+                                                        </div>
+                                                        <div className="mt-1 space-x-2">
+                                                            <span className="inline-block px-3 py-1 text-sm text-blue-800 bg-blue-100 rounded-full">
+                                                                {item.size}
+                                                            </span>
+                                                            <span className="inline-block px-3 py-1 text-sm text-green-800 bg-green-100 rounded-full">
+                                                                ความหวาน: {item.sweetness}
+                                                            </span>
+                                                        </div>
+                                                        {item.toppings && item.toppings.length > 0 && (
+                                                            <div className="mt-2 text-sm text-gray-600">
+                                                                <span className="font-medium">ท็อปปิ้ง: </span>
+                                                                <div className="flex flex-wrap gap-1 mt-1">
+                                                                    {item.toppings.map((topping, idx) => (
+                                                                        <span 
+                                                                            key={idx} 
+                                                                            className="inline-block px-2 py-1 text-xs text-yellow-800 bg-yellow-100 rounded-full"
+                                                                        >
+                                                                            {topping.name} (฿{topping.price})
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             ))}
-                                            <div className="flex justify-between mt-3">
-                                                <span className="text-gray-600">
-                                                    จำนวน:{" "}
-                                                    {item.quantity}
-                                                </span>
-                                                <span className="font-semibold text-blue-600">
-                                                    ฿
-                                                    {(
-                                                        item.price *
-                                                        item.quantity
-                                                    ).toFixed(2)}
-                                                </span>
+                                        </div>
+                                        
+                                        {/* Cart Summary */}
+                                        <div className="p-4 bg-white rounded-xl shadow-md sticky bottom-0 right-drawer-footer">
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between text-gray-600">
+                                                    <span>ราคารวม</span>
+                                                    <span className="font-medium">
+                                                        ฿{(localState.cart.subtotal || 0).toFixed(2)}
+                                                    </span>
+                                                </div>
+                                                {localState.cart.cartDiscount >
+                                                    0 && (
+                                                        <div className="flex justify-between items-center text-green-600">
+                                                            <span>ส่วนลด</span>
+                                                            <span className="font-medium">
+                                                                -฿{(localState.cart.cartDiscount || 0).toFixed(2)}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                {localState.cart
+                                                    .pointDiscountAmount > 0 && (
+                                                        <div className="flex justify-between items-center text-blue-600">
+                                                            <span>ส่วนลดจากคะแนน</span>
+                                                            <span className="font-medium">
+                                                                -฿{(localState.cart.pointDiscountAmount || 0).toFixed(2)}
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                
+                                                {/* VAT Information */}
+                                                <div className="flex justify-between text-gray-600">
+                                                    <span>ราคาก่อนภาษี:</span>
+                                                    <span>
+                                                        ฿{(localState.cart.subtotalBeforeVat || (localState.cart.total / 1.07) || 0).toFixed(2)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between text-gray-600">
+                                                    <span>ภาษีมูลค่าเพิ่ม ({localState.cart.vatRate || 7}%):</span>
+                                                    <span>
+                                                        ฿{(localState.cart.vatAmount || (localState.cart.total - (localState.cart.total / 1.07)) || 0).toFixed(2)}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div className="flex justify-between pt-4 text-xl font-semibold text-blue-600 border-t">
+                                                    <span>ยอดสุทธิ</span>
+                                                    <span>
+                                                        ฿{(localState.cart.total || 0).toFixed(2)}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                )
-                            )}
-
-                            {/* Summary Section */}
-                            <div className="pt-6 mt-6 space-y-3 border-t">
-                                <div className="flex justify-between text-gray-600">
-                                    <span>ยอดรวม</span>
-                                    <span className="font-medium">
-                                        ฿
-                                        {localState.cart.subtotal?.toFixed(
-                                            2
-                                        )}
-                                    </span>
-                                </div>
-                                {localState.cart.cartDiscount > 0 && (
-                                    <div className="flex justify-between text-green-600">
-                                        <span>ส่วนลด</span>
-                                        <span className="font-medium">
-                                            -฿
-                                            {localState.cart.cartDiscount?.toFixed(
-                                                2
-                                            )}
-                                        </span>
-                                    </div>
-                                )}
-                                {localState.cart.pointDiscountAmount >
-                                    0 && (
-                                        <div className="flex justify-between text-blue-600">
-                                            <span>ส่วนลดจากคะแนน</span>
-                                            <span className="font-medium">
-                                                -฿
-                                                {(localState.cart.pointDiscountAmount || 0).toFixed(2)}
-                                            </span>
-                                        </div>
-                                    )}
-                                {/* VAT Information */}
-                                <div className="flex justify-between text-gray-600">
-                                    <span>ราคาก่อนภาษี:</span>
-                                    <span>
-                                        ฿{localState.cart.subtotalBeforeVat?.toFixed(2) || 
-                                          (localState.cart.total / 1.07).toFixed(2)}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between text-gray-600">
-                                    <span>ภาษีมูลค่าเพิ่ม ({localState.cart.vatRate || 7}%):</span>
-                                    <span>
-                                        ฿{localState.cart.vatAmount?.toFixed(2) || 
-                                          (localState.cart.total - (localState.cart.total / 1.07)).toFixed(2)}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between pt-4 text-xl font-semibold text-blue-600 border-t">
-                                    <span>ยอดสุทธิ</span>
-                                    <span>
-                                        ฿
-                                        {localState.cart.total?.toFixed(2)}
-                                    </span>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </>
                 )}
 
                 {/* QR Code Display */}
@@ -491,10 +551,7 @@ export default function ClientPage() {
                                             ยอดรวม:
                                         </span>
                                         <span className="text-lg font-semibold">
-                                            ฿
-                                            {localState.clientScreen.qrCode.subtotal.toFixed(
-                                                2
-                                            )}
+                                            ฿{(localState.clientScreen.qrCode.subtotal || 0).toFixed(2)}
                                         </span>
                                     </div>
                                     {localState.cart.totalDiscount >
@@ -504,10 +561,7 @@ export default function ClientPage() {
                                                     ส่วนลด:
                                                 </span>
                                                 <span className="text-lg font-semibold text-green-600">
-                                                    ฿
-                                                    {localState.cart.totalDiscount.toFixed(
-                                                        2
-                                                    )}
+                                                    -฿{(localState.cart.totalDiscount || 0).toFixed(2)}
                                                 </span>
                                             </div>
                                         )}
@@ -518,8 +572,7 @@ export default function ClientPage() {
                                                     ส่วนลดจากคะแนน:
                                                 </span>
                                                 <span className="text-lg font-semibold text-blue-600">
-                                                    ฿
-                                                    {(localState.cart.pointDiscountAmount || 0).toFixed(2)}
+                                                    -฿{(localState.cart.pointDiscountAmount || 0).toFixed(2)}
                                                 </span>
                                             </div>
                                         )}
@@ -528,15 +581,13 @@ export default function ClientPage() {
                                         <div className="flex justify-between items-center px-4 text-sm text-gray-600">
                                             <span>ราคาก่อนภาษี:</span>
                                             <span>
-                                                ฿{localState.cart.subtotalBeforeVat?.toFixed(2) || 
-                                                  (localState.cart.total / 1.07).toFixed(2)}
+                                                ฿{(localState.cart.subtotalBeforeVat || (localState.cart.total / 1.07) || 0).toFixed(2)}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center px-4 text-sm text-gray-600">
                                             <span>ภาษีมูลค่าเพิ่ม ({localState.cart.vatRate || 7}%):</span>
                                             <span>
-                                                ฿{localState.cart.vatAmount?.toFixed(2) || 
-                                                  (localState.cart.total - (localState.cart.total / 1.07)).toFixed(2)}
+                                                ฿{(localState.cart.vatAmount || (localState.cart.total - (localState.cart.total / 1.07)) || 0).toFixed(2)}
                                             </span>
                                         </div>
                                     </div>
@@ -545,8 +596,7 @@ export default function ClientPage() {
                                             ยอดชำระ:
                                         </span>
                                         <span className="text-xl font-bold text-blue-600">
-                                            ฿
-                                            {localState.cart.total.toFixed(2)}
+                                            ฿{(localState.cart.total || 0).toFixed(2)}
                                         </span>
                                     </div>
                                 </div>
@@ -567,10 +617,7 @@ export default function ClientPage() {
                                             รับเงิน
                                         </p>
                                         <p className="py-4 text-6xl font-bold bg-white bg-opacity-10 rounded-lg">
-                                            ฿
-                                            {localState.clientScreen.paymentInfo.received.toFixed(
-                                                2
-                                            )}
+                                            ฿{(localState.clientScreen.paymentInfo.received || 0).toFixed(2)}
                                         </p>
                                     </div>
                                     <div className="text-white">
@@ -578,8 +625,7 @@ export default function ClientPage() {
                                             เงินทอน
                                         </p>
                                         <p className="py-4 text-6xl font-bold bg-white bg-opacity-10 rounded-lg">
-                                            ฿
-                                            {Math.max(
+                                            ฿{Math.max(
                                                 0,
                                                 localState.clientScreen
                                                     .paymentInfo.change
