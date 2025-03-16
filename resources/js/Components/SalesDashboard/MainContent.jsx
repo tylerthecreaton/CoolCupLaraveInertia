@@ -170,42 +170,42 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
             <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2 lg:grid-cols-4">
                 {/* Total Sales Card */}
                 <div className="p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg transition-all transform hover:scale-105">
-                    <h3 className="text-sm font-medium text-blue-100">ยอดขายรายเดือน</h3>
+                    <h3 className="text-sm font-medium text-blue-100">ยอดขายรายวัน</h3>
                     <p className="text-3xl font-bold text-white">฿{formatCurrency(statistics.totalSales || 0)}</p>
-                    <p className="flex items-center text-sm text-blue-100">
+                    {/* <p className="flex items-center text-sm text-blue-100">
                         <span className="mr-1">{statistics.salesChange >= 0 ? '↑' : '↓'}</span>
-                        {statistics.salesChange >= 0 ? '+' : ''}{statistics.salesChange || 0}% จากเดือนที่แล้ว
-                    </p>
+                        {statistics.salesChange >= 0 ? '+' : ''}{statistics.salesChange || 0}% จากเมื่อวาน
+                    </p> */}
                 </div>
 
                 {/* Orders Card */}
                 <div className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-lg transition-all transform hover:scale-105">
-                    <h3 className="text-sm font-medium text-purple-100">รายการสั่งซื้อรายเดือน</h3>
-                    <p className="text-3xl font-bold text-white">{statistics.totalOrders || 0}</p>
-                    <p className="flex items-center text-sm text-purple-100">
+                    <h3 className="text-sm font-medium text-purple-100">รายการสั่งซื้อรายวัน</h3>
+                    <p className="text-3xl font-bold text-white">{statistics.totalOrders || 0} ออเดอร์</p>
+                    {/* <p className="flex items-center text-sm text-purple-100">
                         <span className="mr-1">{statistics.ordersChange >= 0 ? '↑' : '↓'}</span>
-                        {statistics.ordersChange >= 0 ? '+' : ''}{statistics.ordersChange || 0}% จากเดือนที่แล้ว
-                    </p>
+                        {statistics.ordersChange >= 0 ? '+' : ''}{statistics.ordersChange || 0}% จากเมื่อวาน
+                    </p> */}
                 </div>
 
                 {/* Average Order Value */}
                 <div className="p-6 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg transition-all transform hover:scale-105">
                     <h3 className="text-sm font-medium text-green-100">ยอดเฉลี่ยต่อออเดอร์</h3>
-                    <p className="text-3xl font-bold text-white">฿{formatCurrency(statistics.averageOrderValue || 0)}</p>
-                    <p className="flex items-center text-sm text-green-100">
+                    <p className="text-3xl font-bold text-white">฿{formatCurrency(statistics.averageOrderValue || 0)} </p>
+                    {/* <p className="flex items-center text-sm text-green-100">
                         <span className="mr-1">{statistics.averageOrderChange >= 0 ? '↑' : '↓'}</span>
-                        {statistics.averageOrderChange >= 0 ? '+' : ''}{statistics.averageOrderChange || 0}% จากเดือนที่แล้ว
-                    </p>
+                        {statistics.averageOrderChange >= 0 ? '+' : ''}{statistics.averageOrderChange || 0}% จากเมื่อวาน
+                    </p> */}
                 </div>
 
                 {/* Customers */}
                 <div className="p-6 bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-lg transition-all transform hover:scale-105">
-                    <h3 className="text-sm font-medium text-red-100">จำนวนลูกค้ารายเดือน</h3>
-                    <p className="text-3xl font-bold text-white">{statistics.totalCustomers || 0}</p>
-                    <p className="flex items-center text-sm text-red-100">
+                    <h3 className="text-sm font-medium text-red-100">จำนวนลูกค้าที่สมัครสมาชิกรายวัน</h3>
+                    <p className="text-3xl font-bold text-white">{statistics.totalCustomers || 0} คน</p>
+                    {/* <p className="flex items-center text-sm text-red-100">
                         <span className="mr-1">{statistics.customersChange >= 0 ? '↑' : '↓'}</span>
-                        {statistics.customersChange >= 0 ? '+' : ''}{statistics.customersChange || 0}% จากเดือนที่แล้ว
-                    </p>
+                        {statistics.customersChange >= 0 ? '+' : ''}{statistics.customersChange || 0}% จากเมื่อวาน
+                    </p> */}
                 </div>
             </div>
 
@@ -256,9 +256,9 @@ export default function MainContent({ topProducts = [], statistics = {} }) {
                                     </div>
                                     <div className="ml-4">
                                         <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                                        <p className="text-sm text-gray-500">
-                                            {product.category?.name || 'Uncategorized'}
-                                        </p>
+                                        {/* <p className="text-sm text-gray-500">
+                                            {product.description || 'Uncategorized'}
+                                        </p> */}
                                     </div>
                                 </div>
                                 <p className="text-sm font-medium text-gray-900">

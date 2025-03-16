@@ -15,6 +15,7 @@ import { FaList, FaPlus, FaEdit, FaTrash, FaUser, FaEnvelope, FaUserTag, FaSearc
 import Swal from "sweetalert2";
 
 export default function Index({ usersPaginate }) {
+    const { auth } = usePage().props;
     const [search, setSearch] = useState("");
 
     const handleSearch = (e) => {
@@ -199,12 +200,27 @@ export default function Index({ usersPaginate }) {
                                         </Table.Cell>
                                         <Table.Cell>
                                             <div className="flex items-center justify-end gap-2">
-                                                <Link href={route("admin.users.edit", user.id)}>
-                                                    <Button size="xs" color="info" className="gap-1">
-                                                        <FaEdit className="w-4 h-4" />
-                                                        แก้ไข
-                                                    </Button>
-                                                </Link>
+                                                <Button
+                                                    size="xs"
+                                                    color="info"
+                                                    className="gap-1"
+                                                    onClick={() => {
+                                                        if (user.role === 'admin' && auth.user.role !== 'admin') {
+                                                            Swal.fire({
+                                                                title: 'ไม่สามารถแก้ไขได้',
+                                                                text: 'คุณไม่มีสิทธิ์ในการแก้ไขข้อมูลของ Admin',
+                                                                icon: 'warning',
+                                                                confirmButtonText: 'ตกลง',
+                                                                confirmButtonColor: '#3085d6',
+                                                            });
+                                                            return;
+                                                        }
+                                                        router.get(route("admin.users.edit", user.id));
+                                                    }}
+                                                >
+                                                    <FaEdit className="w-4 h-4" />
+                                                    แก้ไข
+                                                </Button>
                                                 <Button
                                                     size="xs"
                                                     color="failure"
