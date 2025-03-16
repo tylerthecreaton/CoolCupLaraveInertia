@@ -58,6 +58,12 @@ class OrderController extends Controller
         $order->discount_type = $cart['discountType'];
         $order->manual_discount_amount = $cart['manualDiscountAmount'];
         $order->final_amount = $cart['total'];
+        
+        // Save VAT information
+        $order->vat_rate = $cart['vatRate'] ?? 7; // Default to 7% if not provided
+        $order->vat_amount = $cart['vatAmount'] ?? ($cart['total'] - ($cart['total'] / 1.07));
+        $order->subtotal_before_vat = $cart['subtotalBeforeVat'] ?? ($cart['total'] / 1.07);
+        
         $order->payment_method = $request->get("selectedMethod");
         $order->cash = $request->get("cashReceived");
         $order->file_name = '';
@@ -564,7 +570,7 @@ class OrderController extends Controller
 
     public function cancel(Request $request, $id)
     {
-        $order = Order::find($id);
+        $order = Order::findOrFail($id);
         $request->validate([
             'cancellation_reason' => 'required|string|min:3',
             'is_restock_possible' => 'required|boolean',

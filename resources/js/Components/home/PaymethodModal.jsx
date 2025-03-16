@@ -42,6 +42,16 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
     const settings = state.app?.settings || [];
     const { total, subtotal, discount } = state.cart;
 
+    // Get VAT settings
+    const vatSetting = Array.isArray(settings) 
+        ? settings.find(setting => setting.key === 'vat_rate') 
+        : null;
+    const vatRate = vatSetting ? parseFloat(vatSetting.value) : 7; // Default to 7% if not found
+    
+    // Calculate VAT
+    const subtotalBeforeVat = total / (1 + (vatRate / 100));
+    const vatAmount = total - subtotalBeforeVat;
+
     const pointPerThb = Array.isArray(settings) ? settings.find(
         (setting) => setting.key === "point_per_thb"
     ) : null;
@@ -266,7 +276,12 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                     data.selectedMethod === "qr"
                         ? "qr_code"
                         : data.selectedMethod,
-                cart: state.cart,
+                cart: {
+                    ...state.cart,
+                    vatRate,
+                    vatAmount,
+                    subtotalBeforeVat
+                },
                 memberPhone: data.memberPhone,
                 cashReceived:
                     data.selectedMethod === "cash"
@@ -463,6 +478,23 @@ const PaymethodModal = ({ show, onClose, cartActions }) => {
                             </div>
                             <span className="text-xl font-bold text-green-600">
                                 ฿{total}
+                            </span>
+                        </div>
+                        {/* VAT Information */}
+                        <div className="flex justify-between text-sm text-gray-600">
+                            <span>ราคาก่อนภาษี:</span>
+                            <span>฿{subtotalBeforeVat.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600">
+                            <span>ภาษีมูลค่าเพิ่ม ({vatRate}%):</span>
+                            <span>฿{vatAmount.toFixed(2)}</span>
+                        </div>
+                        
+                        {/* Final Total */}
+                        <div className="flex justify-between pt-3 mt-2 border-t border-gray-200">
+                            <span className="font-medium">ยอดชำระสุทธิ:</span>
+                            <span className="text-xl font-bold text-green-600">
+                                ฿{total.toFixed(2)}
                             </span>
                         </div>
                         {!isSummary && (

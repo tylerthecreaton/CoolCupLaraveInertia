@@ -14,7 +14,7 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
     const [isSaving, setIsSaving] = React.useState(false);
     const { state, dispatch } = useGlobalState();
     const settings = state.app.settings || [];
-    const vatRate = Array.isArray(settings) ? settings.find(setting => setting.key === 'vat_rate')?.value || 7 : 7;
+    const vatSetting = Array.isArray(settings) ? settings.find(setting => setting.key === 'vat_rate') : null;
     const taxpayerNumber = Array.isArray(settings) ? settings.find(setting => setting.key === 'taxpayer_number')?.value || '-' : '-';
 
     // แสดงใบเสร็จตอนกด Button พิมพ์ใบเสร็จ
@@ -251,18 +251,24 @@ const ReceiptModal = ({ show, onClose, orderData }) => {
                             </div>
                             {/* คำนวณ VAT */}
                             {(() => {
-                                const totalAfterDiscount = Number(orderData?.total_amount || 0) - Number(orderData?.discount_amount || 0);
-                                const vatAmount = (totalAfterDiscount * vatRate) / (100 + Number(vatRate));
-                                const priceBeforeVat = totalAfterDiscount - vatAmount;
+                                // Use VAT values from order data if available, otherwise calculate
+                                const vatRate = orderData?.vat_rate || Number(vatSetting?.value) || 7;
+                                const vatAmount = orderData?.vat_amount !== undefined && orderData?.vat_amount !== null
+                                    ? Number(orderData.vat_amount)
+                                    : ((Number(orderData?.final_amount || 0) * vatRate) / (100 + vatRate));
+                                const priceBeforeVat = orderData?.subtotal_before_vat !== undefined && orderData?.subtotal_before_vat !== null
+                                    ? Number(orderData.subtotal_before_vat)
+                                    : (Number(orderData?.final_amount || 0) - vatAmount);
+                                
                                 return (
                                     <div className="border-t border-gray-200 pt-1.5">
                                         <div className="flex justify-between text-gray-600">
                                             <span>ราคาก่อน VAT</span>
-                                            <span>฿{priceBeforeVat.toFixed(2)}</span>
+                                            <span>฿{typeof priceBeforeVat === 'number' ? priceBeforeVat.toFixed(2) : '0.00'}</span>
                                         </div>
                                         <div className="flex justify-between text-gray-600">
                                             <span>VAT {vatRate}%</span>
-                                            <span>฿{vatAmount.toFixed(2)}</span>
+                                            <span>฿{typeof vatAmount === 'number' ? vatAmount.toFixed(2) : '0.00'}</span>
                                         </div>
                                     </div>
                                 );

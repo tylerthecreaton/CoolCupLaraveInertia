@@ -37,6 +37,9 @@ const CartComponent = () => {
         userId: user?.id || null,
         userName: user?.name || "ผู้ใช้ทั่วไป",
         timestamp: new Date().toISOString(),
+        vatRate: 0,
+        vatAmount: 0,
+        subtotalBeforeVat: 0,
     });
 
     // Calculate total items (excluding discounts)
@@ -46,6 +49,10 @@ const CartComponent = () => {
             0
         );
     };
+
+    useEffect(() => {
+        console.log(state);
+    }, [state]);
 
     // Fetch promotions on component mount
     useEffect(() => {
@@ -65,7 +72,7 @@ const CartComponent = () => {
 
                     // For category promotions, check if we have relevant items in cart
                     if (promotion.type === "CATEGORY_DISCOUNT") {
-                        const hasRelevantItems = items.some(item => 
+                        const hasRelevantItems = items.some(item =>
                             item.categoryId === Number(promotion.category?.category_id)
                         );
                         return isValidDate && hasRelevantItems;
@@ -85,6 +92,7 @@ const CartComponent = () => {
         };
         fetchPromotions();
     }, [items]); // Added items as dependency to re-fetch when cart changes
+
 
     // Handle click outside cart
     useEffect(() => {
@@ -140,6 +148,9 @@ const CartComponent = () => {
             totalDiscount,
             total,
             totalItems,
+            vatRate,
+            vatAmount,
+            subtotalBeforeVat,
         } = calculateTotals();
         const regularItems = items.filter((item) => item.price > 0);
 
@@ -161,6 +172,9 @@ const CartComponent = () => {
             userId: user?.id || null,
             userName: user?.name || "ผู้ใช้ทั่วไป",
             timestamp: new Date().toISOString(),
+            vatRate,
+            vatAmount,
+            subtotalBeforeVat,
         }));
     }, [items, state.cart, user]);
 
@@ -187,13 +201,30 @@ const CartComponent = () => {
             0
         );
 
+        // VAT calculation
+        const vatSetting = Array.isArray(state.app?.settings) 
+            ? state.app.settings.find(setting => setting.key === 'vat_rate') 
+            : null;
+        
+        const vatRate = vatSetting ? parseFloat(vatSetting.value) : 7; // Default to 7% if not found
+        const totalAfterDiscount = Math.max(0, subtotal - totalDiscount);
+        
+        // Calculate VAT amount and subtotal before VAT
+        // Formula: subtotalBeforeVat = total / (1 + (vatRate/100))
+        // VAT amount = total - subtotalBeforeVat
+        const subtotalBeforeVat = totalAfterDiscount / (1 + (vatRate / 100));
+        const vatAmount = totalAfterDiscount - subtotalBeforeVat;
+
         return {
             subtotal,
             cartDiscount,
             pointDiscount,
             totalDiscount,
-            total: Math.max(0, subtotal - totalDiscount),
+            total: totalAfterDiscount,
             totalItems,
+            vatRate,
+            vatAmount,
+            subtotalBeforeVat,
         };
     };
 
@@ -661,6 +692,14 @@ const CartComponent = () => {
                                     </span>
                                 </div>
                             )}
+                            <div className="flex justify-between text-sm text-gray-600">
+                                <span>ราคาก่อนภาษี:</span>
+                                <span>฿{summary.subtotalBeforeVat.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm text-gray-600">
+                                <span>ภาษีมูลค่าเพิ่ม ({summary.vatRate}%):</span>
+                                <span>฿{summary.vatAmount.toFixed(2)}</span>
+                            </div>
                             <div className="flex justify-between font-medium text-lg pt-2 border-t">
                                 <span>ยอดชำระ:</span>
                                 <span>฿{summary.total.toFixed(2)}</span>

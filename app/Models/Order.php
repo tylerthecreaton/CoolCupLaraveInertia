@@ -22,6 +22,9 @@ class Order extends Model
         'received_points',
         'point_discount_amount',
         'used_points',
+        'vat_rate',
+        'vat_amount',
+        'subtotal_before_vat',
     ];
 
     protected $with = ['orderDetails', 'customer'];

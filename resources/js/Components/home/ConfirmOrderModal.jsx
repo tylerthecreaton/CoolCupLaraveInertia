@@ -166,6 +166,14 @@ const ConfirmOrderModal = ({ show, onClose, totalItems }) => {
                                     </span>
                                 </div>
                             )}
+                            <div className="flex justify-between text-sm text-gray-600">
+                                <span>ราคาก่อนภาษี:</span>
+                                <span>฿{summary.subtotalBeforeVat ? summary.subtotalBeforeVat.toFixed(2) : (summary.total / 1.07).toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm text-gray-600">
+                                <span>ภาษีมูลค่าเพิ่ม ({summary.vatRate || 7}%):</span>
+                                <span>฿{summary.vatAmount ? summary.vatAmount.toFixed(2) : (summary.total - (summary.total / 1.07)).toFixed(2)}</span>
+                            </div>
                             <div className="flex justify-between pt-3 text-lg border-t">
                                 <span className="font-bold">ราคาสุทธิ:</span>
                                 <span className="font-bold text-blue-600">
