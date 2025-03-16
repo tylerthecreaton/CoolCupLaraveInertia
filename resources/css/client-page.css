@@ -197,11 +197,59 @@
 
 /* Drawer Handle Indicator */
 .drawer-handle-indicator {
-  width: 48px;
-  height: 4px;
+  width: 40px;
+  height: 5px;
+  background-color: #e2e8f0;
+  border-radius: 3px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.drawer-container:hover .drawer-handle-indicator {
   background-color: #cbd5e0;
-  border-radius: 4px;
-  margin: 8px auto;
+}
+
+/* Animation classes for the drawer */
+.drawer-enter {
+  animation: drawer-slide-in 0.3s ease-in-out forwards;
+}
+
+.drawer-exit {
+  animation: drawer-slide-out 0.3s ease-in-out forwards;
+}
+
+@keyframes drawer-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawer-slide-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Cart item animations */
+.cart-item {
+  animation: fade-in-up 0.3s ease-in-out forwards;
+  opacity: 0;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Right Side Drawer Specific Styles */
@@ -235,4 +283,83 @@
   border-top: 1px solid #e2e8f0;
   padding: 16px;
   background-color: white;
+}
+
+/* Flex-based Drawer Layout */
+.flex-layout-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  transition: width 0.3s ease-in-out;
+  overflow-y: auto;
+  height: 100vh;
+  max-height: 100vh;
+  /* Hide scrollbar but allow scrolling */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.main-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.main-content.drawer-open {
+  width: calc(100% - 350px);
+}
+
+.drawer-container {
+  width: 0;
+  flex-shrink: 0;
+  height: 100vh;
+  max-height: 100vh;
+  transition: width 0.3s ease-in-out;
+  overflow: hidden;
+  border-left: 1px solid #e2e8f0;
+  background-color: white;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
+}
+
+.drawer-container.open {
+  width: 350px;
+}
+
+.drawer-content {
+  width: 350px;
+  height: 100%;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  /* Hide scrollbar but allow scrolling */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.drawer-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.drawer-container.open .drawer-content {
+  opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .drawer-container.open {
+    width: 300px;
+  }
+  
+  .drawer-content {
+    width: 300px;
+  }
+  
+  .main-content.drawer-open {
+    width: calc(100% - 300px);
+  }
 }
