@@ -231,15 +231,17 @@ export default function Index({ settings, types }) {
                                                     <FaEdit className="w-4 h-4" />
                                                     แก้ไข
                                                 </Button>
-                                                <Button
-                                                    size="xs"
-                                                    color="failure"
-                                                    onClick={() => handleDelete(setting.id)}
-                                                    className="gap-1"
-                                                >
-                                                    <FaTrash className="w-4 h-4" />
-                                                    ลบ
-                                                </Button>
+                                                {setting.type !== 'system' && (
+                                                    <Button
+                                                        size="xs"
+                                                        color="failure"
+                                                        onClick={() => handleDelete(setting.id)}
+                                                        className="gap-1"
+                                                    >
+                                                        <FaTrash className="w-4 h-4" />
+                                                        ลบ
+                                                    </Button>
+                                                )}
                                             </div>
                                         </Table.Cell>
                                     </Table.Row>

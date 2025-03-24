@@ -53,11 +53,41 @@ export default function UnitModal({ show, onClose, onEdit }) {
             reverseButtons: true,
         }).then((result) => {
             if (result.isConfirmed) {
+                // Show loading state
                 Swal.fire({
-                    title: "Coming Soon",
-                    text: "ฟังก์ชันนี้กำลังอยู่ในระหว่างการพัฒนา",
-                    icon: "info",
+                    title: "กำลังดำเนินการ",
+                    text: "กำลังลบหน่วยวัด...",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
                 });
+
+                // Send delete request to the server
+                axios.post(route('admin.units.destroy', id), {
+                    _method: 'DELETE'
+                })
+                    .then(response => {
+                        // Remove the deleted unit from the state
+                        setUnits(units.filter(unit => unit.id !== id));
+                        
+                        // Show success message
+                        Swal.fire({
+                            title: "สำเร็จ!",
+                            text: "ลบหน่วยวัดเรียบร้อยแล้ว",
+                            icon: "success",
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error deleting unit:', error);
+                        
+                        // Show error message
+                        Swal.fire({
+                            title: "เกิดข้อผิดพลาด!",
+                            text: error.response?.data?.message || "ไม่สามารถลบหน่วยวัดได้",
+                            icon: "error",
+                        });
+                    });
             }
         });
     };
