@@ -30,7 +30,19 @@ export default function Index({ usersPaginate }) {
         );
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = (id, role) => {
+        // Check if trying to delete an admin user while not being an admin
+        if (role === 'admin' && auth.user.role !== 'admin') {
+            Swal.fire({
+                title: 'ไม่สามารถลบได้',
+                text: 'คุณไม่มีสิทธิ์ในการลบข้อมูลของ Admin',
+                icon: 'warning',
+                confirmButtonText: 'ตกลง',
+                confirmButtonColor: '#3085d6',
+            });
+            return;
+        }
+
         Swal.fire({
             title: "ยืนยันการลบ?",
             text: "คุณไม่สามารถย้อนกลับการกระทำนี้ได้!",
@@ -224,7 +236,7 @@ export default function Index({ usersPaginate }) {
                                                 <Button
                                                     size="xs"
                                                     color="failure"
-                                                    onClick={() => handleDelete(user.id)}
+                                                    onClick={() => handleDelete(user.id, user.role)}
                                                     className="gap-1"
                                                 >
                                                     <FaTrash className="w-4 h-4" />
